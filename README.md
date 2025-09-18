@@ -5,13 +5,14 @@ Meeple Cart is an in-progress trading platform for Aotearoa's board-gaming commu
 ## Getting Started
 
 ```bash
-npm install
 just dev
 ```
 
-The `just dev` recipe runs `scripts/dev.sh`, which ensures the PocketBase binary is downloaded, applies migrations, launches the PocketBase server, and starts the SvelteKit dev server at http://127.0.0.1:5173.
+The `just dev` recipe now handles first-run setup for you:
 
-Create a `.env` from `.env.example` if you need to override the default PocketBase URL.
+- Installs npm dependencies when `node_modules/` is missing.
+- Copies `.env.example` to `.env` if you haven't created one yet (edit it afterward to change settings).
+- Runs `scripts/dev.sh`, which downloads PocketBase when necessary, applies migrations, starts the PocketBase server, and launches the SvelteKit dev server at http://127.0.0.1:5173.
 
 ## Useful Scripts
 
