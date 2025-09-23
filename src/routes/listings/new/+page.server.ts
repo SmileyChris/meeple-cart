@@ -1,8 +1,7 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
+import { LISTING_TYPES } from '$lib/types/listing';
 import type { ListingType } from '$lib/types/listing';
-
-const LISTING_TYPES: ListingType[] = ['trade', 'sell', 'want', 'bundle'];
 const CONDITION_OPTIONS = ['mint', 'excellent', 'good', 'fair', 'poor'] as const;
 
 const DEFAULT_FORM_VALUES = {
@@ -57,7 +56,8 @@ export const actions: Actions = {
     const form = await request.formData();
 
     const listingTitle = String(form.get('title') ?? '').trim();
-    const listingType = String(form.get('listing_type') ?? '').toLowerCase();
+    const listingTypeRaw = String(form.get('listing_type') ?? '').toLowerCase();
+    const listingType = listingTypeRaw === 'bundle' ? 'sell' : listingTypeRaw;
     const summary = String(form.get('summary') ?? '').trim();
     const location = String(form.get('location') ?? '')
       .trim()

@@ -1,7 +1,6 @@
 <script lang="ts">
   import type { PageData } from './$types';
   import ListingCard from '$lib/components/ListingCard.svelte';
-  import { SvelteURLSearchParams } from 'svelte';
 
   export let data: PageData;
 
@@ -10,13 +9,13 @@
     { label: 'Trade', value: 'trade' },
     { label: 'Sell', value: 'sell' },
     { label: 'Want to Buy', value: 'want' },
-    { label: 'Bundle', value: 'bundle' },
   ];
 
   const hasFilters = Boolean(data.filters.location || data.filters.type);
 
   const buildPageLink = (pageNumber: number): string => {
-    const params = new SvelteURLSearchParams();
+    // eslint-disable-next-line svelte/prefer-svelte-reactivity
+    const params = new URLSearchParams();
 
     if (data.filters.type) {
       params.set('type', data.filters.type);

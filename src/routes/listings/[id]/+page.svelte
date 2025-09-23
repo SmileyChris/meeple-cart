@@ -18,9 +18,6 @@
     activePhotoIndex = 0;
   }
 
-  const primaryGame = games[0];
-  const otherGames = games.slice(1);
-
   const toCurrency = (value?: number | null) => {
     if (typeof value !== 'number' || Number.isNaN(value)) {
       return null;
@@ -40,12 +37,34 @@
     phone: 'Phone',
   };
 
-  const conditionLabels: Record<string, string> = {
+  const conditionBadges: Record<(typeof games)[number]['condition'], string> = {
+    mint: 'Mint',
+    excellent: 'Excellent',
+    good: 'Good',
+    fair: 'Fair',
+    poor: 'Well loved',
+  };
+
+  const conditionDescriptions: Record<string, string> = {
     mint: 'Mint – unplayed or shrink-wrapped',
     excellent: 'Excellent – like new with minimal handling',
     good: 'Good – light wear, all components included',
     fair: 'Fair – noticeable wear or minor missing pieces',
     poor: 'Poor – heavy wear or missing components',
+  };
+
+  const statusLabels: Record<(typeof games)[number]['status'], string> = {
+    available: 'Available',
+    pending: 'Pending',
+    sold: 'Sold',
+    bundled: 'Bundled',
+  };
+
+  const statusTone: Record<(typeof games)[number]['status'], string> = {
+    available: 'border-emerald-500/80 bg-emerald-500/10 text-emerald-200',
+    pending: 'border-amber-500/80 bg-amber-500/10 text-amber-200',
+    sold: 'border-rose-500/80 bg-rose-500/10 text-rose-200',
+    bundled: 'border-sky-500/80 bg-sky-500/10 text-sky-200',
   };
 </script>
 
@@ -73,7 +92,11 @@
           <span
             class="rounded-full border border-emerald-500/80 bg-emerald-500/10 px-3 py-1 font-semibold text-emerald-200 uppercase"
           >
-            {listing.listing_type === 'want' ? 'Want to Buy' : listing.listing_type}
+            {listing.listing_type === 'want'
+              ? 'Want to Buy'
+              : listing.listing_type === 'sell'
+                ? 'Sell'
+                : 'Trade'}
           </span>
           {#if listing.location}
             <span class="rounded-full border border-slate-700 px-3 py-1">{listing.location}</span>
@@ -171,88 +194,96 @@
     >
       <div class="space-y-6">
         <div>
-          <h2 class="text-2xl font-semibold text-slate-100">Game details</h2>
-          <p class="text-sm text-slate-400">Highlights for this copy of the game.</p>
+          <h2 class="text-2xl font-semibold text-slate-100">Games in this listing</h2>
+          <p class="text-sm text-slate-400">
+            Condition, pricing, and trade preferences for each game included.
+          </p>
         </div>
 
-        {#if primaryGame}
-          <article class="space-y-4">
-            <header class="space-y-2">
-              <h3 class="text-xl font-semibold text-slate-100">{primaryGame.title}</h3>
-              <p class="text-sm text-slate-400">
-                Condition: {primaryGame.condition.charAt(0).toUpperCase() +
-                  primaryGame.condition.slice(1)}
-              </p>
-              {#if conditionLabels[primaryGame.condition]}
-                <p class="text-xs text-slate-500">{conditionLabels[primaryGame.condition]}</p>
-              {/if}
-            </header>
-
-            <dl class="grid gap-3 text-sm sm:grid-cols-2">
-              {#if typeof primaryGame.price === 'number'}
-                <div>
-                  <dt class="text-slate-400">Price guide</dt>
-                  <dd class="text-lg font-semibold text-emerald-200">
-                    {toCurrency(primaryGame.price) ?? `${primaryGame.price.toFixed(2)} NZD`}
-                  </dd>
-                </div>
-              {/if}
-              {#if typeof primaryGame.trade_value === 'number'}
-                <div>
-                  <dt class="text-slate-400">Trade value</dt>
-                  <dd class="text-lg font-semibold text-emerald-200">
-                    {toCurrency(primaryGame.trade_value) ??
-                      `${primaryGame.trade_value.toFixed(2)} NZD`}
-                  </dd>
-                </div>
-              {/if}
-              {#if typeof primaryGame.year === 'number'}
-                <div>
-                  <dt class="text-slate-400">Published</dt>
-                  <dd class="text-base text-slate-200">{primaryGame.year}</dd>
-                </div>
-              {/if}
-              {#if typeof primaryGame.bgg_id === 'number'}
-                <div>
-                  <dt class="text-slate-400">BoardGameGeek</dt>
-                  <dd>
-                    <a
-                      class="text-emerald-300 hover:underline"
-                      href={`https://boardgamegeek.com/boardgame/${primaryGame.bgg_id}`}
-                      rel="noreferrer"
-                      target="_blank"
+        {#if games.length > 0}
+          <div class="space-y-4">
+            {#each games as game (game.id)}
+              <article class="space-y-4 rounded-lg border border-slate-800 bg-slate-950/70 p-5">
+                <header class="space-y-2">
+                  <div class="flex flex-wrap items-center justify-between gap-3">
+                    <h3 class="text-xl font-semibold text-slate-100">{game.title}</h3>
+                    {#if game.bggUrl}
+                      <!-- eslint-disable svelte/no-navigation-without-resolve -->
+                      <a
+                        class="text-sm font-medium text-emerald-300 transition hover:text-emerald-200"
+                        href={game.bggUrl}
+                        target="_blank"
+                        rel="external noopener"
+                      >
+                        View on BGG
+                      </a>
+                      <!-- eslint-enable svelte/no-navigation-without-resolve -->
+                    {/if}
+                  </div>
+                  <div class="flex flex-wrap gap-2 text-xs font-semibold">
+                    <span
+                      class="inline-flex items-center rounded-full border border-slate-700 bg-slate-800/80 px-2 py-1 text-slate-200"
                     >
-                      View on BGG
-                    </a>
-                  </dd>
-                </div>
-              {/if}
-            </dl>
-
-            {#if primaryGame.notes}
-              <div>
-                <h4 class="text-sm font-semibold text-slate-200">Seller notes</h4>
-                <p class="mt-2 whitespace-pre-line text-sm text-slate-300">{primaryGame.notes}</p>
-              </div>
-            {/if}
-          </article>
-        {/if}
-
-        {#if otherGames.length > 0}
-          <section class="space-y-2">
-            <h4 class="text-sm font-semibold text-slate-200">Bundle includes</h4>
-            <ul class="list-disc space-y-1 pl-5 text-sm text-slate-300">
-              {#each otherGames as game (game.id)}
-                <li>
-                  {game.title} · {game.condition}
-                  {#if typeof game.trade_value === 'number'}
-                    – Trade value {toCurrency(game.trade_value) ??
-                      `${game.trade_value.toFixed(2)} NZD`}
+                      {conditionBadges[game.condition]}
+                    </span>
+                    <span
+                      class={`inline-flex items-center rounded-full border px-2 py-1 ${statusTone[game.status]}`}
+                    >
+                      {statusLabels[game.status]}
+                    </span>
+                    {#if game.year !== null}
+                      <span
+                        class="inline-flex items-center rounded-full border border-slate-700 bg-slate-800/80 px-2 py-1 text-slate-200"
+                      >
+                        Published {game.year}
+                      </span>
+                    {/if}
+                  </div>
+                  {#if conditionDescriptions[game.condition]}
+                    <p class="text-xs text-slate-500">{conditionDescriptions[game.condition]}</p>
                   {/if}
-                </li>
-              {/each}
-            </ul>
-          </section>
+                </header>
+
+                <dl class="grid gap-3 text-sm sm:grid-cols-2">
+                  {#if game.price !== null}
+                    <div>
+                      <dt class="text-slate-400">Price guide</dt>
+                      <dd class="text-lg font-semibold text-emerald-200">
+                        {toCurrency(game.price) ?? `${game.price.toFixed(2)} NZD`}
+                      </dd>
+                    </div>
+                  {/if}
+                  {#if game.tradeValue !== null}
+                    <div>
+                      <dt class="text-slate-400">Trade value</dt>
+                      <dd class="text-lg font-semibold text-emerald-200">
+                        {toCurrency(game.tradeValue) ?? `${game.tradeValue.toFixed(2)} NZD`}
+                      </dd>
+                    </div>
+                  {/if}
+                  {#if game.price === null && game.tradeValue === null}
+                    <div class="sm:col-span-2">
+                      <dt class="text-slate-400">Negotiable</dt>
+                      <dd class="text-sm text-slate-300">Price to be discussed with the trader.</dd>
+                    </div>
+                  {/if}
+                </dl>
+
+                {#if game.notes}
+                  <div>
+                    <h4 class="text-sm font-semibold text-slate-200">Seller notes</h4>
+                    <p class="mt-2 whitespace-pre-line text-sm text-slate-300">{game.notes}</p>
+                  </div>
+                {/if}
+              </article>
+            {/each}
+          </div>
+        {:else}
+          <div
+            class="rounded-lg border border-dashed border-slate-800 bg-slate-950/50 p-6 text-sm text-slate-400"
+          >
+            The trader has not added individual game details yet.
+          </div>
         {/if}
       </div>
 

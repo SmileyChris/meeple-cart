@@ -13,7 +13,6 @@
     trade: 'Trade',
     sell: 'Sell',
     want: 'Want to Buy',
-    bundle: 'Bundle',
   };
 
   const statusLabels: Record<string, string> = {

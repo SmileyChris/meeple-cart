@@ -1,14 +1,15 @@
 import { PUBLIC_POCKETBASE_URL } from '$env/static/public';
 import type { PageLoad } from './$types';
 import type {
+  GameRecord,
   ListingFilters,
   ListingPreview,
   ListingRecord,
   ListingType,
 } from '$lib/types/listing';
+import { LISTING_TYPES, normalizeListingType } from '$lib/types/listing';
 import type { UserRecord } from '$lib/types/pocketbase';
 
-const LISTING_TYPES: ListingType[] = ['trade', 'sell', 'want', 'bundle'];
 const PAGE_LIMIT = 24;
 const FALLBACK_BASE_URL = 'http://127.0.0.1:8090';
 
@@ -44,7 +45,13 @@ export const load: PageLoad = async ({ fetch, url }) => {
   const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
 
   const rawType = (url.searchParams.get('type') ?? '').toLowerCase();
-  const type = LISTING_TYPES.includes(rawType as ListingType) ? (rawType as ListingType) : '';
+  let type: ListingType | '' = '';
+
+  if (rawType === 'bundle') {
+    type = 'sell';
+  } else if (LISTING_TYPES.includes(rawType as ListingType)) {
+    type = rawType as ListingType;
+  }
 
   const locationParam = url.searchParams.get('location')?.trim() ?? '';
   const location = locationParam.slice(0, 120);
@@ -69,7 +76,7 @@ export const load: PageLoad = async ({ fetch, url }) => {
     page: String(page),
     perPage: String(PAGE_LIMIT),
     sort: '-created',
-    expand: 'owner',
+    expand: 'owner,games(listing)',
   });
 
   if (filters.length > 0) {
@@ -94,6 +101,21 @@ export const load: PageLoad = async ({ fetch, url }) => {
 
     const listings: ListingPreview[] = result.items.map((item) => {
       const owner = item.expand?.owner as UserRecord | undefined;
+      const games = Array.isArray(item.expand?.['games(listing)'])
+        ? (item.expand?.['games(listing)'] as GameRecord[]).map((game) => {
+            const bggId = typeof game.bgg_id === 'number' ? game.bgg_id : null;
+            return {
+              id: game.id,
+              title: game.title,
+              condition: game.condition,
+              status: game.status,
+              bggId,
+              bggUrl: bggId ? `https://boardgamegeek.com/boardgame/${bggId}` : null,
+              price: typeof game.price === 'number' ? game.price : null,
+              tradeValue: typeof game.trade_value === 'number' ? game.trade_value : null,
+            };
+          })
+        : [];
       const coverImage =
         Array.isArray(item.photos) && item.photos.length > 0
           ? buildFileUrl(baseUrl, item, item.photos[0], '800x600')
@@ -102,7 +124,7 @@ export const load: PageLoad = async ({ fetch, url }) => {
       return {
         id: item.id,
         title: item.title,
-        listingType: item.listing_type as ListingType,
+        listingType: normalizeListingType(String(item.listing_type)),
         summary: item.summary ?? '',
         location: item.location ?? null,
         created: item.created,
@@ -110,6 +132,7 @@ export const load: PageLoad = async ({ fetch, url }) => {
         ownerId: owner?.id ?? null,
         coverImage,
         href: `/listings/${item.id}`,
+        games,
       };
     });
 

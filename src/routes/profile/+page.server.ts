@@ -2,6 +2,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { serializeNonPOJOs } from '$lib/utils/object';
 import type { OwnerListingSummary } from '$lib/types/listing';
+import { normalizeListingType } from '$lib/types/listing';
 
 export const load: PageServerLoad = async ({ locals }) => {
   if (!locals.user) {
@@ -22,7 +23,7 @@ export const load: PageServerLoad = async ({ locals }) => {
     listings = results.items.map((item) => ({
       id: item.id,
       title: item.title,
-      listingType: item.listing_type,
+      listingType: normalizeListingType(String(item.listing_type)),
       status: item.status,
       created: item.created,
       views: item.views ?? 0,
