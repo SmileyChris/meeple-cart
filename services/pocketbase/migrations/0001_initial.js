@@ -45,7 +45,7 @@ migrate(
           "options": {
             "min": 0,
             "max": 32,
-            "pattern": "^\\+?[0-9 ]{6,32}$"
+            "pattern": "^\\\\+?[0-9 ]{6,32}$"
           }
         },
         {
@@ -178,8 +178,7 @@ migrate(
             "values": [
               "trade",
               "sell",
-              "want",
-              "bundle"
+              "want"
             ]
           }
         },
@@ -794,6 +793,11 @@ migrate(
     }
   ]
 }`);
+
+    const existingUsers = dao.findCollectionByNameOrId('users');
+    if (existingUsers && existingUsers.id !== 'fhggsowykv3hz86') {
+      dao.deleteCollection(existingUsers);
+    }
 
     for (const raw of snapshot.collections) {
       const collection = new Collection(raw);

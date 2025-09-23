@@ -165,7 +165,7 @@
           "unique": false,
           "options": {
             "maxSelect": 1,
-            "values": ["trade", "sell", "want", "bundle"]
+            "values": ["trade", "sell", "want"]
           }
         },
         {
