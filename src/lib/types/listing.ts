@@ -1,7 +1,17 @@
 import type { RecordModel } from 'pocketbase';
 import type { UserRecord } from './pocketbase';
 
-export type ListingType = 'trade' | 'sell' | 'want' | 'bundle';
+export type ListingType = 'trade' | 'sell' | 'want';
+
+export const LISTING_TYPES: readonly ListingType[] = ['trade', 'sell', 'want'] as const;
+
+export const normalizeListingType = (value: string): ListingType => {
+  if (value === 'bundle') {
+    return 'sell';
+  }
+
+  return LISTING_TYPES.includes(value as ListingType) ? (value as ListingType) : 'sell';
+};
 
 export interface GameRecord extends RecordModel {
   listing: string;
@@ -35,6 +45,22 @@ export interface ListingRecord extends RecordModel {
   };
 }
 
+export interface ListingGameSummary {
+  id: string;
+  title: string;
+  condition: GameRecord['condition'];
+  status: GameRecord['status'];
+  bggId: number | null;
+  bggUrl: string | null;
+  price: number | null;
+  tradeValue: number | null;
+}
+
+export interface ListingGameDetail extends ListingGameSummary {
+  notes: string | null;
+  year: number | null;
+}
+
 export interface ListingPreview {
   id: string;
   title: string;
@@ -46,6 +72,7 @@ export interface ListingPreview {
   ownerId: string | null;
   coverImage: string | null;
   href: string;
+  games: ListingGameSummary[];
 }
 
 export interface OwnerListingSummary {
