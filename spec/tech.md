@@ -31,7 +31,7 @@ users {
 listings {
   user: relation
   title: string
-  type: select (trade/sell/want/bundle)
+  type: select (trade/sell/want)
   status: select (active/pending/completed/cancelled)
   games: relation (multiple)
   description: text

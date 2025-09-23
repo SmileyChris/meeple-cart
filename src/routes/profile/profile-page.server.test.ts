@@ -90,4 +90,41 @@ describe('profile load', () => {
 
     expect(result.listings).toEqual([]);
   });
+
+  it('normalises bundle listings to sell for the profile view', async () => {
+    const getOne = vi.fn().mockResolvedValue({ id: 'user123', display_name: 'Chris' });
+    const getList = vi.fn().mockResolvedValue({
+      items: [
+        {
+          id: 'listing2',
+          title: 'Big bundle',
+          listing_type: 'bundle',
+          status: 'active',
+          created: '2024-02-01 12:00:00Z',
+          views: 12,
+        },
+      ],
+    });
+
+    const locals = {
+      user: { id: 'user123' },
+      pb: {
+        collection: (name: string) => {
+          if (name === 'users') {
+            return { getOne };
+          }
+
+          if (name === 'listings') {
+            return { getList };
+          }
+
+          throw new Error(`Unexpected collection ${name}`);
+        },
+      },
+    };
+
+    const result = await load({ locals } as never);
+
+    expect(result.listings[0].listingType).toBe('sell');
+  });
 });

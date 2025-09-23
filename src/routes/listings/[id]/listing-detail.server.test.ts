@@ -117,4 +117,28 @@ describe('listings/[id] load', () => {
       })
     ).rejects.toMatchObject({ status: 404 });
   });
+
+  it('normalises bundle listing types to sell', async () => {
+    const getOne = vi.fn().mockResolvedValue({
+      ...baseRecord,
+      listing_type: 'bundle',
+    });
+    const locals = {
+      pb: {
+        collection: vi.fn().mockReturnValue({ getOne }),
+        files: {
+          getUrl: vi.fn(
+            () => new URL('https://files.example.com/photo.jpg')
+          ),
+        },
+      },
+    };
+
+    const result = await load({
+      params: { id: 'listing123' },
+      locals: locals as never,
+    });
+
+    expect(result.listing.listing_type).toBe('sell');
+  });
 });
