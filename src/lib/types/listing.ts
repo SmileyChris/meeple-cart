@@ -46,6 +46,17 @@ export interface ListingRecord extends RecordModel {
   views: number;
   bump_date?: string;
   photos?: string[];
+  // Expiration fields
+  last_activity?: string;
+  expires_at?: string;
+  auto_extend?: boolean;
+  // Wanted listing fields
+  response_count?: number;
+  max_price?: number;
+  urgent?: boolean;
+  // Browse filtering
+  condition?: 'New' | 'Like New' | 'Very Good' | 'Good' | 'Fair';
+  price?: number;
   expand?: {
     owner?: UserRecord;
     'games(listing)'?: GameRecord[];
