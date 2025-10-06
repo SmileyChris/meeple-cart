@@ -38,9 +38,12 @@
 </script>
 
 <!-- eslint-disable svelte/no-navigation-without-resolve -->
-<a
-  class="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
-  href={listing.href}
+<div
+  class="group block cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+  role="link"
+  tabindex="0"
+  onclick={() => window.location.href = listing.href}
+  onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); window.location.href = listing.href; }}}
 >
   <article
     class="flex flex-col overflow-hidden rounded-xl border border-slate-800 bg-slate-900/60 shadow transition group-hover:border-emerald-500/80 group-hover:shadow-lg"
@@ -94,6 +97,7 @@
                         href={game.bggUrl}
                         target="_blank"
                         rel="external noopener"
+                        onclick={(e) => e.stopPropagation()}
                       >
                         BGG
                       </a>
@@ -139,5 +143,5 @@
       </div>
     </div>
   </article>
-</a>
+</div>
 <!-- eslint-enable svelte/no-navigation-without-resolve -->
