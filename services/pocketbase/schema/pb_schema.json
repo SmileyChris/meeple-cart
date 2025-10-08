@@ -746,6 +746,105 @@
       "updateRule": "user = @request.auth.id",
       "deleteRule": "user = @request.auth.id",
       "options": {}
+    },
+    {
+      "id": "notifications_collection",
+      "name": "notifications",
+      "type": "base",
+      "system": false,
+      "schema": [
+        {
+          "id": "notif_user",
+          "name": "user",
+          "type": "relation",
+          "required": true,
+          "unique": false,
+          "options": {
+            "collectionId": "fhggsowykv3hz86",
+            "cascadeDelete": true,
+            "minSelect": 1,
+            "maxSelect": 1
+          }
+        },
+        {
+          "id": "notif_type",
+          "name": "type",
+          "type": "select",
+          "required": true,
+          "unique": false,
+          "options": {
+            "maxSelect": 1,
+            "values": ["new_listing", "new_message", "price_drop", "listing_update"]
+          }
+        },
+        {
+          "id": "notif_title",
+          "name": "title",
+          "type": "text",
+          "required": true,
+          "unique": false,
+          "options": {
+            "min": 1,
+            "max": 200,
+            "pattern": ""
+          }
+        },
+        {
+          "id": "notif_message",
+          "name": "message",
+          "type": "text",
+          "required": false,
+          "unique": false,
+          "options": {
+            "min": 0,
+            "max": 500,
+            "pattern": ""
+          }
+        },
+        {
+          "id": "notif_link",
+          "name": "link",
+          "type": "text",
+          "required": false,
+          "unique": false,
+          "options": {
+            "min": 0,
+            "max": 255,
+            "pattern": ""
+          }
+        },
+        {
+          "id": "notif_listing",
+          "name": "listing",
+          "type": "relation",
+          "required": false,
+          "unique": false,
+          "options": {
+            "collectionId": "udc64p17e6s37kf",
+            "cascadeDelete": true,
+            "minSelect": 0,
+            "maxSelect": 1
+          }
+        },
+        {
+          "id": "notif_read",
+          "name": "read",
+          "type": "bool",
+          "required": true,
+          "unique": false,
+          "options": {}
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_notifications_user ON notifications (user)",
+        "CREATE INDEX idx_notifications_user_read ON notifications (user, read)"
+      ],
+      "listRule": "user = @request.auth.id",
+      "viewRule": "user = @request.auth.id",
+      "createRule": null,
+      "updateRule": "user = @request.auth.id",
+      "deleteRule": "user = @request.auth.id",
+      "options": {}
     }
   ]
 }

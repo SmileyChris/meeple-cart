@@ -2,6 +2,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { LISTING_TYPES } from '$lib/types/listing';
 import type { ListingType } from '$lib/types/listing';
+import { notifyNewListing } from '$lib/server/notifications';
 const CONDITION_OPTIONS = ['mint', 'excellent', 'good', 'fair', 'poor'] as const;
 
 const DEFAULT_FORM_VALUES = {
@@ -214,6 +215,11 @@ export const actions: Actions = {
         }
 
         await locals.pb.collection('games').create(gamePayload);
+
+        // Notify users about new listing (non-blocking)
+        notifyNewListing(locals.pb, listingRecord, locals.user.display_name).catch((err) =>
+          console.error('Failed to send new listing notifications', err)
+        );
       } catch (gameError) {
         console.error('Failed to create game record; rolling back listing', gameError);
         try {
