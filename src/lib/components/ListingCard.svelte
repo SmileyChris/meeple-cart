@@ -133,7 +133,15 @@
 
       <div class="mt-auto flex items-center justify-between text-sm text-slate-400">
         <div class="flex flex-col">
-          {#if listing.ownerName}
+          {#if listing.ownerId && listing.ownerName}
+            <a
+              href={`/users/${listing.ownerId}`}
+              class="font-medium text-slate-200 transition hover:text-emerald-300"
+              onclick={(e) => e.stopPropagation()}
+            >
+              {listing.ownerName}
+            </a>
+          {:else if listing.ownerName}
             <span class="font-medium text-slate-200">{listing.ownerName}</span>
           {:else}
             <span class="font-medium text-slate-200">Meeple Cart trader</span>

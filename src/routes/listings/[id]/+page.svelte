@@ -125,7 +125,14 @@
       >
         <h2 class="text-base font-semibold text-slate-100">Trader details</h2>
         {#if owner}
-          <p class="mt-2 text-lg font-semibold text-slate-50">{owner.display_name}</p>
+          <!-- eslint-disable svelte/no-navigation-without-resolve -->
+          <a
+            href={`/users/${owner.id}`}
+            class="mt-2 inline-block text-lg font-semibold text-emerald-300 transition hover:text-emerald-200"
+          >
+            {owner.display_name}
+          </a>
+          <!-- eslint-enable svelte/no-navigation-without-resolve -->
           {#if owner.location}
             <p class="text-sm text-slate-400">Based in {owner.location}</p>
           {/if}
