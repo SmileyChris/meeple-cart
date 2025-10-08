@@ -56,10 +56,26 @@ export const actions: Actions = {
       await locals.pb.collection('users').authWithPassword(email, password);
     } catch (error) {
       console.error('Registration failed', error);
+
+      // Extract PocketBase error message if available
+      let errorMessage = 'Unable to create account, please check the details and try again.';
+      if (error && typeof error === 'object' && 'response' in error) {
+        const pbError = error as { response?: { data?: Record<string, unknown> } };
+        if (pbError.response?.data) {
+          // Try to get a more specific error message
+          const data = pbError.response.data;
+          if ('message' in data && typeof data.message === 'string') {
+            errorMessage = data.message;
+          } else if ('email' in data) {
+            errorMessage = 'This email is already registered.';
+          }
+        }
+      }
+
       return fail(400, {
         email,
         display_name: displayName,
-        error: 'Unable to create account, please check the details and try again.',
+        error: errorMessage,
       });
     }
 

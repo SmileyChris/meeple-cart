@@ -12,6 +12,12 @@
       <a class="text-lg font-semibold hover:text-emerald-300" href="/">Meeple Cart</a>
       <!-- eslint-disable svelte/no-navigation-without-resolve -->
       <nav class="flex items-center gap-3 text-sm">
+        <a
+          class="rounded-full border border-slate-700 px-3 py-1.5 transition hover:border-emerald-500 hover:text-emerald-300"
+          href="/activity"
+        >
+          Activity
+        </a>
         {#if data.user}
           <a
             class="rounded-full border border-slate-700 px-3 py-1.5 transition hover:border-emerald-500 hover:text-emerald-300"

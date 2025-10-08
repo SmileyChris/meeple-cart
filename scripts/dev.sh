@@ -11,7 +11,8 @@ if [[ ! -x "${PB_BIN}" ]]; then
   "${ROOT_DIR}/scripts/download-pocketbase.sh"
 fi
 
-"${PB_BIN}" migrate up --dir "${DATA_DIR}" --migrationsDir "${MIGRATIONS_DIR}" >/dev/null
+echo "Running PocketBase migrations..."
+"${PB_BIN}" migrate up --dir "${DATA_DIR}" --migrationsDir "${MIGRATIONS_DIR}"
 
 declare PB_PID=""
 cleanup() {

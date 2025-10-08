@@ -42,8 +42,13 @@
   class="group block cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
   role="link"
   tabindex="0"
-  onclick={() => window.location.href = listing.href}
-  onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); window.location.href = listing.href; }}}
+  onclick={() => (window.location.href = listing.href)}
+  onkeydown={(e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      window.location.href = listing.href;
+    }
+  }}
 >
   <article
     class="flex flex-col overflow-hidden rounded-xl border border-slate-800 bg-slate-900/60 shadow transition group-hover:border-emerald-500/80 group-hover:shadow-lg"
@@ -56,7 +61,9 @@
         loading="lazy"
       />
     {:else}
-      <div class="flex h-48 w-full flex-col items-center justify-center gap-3 bg-slate-900 text-slate-500">
+      <div
+        class="flex h-48 w-full flex-col items-center justify-center gap-3 bg-slate-900 text-slate-500"
+      >
         <MeepleIcon size={64} className="opacity-50" seed={listing.id} />
         <span class="text-xs font-medium uppercase tracking-wider opacity-40">No image yet</span>
       </div>

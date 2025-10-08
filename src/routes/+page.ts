@@ -9,8 +9,10 @@ import type {
 } from '$lib/types/listing';
 import { LISTING_TYPES, normalizeListingType } from '$lib/types/listing';
 import type { UserRecord } from '$lib/types/pocketbase';
+import type { ActivityItem } from '$lib/types/activity';
 
 const PAGE_LIMIT = 24;
+const ACTIVITY_LIMIT = 50;
 const FALLBACK_BASE_URL = 'http://127.0.0.1:8090';
 
 type PocketBaseListResponse<T> = {
@@ -36,6 +38,81 @@ const buildFileUrl = (
   const fileUrl = `${baseUrl}/api/files/${collection}/${record.id}/${encodedFilename}`;
 
   return thumb ? `${fileUrl}?thumb=${encodeURIComponent(thumb)}` : fileUrl;
+};
+
+type ExpandedGameRecord = GameRecord & {
+  expand?: {
+    listing?: ListingRecord & {
+      expand?: {
+        owner?: UserRecord;
+      };
+    };
+  };
+};
+
+const fetchActivityData = async (
+  baseUrl: string,
+  fetchFn: typeof fetch
+): Promise<ActivityItem[]> => {
+  const activityParams = new URLSearchParams({
+    page: '1',
+    perPage: String(ACTIVITY_LIMIT),
+    sort: '-created',
+    expand: 'listing,listing.owner',
+    filter: 'listing.status = "active"',
+  });
+
+  try {
+    const response = await fetchFn(
+      `${baseUrl}/api/collections/games/records?${activityParams.toString()}`,
+      {
+        headers: {
+          accept: 'application/json',
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch activity: ${response.status} ${response.statusText}`);
+    }
+
+    const result = (await response.json()) as PocketBaseListResponse<ExpandedGameRecord>;
+
+    return result.items
+      .filter((game) => {
+        // Ensure we have the expanded listing data
+        return game.expand?.listing && game.expand.listing.status === 'active';
+      })
+      .map((game) => {
+        const listing = game.expand!.listing!;
+        const owner = listing.expand?.owner;
+        const bggId = typeof game.bgg_id === 'number' ? game.bgg_id : null;
+
+        // Get thumbnail from listing photos
+        const thumbnail =
+          Array.isArray(listing.photos) && listing.photos.length > 0
+            ? buildFileUrl(baseUrl, listing, listing.photos[0], '100x100')
+            : null;
+
+        return {
+          id: game.id,
+          type: normalizeListingType(String(listing.listing_type)),
+          gameTitle: game.title,
+          bggId,
+          condition: game.condition,
+          price: typeof game.price === 'number' ? game.price : null,
+          tradeValue: typeof game.trade_value === 'number' ? game.trade_value : null,
+          timestamp: game.created,
+          userName: owner?.display_name ?? null,
+          userLocation: listing.location ?? null,
+          listingHref: `/listings/${listing.id}`,
+          thumbnail,
+        };
+      });
+  } catch (error) {
+    console.error('Failed to load activity', error);
+    return [];
+  }
 };
 
 export const prerender = true;
@@ -84,20 +161,23 @@ export const load: PageLoad = async ({ fetch, url }) => {
   }
 
   try {
-    const response = await fetch(
-      `${baseUrl}/api/collections/listings/records?${searchParams.toString()}`,
-      {
+    // Fetch both listings and activity in parallel
+    const [listingsResponse, activities] = await Promise.all([
+      fetch(`${baseUrl}/api/collections/listings/records?${searchParams.toString()}`, {
         headers: {
           accept: 'application/json',
         },
-      }
-    );
+      }),
+      fetchActivityData(baseUrl, fetch),
+    ]);
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch listings: ${response.status} ${response.statusText}`);
+    if (!listingsResponse.ok) {
+      throw new Error(
+        `Failed to fetch listings: ${listingsResponse.status} ${listingsResponse.statusText}`
+      );
     }
 
-    const result = (await response.json()) as PocketBaseListResponse<ListingRecord>;
+    const result = (await listingsResponse.json()) as PocketBaseListResponse<ListingRecord>;
 
     const listings: ListingPreview[] = result.items.map((item) => {
       const owner = item.expand?.owner as UserRecord | undefined;
@@ -138,6 +218,7 @@ export const load: PageLoad = async ({ fetch, url }) => {
 
     return {
       listings,
+      activities,
       filters: filtersState,
       pagination: {
         page: result.page,
@@ -151,6 +232,7 @@ export const load: PageLoad = async ({ fetch, url }) => {
 
     return {
       listings: [],
+      activities: [],
       filters: filtersState,
       pagination: {
         page: 1,

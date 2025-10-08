@@ -61,9 +61,15 @@
           type, and organise trades without the Facebook shuffle.
         </p>
       </div>
-      <div class="flex flex-wrap gap-4 text-sm text-slate-300">
+      <div class="flex flex-wrap gap-4">
         <a
-          class="rounded-full border border-slate-700 px-4 py-2 transition hover:border-emerald-500 hover:text-emerald-300"
+          class="rounded-full bg-emerald-500 px-6 py-3 font-semibold text-slate-900 transition hover:bg-emerald-400"
+          href="/activity"
+        >
+          ⚡ Recent Activity
+        </a>
+        <a
+          class="rounded-full border border-slate-700 px-6 py-3 text-sm text-slate-300 transition hover:border-emerald-500 hover:text-emerald-300"
           href="/spec/prd.md"
           target="_blank"
           rel="external noopener"
@@ -71,20 +77,12 @@
           Product spec
         </a>
         <a
-          class="rounded-full border border-slate-700 px-4 py-2 transition hover:border-emerald-500 hover:text-emerald-300"
+          class="rounded-full border border-slate-700 px-6 py-3 text-sm text-slate-300 transition hover:border-emerald-500 hover:text-emerald-300"
           href="/spec/tech.md"
           target="_blank"
           rel="external noopener"
         >
           Technical plan
-        </a>
-        <a
-          class="rounded-full border border-slate-700 px-4 py-2 transition hover:border-emerald-500 hover:text-emerald-300"
-          href="https://kit.svelte.dev/docs"
-          target="_blank"
-          rel="noreferrer"
-        >
-          SvelteKit docs
         </a>
       </div>
     </div>

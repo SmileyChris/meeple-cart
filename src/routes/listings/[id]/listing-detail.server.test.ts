@@ -127,9 +127,7 @@ describe('listings/[id] load', () => {
       pb: {
         collection: vi.fn().mockReturnValue({ getOne }),
         files: {
-          getUrl: vi.fn(
-            () => new URL('https://files.example.com/photo.jpg')
-          ),
+          getUrl: vi.fn(() => new URL('https://files.example.com/photo.jpg')),
         },
       },
     };

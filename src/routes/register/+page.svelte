@@ -11,8 +11,7 @@
 
   <form class="mt-6 space-y-4" method="POST">
     <div class="space-y-2">
-      <label class="block text-sm font-medium text-slate-200" for="display_name">Display name</label
-      >
+      <label class="block text-sm font-medium text-slate-200" for="display_name">Full name</label>
       <input
         class="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
         id="display_name"
@@ -22,7 +21,7 @@
         maxlength="64"
         value={form?.display_name ?? ''}
         required
-        autocomplete="nickname"
+        autocomplete="name"
       />
     </div>
 
