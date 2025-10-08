@@ -98,6 +98,10 @@ export interface OwnerListingSummary {
 export interface ListingFilters {
   location: string;
   type: ListingType | '';
+  search?: string;
+  condition?: string;
+  minPrice?: string;
+  maxPrice?: string;
 }
 
 export interface ListingPagination {

@@ -133,6 +133,19 @@ export const load: PageLoad = async ({ fetch, url }) => {
   const locationParam = url.searchParams.get('location')?.trim() ?? '';
   const location = locationParam.slice(0, 120);
 
+  const searchParam = url.searchParams.get('search')?.trim() ?? '';
+  const search = searchParam.slice(0, 200);
+
+  const conditionParam = url.searchParams.get('condition')?.trim() ?? '';
+  const condition = ['mint', 'excellent', 'good', 'fair', 'poor'].includes(conditionParam)
+    ? conditionParam
+    : '';
+
+  const minPriceParam = url.searchParams.get('minPrice')?.trim() ?? '';
+  const maxPriceParam = url.searchParams.get('maxPrice')?.trim() ?? '';
+  const minPrice = minPriceParam;
+  const maxPrice = maxPriceParam;
+
   const filters: string[] = ['status = "active"'];
 
   if (type) {
@@ -143,9 +156,38 @@ export const load: PageLoad = async ({ fetch, url }) => {
     filters.push(`location ~ "${sanitizeForFilter(location)}"`);
   }
 
+  // Search in game titles via relation
+  if (search) {
+    filters.push(`games_via_listing.title ~ "${sanitizeForFilter(search)}"`);
+  }
+
+  // Filter by game condition via relation
+  if (condition) {
+    filters.push(`games_via_listing.condition = "${condition}"`);
+  }
+
+  // Filter by price range via relation
+  if (minPrice) {
+    const minVal = parseFloat(minPrice);
+    if (!isNaN(minVal) && minVal >= 0) {
+      filters.push(`games_via_listing.price >= ${minVal}`);
+    }
+  }
+
+  if (maxPrice) {
+    const maxVal = parseFloat(maxPrice);
+    if (!isNaN(maxVal) && maxVal >= 0) {
+      filters.push(`games_via_listing.price <= ${maxVal}`);
+    }
+  }
+
   const filtersState: ListingFilters = {
     type,
     location,
+    search: search || undefined,
+    condition: condition || undefined,
+    minPrice: minPrice || undefined,
+    maxPrice: maxPrice || undefined,
   };
 
   const baseUrl = (PUBLIC_POCKETBASE_URL || FALLBACK_BASE_URL).replace(/\/$/, '');

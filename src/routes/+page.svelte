@@ -11,11 +11,31 @@
     { label: 'Want to Buy', value: 'want' },
   ];
 
-  const hasFilters = Boolean(data.filters.location || data.filters.type);
+  const conditionOptions = [
+    { label: 'Any condition', value: '' },
+    { label: 'Mint', value: 'mint' },
+    { label: 'Excellent', value: 'excellent' },
+    { label: 'Good', value: 'good' },
+    { label: 'Fair', value: 'fair' },
+    { label: 'Poor', value: 'poor' },
+  ];
+
+  const hasFilters = Boolean(
+    data.filters.location ||
+      data.filters.type ||
+      data.filters.search ||
+      data.filters.condition ||
+      data.filters.minPrice ||
+      data.filters.maxPrice
+  );
 
   const buildPageLink = (pageNumber: number): string => {
     // eslint-disable-next-line svelte/prefer-svelte-reactivity
     const params = new URLSearchParams();
+
+    if (data.filters.search) {
+      params.set('search', data.filters.search);
+    }
 
     if (data.filters.type) {
       params.set('type', data.filters.type);
@@ -23,6 +43,18 @@
 
     if (data.filters.location) {
       params.set('location', data.filters.location);
+    }
+
+    if (data.filters.condition) {
+      params.set('condition', data.filters.condition);
+    }
+
+    if (data.filters.minPrice) {
+      params.set('minPrice', data.filters.minPrice);
+    }
+
+    if (data.filters.maxPrice) {
+      params.set('maxPrice', data.filters.maxPrice);
     }
 
     if (pageNumber > 1) {
@@ -90,37 +122,104 @@
 
   <section class="px-6 sm:px-8">
     <div class="mx-auto max-w-5xl space-y-8">
-      <form
-        class="grid gap-4 rounded-xl border border-slate-800 bg-slate-900/60 p-6 sm:grid-cols-3"
-        method="GET"
-      >
-        <div class="sm:col-span-2">
-          <label class="block text-sm font-medium text-slate-200" for="location">Location</label>
+      <form class="grid gap-4 rounded-xl border border-slate-800 bg-slate-900/60 p-6" method="GET">
+        <!-- Search Bar -->
+        <div class="sm:col-span-full">
+          <label class="block text-sm font-medium text-slate-200" for="search">
+            Search game titles
+          </label>
           <input
             class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
-            id="location"
-            name="location"
-            placeholder="Eg: Wellington or Christchurch"
-            value={data.filters.location}
-            maxlength="120"
+            id="search"
+            name="search"
+            placeholder="Search for a game..."
+            value={data.filters.search ?? ''}
+            maxlength="200"
           />
         </div>
 
-        <div>
-          <label class="block text-sm font-medium text-slate-200" for="type">Listing type</label>
-          <select
-            class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
-            id="type"
-            name="type"
-            value={data.filters.type}
-          >
-            {#each listingTypeOptions as option (option.value)}
-              <option value={option.value}>{option.label}</option>
-            {/each}
-          </select>
+        <div class="grid gap-4 sm:grid-cols-3">
+          <!-- Location -->
+          <div>
+            <label class="block text-sm font-medium text-slate-200" for="location">Location</label>
+            <input
+              class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+              id="location"
+              name="location"
+              placeholder="Eg: Wellington"
+              value={data.filters.location}
+              maxlength="120"
+            />
+          </div>
+
+          <!-- Listing Type -->
+          <div>
+            <label class="block text-sm font-medium text-slate-200" for="type">Listing type</label>
+            <select
+              class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+              id="type"
+              name="type"
+              value={data.filters.type}
+            >
+              {#each listingTypeOptions as option (option.value)}
+                <option value={option.value}>{option.label}</option>
+              {/each}
+            </select>
+          </div>
+
+          <!-- Condition -->
+          <div>
+            <label class="block text-sm font-medium text-slate-200" for="condition">Condition</label
+            >
+            <select
+              class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+              id="condition"
+              name="condition"
+              value={data.filters.condition ?? ''}
+            >
+              {#each conditionOptions as option (option.value)}
+                <option value={option.value}>{option.label}</option>
+              {/each}
+            </select>
+          </div>
         </div>
 
-        <div class="sm:col-span-3 flex flex-wrap gap-3">
+        <!-- Price Range -->
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label class="block text-sm font-medium text-slate-200" for="minPrice">
+              Min price (NZD)
+            </label>
+            <input
+              class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+              id="minPrice"
+              name="minPrice"
+              type="number"
+              min="0"
+              step="1"
+              placeholder="No minimum"
+              value={data.filters.minPrice ?? ''}
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-200" for="maxPrice">
+              Max price (NZD)
+            </label>
+            <input
+              class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+              id="maxPrice"
+              name="maxPrice"
+              type="number"
+              min="0"
+              step="1"
+              placeholder="No maximum"
+              value={data.filters.maxPrice ?? ''}
+            />
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex flex-wrap gap-3">
           <button
             class="rounded-lg bg-emerald-500 px-4 py-2 font-semibold text-slate-900 transition hover:bg-emerald-400"
             type="submit"
