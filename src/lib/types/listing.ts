@@ -68,6 +68,8 @@ export interface ListingGameDetail extends ListingGameSummary {
   year: number | null;
   previousPrice: number | null;
   previousTradeValue: number | null;
+  listingCreated: string;
+  priceHistory?: PriceHistoryEntry[];
 }
 
 export interface ListingPreview {

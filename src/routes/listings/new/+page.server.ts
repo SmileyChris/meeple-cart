@@ -214,6 +214,15 @@ export const actions: Actions = {
           gamePayload.bgg_id = bggId;
         }
 
+        // Initialize price history with first entry
+        gamePayload.price_history = [
+          {
+            price: price !== null ? price : undefined,
+            trade_value: tradeValue !== null ? tradeValue : undefined,
+            timestamp: new Date().toISOString(),
+          },
+        ];
+
         await locals.pb.collection('games').create(gamePayload);
 
         // Notify users about new listing (non-blocking)

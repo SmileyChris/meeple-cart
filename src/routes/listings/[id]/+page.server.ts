@@ -5,6 +5,7 @@ import type { UserRecord } from '$lib/types/pocketbase';
 import { serializeNonPOJOs } from '$lib/utils/object';
 import { normalizeListingType } from '$lib/types/listing';
 import { generateThreadId } from '$lib/types/message';
+import { getLowestHistoricalPrice } from '$lib/server/price-tracking';
 
 const GAMES_EXPAND_KEY = 'games(listing)';
 
@@ -21,14 +22,33 @@ export const load: PageServerLoad = async ({ params, locals }) => {
     const formattedGames: ListingGameDetail[] = games.map((game) => {
       const bggId = typeof game.bgg_id === 'number' ? game.bgg_id : null;
 
-      // Get previous price from price history
+      // Get lowest historical price using anti-gaming logic
+      const currentPrice = typeof game.price === 'number' ? game.price : null;
+      const currentTradeValue = typeof game.trade_value === 'number' ? game.trade_value : null;
+
       let previousPrice: number | null = null;
       let previousTradeValue: number | null = null;
-      if (game.price_history && game.price_history.length >= 2) {
-        const prevEntry = game.price_history[game.price_history.length - 2];
-        previousPrice = typeof prevEntry.price === 'number' ? prevEntry.price : null;
-        previousTradeValue =
-          typeof prevEntry.trade_value === 'number' ? prevEntry.trade_value : null;
+
+      if (game.price_history && game.price_history.length >= 1) {
+        const lowestPrice = getLowestHistoricalPrice(game.price_history, listing.created, 'price');
+        const lowestTradeValue = getLowestHistoricalPrice(
+          game.price_history,
+          listing.created,
+          'trade_value'
+        );
+
+        // Only show previous price if current is lower (actual drop)
+        if (lowestPrice !== null && currentPrice !== null && currentPrice < lowestPrice) {
+          previousPrice = lowestPrice;
+        }
+
+        if (
+          lowestTradeValue !== null &&
+          currentTradeValue !== null &&
+          currentTradeValue < lowestTradeValue
+        ) {
+          previousTradeValue = lowestTradeValue;
+        }
       }
 
       return {
@@ -38,12 +58,14 @@ export const load: PageServerLoad = async ({ params, locals }) => {
         status: game.status,
         bggId,
         bggUrl: bggId ? `https://boardgamegeek.com/boardgame/${bggId}` : null,
-        price: typeof game.price === 'number' ? game.price : null,
-        tradeValue: typeof game.trade_value === 'number' ? game.trade_value : null,
+        price: currentPrice,
+        tradeValue: currentTradeValue,
         notes: game.notes ?? null,
         year: typeof game.year === 'number' ? game.year : null,
         previousPrice,
         previousTradeValue,
+        listingCreated: listing.created,
+        priceHistory: game.price_history,
       };
     });
 

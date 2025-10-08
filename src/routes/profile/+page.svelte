@@ -87,7 +87,13 @@
                 class="rounded-lg border border-slate-700 px-3 py-1.5 text-slate-200 transition hover:border-emerald-500 hover:text-emerald-300"
                 href={`/listings/${listing.id}`}
               >
-                View listing
+                View
+              </a>
+              <a
+                class="rounded-lg border border-slate-700 px-3 py-1.5 text-slate-200 transition hover:border-emerald-500 hover:text-emerald-300"
+                href={`/listings/${listing.id}/edit`}
+              >
+                Edit prices
               </a>
               <!-- eslint-enable svelte/no-navigation-without-resolve -->
             </div>

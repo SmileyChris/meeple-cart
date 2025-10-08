@@ -342,8 +342,16 @@
             <!-- eslint-enable svelte/no-navigation-without-resolve -->
           </div>
         {:else if owner && data.user.id === owner.id}
-          <div class="rounded-lg bg-slate-900 p-4 text-center">
-            <p class="text-sm text-slate-400">This is your listing</p>
+          <div class="space-y-3 rounded-lg bg-slate-900 p-4">
+            <p class="text-center text-sm text-slate-400">This is your listing</p>
+            <!-- eslint-disable svelte/no-navigation-without-resolve -->
+            <a
+              href={`/listings/${listing.id}/edit`}
+              class="block w-full rounded-lg border border-emerald-500 bg-emerald-500/10 px-4 py-2 text-center font-semibold text-emerald-200 transition hover:bg-emerald-500/20"
+            >
+              Edit prices
+            </a>
+            <!-- eslint-enable svelte/no-navigation-without-resolve -->
           </div>
         {:else if owner}
           {#if !showMessageForm}
