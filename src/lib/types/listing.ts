@@ -13,6 +13,12 @@ export const normalizeListingType = (value: string): ListingType => {
   return LISTING_TYPES.includes(value as ListingType) ? (value as ListingType) : 'sell';
 };
 
+export interface PriceHistoryEntry {
+  price?: number;
+  trade_value?: number;
+  timestamp: string;
+}
+
 export interface GameRecord extends RecordModel {
   listing: string;
   bgg_id?: number;
@@ -24,6 +30,7 @@ export interface GameRecord extends RecordModel {
   notes?: string;
   status: 'available' | 'pending' | 'sold' | 'bundled';
   photo_regions?: Record<string, unknown>;
+  price_history?: PriceHistoryEntry[];
 }
 
 export interface ListingRecord extends RecordModel {
@@ -59,6 +66,8 @@ export interface ListingGameSummary {
 export interface ListingGameDetail extends ListingGameSummary {
   notes: string | null;
   year: number | null;
+  previousPrice: number | null;
+  previousTradeValue: number | null;
 }
 
 export interface ListingPreview {

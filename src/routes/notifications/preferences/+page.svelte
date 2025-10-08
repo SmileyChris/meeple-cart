@@ -126,6 +126,34 @@
         </div>
       </section>
 
+      <!-- In-App Digest Frequency -->
+      <section class="space-y-4">
+        <div>
+          <h2 class="text-xl font-semibold text-slate-100">In-App Notification Digest</h2>
+          <p class="mt-1 text-sm text-slate-400">
+            Batch multiple notifications together instead of showing each individually
+          </p>
+        </div>
+
+        <div class="space-y-2">
+          {#each [{ value: 'instant', label: 'Instant - show immediately' }, { value: 'daily', label: 'Daily summary' }, { value: 'weekly', label: 'Weekly summary' }] as option (option.value)}
+            <label
+              class="flex items-center gap-3 rounded-lg border border-slate-800 bg-slate-900/60 p-3 transition hover:border-emerald-500"
+            >
+              <input
+                type="radio"
+                name="in_app_digest"
+                value={option.value}
+                checked={prefs.in_app_digest === option.value ||
+                  (!prefs.in_app_digest && option.value === 'instant')}
+                class="h-4 w-4 border-slate-700 bg-slate-900 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-0"
+              />
+              <span class="text-slate-200">{option.label}</span>
+            </label>
+          {/each}
+        </div>
+      </section>
+
       <!-- Notification Types -->
       <section class="space-y-4">
         <div>

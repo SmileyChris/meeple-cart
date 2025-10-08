@@ -55,13 +55,17 @@ export interface NotificationItem {
 /**
  * User notification preferences
  */
+export type DigestFrequency = 'instant' | 'daily' | 'weekly' | 'never';
+
 export interface NotificationPreferences {
   /** Regions to watch for new listings */
   watched_regions?: string[];
   /** Maximum distance in km for location-based alerts */
   max_distance_km?: number;
   /** Email notification frequency */
-  email_frequency?: 'instant' | 'daily' | 'weekly' | 'never';
+  email_frequency?: DigestFrequency;
+  /** In-app notification digest frequency */
+  in_app_digest?: DigestFrequency;
   /** Enable notifications for new listings in watched regions */
   notify_new_listings?: boolean;
   /** Enable notifications for price drops on watched items */
@@ -77,6 +81,7 @@ export const DEFAULT_NOTIFICATION_PREFS: NotificationPreferences = {
   watched_regions: [],
   max_distance_km: undefined,
   email_frequency: 'daily',
+  in_app_digest: 'instant',
   notify_new_listings: true,
   notify_price_drops: false,
   notify_new_messages: true,

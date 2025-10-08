@@ -2,6 +2,7 @@
   import type { PageData, ActionData } from './$types';
   import { formatCurrency } from '$lib/utils/currency';
   import { enhance } from '$app/forms';
+  import WatchlistButton from '$lib/components/WatchlistButton.svelte';
 
   export let data: PageData;
   export let form: ActionData;
@@ -253,16 +254,40 @@
                   {#if game.price !== null}
                     <div>
                       <dt class="text-slate-400">Price guide</dt>
-                      <dd class="text-lg font-semibold text-emerald-200">
-                        {toCurrency(game.price) ?? `${game.price.toFixed(2)} NZD`}
+                      <dd class="text-lg font-semibold">
+                        {#if game.previousPrice !== null && game.previousPrice > game.price}
+                          <span class="text-slate-500 line-through">
+                            {toCurrency(game.previousPrice) ??
+                              `${game.previousPrice.toFixed(2)} NZD`}
+                          </span>
+                          <span class="ml-2 text-emerald-200">
+                            {toCurrency(game.price) ?? `${game.price.toFixed(2)} NZD`}
+                          </span>
+                        {:else}
+                          <span class="text-emerald-200">
+                            {toCurrency(game.price) ?? `${game.price.toFixed(2)} NZD`}
+                          </span>
+                        {/if}
                       </dd>
                     </div>
                   {/if}
                   {#if game.tradeValue !== null}
                     <div>
                       <dt class="text-slate-400">Trade value</dt>
-                      <dd class="text-lg font-semibold text-emerald-200">
-                        {toCurrency(game.tradeValue) ?? `${game.tradeValue.toFixed(2)} NZD`}
+                      <dd class="text-lg font-semibold">
+                        {#if game.previousTradeValue !== null && game.previousTradeValue > game.tradeValue}
+                          <span class="text-slate-500 line-through">
+                            {toCurrency(game.previousTradeValue) ??
+                              `${game.previousTradeValue.toFixed(2)} NZD`}
+                          </span>
+                          <span class="ml-2 text-emerald-200">
+                            {toCurrency(game.tradeValue) ?? `${game.tradeValue.toFixed(2)} NZD`}
+                          </span>
+                        {:else}
+                          <span class="text-emerald-200">
+                            {toCurrency(game.tradeValue) ?? `${game.tradeValue.toFixed(2)} NZD`}
+                          </span>
+                        {/if}
                       </dd>
                     </div>
                   {/if}
@@ -296,6 +321,13 @@
         class="space-y-4 rounded-lg border border-slate-800 bg-slate-950/80 p-5 text-sm text-slate-300"
       >
         <h3 class="text-base font-semibold text-slate-100">Contact trader</h3>
+
+        <!-- Watchlist button (show for all logged-in users) -->
+        {#if data.user}
+          <div class="pb-4">
+            <WatchlistButton listingId={listing.id} isWatching={data.isWatching} />
+          </div>
+        {/if}
 
         {#if !data.user}
           <div class="space-y-4">

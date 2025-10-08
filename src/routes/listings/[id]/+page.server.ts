@@ -21,6 +21,16 @@ export const load: PageServerLoad = async ({ params, locals }) => {
     const formattedGames: ListingGameDetail[] = games.map((game) => {
       const bggId = typeof game.bgg_id === 'number' ? game.bgg_id : null;
 
+      // Get previous price from price history
+      let previousPrice: number | null = null;
+      let previousTradeValue: number | null = null;
+      if (game.price_history && game.price_history.length >= 2) {
+        const prevEntry = game.price_history[game.price_history.length - 2];
+        previousPrice = typeof prevEntry.price === 'number' ? prevEntry.price : null;
+        previousTradeValue =
+          typeof prevEntry.trade_value === 'number' ? prevEntry.trade_value : null;
+      }
+
       return {
         id: game.id,
         title: game.title,
@@ -32,6 +42,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
         tradeValue: typeof game.trade_value === 'number' ? game.trade_value : null,
         notes: game.notes ?? null,
         year: typeof game.year === 'number' ? game.year : null,
+        previousPrice,
+        previousTradeValue,
       };
     });
 
@@ -48,11 +60,21 @@ export const load: PageServerLoad = async ({ params, locals }) => {
       listing_type: normalizeListingType(String(listing.listing_type)),
     } satisfies ListingRecord;
 
+    // Check if user is watching this listing
+    let isWatching = false;
+    if (locals.user) {
+      const watchlist = await locals.pb.collection('watchlist').getFullList({
+        filter: `user = "${locals.user.id}" && listing = "${id}"`,
+      });
+      isWatching = watchlist.length > 0;
+    }
+
     return {
       listing: serializeNonPOJOs(normalizedListing),
       owner: owner ? serializeNonPOJOs(owner) : null,
       games: serializeNonPOJOs(formattedGames),
       photos: serializeNonPOJOs(photos),
+      isWatching,
     };
   } catch (err) {
     console.error(`Failed to load listing ${id}`, err);

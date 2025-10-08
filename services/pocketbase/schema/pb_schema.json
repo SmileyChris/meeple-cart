@@ -394,6 +394,14 @@
           "required": false,
           "unique": false,
           "options": {}
+        },
+        {
+          "id": "price_history_field",
+          "name": "price_history",
+          "type": "json",
+          "required": false,
+          "unique": false,
+          "options": {}
         }
       ],
       "indexes": [

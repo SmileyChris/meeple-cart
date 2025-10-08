@@ -63,10 +63,17 @@ export const actions: Actions = {
       | 'never'
       | undefined;
 
+    const inAppDigest = formData.get('in_app_digest')?.toString() as
+      | 'instant'
+      | 'daily'
+      | 'weekly'
+      | undefined;
+
     const prefs: NotificationPreferences = {
       watched_regions: watchedRegions,
       max_distance_km: maxDistance && maxDistance > 0 ? maxDistance : undefined,
       email_frequency: emailFrequency || 'daily',
+      in_app_digest: inAppDigest || 'instant',
       notify_new_listings: formData.get('notify_new_listings') === 'on',
       notify_price_drops: formData.get('notify_price_drops') === 'on',
       notify_new_messages: formData.get('notify_new_messages') === 'on',
