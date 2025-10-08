@@ -1,9 +1,10 @@
-import { error } from '@sveltejs/kit';
-import type { PageServerLoad } from './$types';
+import { error, redirect, fail } from '@sveltejs/kit';
+import type { Actions, PageServerLoad } from './$types';
 import type { GameRecord, ListingGameDetail, ListingRecord } from '$lib/types/listing';
 import type { UserRecord } from '$lib/types/pocketbase';
 import { serializeNonPOJOs } from '$lib/utils/object';
 import { normalizeListingType } from '$lib/types/listing';
+import { generateThreadId } from '$lib/types/message';
 
 const GAMES_EXPAND_KEY = 'games(listing)';
 
@@ -57,4 +58,57 @@ export const load: PageServerLoad = async ({ params, locals }) => {
     console.error(`Failed to load listing ${id}`, err);
     throw error(404, 'Listing not found');
   }
+};
+
+export const actions: Actions = {
+  start_message: async ({ locals, params, request }) => {
+    if (!locals.user) {
+      return fail(401, { error: 'Not authenticated' });
+    }
+
+    const formData = await request.formData();
+    const ownerId = formData.get('ownerId')?.toString();
+    const initialMessage = formData.get('message')?.toString().trim();
+
+    if (!ownerId) {
+      return fail(400, { error: 'Owner ID required' });
+    }
+
+    if (ownerId === locals.user.id) {
+      return fail(400, { error: 'Cannot message yourself' });
+    }
+
+    if (!initialMessage || initialMessage.length === 0) {
+      return fail(400, { error: 'Message cannot be empty' });
+    }
+
+    if (initialMessage.length > 4000) {
+      return fail(400, { error: 'Message too long' });
+    }
+
+    try {
+      // Generate thread ID from user IDs
+      const threadId = generateThreadId(locals.user.id, ownerId);
+
+      // Create the first message in the thread
+      await locals.pb.collection('messages').create({
+        listing: params.id,
+        thread_id: threadId,
+        sender: locals.user.id,
+        recipient: ownerId,
+        content: initialMessage,
+        is_public: false,
+        read: false,
+      });
+
+      // Redirect to the thread
+      throw redirect(303, `/messages/${threadId}`);
+    } catch (err) {
+      if (err instanceof Error && 'status' in err && err.status === 303) {
+        throw err; // Re-throw redirects
+      }
+      console.error('Failed to create message', err);
+      return fail(500, { error: 'Failed to send message' });
+    }
+  },
 };

@@ -21,6 +21,12 @@
         {#if data.user}
           <a
             class="rounded-full border border-slate-700 px-3 py-1.5 transition hover:border-emerald-500 hover:text-emerald-300"
+            href="/messages"
+          >
+            💬 Messages
+          </a>
+          <a
+            class="rounded-full border border-slate-700 px-3 py-1.5 transition hover:border-emerald-500 hover:text-emerald-300"
             href="/profile"
           >
             {data.user.display_name ?? 'Profile'}

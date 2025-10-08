@@ -1,8 +1,13 @@
 <script lang="ts">
-  import type { PageData } from './$types';
+  import type { PageData, ActionData } from './$types';
   import { formatCurrency } from '$lib/utils/currency';
+  import { enhance } from '$app/forms';
 
   export let data: PageData;
+  export let form: ActionData;
+
+  let message = '';
+  let showMessageForm = false;
 
   const listing = data.listing;
   const owner = data.owner;
@@ -290,24 +295,79 @@
       <aside
         class="space-y-4 rounded-lg border border-slate-800 bg-slate-950/80 p-5 text-sm text-slate-300"
       >
-        <h3 class="text-base font-semibold text-slate-100">Next steps</h3>
-        <ol class="list-decimal space-y-2 pl-5">
-          <li>Sign in or create an account to send a direct message.</li>
-          <li>Confirm pickup or shipping details with the trader.</li>
-          <li>Update the listing to pending once a trade is agreed.</li>
-        </ol>
-        <!-- eslint-disable svelte/no-navigation-without-resolve -->
-        <a
-          class="mt-4 inline-flex items-center justify-center rounded-lg border border-emerald-500 bg-emerald-500/10 px-4 py-2 font-semibold text-emerald-200 transition hover:bg-emerald-500/20"
-          href="/login"
-        >
-          Message this trader
-        </a>
-        <!-- eslint-enable svelte/no-navigation-without-resolve -->
-        <p class="text-xs text-slate-500">
-          Messaging requires a Meeple Cart account. Once trust features launch, vouches and
-          verification will surface here.
-        </p>
+        <h3 class="text-base font-semibold text-slate-100">Contact trader</h3>
+
+        {#if !data.user}
+          <div class="space-y-4">
+            <p class="text-sm text-slate-400">Sign in to send a message to this trader.</p>
+            <!-- eslint-disable svelte/no-navigation-without-resolve -->
+            <a
+              class="inline-flex w-full items-center justify-center rounded-lg border border-emerald-500 bg-emerald-500/10 px-4 py-2 font-semibold text-emerald-200 transition hover:bg-emerald-500/20"
+              href="/login"
+            >
+              Sign in to message
+            </a>
+            <!-- eslint-enable svelte/no-navigation-without-resolve -->
+          </div>
+        {:else if owner && data.user.id === owner.id}
+          <div class="rounded-lg bg-slate-900 p-4 text-center">
+            <p class="text-sm text-slate-400">This is your listing</p>
+          </div>
+        {:else if owner}
+          {#if !showMessageForm}
+            <button
+              type="button"
+              on:click={() => (showMessageForm = true)}
+              class="w-full rounded-lg border border-emerald-500 bg-emerald-500/10 px-4 py-2 font-semibold text-emerald-200 transition hover:bg-emerald-500/20"
+            >
+              💬 Send message
+            </button>
+          {:else}
+            <form method="POST" action="?/start_message" use:enhance class="space-y-3">
+              <input type="hidden" name="ownerId" value={owner.id} />
+
+              {#if form?.error}
+                <div class="rounded-lg bg-rose-500/10 px-3 py-2 text-sm text-rose-400">
+                  {form.error}
+                </div>
+              {/if}
+
+              <textarea
+                name="message"
+                bind:value={message}
+                placeholder="Hi! I'm interested in this listing..."
+                rows="4"
+                maxlength="4000"
+                required
+                class="w-full resize-none rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-slate-100 placeholder-slate-500 focus:border-emerald-500 focus:outline-none"
+              />
+
+              <div class="flex gap-2">
+                <button
+                  type="submit"
+                  disabled={!message.trim()}
+                  class="flex-1 rounded-lg bg-emerald-500 px-4 py-2 font-medium text-slate-900 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Send
+                </button>
+                <button
+                  type="button"
+                  on:click={() => {
+                    showMessageForm = false;
+                    message = '';
+                  }}
+                  class="rounded-lg border border-slate-700 px-4 py-2 text-slate-300 transition hover:bg-slate-800"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          {/if}
+
+          <p class="text-xs text-slate-500">
+            Messages are private and only visible to you and {owner.display_name}.
+          </p>
+        {/if}
       </aside>
     </section>
   </div>
