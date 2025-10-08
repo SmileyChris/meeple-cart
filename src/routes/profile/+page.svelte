@@ -91,6 +91,12 @@
               </a>
               <a
                 class="rounded-lg border border-slate-700 px-3 py-1.5 text-slate-200 transition hover:border-emerald-500 hover:text-emerald-300"
+                href={`/listings/${listing.id}/manage`}
+              >
+                Manage games
+              </a>
+              <a
+                class="rounded-lg border border-slate-700 px-3 py-1.5 text-slate-200 transition hover:border-emerald-500 hover:text-emerald-300"
                 href={`/listings/${listing.id}/edit`}
               >
                 Edit prices

@@ -66,14 +66,30 @@ export const actions: Actions = {
     const shippingAvailable = form.get('shipping_available') === 'on';
     const preferBundle = form.get('prefer_bundle') === 'on';
     const bundleDiscountRaw = form.get('bundle_discount');
-
-    const gameTitle = String(form.get('game_title') ?? '').trim();
-    const condition = String(form.get('condition') ?? '').toLowerCase();
-    const priceRaw = form.get('price');
-    const tradeValueRaw = form.get('trade_value');
-    const notes = String(form.get('notes') ?? '').trim();
-    const bggIdRaw = form.get('bgg_id');
     const photoEntries = form.getAll('photos');
+
+    // Parse multiple games from form data
+    const games: Array<{
+      title: string;
+      condition: string;
+      priceRaw: FormDataEntryValue | null;
+      tradeValueRaw: FormDataEntryValue | null;
+      notes: string;
+      bggIdRaw: FormDataEntryValue | null;
+    }> = [];
+
+    let gameIndex = 0;
+    while (form.has(`game_${gameIndex}_title`)) {
+      games.push({
+        title: String(form.get(`game_${gameIndex}_title`) ?? '').trim(),
+        condition: String(form.get(`game_${gameIndex}_condition`) ?? '').toLowerCase(),
+        priceRaw: form.get(`game_${gameIndex}_price`),
+        tradeValueRaw: form.get(`game_${gameIndex}_trade_value`),
+        notes: String(form.get(`game_${gameIndex}_notes`) ?? '').trim(),
+        bggIdRaw: form.get(`game_${gameIndex}_bgg_id`),
+      });
+      gameIndex++;
+    }
 
     const fieldErrors: Record<string, string> = {};
 
@@ -85,13 +101,37 @@ export const actions: Actions = {
       fieldErrors.listing_type = 'Select a valid listing type.';
     }
 
-    if (!gameTitle) {
-      fieldErrors.game_title = 'Enter the game title.';
+    if (games.length === 0) {
+      fieldErrors.games = 'At least one game is required.';
     }
 
-    if (!CONDITION_OPTIONS.includes(condition as (typeof CONDITION_OPTIONS)[number])) {
-      fieldErrors.condition = 'Select a valid condition.';
-    }
+    // Validate each game
+    games.forEach((game, index) => {
+      if (!game.title) {
+        fieldErrors[`game_${index}_title`] = 'Enter the game title.';
+      }
+
+      if (!CONDITION_OPTIONS.includes(game.condition as (typeof CONDITION_OPTIONS)[number])) {
+        fieldErrors[`game_${index}_condition`] = 'Select a valid condition.';
+      }
+
+      const price = parseOptionalNumber(game.priceRaw, { allowDecimals: true, min: 0 });
+      if (Number.isNaN(price)) {
+        fieldErrors[`game_${index}_price`] =
+          'Price must be a valid number greater than or equal to zero.';
+      }
+
+      const tradeValue = parseOptionalNumber(game.tradeValueRaw, { allowDecimals: true, min: 0 });
+      if (Number.isNaN(tradeValue)) {
+        fieldErrors[`game_${index}_trade_value`] =
+          'Trade value must be a valid number greater than or equal to zero.';
+      }
+
+      const bggId = parseOptionalNumber(game.bggIdRaw, { allowDecimals: false, min: 0 });
+      if (Number.isNaN(bggId)) {
+        fieldErrors[`game_${index}_bgg_id`] = 'BGG ID must be a whole number.';
+      }
+    });
 
     const photos = photoEntries.filter(
       (value): value is File => value instanceof File && value.size > 0
@@ -123,21 +163,6 @@ export const actions: Actions = {
       fieldErrors.bundle_discount = 'Bundle discount must be a whole number between 0 and 100.';
     }
 
-    const price = parseOptionalNumber(priceRaw, { allowDecimals: true, min: 0 });
-    if (Number.isNaN(price)) {
-      fieldErrors.price = 'Price must be a valid number greater than or equal to zero.';
-    }
-
-    const tradeValue = parseOptionalNumber(tradeValueRaw, { allowDecimals: true, min: 0 });
-    if (Number.isNaN(tradeValue)) {
-      fieldErrors.trade_value = 'Trade value must be a valid number greater than or equal to zero.';
-    }
-
-    const bggId = parseOptionalNumber(bggIdRaw, { allowDecimals: false, min: 0 });
-    if (Number.isNaN(bggId)) {
-      fieldErrors.bgg_id = 'BGG ID must be a whole number.';
-    }
-
     const values = {
       title: listingTitle,
       listing_type: LISTING_TYPES.includes(listingType as ListingType)
@@ -148,20 +173,24 @@ export const actions: Actions = {
       shipping_available: shippingAvailable,
       prefer_bundle: preferBundle,
       bundle_discount: typeof bundleDiscountRaw === 'string' ? bundleDiscountRaw : '',
-      game_title: gameTitle,
-      condition: CONDITION_OPTIONS.includes(condition as (typeof CONDITION_OPTIONS)[number])
-        ? condition
-        : DEFAULT_FORM_VALUES.condition,
-      price: typeof priceRaw === 'string' ? priceRaw : '',
-      trade_value: typeof tradeValueRaw === 'string' ? tradeValueRaw : '',
-      notes,
-      bgg_id: typeof bggIdRaw === 'string' ? bggIdRaw : '',
     };
+
+    const gamesForForm = games.map((game) => ({
+      title: game.title,
+      condition: CONDITION_OPTIONS.includes(game.condition as (typeof CONDITION_OPTIONS)[number])
+        ? game.condition
+        : DEFAULT_FORM_VALUES.condition,
+      price: typeof game.priceRaw === 'string' ? game.priceRaw : '',
+      trade_value: typeof game.tradeValueRaw === 'string' ? game.tradeValueRaw : '',
+      notes: game.notes,
+      bgg_id: typeof game.bggIdRaw === 'string' ? game.bggIdRaw : '',
+    }));
 
     if (Object.keys(fieldErrors).length > 0) {
       return fail(400, {
         fieldErrors,
         values,
+        games: gamesForForm,
       });
     }
 
@@ -194,43 +223,53 @@ export const actions: Actions = {
       const listingRecord = await locals.pb.collection('listings').create(listingPayload);
 
       try {
-        const gamePayload: Record<string, unknown> = {
-          listing: listingRecord.id,
-          title: gameTitle,
-          condition: values.condition,
-          status: 'available',
-          notes: notes || null,
-        };
+        // Create all game records
+        for (const game of games) {
+          const price = parseOptionalNumber(game.priceRaw, { allowDecimals: true, min: 0 });
+          const tradeValue = parseOptionalNumber(game.tradeValueRaw, {
+            allowDecimals: true,
+            min: 0,
+          });
+          const bggId = parseOptionalNumber(game.bggIdRaw, { allowDecimals: false, min: 0 });
 
-        if (price !== null) {
-          gamePayload.price = price;
+          const gamePayload: Record<string, unknown> = {
+            listing: listingRecord.id,
+            title: game.title,
+            condition: game.condition,
+            status: 'available',
+            notes: game.notes || null,
+          };
+
+          if (price !== null) {
+            gamePayload.price = price;
+          }
+
+          if (tradeValue !== null) {
+            gamePayload.trade_value = tradeValue;
+          }
+
+          if (bggId !== null) {
+            gamePayload.bgg_id = bggId;
+          }
+
+          // Initialize price history with first entry
+          gamePayload.price_history = [
+            {
+              price: price !== null ? price : undefined,
+              trade_value: tradeValue !== null ? tradeValue : undefined,
+              timestamp: new Date().toISOString(),
+            },
+          ];
+
+          await locals.pb.collection('games').create(gamePayload);
         }
-
-        if (tradeValue !== null) {
-          gamePayload.trade_value = tradeValue;
-        }
-
-        if (bggId !== null) {
-          gamePayload.bgg_id = bggId;
-        }
-
-        // Initialize price history with first entry
-        gamePayload.price_history = [
-          {
-            price: price !== null ? price : undefined,
-            trade_value: tradeValue !== null ? tradeValue : undefined,
-            timestamp: new Date().toISOString(),
-          },
-        ];
-
-        await locals.pb.collection('games').create(gamePayload);
 
         // Notify users about new listing (non-blocking)
         notifyNewListing(locals.pb, listingRecord, locals.user.display_name).catch((err) =>
           console.error('Failed to send new listing notifications', err)
         );
       } catch (gameError) {
-        console.error('Failed to create game record; rolling back listing', gameError);
+        console.error('Failed to create game records; rolling back listing', gameError);
         try {
           await locals.pb.collection('listings').delete(listingRecord.id);
         } catch (cleanupError) {
@@ -240,6 +279,7 @@ export const actions: Actions = {
         return fail(500, {
           message: 'We saved the listing but could not store the game details. Please try again.',
           values,
+          games: gamesForForm,
         });
       }
     } catch (listingError) {
@@ -247,6 +287,7 @@ export const actions: Actions = {
       return fail(500, {
         message: 'Unable to create listing right now. Please try again shortly.',
         values,
+        games: gamesForForm,
       });
     }
 

@@ -5,7 +5,16 @@
   export let data: PageData;
   export let form: ActionData | undefined;
 
-  const values = form?.values ?? {
+  interface GameEntry {
+    title: string;
+    condition: string;
+    price: string;
+    trade_value: string;
+    notes: string;
+    bgg_id: string;
+  }
+
+  const listingValues = form?.values ?? {
     title: '',
     listing_type: data.defaults.listing_type,
     summary: '',
@@ -13,13 +22,20 @@
     shipping_available: false,
     prefer_bundle: false,
     bundle_discount: '',
-    game_title: '',
-    condition: data.defaults.condition,
-    price: '',
-    trade_value: '',
-    notes: '',
-    bgg_id: '',
   };
+
+  let games: GameEntry[] =
+    form?.games ??
+    ([
+      {
+        title: '',
+        condition: data.defaults.condition,
+        price: '',
+        trade_value: '',
+        notes: '',
+        bgg_id: '',
+      },
+    ] as GameEntry[]);
 
   const fieldErrors = form?.fieldErrors ?? {};
 
@@ -56,6 +72,24 @@
       url: URL.createObjectURL(file),
       size: formatSize(file.size),
     }));
+  };
+
+  const addGame = () => {
+    games = [
+      ...games,
+      {
+        title: '',
+        condition: data.defaults.condition,
+        price: '',
+        trade_value: '',
+        notes: '',
+        bgg_id: '',
+      },
+    ];
+  };
+
+  const removeGame = (index: number) => {
+    games = games.filter((_, i) => i !== index);
   };
 
   onDestroy(() => {
@@ -149,7 +183,7 @@
               placeholder="Eg: Gloomhaven 2nd edition with inserts"
               required
               maxlength="120"
-              value={values.title}
+              value={listingValues.title}
             />
             {#if fieldErrors.title}
               <p class="mt-2 text-sm text-rose-300">{fieldErrors.title}</p>
@@ -165,7 +199,7 @@
               id="listing_type"
               name="listing_type"
               required
-              value={values.listing_type}
+              value={listingValues.listing_type}
             >
               {#each data.listingTypes as type (type)}
                 <option value={type}
@@ -188,7 +222,7 @@
               name="location"
               placeholder="City or suburb"
               maxlength="120"
-              value={values.location}
+              value={listingValues.location}
             />
           </div>
 
@@ -200,7 +234,7 @@
               name="summary"
               maxlength="2000"
               placeholder="Describe condition, included expansions, and trade preferences."
-              >{values.summary}</textarea
+              >{listingValues.summary}</textarea
             >
           </div>
         </div>
@@ -211,7 +245,7 @@
               class="h-4 w-4 rounded border border-slate-700 bg-slate-950"
               name="shipping_available"
               type="checkbox"
-              checked={values.shipping_available}
+              checked={listingValues.shipping_available}
             />
             Shipping available
           </label>
@@ -220,7 +254,7 @@
               class="h-4 w-4 rounded border border-slate-700 bg-slate-950"
               name="prefer_bundle"
               type="checkbox"
-              checked={values.prefer_bundle}
+              checked={listingValues.prefer_bundle}
             />
             Prefer bundle deals
           </label>
@@ -235,7 +269,7 @@
               placeholder="Optional"
               inputmode="numeric"
               pattern="[0-9]*"
-              value={values.bundle_discount}
+              value={listingValues.bundle_discount}
             />
             {#if fieldErrors.bundle_discount}
               <p class="mt-2 text-sm text-rose-300">{fieldErrors.bundle_discount}</p>
@@ -244,115 +278,149 @@
         </div>
       </section>
 
-      <section class="space-y-6 rounded-xl border border-slate-800 bg-slate-900/60 p-6">
-        <div class="space-y-2">
-          <h2 class="text-xl font-semibold text-slate-100">Game details</h2>
-          <p class="text-sm text-slate-400">
-            Tell potential traders more about this specific copy.
-          </p>
+      <div class="space-y-6">
+        <div class="flex items-center justify-between">
+          <div class="space-y-1">
+            <h2 class="text-xl font-semibold text-slate-100">Games</h2>
+            <p class="text-sm text-slate-400">Add one or more games to this listing.</p>
+          </div>
+          <button
+            class="rounded-lg border border-emerald-500 px-4 py-2 text-sm font-medium text-emerald-300 transition hover:bg-emerald-500/10"
+            type="button"
+            on:click={addGame}
+          >
+            + Add game
+          </button>
         </div>
 
-        <div class="grid gap-6 sm:grid-cols-2">
-          <div class="sm:col-span-2">
-            <label class="block text-sm font-medium text-slate-200" for="game_title"
-              >Game title</label
-            >
-            <input
-              class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
-              id="game_title"
-              name="game_title"
-              placeholder="Eg: Gloomhaven"
-              required
-              maxlength="200"
-              value={values.game_title}
-            />
-            {#if fieldErrors.game_title}
-              <p class="mt-2 text-sm text-rose-300">{fieldErrors.game_title}</p>
-            {/if}
-          </div>
+        {#each games as game, index (index)}
+          <section class="space-y-6 rounded-xl border border-slate-800 bg-slate-900/60 p-6">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-medium text-slate-100">Game {index + 1}</h3>
+              {#if games.length > 1}
+                <button
+                  class="text-sm text-rose-400 transition hover:text-rose-300"
+                  type="button"
+                  on:click={() => removeGame(index)}
+                >
+                  Remove
+                </button>
+              {/if}
+            </div>
 
-          <div>
-            <label class="block text-sm font-medium text-slate-200" for="condition">Condition</label
-            >
-            <select
-              class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
-              id="condition"
-              name="condition"
-              required
-              value={values.condition}
-            >
-              {#each data.conditionOptions as option (option)}
-                <option value={option}>{option.charAt(0).toUpperCase() + option.slice(1)}</option>
-              {/each}
-            </select>
-            {#if fieldErrors.condition}
-              <p class="mt-2 text-sm text-rose-300">{fieldErrors.condition}</p>
-            {/if}
-          </div>
+            <div class="grid gap-6 sm:grid-cols-2">
+              <div class="sm:col-span-2">
+                <label class="block text-sm font-medium text-slate-200" for="game_{index}_title"
+                  >Game title</label
+                >
+                <input
+                  class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+                  id="game_{index}_title"
+                  name="game_{index}_title"
+                  placeholder="Eg: Gloomhaven"
+                  required
+                  maxlength="200"
+                  bind:value={game.title}
+                />
+                {#if fieldErrors[`game_${index}_title`]}
+                  <p class="mt-2 text-sm text-rose-300">{fieldErrors[`game_${index}_title`]}</p>
+                {/if}
+              </div>
 
-          <div>
-            <label class="block text-sm font-medium text-slate-200" for="price">Price (NZD)</label>
-            <input
-              class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
-              id="price"
-              name="price"
-              placeholder="Optional"
-              inputmode="decimal"
-              value={values.price}
-            />
-            {#if fieldErrors.price}
-              <p class="mt-2 text-sm text-rose-300">{fieldErrors.price}</p>
-            {/if}
-          </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-200" for="game_{index}_condition"
+                  >Condition</label
+                >
+                <select
+                  class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+                  id="game_{index}_condition"
+                  name="game_{index}_condition"
+                  required
+                  bind:value={game.condition}
+                >
+                  {#each data.conditionOptions as option (option)}
+                    <option value={option}
+                      >{option.charAt(0).toUpperCase() + option.slice(1)}</option
+                    >
+                  {/each}
+                </select>
+                {#if fieldErrors[`game_${index}_condition`]}
+                  <p class="mt-2 text-sm text-rose-300">{fieldErrors[`game_${index}_condition`]}</p>
+                {/if}
+              </div>
 
-          <div>
-            <label class="block text-sm font-medium text-slate-200" for="trade_value"
-              >Trade value (NZD)</label
-            >
-            <input
-              class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
-              id="trade_value"
-              name="trade_value"
-              placeholder="Optional"
-              inputmode="decimal"
-              value={values.trade_value}
-            />
-            {#if fieldErrors.trade_value}
-              <p class="mt-2 text-sm text-rose-300">{fieldErrors.trade_value}</p>
-            {/if}
-          </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-200" for="game_{index}_price"
+                  >Price (NZD)</label
+                >
+                <input
+                  class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+                  id="game_{index}_price"
+                  name="game_{index}_price"
+                  placeholder="Optional"
+                  inputmode="decimal"
+                  bind:value={game.price}
+                />
+                {#if fieldErrors[`game_${index}_price`]}
+                  <p class="mt-2 text-sm text-rose-300">{fieldErrors[`game_${index}_price`]}</p>
+                {/if}
+              </div>
 
-          <div>
-            <label class="block text-sm font-medium text-slate-200" for="bgg_id"
-              >BoardGameGeek ID</label
-            >
-            <input
-              class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
-              id="bgg_id"
-              name="bgg_id"
-              placeholder="Optional"
-              inputmode="numeric"
-              pattern="[0-9]*"
-              value={values.bgg_id}
-            />
-            {#if fieldErrors.bgg_id}
-              <p class="mt-2 text-sm text-rose-300">{fieldErrors.bgg_id}</p>
-            {/if}
-          </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-slate-200"
+                  for="game_{index}_trade_value">Trade value (NZD)</label
+                >
+                <input
+                  class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+                  id="game_{index}_trade_value"
+                  name="game_{index}_trade_value"
+                  placeholder="Optional"
+                  inputmode="decimal"
+                  bind:value={game.trade_value}
+                />
+                {#if fieldErrors[`game_${index}_trade_value`]}
+                  <p class="mt-2 text-sm text-rose-300">
+                    {fieldErrors[`game_${index}_trade_value`]}
+                  </p>
+                {/if}
+              </div>
 
-          <div class="sm:col-span-2">
-            <label class="block text-sm font-medium text-slate-200" for="notes">Copy notes</label>
-            <textarea
-              class="mt-2 min-h-[120px] w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
-              id="notes"
-              name="notes"
-              maxlength="2000"
-              placeholder="Mention wear, missing components, or house-rule kits."
-              >{values.notes}</textarea
-            >
-          </div>
-        </div>
-      </section>
+              <div>
+                <label class="block text-sm font-medium text-slate-200" for="game_{index}_bgg_id"
+                  >BoardGameGeek ID</label
+                >
+                <input
+                  class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+                  id="game_{index}_bgg_id"
+                  name="game_{index}_bgg_id"
+                  placeholder="Optional"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
+                  bind:value={game.bgg_id}
+                />
+                {#if fieldErrors[`game_${index}_bgg_id`]}
+                  <p class="mt-2 text-sm text-rose-300">{fieldErrors[`game_${index}_bgg_id`]}</p>
+                {/if}
+              </div>
+
+              <div class="sm:col-span-2">
+                <label class="block text-sm font-medium text-slate-200" for="game_{index}_notes"
+                  >Copy notes</label
+                >
+                <textarea
+                  class="mt-2 min-h-[120px] w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+                  id="game_{index}_notes"
+                  name="game_{index}_notes"
+                  maxlength="2000"
+                  placeholder="Mention wear, missing components, or house-rule kits."
+                  bind:value={game.notes}
+                />
+              </div>
+            </div>
+          </section>
+        {/each}
+      </div>
 
       <div class="flex items-center justify-end gap-4">
         <!-- eslint-disable svelte/no-navigation-without-resolve -->
@@ -366,7 +434,7 @@
           class="rounded-lg bg-emerald-500 px-4 py-2 font-semibold text-slate-900 transition hover:bg-emerald-400"
           type="submit"
         >
-          Publish listing
+          Publish listing {games.length > 1 ? `with ${games.length} games` : ''}
         </button>
         <!-- eslint-enable svelte/no-navigation-without-resolve -->
       </div>
