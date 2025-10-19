@@ -1,0 +1,32 @@
+site_name: Meeple Cart Docs
+site_description: Developer documentation for Meeple Cart
+theme:
+  name: material
+nav:
+  - Home: index.md
+  - Listings & Marketplace: listings.md
+  - Trade Chains: trade-chains.md
+  - Reputation & Trust:
+      - Overview: reputation/README.md
+      - Trust Tiers: reputation/trust-tiers.md
+      - Anti-Gaming & Fraud Prevention: reputation/anti-gaming.md
+      - Moderation Playbook: reputation/moderation.md
+      - Trust & Vouching: trust-and-vouches.md
+  - Developer Guide:
+      - Getting Started: development/getting-started.md
+      - Architecture & Patterns: development/architecture.md
+      - Testing Guide: development/testing.md
+      - PocketBase Data Models: development/data-models.md
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: true
+  - attr_list
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+  - pymdownx.details
+  - markdown.extensions.nl2br
+plugins:
+  - search

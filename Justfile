@@ -12,3 +12,6 @@ dev:
         cp .env.example .env; \
     fi
     @./scripts/dev.sh
+
+docs:
+    @uvx --with mkdocs-material mkdocs serve
