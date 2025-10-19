@@ -10,6 +10,14 @@ export interface UserRecord extends RecordModel {
   bio?: string;
   preferred_contact: 'platform' | 'email' | 'phone';
   notification_prefs?: Record<string, unknown>;
+  // Cascade stats
+  cascades_seeded: number;
+  cascades_received: number;
+  cascades_passed: number;
+  cascades_broken: number;
+  cascade_reputation: number;
+  cascade_restricted_until?: string;
+  can_enter_cascades: boolean;
 }
 
 export type AuthenticatedUser = UserRecord | null;

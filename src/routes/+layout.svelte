@@ -19,6 +19,12 @@
         >
           Activity
         </a>
+        <a
+          class="rounded-full border border-slate-700 px-3 py-1.5 transition hover:border-emerald-500 hover:text-emerald-300"
+          href="/cascades"
+        >
+          🎁 Gift Cascades
+        </a>
         {#if data.user}
           <NotificationBell unreadCount={data.unreadNotifications} />
           <a
