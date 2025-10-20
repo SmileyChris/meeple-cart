@@ -97,6 +97,11 @@ migrate(
 
     dao.saveCollection(usersCollection);
 
+    // Initialize cascade fields for existing users
+    db.newQuery(
+      'UPDATE users SET cascades_seeded = 0, cascades_received = 0, cascades_passed = 0, cascades_broken = 0, cascade_reputation = 50, can_enter_cascades = TRUE WHERE cascades_seeded IS NULL'
+    ).execute();
+
     // 2. Update notifications collection - add cascade notification types
     const notificationsCollection = dao.findCollectionByNameOrId('notifications_collection');
     const typeField = notificationsCollection.schema.getFieldByName('type');

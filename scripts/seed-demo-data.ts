@@ -236,6 +236,12 @@ const ensureUser = async (seed: SeedUser): Promise<RecordModel | null> => {
     joined_date: seed.joinedDate,
     bio: seed.bio ?? '',
     preferred_contact: seed.preferredContact,
+    cascades_seeded: 0,
+    cascades_received: 0,
+    cascades_passed: 0,
+    cascades_broken: 0,
+    cascade_reputation: 50,
+    can_enter_cascades: true,
   };
 
   const authClient = new PocketBase(baseUrl);

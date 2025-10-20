@@ -51,6 +51,12 @@ export const actions: Actions = {
         vouch_count: 0,
         joined_date: new Date().toISOString(),
         notification_prefs: DEFAULT_NOTIFICATION_PREFS,
+        cascades_seeded: 0,
+        cascades_received: 0,
+        cascades_passed: 0,
+        cascades_broken: 0,
+        cascade_reputation: 50,
+        can_enter_cascades: true,
       });
 
       await locals.pb.collection('users').authWithPassword(email, password);
