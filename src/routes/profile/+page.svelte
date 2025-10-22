@@ -27,34 +27,34 @@
 </script>
 
 <section
-  class="mx-auto mt-12 max-w-3xl rounded-xl border border-slate-800 bg-slate-900/60 p-8 shadow-lg"
+  class="mx-auto mt-12 max-w-3xl rounded-xl border border-subtle bg-surface-panel p-8 shadow-elevated transition-colors"
 >
   <header
-    class="flex flex-col gap-2 border-b border-slate-800 pb-4 sm:flex-row sm:items-center sm:justify-between"
+    class="flex flex-col gap-2 border-b border-subtle pb-4 sm:flex-row sm:items-center sm:justify-between"
   >
     <div>
-      <h1 class="text-2xl font-semibold text-slate-100">{profile.display_name}</h1>
-      <p class="text-sm text-slate-400">
+      <h1 class="text-2xl font-semibold text-primary">{profile.display_name}</h1>
+      <p class="text-sm text-muted">
         Joined {new Date(profile.joined_date).toLocaleDateString()}
       </p>
     </div>
-    <div class="flex gap-4 text-sm text-slate-300">
-      <span><span class="font-semibold text-emerald-300">{profile.trade_count}</span> trades</span>
-      <span><span class="font-semibold text-emerald-300">{profile.vouch_count}</span> vouches</span>
+    <div class="flex gap-4 text-sm text-secondary">
+      <span><span class="font-semibold" style="color: var(--accent)">{profile.trade_count}</span> trades</span>
+      <span><span class="font-semibold" style="color: var(--accent)">{profile.vouch_count}</span> vouches</span>
     </div>
   </header>
 
   <section class="mt-6 space-y-4">
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <h2 class="text-xl font-semibold text-slate-100">My listings</h2>
-        <p class="text-sm text-slate-400">
+        <h2 class="text-xl font-semibold text-primary">My listings</h2>
+        <p class="text-sm text-muted">
           Create, review, and manage the games you have on offer.
         </p>
       </div>
       <!-- eslint-disable svelte/no-navigation-without-resolve -->
       <a
-        class="inline-flex items-center justify-center rounded-lg border border-emerald-500 bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-200 transition hover:bg-emerald-500/20"
+        class="btn-secondary px-4 py-2"
         href="/listings/new"
       >
         New listing
@@ -63,18 +63,18 @@
     </div>
 
     {#if listings.length > 0}
-      <ul class="divide-y divide-slate-800 rounded-xl border border-slate-800 bg-slate-950/60">
+      <ul class="divide-y divide-[var(--border-subtle)] rounded-xl border border-subtle bg-surface-card transition-colors">
         {#each listings as listing (listing.id)}
           <li class="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
             <div class="space-y-1">
-              <h3 class="text-lg font-semibold text-slate-100">{listing.title}</h3>
+              <h3 class="text-lg font-semibold text-primary">{listing.title}</h3>
               <div
-                class="flex flex-wrap items-center gap-2 text-xs uppercase tracking-wide text-slate-400"
+                class="flex flex-wrap items-center gap-2 text-xs uppercase tracking-wide text-muted"
               >
-                <span class="rounded-full border border-emerald-600 px-2 py-0.5 text-emerald-200">
+                <span class="rounded-full border px-2 py-0.5" style="border-color: var(--accent); color: var(--accent)">
                   {typeLabels[listing.listingType] ?? listing.listingType}
                 </span>
-                <span class="rounded-full border border-slate-700 px-2 py-0.5 text-slate-300">
+                <span class="rounded-full border border-subtle px-2 py-0.5 text-secondary">
                   {statusLabels[listing.status] ?? listing.status}
                 </span>
                 <span>Created {formatDate(listing.created)}</span>
@@ -84,19 +84,19 @@
             <div class="flex flex-wrap gap-3 text-sm">
               <!-- eslint-disable svelte/no-navigation-without-resolve -->
               <a
-                class="rounded-lg border border-slate-700 px-3 py-1.5 text-slate-200 transition hover:border-emerald-500 hover:text-emerald-300"
+                class="btn-ghost"
                 href={`/listings/${listing.id}`}
               >
                 View
               </a>
               <a
-                class="rounded-lg border border-slate-700 px-3 py-1.5 text-slate-200 transition hover:border-emerald-500 hover:text-emerald-300"
+                class="btn-ghost"
                 href={`/listings/${listing.id}/manage`}
               >
                 Manage games
               </a>
               <a
-                class="rounded-lg border border-slate-700 px-3 py-1.5 text-slate-200 transition hover:border-emerald-500 hover:text-emerald-300"
+                class="btn-ghost"
                 href={`/listings/${listing.id}/edit`}
               >
                 Edit prices
@@ -108,9 +108,9 @@
       </ul>
     {:else}
       <div
-        class="rounded-xl border border-dashed border-slate-800 bg-slate-950/40 p-6 text-sm text-slate-400"
+        class="rounded-xl border border-dashed border-subtle bg-surface-card p-6 text-sm text-muted transition-colors"
       >
-        You have not created any listings yet. Use the <span class="text-emerald-300"
+        You have not created any listings yet. Use the <span style="color: var(--accent)"
           >New listing</span
         > button to publish your first trade.
       </div>
@@ -119,10 +119,10 @@
 
   <form class="mt-6 grid gap-4 sm:grid-cols-2" method="POST" action="?/update">
     <div class="sm:col-span-2">
-      <label class="block text-sm font-medium text-slate-200" for="display_name">Display name</label
+      <label class="block text-sm font-medium text-secondary" for="display_name">Display name</label
       >
       <input
-        class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+        class="mt-2 w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
         id="display_name"
         name="display_name"
         type="text"
@@ -134,9 +134,9 @@
     </div>
 
     <div>
-      <label class="block text-sm font-medium text-slate-200" for="location">Location</label>
+      <label class="block text-sm font-medium text-secondary" for="location">Location</label>
       <input
-        class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+        class="mt-2 w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
         id="location"
         name="location"
         type="text"
@@ -147,11 +147,11 @@
     </div>
 
     <div>
-      <label class="block text-sm font-medium text-slate-200" for="preferred_contact"
+      <label class="block text-sm font-medium text-secondary" for="preferred_contact"
         >Preferred contact</label
       >
       <select
-        class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+        class="mt-2 w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
         id="preferred_contact"
         name="preferred_contact"
         value={profile.preferred_contact}
@@ -165,26 +165,26 @@
     </div>
 
     <div class="sm:col-span-2">
-      <label class="block text-sm font-medium text-slate-200" for="bio">Bio</label>
+      <label class="block text-sm font-medium text-secondary" for="bio">Bio</label>
       <textarea
-        class="mt-2 h-32 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+        class="mt-2 h-32 w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
         id="bio"
         name="bio"
         maxlength="2000">{profile.bio ?? ''}</textarea
       >
-      <p class="mt-1 text-xs text-slate-500">Share a short intro or trading preferences.</p>
+      <p class="mt-1 text-xs text-muted">Share a short intro or trading preferences.</p>
     </div>
 
     {#if actionState?.message}
-      <p class="sm:col-span-2 text-sm text-rose-300">{actionState.message}</p>
+      <p class="sm:col-span-2 text-sm text-rose-400">{actionState.message}</p>
     {/if}
     {#if updated}
-      <p class="sm:col-span-2 text-sm text-emerald-300">Profile updated.</p>
+      <p class="sm:col-span-2 text-sm" style="color: var(--accent)">Profile updated.</p>
     {/if}
 
     <div class="sm:col-span-2 flex justify-end">
       <button
-        class="rounded-lg bg-emerald-500 px-4 py-2 font-semibold text-slate-900 transition hover:bg-emerald-400"
+        class="btn-primary"
         name="intent"
         value="update"
         type="submit"

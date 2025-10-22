@@ -45,11 +45,11 @@
       case 'pending':
         return 'text-amber-400';
       case 'sold':
-        return 'text-slate-500';
+        return 'text-muted';
       case 'bundled':
         return 'text-blue-400';
       default:
-        return 'text-slate-400';
+        return 'text-muted';
     }
   };
 
@@ -64,14 +64,14 @@
   <title>Manage Games · {data.listing.title} · Meeple Cart</title>
 </svelte:head>
 
-<main class="bg-slate-950 px-6 py-12 text-slate-100 sm:px-8">
+<main class="bg-surface-body transition-colors px-6 py-12 text-primary sm:px-8">
   <div class="mx-auto max-w-4xl space-y-8">
     <header class="space-y-4">
       <div class="flex items-center gap-4">
         <!-- eslint-disable svelte/no-navigation-without-resolve -->
         <a
           href="/profile"
-          class="rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-slate-200"
+          class="rounded-lg p-2 text-muted transition hover:bg-surface-card-alt hover:text-secondary"
         >
           <!-- eslint-enable svelte/no-navigation-without-resolve -->
           <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -85,7 +85,7 @@
         </a>
         <div class="flex-1">
           <h1 class="text-3xl font-semibold tracking-tight">Manage Games</h1>
-          <p class="mt-1 text-sm text-slate-400">{data.listing.title}</p>
+          <p class="mt-1 text-sm text-muted">{data.listing.title}</p>
         </div>
       </div>
     </header>
@@ -115,16 +115,16 @@
       </div>
 
       {#if showAddForm}
-        <section class="rounded-xl border border-slate-800 bg-slate-900/60 p-6">
+        <section class="rounded-xl border border-subtle bg-surface-card transition-colors p-6">
           <h3 class="mb-4 text-lg font-medium">Add New Game</h3>
           <form method="POST" action="?/add_game" class="space-y-4">
             <div class="grid gap-4 sm:grid-cols-2">
               <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-slate-200" for="new_title"
+                <label class="block text-sm font-medium text-secondary" for="new_title"
                   >Game title</label
                 >
                 <input
-                  class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+                  class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
                   id="new_title"
                   name="title"
                   placeholder="Eg: Gloomhaven"
@@ -138,11 +138,11 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-slate-200" for="new_condition"
+                <label class="block text-sm font-medium text-secondary" for="new_condition"
                   >Condition</label
                 >
                 <select
-                  class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+                  class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
                   id="new_condition"
                   name="condition"
                   required
@@ -157,11 +157,11 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-slate-200" for="new_price"
+                <label class="block text-sm font-medium text-secondary" for="new_price"
                   >Price (NZD)</label
                 >
                 <input
-                  class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+                  class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
                   id="new_price"
                   name="price"
                   placeholder="Optional"
@@ -174,11 +174,11 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-slate-200" for="new_trade_value"
+                <label class="block text-sm font-medium text-secondary" for="new_trade_value"
                   >Trade value (NZD)</label
                 >
                 <input
-                  class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+                  class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
                   id="new_trade_value"
                   name="trade_value"
                   placeholder="Optional"
@@ -191,11 +191,11 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-slate-200" for="new_bgg_id"
+                <label class="block text-sm font-medium text-secondary" for="new_bgg_id"
                   >BoardGameGeek ID</label
                 >
                 <input
-                  class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+                  class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
                   id="new_bgg_id"
                   name="bgg_id"
                   placeholder="Optional"
@@ -209,11 +209,11 @@
               </div>
 
               <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-slate-200" for="new_notes"
+                <label class="block text-sm font-medium text-secondary" for="new_notes"
                   >Copy notes</label
                 >
                 <textarea
-                  class="mt-2 min-h-[120px] w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+                  class="mt-2 min-h-[120px] w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
                   id="new_notes"
                   name="notes"
                   maxlength="2000"
@@ -225,14 +225,14 @@
 
             <div class="flex justify-end gap-3">
               <button
-                class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-200 transition hover:border-slate-600"
+                class="rounded-lg border border-subtle px-4 py-2 text-sm text-secondary transition hover:border-strong"
                 type="button"
                 on:click={toggleAddForm}
               >
                 Cancel
               </button>
               <button
-                class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-emerald-400"
+                class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-[var(--accent-contrast)] transition hover:bg-emerald-400"
                 type="submit"
               >
                 Add Game
@@ -244,7 +244,7 @@
 
       <div class="space-y-4">
         {#each data.games as game (game.id)}
-          <section class="rounded-xl border border-slate-800 bg-slate-900/60 p-6">
+          <section class="rounded-xl border border-subtle bg-surface-card transition-colors p-6">
             {#if editingGameId === game.id}
               <form method="POST" action="?/update_game" class="space-y-4">
                 <input type="hidden" name="game_id" value={game.id} />
@@ -252,11 +252,11 @@
                 <div class="grid gap-4 sm:grid-cols-2">
                   <div class="sm:col-span-2">
                     <label
-                      class="block text-sm font-medium text-slate-200"
+                      class="block text-sm font-medium text-secondary"
                       for="edit_title_{game.id}">Game title</label
                     >
                     <input
-                      class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+                      class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
                       id="edit_title_{game.id}"
                       name="title"
                       required
@@ -267,11 +267,11 @@
 
                   <div>
                     <label
-                      class="block text-sm font-medium text-slate-200"
+                      class="block text-sm font-medium text-secondary"
                       for="edit_condition_{game.id}">Condition</label
                     >
                     <select
-                      class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+                      class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
                       id="edit_condition_{game.id}"
                       name="condition"
                       required
@@ -287,11 +287,11 @@
 
                   <div>
                     <label
-                      class="block text-sm font-medium text-slate-200"
+                      class="block text-sm font-medium text-secondary"
                       for="edit_bgg_id_{game.id}">BoardGameGeek ID</label
                     >
                     <input
-                      class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+                      class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
                       id="edit_bgg_id_{game.id}"
                       name="bgg_id"
                       placeholder="Optional"
@@ -303,11 +303,11 @@
 
                   <div class="sm:col-span-2">
                     <label
-                      class="block text-sm font-medium text-slate-200"
+                      class="block text-sm font-medium text-secondary"
                       for="edit_notes_{game.id}">Copy notes</label
                     >
                     <textarea
-                      class="mt-2 min-h-[120px] w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+                      class="mt-2 min-h-[120px] w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
                       id="edit_notes_{game.id}"
                       name="notes"
                       maxlength="2000"
@@ -319,14 +319,14 @@
 
                 <div class="flex justify-end gap-3">
                   <button
-                    class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-200 transition hover:border-slate-600"
+                    class="rounded-lg border border-subtle px-4 py-2 text-sm text-secondary transition hover:border-strong"
                     type="button"
                     on:click={cancelEditing}
                   >
                     Cancel
                   </button>
                   <button
-                    class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-emerald-400"
+                    class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-[var(--accent-contrast)] transition hover:bg-emerald-400"
                     type="submit"
                   >
                     Save Changes
@@ -337,10 +337,10 @@
               <div class="space-y-4">
                 <div class="flex items-start justify-between">
                   <div class="flex-1">
-                    <h3 class="text-lg font-semibold text-slate-100">{game.title}</h3>
-                    <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-400">
+                    <h3 class="text-lg font-semibold text-primary">{game.title}</h3>
+                    <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted">
                       <span
-                        >Condition: <span class="text-slate-300"
+                        >Condition: <span class="text-secondary"
                           >{game.condition.charAt(0).toUpperCase() + game.condition.slice(1)}</span
                         ></span
                       >
@@ -358,7 +358,7 @@
                       {/if}
                     </div>
                     {#if game.notes}
-                      <p class="mt-2 text-sm text-slate-400">{game.notes}</p>
+                      <p class="mt-2 text-sm text-muted">{game.notes}</p>
                     {/if}
                   </div>
 
@@ -387,11 +387,11 @@
 
                 {#if game.status !== 'sold'}
                   <div class="flex gap-2">
-                    <span class="text-sm text-slate-400">Status:</span>
+                    <span class="text-sm text-muted">Status:</span>
                     <form method="POST" action="?/update_status" class="inline">
                       <input type="hidden" name="game_id" value={game.id} />
                       <select
-                        class="rounded border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-300"
+                        class="rounded border border-subtle bg-surface-card transition-colors px-2 py-1 text-xs text-secondary"
                         name="status"
                         value={game.status}
                         on:change={(e) => e.currentTarget.form?.requestSubmit()}

@@ -10,15 +10,15 @@
   <meta name="description" content="Your message inbox for board game trades and conversations." />
 </svelte:head>
 
-<main class="min-h-screen bg-slate-950">
+<main class="min-h-screen bg-surface-body transition-colors">
   <div class="mx-auto max-w-4xl">
     <!-- Header -->
-    <div class="border-b border-slate-800 bg-slate-950/80 px-6 py-6 backdrop-blur">
+    <div class="border-b border-subtle bg-surface-panel transition-colors px-6 py-6 backdrop-blur">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-3xl font-bold text-slate-100">Messages</h1>
+          <h1 class="text-3xl font-bold text-primary">Messages</h1>
           {#if data.unreadTotal > 0}
-            <p class="mt-1 text-sm text-slate-400">
+            <p class="mt-1 text-sm text-muted">
               {data.unreadTotal} unread {data.unreadTotal === 1 ? 'message' : 'messages'}
             </p>
           {/if}

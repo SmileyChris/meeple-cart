@@ -106,13 +106,9 @@
 }
 
 @layer components {
-  .btn {
+  .btn-primary {
     @apply inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold transition-[background-color,color,border-color,box-shadow];
     border: 1px solid transparent;
-  }
-
-  .btn-primary {
-    @apply btn;
     background-color: var(--accent);
     color: var(--accent-contrast);
     box-shadow: 0 10px 25px rgba(16, 185, 129, 0.25);
@@ -123,7 +119,7 @@
   }
 
   .btn-secondary {
-    @apply btn;
+    @apply inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold transition-[background-color,color,border-color,box-shadow];
     border: 1px solid var(--accent);
     color: var(--accent);
     background-color: transparent;
@@ -137,8 +133,8 @@
   }
 
   .btn-ghost {
-    @apply btn px-3 py-1.5 font-medium;
-    border-color: var(--border-subtle);
+    @apply inline-flex items-center justify-center rounded-full px-3 py-1.5 text-sm font-medium transition-[background-color,color,border-color,box-shadow];
+    border: 1px solid var(--border-subtle);
     color: var(--text-secondary);
     background-color: transparent;
     box-shadow: none;

@@ -39,14 +39,14 @@
   <title>{data.otherUser?.name || 'Message'} · Messages · Meeple Cart</title>
 </svelte:head>
 
-<main class="flex h-screen flex-col bg-slate-950">
+<main class="flex h-screen flex-col bg-surface-body transition-colors">
   <!-- Header -->
   <!-- eslint-disable svelte/no-navigation-without-resolve -->
-  <div class="flex-shrink-0 border-b border-slate-800 bg-slate-950/80 backdrop-blur">
+  <div class="flex-shrink-0 border-b border-subtle bg-surface-panel transition-colors backdrop-blur">
     <div class="mx-auto flex max-w-4xl items-center gap-4 px-4 py-4">
       <a
         href="/messages"
-        class="rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-slate-200"
+        class="rounded-lg p-2 text-muted transition hover:bg-surface-card-alt hover:text-secondary"
       >
         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
@@ -68,19 +68,19 @@
             />
           </a>
         {:else}
-          <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-slate-800 text-xl">
+          <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-surface-card-alt text-xl">
             🎲
           </div>
         {/if}
 
         <div class="min-w-0 flex-1">
-          <h1 class="truncate text-lg font-semibold text-slate-100">
+          <h1 class="truncate text-lg font-semibold text-primary">
             {data.otherUser?.name || 'Unknown User'}
           </h1>
           {#if data.listing}
             <a
               href={data.listing.href}
-              class="truncate text-sm text-slate-400 hover:text-emerald-400"
+              class="truncate text-sm text-muted hover:text-emerald-400"
             >
               {data.listing.title}
             </a>
@@ -99,7 +99,7 @@
   </div>
 
   <!-- Input -->
-  <div class="flex-shrink-0 border-t border-slate-800 bg-slate-950/80 backdrop-blur">
+  <div class="flex-shrink-0 border-t border-subtle bg-surface-panel transition-colors backdrop-blur">
     <div class="mx-auto max-w-4xl px-4 py-4">
       {#if form?.error}
         <div class="mb-3 rounded-lg bg-rose-500/10 px-4 py-2 text-sm text-rose-400">

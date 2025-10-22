@@ -20,11 +20,11 @@
   <title>Edit Prices - {listing.title} · Meeple Cart</title>
 </svelte:head>
 
-<main class="bg-slate-950 px-6 py-12 text-slate-100 sm:px-8">
+<main class="bg-surface-body transition-colors px-6 py-12 text-primary sm:px-8">
   <div class="mx-auto max-w-4xl space-y-8">
     <!-- Header -->
     <header class="space-y-3">
-      <nav class="flex items-center gap-3 text-sm text-slate-400">
+      <nav class="flex items-center gap-3 text-sm text-muted">
         <!-- eslint-disable svelte/no-navigation-without-resolve -->
         <a class="hover:text-emerald-300" href="/profile">Profile</a>
         <span>/</span>
@@ -34,7 +34,7 @@
         <!-- eslint-enable svelte/no-navigation-without-resolve -->
       </nav>
       <h1 class="text-3xl font-semibold tracking-tight">Edit Game Prices</h1>
-      <p class="text-sm text-slate-400">
+      <p class="text-sm text-muted">
         Update prices for games in this listing. Price drops will notify users watching this
         listing.
       </p>
@@ -68,22 +68,22 @@
     >
       <!-- Games List -->
       <div class="space-y-4">
-        <h2 class="text-xl font-semibold text-slate-100">Games in this listing</h2>
+        <h2 class="text-xl font-semibold text-primary">Games in this listing</h2>
 
         {#if games.length === 0}
-          <p class="text-slate-400">No games found in this listing.</p>
+          <p class="text-muted">No games found in this listing.</p>
         {:else}
           <div class="space-y-4">
             {#each games as game (game.id)}
               <div
-                class="rounded-xl border border-slate-800 bg-slate-900/60 p-5 transition hover:border-slate-700"
+                class="rounded-xl border border-subtle bg-surface-card transition-colors p-5 transition hover:border-subtle"
               >
                 <div class="space-y-4">
                   <!-- Game Header -->
-                  <div class="border-b border-slate-800 pb-3">
-                    <h3 class="text-lg font-semibold text-slate-100">{game.title}</h3>
+                  <div class="border-b border-subtle pb-3">
+                    <h3 class="text-lg font-semibold text-primary">{game.title}</h3>
                     {#if game.year}
-                      <p class="text-sm text-slate-400">({game.year})</p>
+                      <p class="text-sm text-muted">({game.year})</p>
                     {/if}
                   </div>
 
@@ -91,7 +91,7 @@
                   <div class="grid gap-4 sm:grid-cols-2">
                     <!-- Price -->
                     <div>
-                      <label for="price_{game.id}" class="mb-2 block text-sm text-slate-300">
+                      <label for="price_{game.id}" class="mb-2 block text-sm text-secondary">
                         Price (NZD)
                       </label>
                       <input
@@ -102,7 +102,7 @@
                         step="0.01"
                         min="0"
                         placeholder="No price set"
-                        class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-slate-100 placeholder-slate-500 focus:border-emerald-500 focus:outline-none"
+                        class="w-full rounded-lg border border-subtle bg-surface-card transition-colors px-3 py-2 text-primary placeholder-slate-500 focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
                       />
                       {#if form?.fieldErrors?.[`price_${game.id}`]}
                         <p class="mt-1 text-sm text-rose-400">
@@ -113,7 +113,7 @@
 
                     <!-- Trade Value -->
                     <div>
-                      <label for="trade_value_{game.id}" class="mb-2 block text-sm text-slate-300">
+                      <label for="trade_value_{game.id}" class="mb-2 block text-sm text-secondary">
                         Trade Value (NZD)
                       </label>
                       <input
@@ -124,7 +124,7 @@
                         step="0.01"
                         min="0"
                         placeholder="No trade value set"
-                        class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-slate-100 placeholder-slate-500 focus:border-emerald-500 focus:outline-none"
+                        class="w-full rounded-lg border border-subtle bg-surface-card transition-colors px-3 py-2 text-primary placeholder-slate-500 focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
                       />
                       {#if form?.fieldErrors?.[`trade_value_${game.id}`]}
                         <p class="mt-1 text-sm text-rose-400">
@@ -136,7 +136,7 @@
 
                   <!-- Current Price Info -->
                   {#if game.price !== null || game.trade_value !== null}
-                    <div class="text-xs text-slate-500">
+                    <div class="text-xs text-muted">
                       Current:
                       {#if game.price !== null}
                         <span>Price ${game.price.toFixed(2)}</span>
@@ -157,11 +157,11 @@
       </div>
 
       <!-- Actions -->
-      <div class="flex gap-3 border-t border-slate-800 pt-6">
+      <div class="flex gap-3 border-t border-subtle pt-6">
         <!-- eslint-disable svelte/no-navigation-without-resolve -->
         <a
           href={`/listings/${listing.id}`}
-          class="rounded-lg border border-slate-700 px-6 py-2 text-center text-slate-300 transition hover:border-emerald-500 hover:text-emerald-300"
+          class="rounded-lg border border-subtle px-6 py-2 text-center text-secondary transition hover:border-emerald-500 hover:text-emerald-300"
         >
           Cancel
         </a>
@@ -169,7 +169,7 @@
         <button
           type="submit"
           disabled={isSubmitting || games.length === 0}
-          class="flex-1 rounded-lg bg-emerald-500 px-6 py-2 font-medium text-slate-900 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
+          class="flex-1 rounded-lg bg-emerald-500 px-6 py-2 font-medium text-[var(--accent-contrast)] transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isSubmitting ? 'Saving...' : 'Save Prices'}
         </button>
@@ -177,8 +177,8 @@
     </form>
 
     <!-- Help Text -->
-    <div class="rounded-lg border border-slate-800 bg-slate-900/40 p-4 text-sm text-slate-400">
-      <h3 class="mb-2 font-semibold text-slate-300">💡 Price Drop Tips</h3>
+    <div class="rounded-lg border border-subtle bg-surface-card transition-colors p-4 text-sm text-muted">
+      <h3 class="mb-2 font-semibold text-secondary">💡 Price Drop Tips</h3>
       <ul class="space-y-1">
         <li>
           • Price drops are shown publicly after 3 days from listing creation (prevents gaming)

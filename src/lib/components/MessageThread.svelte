@@ -46,14 +46,14 @@
   {#if loading}
     <div class="flex items-center justify-center py-12">
       <div
-        class="h-8 w-8 animate-spin rounded-full border-4 border-slate-700 border-t-emerald-500"
+        class="h-8 w-8 animate-spin rounded-full border-4 border-subtle border-t-emerald-500"
       ></div>
     </div>
   {:else if messages.length === 0}
     <div class="flex flex-1 items-center justify-center">
       <div class="text-center">
         <div class="mb-3 text-5xl opacity-20">💬</div>
-        <p class="text-slate-400">{emptyMessage}</p>
+        <p class="text-muted">{emptyMessage}</p>
       </div>
     </div>
   {:else}

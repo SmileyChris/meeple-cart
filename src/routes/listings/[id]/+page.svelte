@@ -82,9 +82,9 @@
   />
 </svelte:head>
 
-<main class="bg-slate-950 px-6 py-12 text-slate-100 sm:px-8">
+<main class="bg-surface-body transition-colors px-6 py-12 text-primary sm:px-8">
   <div class="mx-auto flex max-w-5xl flex-col gap-8">
-    <nav class="flex items-center text-sm text-slate-400">
+    <nav class="flex items-center text-sm text-muted">
       <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
       <a class="hover:text-emerald-300" href="/">Home</a>
       <span class="px-2">/</span>
@@ -93,8 +93,8 @@
 
     <header class="flex flex-col gap-6 lg:flex-row">
       <div class="flex-1 space-y-4">
-        <h1 class="text-4xl font-semibold tracking-tight text-slate-50">{listing.title}</h1>
-        <div class="flex flex-wrap gap-3 text-sm text-slate-300">
+        <h1 class="text-4xl font-semibold tracking-tight text-primary">{listing.title}</h1>
+        <div class="flex flex-wrap gap-3 text-sm text-secondary">
           <span
             class="rounded-full border border-emerald-500/80 bg-emerald-500/10 px-3 py-1 font-semibold text-emerald-200 uppercase"
           >
@@ -105,25 +105,25 @@
                 : 'Trade'}
           </span>
           {#if listing.location}
-            <span class="rounded-full border border-slate-700 px-3 py-1">{listing.location}</span>
+            <span class="rounded-full border border-subtle px-3 py-1">{listing.location}</span>
           {/if}
-          <span class="rounded-full border border-slate-700 px-3 py-1">Added {listingCreated}</span>
+          <span class="rounded-full border border-subtle px-3 py-1">Added {listingCreated}</span>
           {#if listing.shipping_available}
-            <span class="rounded-full border border-slate-700 px-3 py-1">Shipping available</span>
+            <span class="rounded-full border border-subtle px-3 py-1">Shipping available</span>
           {/if}
           {#if listing.prefer_bundle}
-            <span class="rounded-full border border-slate-700 px-3 py-1">Prefers bundle</span>
+            <span class="rounded-full border border-subtle px-3 py-1">Prefers bundle</span>
           {/if}
         </div>
         {#if listing.summary}
-          <p class="max-w-2xl text-base text-slate-300">{listing.summary}</p>
+          <p class="max-w-2xl text-base text-secondary">{listing.summary}</p>
         {/if}
       </div>
 
       <aside
-        class="w-full max-w-sm rounded-xl border border-slate-800 bg-slate-900/60 p-5 text-sm text-slate-300"
+        class="w-full max-w-sm rounded-xl border border-subtle bg-surface-card transition-colors p-5 text-sm text-secondary"
       >
-        <h2 class="text-base font-semibold text-slate-100">Trader details</h2>
+        <h2 class="text-base font-semibold text-primary">Trader details</h2>
         {#if owner}
           <!-- eslint-disable svelte/no-navigation-without-resolve -->
           <a
@@ -134,33 +134,33 @@
           </a>
           <!-- eslint-enable svelte/no-navigation-without-resolve -->
           {#if owner.location}
-            <p class="text-sm text-slate-400">Based in {owner.location}</p>
+            <p class="text-sm text-muted">Based in {owner.location}</p>
           {/if}
           <dl class="mt-4 grid grid-cols-2 gap-3 text-sm">
             <div>
-              <dt class="text-slate-400">Trades</dt>
+              <dt class="text-muted">Trades</dt>
               <dd class="text-lg font-semibold text-emerald-300">{owner.trade_count}</dd>
             </div>
             <div>
-              <dt class="text-slate-400">Vouches</dt>
+              <dt class="text-muted">Vouches</dt>
               <dd class="text-lg font-semibold text-emerald-300">{owner.vouch_count}</dd>
             </div>
           </dl>
           <div class="mt-4 space-y-2">
             <p>Preferred contact: {contactPreference[owner.preferred_contact]}</p>
-            <p class="text-xs text-slate-500">
+            <p class="text-xs text-muted">
               Coordinate trades via the in-app messenger or the method agreed with the seller.
             </p>
           </div>
         {:else}
-          <p class="mt-2 text-slate-400">Owner details are unavailable.</p>
+          <p class="mt-2 text-muted">Owner details are unavailable.</p>
         {/if}
       </aside>
     </header>
 
     {#if photos.length > 0}
       <section class="space-y-4">
-        <div class="overflow-hidden rounded-xl border border-slate-800 bg-slate-950/40">
+        <div class="overflow-hidden rounded-xl border border-subtle bg-surface-card transition-colors">
           <img
             alt={`${listing.title} photo ${activePhotoIndex + 1}`}
             class="h-full w-full max-h-[520px] object-cover"
@@ -177,7 +177,7 @@
                 class={`overflow-hidden rounded-lg border ${
                   index === activePhotoIndex
                     ? 'border-emerald-500 shadow-[0_0_0_2px_rgba(16,185,129,0.4)]'
-                    : 'border-slate-800 hover:border-emerald-400'
+                    : 'border-subtle hover:border-emerald-400'
                 }`}
                 on:click={() => selectPhoto(index)}
                 aria-label={`View photo ${index + 1}`}
@@ -196,19 +196,19 @@
       </section>
     {:else}
       <section
-        class="rounded-xl border border-dashed border-slate-800 bg-slate-900/40 p-6 text-center text-sm text-slate-400"
+        class="rounded-xl border border-dashed border-subtle bg-surface-card transition-colors p-6 text-center text-sm text-muted"
       >
         This listing does not have photos yet.
       </section>
     {/if}
 
     <section
-      class="grid gap-8 rounded-xl border border-slate-800 bg-slate-900/60 p-6 lg:grid-cols-[2fr_1fr]"
+      class="grid gap-8 rounded-xl border border-subtle bg-surface-card transition-colors p-6 lg:grid-cols-[2fr_1fr]"
     >
       <div class="space-y-6">
         <div>
-          <h2 class="text-2xl font-semibold text-slate-100">Games in this listing</h2>
-          <p class="text-sm text-slate-400">
+          <h2 class="text-2xl font-semibold text-primary">Games in this listing</h2>
+          <p class="text-sm text-muted">
             Condition, pricing, and trade preferences for each game included.
           </p>
         </div>
@@ -216,10 +216,10 @@
         {#if games.length > 0}
           <div class="space-y-4">
             {#each games as game (game.id)}
-              <article class="space-y-4 rounded-lg border border-slate-800 bg-slate-950/70 p-5">
+              <article class="space-y-4 rounded-lg border border-subtle bg-surface-panel transition-colors p-5">
                 <header class="space-y-2">
                   <div class="flex flex-wrap items-center justify-between gap-3">
-                    <h3 class="text-xl font-semibold text-slate-100">{game.title}</h3>
+                    <h3 class="text-xl font-semibold text-primary">{game.title}</h3>
                     {#if game.bggUrl}
                       <!-- eslint-disable svelte/no-navigation-without-resolve -->
                       <a
@@ -235,7 +235,7 @@
                   </div>
                   <div class="flex flex-wrap gap-2 text-xs font-semibold">
                     <span
-                      class="inline-flex items-center rounded-full border border-slate-700 bg-slate-800/80 px-2 py-1 text-slate-200"
+                      class="inline-flex items-center rounded-full border border-subtle bg-surface-card-alt px-2 py-1 text-secondary"
                     >
                       {conditionBadges[game.condition]}
                     </span>
@@ -246,24 +246,24 @@
                     </span>
                     {#if game.year !== null}
                       <span
-                        class="inline-flex items-center rounded-full border border-slate-700 bg-slate-800/80 px-2 py-1 text-slate-200"
+                        class="inline-flex items-center rounded-full border border-subtle bg-surface-card-alt px-2 py-1 text-secondary"
                       >
                         Published {game.year}
                       </span>
                     {/if}
                   </div>
                   {#if conditionDescriptions[game.condition]}
-                    <p class="text-xs text-slate-500">{conditionDescriptions[game.condition]}</p>
+                    <p class="text-xs text-muted">{conditionDescriptions[game.condition]}</p>
                   {/if}
                 </header>
 
                 <dl class="grid gap-3 text-sm sm:grid-cols-2">
                   {#if game.price !== null}
                     <div>
-                      <dt class="text-slate-400">Price guide</dt>
+                      <dt class="text-muted">Price guide</dt>
                       <dd class="text-lg font-semibold">
                         {#if game.previousPrice !== null && game.previousPrice > game.price}
-                          <span class="text-slate-500 line-through">
+                          <span class="text-muted line-through">
                             {toCurrency(game.previousPrice) ??
                               `${game.previousPrice.toFixed(2)} NZD`}
                           </span>
@@ -280,10 +280,10 @@
                   {/if}
                   {#if game.tradeValue !== null}
                     <div>
-                      <dt class="text-slate-400">Trade value</dt>
+                      <dt class="text-muted">Trade value</dt>
                       <dd class="text-lg font-semibold">
                         {#if game.previousTradeValue !== null && game.previousTradeValue > game.tradeValue}
-                          <span class="text-slate-500 line-through">
+                          <span class="text-muted line-through">
                             {toCurrency(game.previousTradeValue) ??
                               `${game.previousTradeValue.toFixed(2)} NZD`}
                           </span>
@@ -300,16 +300,16 @@
                   {/if}
                   {#if game.price === null && game.tradeValue === null}
                     <div class="sm:col-span-2">
-                      <dt class="text-slate-400">Negotiable</dt>
-                      <dd class="text-sm text-slate-300">Price to be discussed with the trader.</dd>
+                      <dt class="text-muted">Negotiable</dt>
+                      <dd class="text-sm text-secondary">Price to be discussed with the trader.</dd>
                     </div>
                   {/if}
                 </dl>
 
                 {#if game.notes}
                   <div>
-                    <h4 class="text-sm font-semibold text-slate-200">Seller notes</h4>
-                    <p class="mt-2 whitespace-pre-line text-sm text-slate-300">{game.notes}</p>
+                    <h4 class="text-sm font-semibold text-secondary">Seller notes</h4>
+                    <p class="mt-2 whitespace-pre-line text-sm text-secondary">{game.notes}</p>
                   </div>
                 {/if}
               </article>
@@ -317,7 +317,7 @@
           </div>
         {:else}
           <div
-            class="rounded-lg border border-dashed border-slate-800 bg-slate-950/50 p-6 text-sm text-slate-400"
+            class="rounded-lg border border-dashed border-subtle bg-surface-body transition-colors/50 p-6 text-sm text-muted"
           >
             The trader has not added individual game details yet.
           </div>
@@ -325,9 +325,9 @@
       </div>
 
       <aside
-        class="space-y-4 rounded-lg border border-slate-800 bg-slate-950/80 p-5 text-sm text-slate-300"
+        class="space-y-4 rounded-lg border border-subtle bg-surface-panel transition-colors p-5 text-sm text-secondary"
       >
-        <h3 class="text-base font-semibold text-slate-100">Contact trader</h3>
+        <h3 class="text-base font-semibold text-primary">Contact trader</h3>
 
         <!-- Watchlist button (show for all logged-in users) -->
         {#if data.user}
@@ -338,7 +338,7 @@
 
         {#if !data.user}
           <div class="space-y-4">
-            <p class="text-sm text-slate-400">Sign in to send a message to this trader.</p>
+            <p class="text-sm text-muted">Sign in to send a message to this trader.</p>
             <!-- eslint-disable svelte/no-navigation-without-resolve -->
             <a
               class="inline-flex w-full items-center justify-center rounded-lg border border-emerald-500 bg-emerald-500/10 px-4 py-2 font-semibold text-emerald-200 transition hover:bg-emerald-500/20"
@@ -349,8 +349,8 @@
             <!-- eslint-enable svelte/no-navigation-without-resolve -->
           </div>
         {:else if owner && data.user.id === owner.id}
-          <div class="space-y-3 rounded-lg bg-slate-900 p-4">
-            <p class="text-center text-sm text-slate-400">This is your listing</p>
+          <div class="space-y-3 rounded-lg bg-surface-card transition-colors p-4">
+            <p class="text-center text-sm text-muted">This is your listing</p>
             <!-- eslint-disable svelte/no-navigation-without-resolve -->
             <a
               href={`/listings/${listing.id}/edit`}
@@ -386,14 +386,14 @@
                 rows="4"
                 maxlength="4000"
                 required
-                class="w-full resize-none rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-slate-100 placeholder-slate-500 focus:border-emerald-500 focus:outline-none"
+                class="w-full resize-none rounded-lg border border-subtle bg-surface-card transition-colors px-3 py-2 text-primary placeholder-slate-500 focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
               />
 
               <div class="flex gap-2">
                 <button
                   type="submit"
                   disabled={!message.trim()}
-                  class="flex-1 rounded-lg bg-emerald-500 px-4 py-2 font-medium text-slate-900 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
+                  class="flex-1 rounded-lg bg-emerald-500 px-4 py-2 font-medium text-[var(--accent-contrast)] transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Send
                 </button>
@@ -403,7 +403,7 @@
                     showMessageForm = false;
                     message = '';
                   }}
-                  class="rounded-lg border border-slate-700 px-4 py-2 text-slate-300 transition hover:bg-slate-800"
+                  class="rounded-lg border border-subtle px-4 py-2 text-secondary transition hover:bg-surface-card-alt"
                 >
                   Cancel
                 </button>
@@ -411,7 +411,7 @@
             </form>
           {/if}
 
-          <p class="text-xs text-slate-500">
+          <p class="text-xs text-muted">
             Messages are private and only visible to you and {owner.display_name}.
           </p>
         {/if}

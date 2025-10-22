@@ -101,11 +101,11 @@
   <title>Create listing · Meeple Cart</title>
 </svelte:head>
 
-<main class="bg-slate-950 px-6 py-12 text-slate-100 sm:px-8">
+<main class="bg-surface-body transition-colors px-6 py-12 text-primary sm:px-8">
   <div class="mx-auto max-w-4xl space-y-10">
     <header class="space-y-3">
       <h1 class="text-3xl font-semibold tracking-tight">Create a new listing</h1>
-      <p class="text-sm text-slate-400">
+      <p class="text-sm text-muted">
         Share the details of the game you want to trade or sell. Listings publish immediately and
         can be edited from your profile afterwards.
       </p>
@@ -118,18 +118,18 @@
     {/if}
 
     <form class="space-y-10" method="POST">
-      <section class="space-y-6 rounded-xl border border-slate-800 bg-slate-900/60 p-6">
+      <section class="space-y-6 rounded-xl border border-subtle bg-surface-card transition-colors p-6">
         <div class="space-y-2">
-          <h2 class="text-xl font-semibold text-slate-100">Photos</h2>
-          <p class="text-sm text-slate-400">
+          <h2 class="text-xl font-semibold text-primary">Photos</h2>
+          <p class="text-sm text-muted">
             Upload up to 6 images (PNG, JPG, WEBP, 5MB maximum each).
           </p>
         </div>
 
         <div class="space-y-3">
-          <label class="block text-sm font-medium text-slate-200" for="photos">Upload photos</label>
+          <label class="block text-sm font-medium text-secondary" for="photos">Upload photos</label>
           <input
-            class="w-full cursor-pointer rounded-lg border border-dashed border-slate-700 bg-slate-950 px-3 py-8 text-sm text-slate-300 focus:border-emerald-500 focus:outline-none"
+            class="w-full cursor-pointer rounded-lg border border-dashed border-subtle bg-surface-body transition-colors px-3 py-8 text-sm text-secondary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
             id="photos"
             name="photos"
             type="file"
@@ -140,7 +140,7 @@
           {#if fieldErrors.photos}
             <p class="text-sm text-rose-300">{fieldErrors.photos}</p>
           {/if}
-          <p class="text-xs text-slate-500">
+          <p class="text-xs text-muted">
             You'll need to reselect images if the form submission fails.
           </p>
         </div>
@@ -148,15 +148,15 @@
         {#if photoPreviews.length > 0}
           <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {#each photoPreviews as preview (preview.url)}
-              <figure class="overflow-hidden rounded-lg border border-slate-800 bg-slate-950/60">
+              <figure class="overflow-hidden rounded-lg border border-subtle bg-surface-card transition-colors">
                 <img
                   alt={`Preview of ${preview.name}`}
                   class="h-40 w-full object-cover"
                   src={preview.url}
                 />
-                <figcaption class="px-3 py-2 text-xs text-slate-300">
-                  <span class="block truncate font-medium text-slate-100">{preview.name}</span>
-                  <span class="text-slate-500">{preview.size}</span>
+                <figcaption class="px-3 py-2 text-xs text-secondary">
+                  <span class="block truncate font-medium text-primary">{preview.name}</span>
+                  <span class="text-muted">{preview.size}</span>
                 </figcaption>
               </figure>
             {/each}
@@ -164,20 +164,20 @@
         {/if}
       </section>
 
-      <section class="space-y-6 rounded-xl border border-slate-800 bg-slate-900/60 p-6">
+      <section class="space-y-6 rounded-xl border border-subtle bg-surface-card transition-colors p-6">
         <div class="space-y-2">
-          <h2 class="text-xl font-semibold text-slate-100">Listing overview</h2>
-          <p class="text-sm text-slate-400">
+          <h2 class="text-xl font-semibold text-primary">Listing overview</h2>
+          <p class="text-sm text-muted">
             These details describe how your listing appears in the feed.
           </p>
         </div>
 
         <div class="grid gap-6 sm:grid-cols-2">
           <div class="sm:col-span-2">
-            <label class="block text-sm font-medium text-slate-200" for="title">Listing title</label
+            <label class="block text-sm font-medium text-secondary" for="title">Listing title</label
             >
             <input
-              class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+              class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
               id="title"
               name="title"
               placeholder="Eg: Gloomhaven 2nd edition with inserts"
@@ -191,11 +191,11 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-slate-200" for="listing_type"
+            <label class="block text-sm font-medium text-secondary" for="listing_type"
               >Listing type</label
             >
             <select
-              class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+              class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
               id="listing_type"
               name="listing_type"
               required
@@ -215,9 +215,9 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-slate-200" for="location">Location</label>
+            <label class="block text-sm font-medium text-secondary" for="location">Location</label>
             <input
-              class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+              class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
               id="location"
               name="location"
               placeholder="City or suburb"
@@ -227,9 +227,9 @@
           </div>
 
           <div class="sm:col-span-2">
-            <label class="block text-sm font-medium text-slate-200" for="summary">Summary</label>
+            <label class="block text-sm font-medium text-secondary" for="summary">Summary</label>
             <textarea
-              class="mt-2 min-h-[140px] w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+              class="mt-2 min-h-[140px] w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
               id="summary"
               name="summary"
               maxlength="2000"
@@ -240,18 +240,18 @@
         </div>
 
         <div class="grid gap-4 sm:grid-cols-2">
-          <label class="flex items-center gap-2 text-sm text-slate-300">
+          <label class="flex items-center gap-2 text-sm text-secondary">
             <input
-              class="h-4 w-4 rounded border border-slate-700 bg-slate-950"
+              class="h-4 w-4 rounded border border-subtle bg-surface-body transition-colors"
               name="shipping_available"
               type="checkbox"
               checked={listingValues.shipping_available}
             />
             Shipping available
           </label>
-          <label class="flex items-center gap-2 text-sm text-slate-300">
+          <label class="flex items-center gap-2 text-sm text-secondary">
             <input
-              class="h-4 w-4 rounded border border-slate-700 bg-slate-950"
+              class="h-4 w-4 rounded border border-subtle bg-surface-body transition-colors"
               name="prefer_bundle"
               type="checkbox"
               checked={listingValues.prefer_bundle}
@@ -259,11 +259,11 @@
             Prefer bundle deals
           </label>
           <div class="sm:col-span-2">
-            <label class="block text-sm font-medium text-slate-200" for="bundle_discount"
+            <label class="block text-sm font-medium text-secondary" for="bundle_discount"
               >Bundle discount (%)</label
             >
             <input
-              class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+              class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
               id="bundle_discount"
               name="bundle_discount"
               placeholder="Optional"
@@ -281,8 +281,8 @@
       <div class="space-y-6">
         <div class="flex items-center justify-between">
           <div class="space-y-1">
-            <h2 class="text-xl font-semibold text-slate-100">Games</h2>
-            <p class="text-sm text-slate-400">Add one or more games to this listing.</p>
+            <h2 class="text-xl font-semibold text-primary">Games</h2>
+            <p class="text-sm text-muted">Add one or more games to this listing.</p>
           </div>
           <button
             class="rounded-lg border border-emerald-500 px-4 py-2 text-sm font-medium text-emerald-300 transition hover:bg-emerald-500/10"
@@ -294,9 +294,9 @@
         </div>
 
         {#each games as game, index (index)}
-          <section class="space-y-6 rounded-xl border border-slate-800 bg-slate-900/60 p-6">
+          <section class="space-y-6 rounded-xl border border-subtle bg-surface-card transition-colors p-6">
             <div class="flex items-center justify-between">
-              <h3 class="text-lg font-medium text-slate-100">Game {index + 1}</h3>
+              <h3 class="text-lg font-medium text-primary">Game {index + 1}</h3>
               {#if games.length > 1}
                 <button
                   class="text-sm text-rose-400 transition hover:text-rose-300"
@@ -310,11 +310,11 @@
 
             <div class="grid gap-6 sm:grid-cols-2">
               <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-slate-200" for="game_{index}_title"
+                <label class="block text-sm font-medium text-secondary" for="game_{index}_title"
                   >Game title</label
                 >
                 <input
-                  class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+                  class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
                   id="game_{index}_title"
                   name="game_{index}_title"
                   placeholder="Eg: Gloomhaven"
@@ -328,11 +328,11 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-slate-200" for="game_{index}_condition"
+                <label class="block text-sm font-medium text-secondary" for="game_{index}_condition"
                   >Condition</label
                 >
                 <select
-                  class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+                  class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
                   id="game_{index}_condition"
                   name="game_{index}_condition"
                   required
@@ -350,11 +350,11 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-slate-200" for="game_{index}_price"
+                <label class="block text-sm font-medium text-secondary" for="game_{index}_price"
                   >Price (NZD)</label
                 >
                 <input
-                  class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+                  class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
                   id="game_{index}_price"
                   name="game_{index}_price"
                   placeholder="Optional"
@@ -368,11 +368,11 @@
 
               <div>
                 <label
-                  class="block text-sm font-medium text-slate-200"
+                  class="block text-sm font-medium text-secondary"
                   for="game_{index}_trade_value">Trade value (NZD)</label
                 >
                 <input
-                  class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+                  class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
                   id="game_{index}_trade_value"
                   name="game_{index}_trade_value"
                   placeholder="Optional"
@@ -387,11 +387,11 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-slate-200" for="game_{index}_bgg_id"
+                <label class="block text-sm font-medium text-secondary" for="game_{index}_bgg_id"
                   >BoardGameGeek ID</label
                 >
                 <input
-                  class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+                  class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
                   id="game_{index}_bgg_id"
                   name="game_{index}_bgg_id"
                   placeholder="Optional"
@@ -405,11 +405,11 @@
               </div>
 
               <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-slate-200" for="game_{index}_notes"
+                <label class="block text-sm font-medium text-secondary" for="game_{index}_notes"
                   >Copy notes</label
                 >
                 <textarea
-                  class="mt-2 min-h-[120px] w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+                  class="mt-2 min-h-[120px] w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
                   id="game_{index}_notes"
                   name="game_{index}_notes"
                   maxlength="2000"
@@ -425,13 +425,13 @@
       <div class="flex items-center justify-end gap-4">
         <!-- eslint-disable svelte/no-navigation-without-resolve -->
         <a
-          class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-200 transition hover:border-emerald-500 hover:text-emerald-300"
+          class="rounded-lg border border-subtle px-4 py-2 text-sm text-secondary transition hover:border-emerald-500 hover:text-emerald-300"
           href="/"
         >
           Cancel
         </a>
         <button
-          class="rounded-lg bg-emerald-500 px-4 py-2 font-semibold text-slate-900 transition hover:bg-emerald-400"
+          class="rounded-lg bg-emerald-500 px-4 py-2 font-semibold text-[var(--accent-contrast)] transition hover:bg-emerald-400"
           type="submit"
         >
           Publish listing {games.length > 1 ? `with ${games.length} games` : ''}
