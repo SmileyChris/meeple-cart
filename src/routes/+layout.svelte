@@ -1,10 +1,46 @@
 <script lang="ts">
-  import type { PageData } from './$types';
   import '../app.css';
   import NotificationBell from '$lib/components/NotificationBell.svelte';
   import ThemeToggle from '$lib/components/ThemeToggle.svelte';
+  import { currentUser, pb } from '$lib/pocketbase';
+  import { onMount } from 'svelte';
+  import { goto } from '$app/navigation';
 
-  export let data: PageData;
+  let unreadNotifications = 0;
+
+  // Fetch unread notifications count
+  async function fetchUnreadCount() {
+    if (!$currentUser) {
+      unreadNotifications = 0;
+      return;
+    }
+
+    try {
+      const result = await pb.collection('notifications').getList(1, 1, {
+        filter: `user = "${$currentUser.id}" && read = false`,
+      });
+      unreadNotifications = result.totalItems;
+    } catch (error) {
+      console.error('Failed to fetch unread notifications count', error);
+    }
+  }
+
+  // Fetch on mount and when user changes
+  onMount(() => {
+    fetchUnreadCount();
+  });
+
+  $: if ($currentUser) {
+    fetchUnreadCount();
+  } else {
+    unreadNotifications = 0;
+  }
+
+  // Handle logout
+  function handleLogout() {
+    currentUser.logout();
+    goto('/');
+  }
 </script>
 
 <div class="min-h-screen bg-surface-body text-primary transition-colors">
@@ -21,17 +57,16 @@
         <a class="btn-ghost" href="/activity"> Activity </a>
         <a class="btn-ghost" href="/cascades"> 🎁 Gift Cascades </a>
         <ThemeToggle />
-        {#if data.user}
-          <NotificationBell unreadCount={data.unreadNotifications} />
+        {#if $currentUser}
+          <NotificationBell unreadCount={unreadNotifications} />
+          <a class="btn-ghost" href="/trades"> 🤝 My Trades </a>
           <a class="btn-ghost" href="/watchlist"> ⭐ Watchlist </a>
           <a class="btn-ghost" href="/messages"> 💬 Messages </a>
           <a class="btn-ghost" href="/profile">
-            {data.user.display_name ?? 'Profile'}
+            {$currentUser.display_name ?? 'Profile'}
           </a>
           <a class="btn-primary" href="/listings/new"> New listing </a>
-          <form method="post" action="/logout">
-            <button class="btn-ghost" type="submit"> Log out </button>
-          </form>
+          <button class="btn-ghost" type="button" on:click={handleLogout}> Log out </button>
         {:else}
           <a class="btn-ghost" href="/login"> Log in </a>
           <a class="btn-primary" href="/register"> Create account </a>

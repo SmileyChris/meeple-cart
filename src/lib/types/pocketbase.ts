@@ -21,3 +21,18 @@ export interface UserRecord extends RecordModel {
 }
 
 export type AuthenticatedUser = UserRecord | null;
+
+export interface TradeRecord extends RecordModel {
+  listing: string;
+  buyer: string;
+  seller: string;
+  status: 'initiated' | 'confirmed' | 'completed' | 'disputed';
+  rating?: number;
+  review?: string;
+  completed_date?: string;
+  expand?: {
+    listing?: RecordModel;
+    buyer?: UserRecord;
+    seller?: UserRecord;
+  };
+}

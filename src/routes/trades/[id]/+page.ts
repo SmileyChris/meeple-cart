@@ -1,0 +1,35 @@
+import { error, redirect } from '@sveltejs/kit';
+import type { PageLoad } from './$types';
+import type { TradeRecord } from '$lib/types/pocketbase';
+import { pb, currentUser } from '$lib/pocketbase';
+import { get } from 'svelte/store';
+
+export const load: PageLoad = async ({ params }) => {
+  const user = get(currentUser);
+
+  if (!user) {
+    throw redirect(302, '/login');
+  }
+
+  const { id } = params;
+
+  try {
+    // Fetch trade with expanded relations
+    const trade = await pb.collection('trades').getOne<TradeRecord>(id, {
+      expand: 'listing,buyer,seller',
+    });
+
+    // Verify user is a participant
+    if (trade.buyer !== user.id && trade.seller !== user.id) {
+      throw error(403, 'You do not have access to this trade');
+    }
+
+    return {
+      trade,
+    };
+  } catch (err: any) {
+    if (err.status === 403) throw err;
+    console.error(`Failed to load trade ${id}`, err);
+    throw error(404, 'Trade not found');
+  }
+};

@@ -1,13 +1,55 @@
 <script lang="ts">
-  import type { ActionData, PageData } from './$types';
+  import type { PageData } from './$types';
+  import { pb, currentUser } from '$lib/pocketbase';
+  import { invalidate } from '$app/navigation';
 
   export let data: PageData;
-  export let form: ActionData | undefined;
 
-  const actionState = form?.update;
-  const profile = actionState?.profile ?? data.profile;
-  const updated = actionState?.success ?? false;
-  const listings = data.listings;
+  let profile = data.profile;
+  let listings = data.listings;
+  let updated = false;
+  let error: string | null = null;
+  let saving = false;
+
+  // Form fields
+  let displayName = profile.display_name;
+  let location = profile.location || '';
+  let bio = profile.bio || '';
+  let preferredContact = profile.preferred_contact;
+
+  async function handleUpdate(e: Event) {
+    e.preventDefault();
+    error = null;
+    updated = false;
+
+    if (!displayName.trim()) {
+      error = 'Display name is required.';
+      return;
+    }
+
+    saving = true;
+    try {
+      const updatedProfile = await pb.collection('users').update($currentUser!.id, {
+        display_name: displayName.trim(),
+        location: location.trim() || null,
+        bio: bio.trim() || null,
+        preferred_contact: preferredContact,
+      });
+
+      // Update the store
+      currentUser.set(updatedProfile as any);
+      profile = updatedProfile as any;
+      updated = true;
+
+      // Refresh data
+      await invalidate('app:profile');
+    } catch (err) {
+      console.error('Profile update failed', err);
+      error = 'Unable to update profile. Please try again.';
+    } finally {
+      saving = false;
+    }
+  }
 
   const typeLabels: Record<string, string> = {
     trade: 'Trade',
@@ -117,7 +159,7 @@
     {/if}
   </section>
 
-  <form class="mt-6 grid gap-4 sm:grid-cols-2" method="POST" action="?/update">
+  <form class="mt-6 grid gap-4 sm:grid-cols-2" on:submit={handleUpdate}>
     <div class="sm:col-span-2">
       <label class="block text-sm font-medium text-secondary" for="display_name">Display name</label
       >
@@ -128,7 +170,8 @@
         type="text"
         minlength="2"
         maxlength="64"
-        value={profile.display_name}
+        bind:value={displayName}
+        disabled={saving}
         required
       />
     </div>
@@ -141,7 +184,8 @@
         name="location"
         type="text"
         maxlength="120"
-        value={profile.location ?? ''}
+        bind:value={location}
+        disabled={saving}
         placeholder="Eg: Wellington"
       />
     </div>
@@ -154,13 +198,12 @@
         class="mt-2 w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
         id="preferred_contact"
         name="preferred_contact"
-        value={profile.preferred_contact}
+        bind:value={preferredContact}
+        disabled={saving}
       >
-        <option value="platform" selected={profile.preferred_contact === 'platform'}>
-          Meeple Cart messages
-        </option>
-        <option value="email" selected={profile.preferred_contact === 'email'}>Email</option>
-        <option value="phone" selected={profile.preferred_contact === 'phone'}>Phone</option>
+        <option value="platform">Meeple Cart messages</option>
+        <option value="email">Email</option>
+        <option value="phone">Phone</option>
       </select>
     </div>
 
@@ -170,26 +213,23 @@
         class="mt-2 h-32 w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
         id="bio"
         name="bio"
-        maxlength="2000">{profile.bio ?? ''}</textarea
-      >
+        maxlength="2000"
+        bind:value={bio}
+        disabled={saving}
+      ></textarea>
       <p class="mt-1 text-xs text-muted">Share a short intro or trading preferences.</p>
     </div>
 
-    {#if actionState?.message}
-      <p class="sm:col-span-2 text-sm text-rose-400">{actionState.message}</p>
+    {#if error}
+      <p class="sm:col-span-2 text-sm text-rose-400">{error}</p>
     {/if}
     {#if updated}
       <p class="sm:col-span-2 text-sm" style="color: var(--accent)">Profile updated.</p>
     {/if}
 
     <div class="sm:col-span-2 flex justify-end">
-      <button
-        class="btn-primary"
-        name="intent"
-        value="update"
-        type="submit"
-      >
-        Save changes
+      <button class="btn-primary" type="submit" disabled={saving}>
+        {saving ? 'Saving...' : 'Save changes'}
       </button>
     </div>
   </form>

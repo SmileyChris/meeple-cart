@@ -1,6 +1,40 @@
 <script lang="ts">
-  import type { ActionData } from './$types';
-  export let form: ActionData;
+  import { currentUser } from '$lib/pocketbase';
+  import { goto } from '$app/navigation';
+  import { onMount } from 'svelte';
+
+  let email = '';
+  let password = '';
+  let error: string | null = null;
+  let loading = false;
+
+  // Redirect if already logged in
+  onMount(() => {
+    if ($currentUser) {
+      goto('/profile');
+    }
+  });
+
+  async function handleSubmit(e: Event) {
+    e.preventDefault();
+    error = null;
+
+    if (!email || !password) {
+      error = 'Please fill in both email and password.';
+      return;
+    }
+
+    loading = true;
+    try {
+      await currentUser.login(email, password);
+      goto('/profile');
+    } catch (err) {
+      console.error('Login failed', err);
+      error = "We couldn't find that account. Double-check your credentials.";
+    } finally {
+      loading = false;
+    }
+  }
 </script>
 
 <section
@@ -9,7 +43,7 @@
   <h1 class="text-2xl font-semibold text-primary">Log in</h1>
   <p class="mt-2 text-sm text-muted">Use the email and password you registered with.</p>
 
-  <form class="mt-6 space-y-4" method="POST">
+  <form class="mt-6 space-y-4" on:submit={handleSubmit}>
     <div class="space-y-2">
       <label class="block text-sm font-medium text-secondary" for="email">Email</label>
       <input
@@ -17,9 +51,10 @@
         id="email"
         name="email"
         type="email"
-        value={form?.email ?? ''}
+        bind:value={email}
         required
         autocomplete="email"
+        disabled={loading}
       />
     </div>
 
@@ -30,21 +65,19 @@
         id="password"
         name="password"
         type="password"
+        bind:value={password}
         required
         autocomplete="current-password"
+        disabled={loading}
       />
     </div>
 
-    {#if form?.invalid}
-      <p class="text-sm text-rose-400">
-        We couldn't find that account. Double-check your credentials.
-      </p>
-    {:else if form?.missing}
-      <p class="text-sm text-rose-400">Please fill in both email and password.</p>
+    {#if error}
+      <p class="text-sm text-rose-400">{error}</p>
     {/if}
 
-    <button class="btn-primary w-full" type="submit">
-      Continue
+    <button class="btn-primary w-full" type="submit" disabled={loading}>
+      {loading ? 'Logging in...' : 'Continue'}
     </button>
   </form>
 

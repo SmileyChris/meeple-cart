@@ -1,14 +1,19 @@
 <script lang="ts">
-  import type { PageData, ActionData } from './$types';
+  import type { PageData } from './$types';
   import { formatCurrency } from '$lib/utils/currency';
-  import { enhance } from '$app/forms';
   import WatchlistButton from '$lib/components/WatchlistButton.svelte';
+  import { pb, currentUser } from '$lib/pocketbase';
+  import { goto } from '$app/navigation';
+  import { generateThreadId } from '$lib/types/message';
 
   export let data: PageData;
-  export let form: ActionData;
 
   let message = '';
   let showMessageForm = false;
+  let messageError: string | null = null;
+  let sendingMessage = false;
+  let initiatingTrade = false;
+  let tradeError: string | null = null;
 
   const listing = data.listing;
   const owner = data.owner;
@@ -72,6 +77,109 @@
     sold: 'border-rose-500/80 bg-rose-500/10 text-rose-200',
     bundled: 'border-sky-500/80 bg-sky-500/10 text-sky-200',
   };
+
+  async function handleSendMessage(e: Event) {
+    e.preventDefault();
+    if (!owner || !$currentUser) return;
+
+    messageError = null;
+    const initialMessage = message.trim();
+
+    if (!initialMessage || initialMessage.length === 0) {
+      messageError = 'Message cannot be empty';
+      return;
+    }
+
+    if (initialMessage.length > 4000) {
+      messageError = 'Message too long';
+      return;
+    }
+
+    if (owner.id === $currentUser.id) {
+      messageError = 'Cannot message yourself';
+      return;
+    }
+
+    sendingMessage = true;
+    try {
+      // Generate thread ID from user IDs
+      const threadId = generateThreadId($currentUser.id, owner.id);
+
+      // Create the first message in the thread
+      await pb.collection('messages').create({
+        listing: listing.id,
+        thread_id: threadId,
+        sender: $currentUser.id,
+        recipient: owner.id,
+        content: initialMessage,
+        is_public: false,
+        read: false,
+      });
+
+      // Redirect to the thread
+      goto(`/messages/${threadId}`);
+    } catch (err) {
+      console.error('Failed to create message', err);
+      messageError = 'Failed to send message';
+      sendingMessage = false;
+    }
+  }
+
+  async function handleInitiateTrade() {
+    if (!owner || !$currentUser) return;
+
+    tradeError = null;
+
+    // Verify not trading with self
+    if (owner.id === $currentUser.id) {
+      tradeError = 'Cannot trade with yourself';
+      return;
+    }
+
+    initiatingTrade = true;
+    try {
+      // Check for duplicate trades
+      const existingTrades = await pb.collection('trades').getList(1, 1, {
+        filter: `listing = "${listing.id}" && buyer = "${$currentUser.id}"`,
+      });
+
+      if (existingTrades.items.length > 0) {
+        tradeError = 'You already have an active trade for this listing';
+        initiatingTrade = false;
+        return;
+      }
+
+      // Create trade record
+      const trade = await pb.collection('trades').create({
+        listing: listing.id,
+        buyer: $currentUser.id,
+        seller: owner.id,
+        status: 'initiated',
+      });
+
+      // Update listing status to pending
+      await pb.collection('listings').update(listing.id, {
+        status: 'pending',
+      });
+
+      // Send notification to seller
+      await pb.collection('notifications').create({
+        user: owner.id,
+        type: 'new_message', // We'll need to add 'trade_initiated' type later
+        title: `${$currentUser.display_name} wants to trade`,
+        message: `${$currentUser.display_name} has initiated a trade for "${listing.title}"`,
+        link: `/trades/${trade.id}`,
+        read: false,
+      });
+
+      // Redirect to trade detail page
+      goto(`/trades/${trade.id}`);
+    } catch (err) {
+      console.error('Failed to initiate trade', err);
+      tradeError = 'Failed to initiate trade. Please try again.';
+      initiatingTrade = false;
+    }
+  }
 </script>
 
 <svelte:head>
@@ -330,13 +438,13 @@
         <h3 class="text-base font-semibold text-primary">Contact trader</h3>
 
         <!-- Watchlist button (show for all logged-in users) -->
-        {#if data.user}
+        {#if $currentUser}
           <div class="pb-4">
             <WatchlistButton listingId={listing.id} isWatching={data.isWatching} />
           </div>
         {/if}
 
-        {#if !data.user}
+        {#if !$currentUser}
           <div class="space-y-4">
             <p class="text-sm text-muted">Sign in to send a message to this trader.</p>
             <!-- eslint-disable svelte/no-navigation-without-resolve -->
@@ -348,7 +456,7 @@
             </a>
             <!-- eslint-enable svelte/no-navigation-without-resolve -->
           </div>
-        {:else if owner && data.user.id === owner.id}
+        {:else if owner && $currentUser.id === owner.id}
           <div class="space-y-3 rounded-lg bg-surface-card transition-colors p-4">
             <p class="text-center text-sm text-muted">This is your listing</p>
             <!-- eslint-disable svelte/no-navigation-without-resolve -->
@@ -361,21 +469,37 @@
             <!-- eslint-enable svelte/no-navigation-without-resolve -->
           </div>
         {:else if owner}
-          {#if !showMessageForm}
+          <div class="space-y-3">
+            <!-- Initiate Trade Button -->
             <button
               type="button"
-              on:click={() => (showMessageForm = true)}
-              class="w-full rounded-lg border border-emerald-500 bg-emerald-500/10 px-4 py-2 font-semibold text-emerald-200 transition hover:bg-emerald-500/20"
+              on:click={handleInitiateTrade}
+              disabled={initiatingTrade}
+              class="w-full rounded-lg border border-emerald-500 bg-emerald-500 px-4 py-2 font-semibold text-[var(--accent-contrast)] shadow-[0_10px_25px_rgba(16,185,129,0.25)] transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              💬 Send message
+              {initiatingTrade ? 'Initiating...' : '🤝 Propose Trade'}
             </button>
-          {:else}
-            <form method="POST" action="?/start_message" use:enhance class="space-y-3">
-              <input type="hidden" name="ownerId" value={owner.id} />
 
-              {#if form?.error}
+            {#if tradeError}
+              <div class="rounded-lg bg-rose-500/10 px-3 py-2 text-sm text-rose-400">
+                {tradeError}
+              </div>
+            {/if}
+
+            <!-- Send Message Button -->
+            {#if !showMessageForm}
+              <button
+                type="button"
+                on:click={() => (showMessageForm = true)}
+                class="w-full rounded-lg border border-subtle px-4 py-2 font-semibold text-secondary transition hover:bg-surface-ghost hover:border-emerald-500 hover:text-emerald-200"
+              >
+                💬 Send message
+              </button>
+            {:else}
+            <form on:submit={handleSendMessage} class="space-y-3">
+              {#if messageError}
                 <div class="rounded-lg bg-rose-500/10 px-3 py-2 text-sm text-rose-400">
-                  {form.error}
+                  {messageError}
                 </div>
               {/if}
 
@@ -386,33 +510,37 @@
                 rows="4"
                 maxlength="4000"
                 required
+                disabled={sendingMessage}
                 class="w-full resize-none rounded-lg border border-subtle bg-surface-card transition-colors px-3 py-2 text-primary placeholder-slate-500 focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
               />
 
               <div class="flex gap-2">
                 <button
                   type="submit"
-                  disabled={!message.trim()}
+                  disabled={!message.trim() || sendingMessage}
                   class="flex-1 rounded-lg bg-emerald-500 px-4 py-2 font-medium text-[var(--accent-contrast)] transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  Send
+                  {sendingMessage ? 'Sending...' : 'Send'}
                 </button>
                 <button
                   type="button"
+                  disabled={sendingMessage}
                   on:click={() => {
                     showMessageForm = false;
                     message = '';
+                    messageError = null;
                   }}
-                  class="rounded-lg border border-subtle px-4 py-2 text-secondary transition hover:bg-surface-card-alt"
+                  class="rounded-lg border border-subtle px-4 py-2 text-secondary transition hover:bg-surface-card-alt disabled:opacity-50"
                 >
                   Cancel
                 </button>
               </div>
             </form>
-          {/if}
+            {/if}
+          </div>
 
           <p class="text-xs text-muted">
-            Messages are private and only visible to you and {owner.display_name}.
+            Initiate a formal trade to track progress, or message to discuss details.
           </p>
         {/if}
       </aside>

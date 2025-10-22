@@ -1,19 +1,19 @@
-import { error, redirect, fail } from '@sveltejs/kit';
-import type { Actions, PageServerLoad } from './$types';
+import { error } from '@sveltejs/kit';
+import type { PageLoad } from './$types';
 import type { GameRecord, ListingGameDetail, ListingRecord } from '$lib/types/listing';
 import type { UserRecord } from '$lib/types/pocketbase';
-import { serializeNonPOJOs } from '$lib/utils/object';
 import { normalizeListingType } from '$lib/types/listing';
-import { generateThreadId } from '$lib/types/message';
 import { getLowestHistoricalPrice } from '$lib/server/price-tracking';
+import { pb, currentUser } from '$lib/pocketbase';
+import { get } from 'svelte/store';
 
 const GAMES_EXPAND_KEY = 'games(listing)';
 
-export const load: PageServerLoad = async ({ params, locals }) => {
+export const load: PageLoad = async ({ params }) => {
   const { id } = params;
 
   try {
-    const listing = await locals.pb.collection('listings').getOne<ListingRecord>(id, {
+    const listing = await pb.collection('listings').getOne<ListingRecord>(id, {
       expand: 'owner,games(listing)',
     });
 
@@ -72,8 +72,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
     const photos = Array.isArray(listing.photos)
       ? listing.photos.map((photo) => ({
           id: photo,
-          full: locals.pb.files.getUrl(listing, photo).toString(),
-          thumb: locals.pb.files.getUrl(listing, photo, { thumb: '400x300' }).toString(),
+          full: pb.files.getUrl(listing, photo).toString(),
+          thumb: pb.files.getUrl(listing, photo, { thumb: '400x300' }).toString(),
         }))
       : [];
 
@@ -84,75 +84,23 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
     // Check if user is watching this listing
     let isWatching = false;
-    if (locals.user) {
-      const watchlist = await locals.pb.collection('watchlist').getFullList({
-        filter: `user = "${locals.user.id}" && listing = "${id}"`,
+    const user = get(currentUser);
+    if (user) {
+      const watchlist = await pb.collection('watchlist').getFullList({
+        filter: `user = "${user.id}" && listing = "${id}"`,
       });
       isWatching = watchlist.length > 0;
     }
 
     return {
-      listing: serializeNonPOJOs(normalizedListing),
-      owner: owner ? serializeNonPOJOs(owner) : null,
-      games: serializeNonPOJOs(formattedGames),
-      photos: serializeNonPOJOs(photos),
+      listing: normalizedListing,
+      owner: owner || null,
+      games: formattedGames,
+      photos,
       isWatching,
     };
   } catch (err) {
     console.error(`Failed to load listing ${id}`, err);
     throw error(404, 'Listing not found');
   }
-};
-
-export const actions: Actions = {
-  start_message: async ({ locals, params, request }) => {
-    if (!locals.user) {
-      return fail(401, { error: 'Not authenticated' });
-    }
-
-    const formData = await request.formData();
-    const ownerId = formData.get('ownerId')?.toString();
-    const initialMessage = formData.get('message')?.toString().trim();
-
-    if (!ownerId) {
-      return fail(400, { error: 'Owner ID required' });
-    }
-
-    if (ownerId === locals.user.id) {
-      return fail(400, { error: 'Cannot message yourself' });
-    }
-
-    if (!initialMessage || initialMessage.length === 0) {
-      return fail(400, { error: 'Message cannot be empty' });
-    }
-
-    if (initialMessage.length > 4000) {
-      return fail(400, { error: 'Message too long' });
-    }
-
-    try {
-      // Generate thread ID from user IDs
-      const threadId = generateThreadId(locals.user.id, ownerId);
-
-      // Create the first message in the thread
-      await locals.pb.collection('messages').create({
-        listing: params.id,
-        thread_id: threadId,
-        sender: locals.user.id,
-        recipient: ownerId,
-        content: initialMessage,
-        is_public: false,
-        read: false,
-      });
-
-      // Redirect to the thread
-      throw redirect(303, `/messages/${threadId}`);
-    } catch (err) {
-      if (err instanceof Error && 'status' in err && err.status === 303) {
-        throw err; // Re-throw redirects
-      }
-      console.error('Failed to create message', err);
-      return fail(500, { error: 'Failed to send message' });
-    }
-  },
 };

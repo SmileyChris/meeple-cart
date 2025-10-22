@@ -1,19 +1,10 @@
-import type PocketBase from 'pocketbase';
-import type { UserRecord } from '$lib/types/pocketbase';
-
 // See https://svelte.dev/docs/kit/types#app.d.ts
 // for information about these interfaces
 declare global {
   namespace App {
-    interface Locals {
-      pb: PocketBase;
-      user: UserRecord | null;
-    }
-
-    interface PageData {
-      user: UserRecord | null;
-    }
-
+    // Locals removed - now using client-side only architecture
+    // interface Locals {}
+    // interface PageData {}
     // interface Error {}
     // interface Platform {}
   }
