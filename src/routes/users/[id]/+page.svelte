@@ -6,6 +6,7 @@
   const profile = data.profile;
   const listings = data.listings;
   const vouches = data.vouches;
+  const reviews = data.reviews;
 
   const typeLabels: Record<string, string> = {
     trade: 'Trade',
@@ -173,6 +174,57 @@
             Showing {vouches.length} most recent of {profile.vouch_count} total vouches
           </p>
         {/if}
+      </div>
+    {/if}
+
+    <!-- Reviews -->
+    {#if reviews.length > 0}
+      <div class="space-y-4">
+        <h2 class="text-2xl font-bold text-primary">Reviews ({reviews.length})</h2>
+
+        <div class="space-y-4">
+          {#each reviews as review (review.id)}
+            <div class="rounded-xl border border-subtle bg-surface-card transition-colors p-6">
+              <div class="flex items-start justify-between gap-4">
+                <div class="flex-1 space-y-3">
+                  <!-- Rating -->
+                  <div class="flex items-center gap-2">
+                    {#each Array(5) as _, i}
+                      <span class="text-2xl">
+                        {i < review.rating ? '⭐' : '☆'}
+                      </span>
+                    {/each}
+                  </div>
+
+                  <!-- Reviewer -->
+                  <div class="flex items-center gap-2 text-sm">
+                    <span class="text-muted">Review from</span>
+                    <!-- eslint-disable svelte/no-navigation-without-resolve -->
+                    <a
+                      href={`/users/${review.reviewerId}`}
+                      class="font-semibold text-emerald-300 hover:text-emerald-200"
+                    >
+                      {review.reviewerName}
+                    </a>
+                    <!-- eslint-enable svelte/no-navigation-without-resolve -->
+                  </div>
+
+                  <!-- Review Text -->
+                  {#if review.review}
+                    <p class="text-secondary leading-relaxed">"{review.review}"</p>
+                  {/if}
+
+                  <!-- Trade Info -->
+                  <div class="flex items-center gap-2 text-sm text-muted">
+                    <span>Trade: {review.listingTitle}</span>
+                    <span>·</span>
+                    <span>{formatDate(review.completedDate)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {/each}
+        </div>
       </div>
     {/if}
   </div>

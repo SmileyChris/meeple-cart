@@ -24,8 +24,19 @@ export const load: PageLoad = async ({ params }) => {
       throw error(403, 'You do not have access to this trade');
     }
 
+    // Determine the other party
+    const otherPartyId = trade.buyer === user.id ? trade.seller : trade.buyer;
+
+    // Check if user has already vouched for the other party
+    const existingVouches = await pb.collection('vouches').getList(1, 1, {
+      filter: `voucher = "${user.id}" && vouchee = "${otherPartyId}"`,
+    });
+
+    const hasVouched = existingVouches.totalItems > 0;
+
     return {
       trade,
+      hasVouched,
     };
   } catch (err: any) {
     if (err.status === 403) throw err;

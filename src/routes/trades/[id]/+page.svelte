@@ -11,6 +11,7 @@
   let listing = trade.expand?.listing as ListingRecord;
   let buyer = trade.expand?.buyer as UserRecord;
   let seller = trade.expand?.seller as UserRecord;
+  let hasVouched = data.hasVouched;
 
   $: isBuyer = $currentUser?.id === trade.buyer;
   $: isSeller = $currentUser?.id === trade.seller;
@@ -18,6 +19,16 @@
 
   let actionError: string | null = null;
   let processing = false;
+  let showFeedbackForm = false;
+  let feedbackRating = 5;
+  let feedbackReview = '';
+  let feedbackError: string | null = null;
+  let submittingFeedback = false;
+
+  let showVouchForm = false;
+  let vouchMessage = '';
+  let vouchError: string | null = null;
+  let submittingVouch = false;
 
   const statusLabels: Record<string, string> = {
     initiated: 'Initiated',
@@ -122,6 +133,84 @@
 
   function handleDisputeTrade() {
     updateTradeStatus('disputed');
+  }
+
+  async function handleSubmitFeedback(e: Event) {
+    e.preventDefault();
+    feedbackError = null;
+
+    if (!feedbackRating || feedbackRating < 1 || feedbackRating > 5) {
+      feedbackError = 'Please select a valid rating';
+      return;
+    }
+
+    submittingFeedback = true;
+    try {
+      // Update trade with rating and review
+      const updatedTrade = await pb.collection('trades').update<TradeRecord>(trade.id, {
+        rating: feedbackRating,
+        review: feedbackReview.trim() || null,
+      });
+
+      trade = updatedTrade;
+      showFeedbackForm = false;
+      feedbackReview = '';
+      await invalidate('app:trade');
+
+      // Optionally notify the other party
+      await pb.collection('notifications').create({
+        user: otherParty.id,
+        type: 'new_message',
+        title: 'Received feedback',
+        message: `${$currentUser?.display_name} left you a ${feedbackRating}-star review`,
+        link: `/trades/${trade.id}`,
+        read: false,
+      });
+    } catch (err) {
+      console.error('Failed to submit feedback', err);
+      feedbackError = 'Failed to submit feedback. Please try again.';
+    } finally {
+      submittingFeedback = false;
+    }
+  }
+
+  async function handleSubmitVouch(e: Event) {
+    e.preventDefault();
+    vouchError = null;
+
+    submittingVouch = true;
+    try {
+      // Create vouch record
+      await pb.collection('vouches').create({
+        voucher: $currentUser!.id,
+        vouchee: otherParty.id,
+        message: vouchMessage.trim() || '',
+      });
+
+      // Increment vouchee's vouch_count
+      await pb.collection('users').update(otherParty.id, {
+        vouch_count: otherParty.vouch_count + 1,
+      });
+
+      // Send notification
+      await pb.collection('notifications').create({
+        user: otherParty.id,
+        type: 'vouch_received',
+        title: `${$currentUser?.display_name} vouched for you!`,
+        message: vouchMessage.trim() || 'New vouch from a trading partner',
+        link: `/users/${$currentUser!.id}`,
+        read: false,
+      });
+
+      hasVouched = true;
+      showVouchForm = false;
+      vouchMessage = '';
+    } catch (err) {
+      console.error('Failed to submit vouch', err);
+      vouchError = 'Failed to submit vouch. Please try again.';
+    } finally {
+      submittingVouch = false;
+    }
   }
 
   const formatDate = (iso: string) =>
@@ -319,5 +408,220 @@
         </a>
       </div>
     </section>
+
+    <!-- Feedback Form (shown after trade completion if no rating given yet) -->
+    {#if trade.status === 'completed' && !trade.rating}
+      <section
+        class="rounded-xl border border-emerald-500/50 bg-surface-card transition-colors p-6 space-y-4"
+      >
+        <div class="flex items-start justify-between">
+          <div>
+            <h2 class="text-xl font-semibold text-primary">How was your experience?</h2>
+            <p class="mt-1 text-sm text-muted">
+              Help others by sharing your feedback about this trade
+            </p>
+          </div>
+          {#if !showFeedbackForm}
+            <button
+              type="button"
+              on:click={() => (showFeedbackForm = true)}
+              class="btn-primary"
+            >
+              Leave Feedback
+            </button>
+          {/if}
+        </div>
+
+        {#if showFeedbackForm}
+          <form on:submit={handleSubmitFeedback} class="space-y-4 border-t border-subtle pt-4">
+            <!-- Rating -->
+            <div class="space-y-2">
+              <label class="block text-sm font-medium text-secondary" for="rating">
+                Rating
+              </label>
+              <div class="flex gap-2">
+                {#each [1, 2, 3, 4, 5] as star}
+                  <button
+                    type="button"
+                    on:click={() => (feedbackRating = star)}
+                    class={`h-12 w-12 rounded-lg border transition ${
+                      feedbackRating >= star
+                        ? 'border-amber-500 bg-amber-500/20 text-amber-300'
+                        : 'border-subtle bg-surface-panel text-muted hover:border-amber-500/50'
+                    }`}
+                  >
+                    ⭐
+                  </button>
+                {/each}
+              </div>
+              <p class="text-xs text-muted">
+                {#if feedbackRating === 1}
+                  Poor
+                {:else if feedbackRating === 2}
+                  Fair
+                {:else if feedbackRating === 3}
+                  Good
+                {:else if feedbackRating === 4}
+                  Very Good
+                {:else}
+                  Excellent
+                {/if}
+              </p>
+            </div>
+
+            <!-- Review -->
+            <div class="space-y-2">
+              <label class="block text-sm font-medium text-secondary" for="review">
+                Review (optional)
+              </label>
+              <textarea
+                id="review"
+                bind:value={feedbackReview}
+                placeholder="Share details about your trading experience..."
+                maxlength="2000"
+                rows="4"
+                disabled={submittingFeedback}
+                class="w-full resize-none rounded-lg border border-subtle bg-surface-panel px-3 py-2 text-primary placeholder-slate-500 transition-colors focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/35"
+              ></textarea>
+              <p class="text-xs text-muted">{feedbackReview.length} / 2000 characters</p>
+            </div>
+
+            {#if feedbackError}
+              <div class="rounded-lg bg-rose-500/10 px-4 py-3 text-sm text-rose-400">
+                {feedbackError}
+              </div>
+            {/if}
+
+            <div class="flex gap-3">
+              <button
+                type="submit"
+                disabled={submittingFeedback}
+                class="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {submittingFeedback ? 'Submitting...' : 'Submit Feedback'}
+              </button>
+              <button
+                type="button"
+                on:click={() => {
+                  showFeedbackForm = false;
+                  feedbackError = null;
+                }}
+                disabled={submittingFeedback}
+                class="btn-secondary disabled:opacity-50"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        {/if}
+      </section>
+    {/if}
+
+    <!-- Show existing feedback if already given -->
+    {#if trade.rating}
+      <section
+        class="rounded-xl border border-subtle bg-surface-card transition-colors p-6 space-y-3"
+      >
+        <h2 class="text-xl font-semibold text-primary">Your Feedback</h2>
+        <div class="flex items-center gap-2">
+          <div class="flex gap-1">
+            {#each [1, 2, 3, 4, 5] as star}
+              <span class={star <= trade.rating ? 'text-amber-300' : 'text-muted'}>⭐</span>
+            {/each}
+          </div>
+          <span class="text-sm text-secondary">
+            {trade.rating} out of 5
+          </span>
+        </div>
+        {#if trade.review}
+          <p class="text-sm text-secondary whitespace-pre-line">{trade.review}</p>
+        {/if}
+      </section>
+    {/if}
+
+    <!-- Vouch Prompt (shown after trade completion if not already vouched) -->
+    {#if trade.status === 'completed' && !hasVouched}
+      <section
+        class="rounded-xl border border-emerald-500/50 bg-surface-card transition-colors p-6 space-y-4"
+      >
+        <div class="flex items-start justify-between">
+          <div>
+            <h2 class="text-xl font-semibold text-primary">Vouch for {otherParty.display_name}?</h2>
+            <p class="mt-1 text-sm text-muted">
+              Vouching builds community trust and helps others trade confidently
+            </p>
+          </div>
+          {#if !showVouchForm}
+            <button
+              type="button"
+              on:click={() => (showVouchForm = true)}
+              class="btn-primary"
+            >
+              ✓ Vouch
+            </button>
+          {/if}
+        </div>
+
+        {#if showVouchForm}
+          <form on:submit={handleSubmitVouch} class="space-y-4 border-t border-subtle pt-4">
+            <!-- Vouch Message -->
+            <div class="space-y-2">
+              <label class="block text-sm font-medium text-secondary" for="vouch-message">
+                Testimonial (optional)
+              </label>
+              <textarea
+                id="vouch-message"
+                bind:value={vouchMessage}
+                placeholder="Share what made this a great trade..."
+                maxlength="1000"
+                rows="3"
+                disabled={submittingVouch}
+                class="w-full resize-none rounded-lg border border-subtle bg-surface-panel px-3 py-2 text-primary placeholder-slate-500 transition-colors focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/35"
+              ></textarea>
+              <p class="text-xs text-muted">{vouchMessage.length} / 1000 characters</p>
+            </div>
+
+            {#if vouchError}
+              <div class="rounded-lg bg-rose-500/10 px-4 py-3 text-sm text-rose-400">
+                {vouchError}
+              </div>
+            {/if}
+
+            <div class="flex gap-3">
+              <button
+                type="submit"
+                disabled={submittingVouch}
+                class="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {submittingVouch ? 'Submitting...' : 'Submit Vouch'}
+              </button>
+              <button
+                type="button"
+                on:click={() => {
+                  showVouchForm = false;
+                  vouchError = null;
+                }}
+                disabled={submittingVouch}
+                class="btn-secondary disabled:opacity-50"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        {/if}
+      </section>
+    {/if}
+
+    <!-- Show if already vouched -->
+    {#if hasVouched}
+      <section
+        class="rounded-xl border border-subtle bg-surface-card transition-colors p-6"
+      >
+        <div class="flex items-center gap-2 text-emerald-300">
+          <span class="text-2xl">✓</span>
+          <span class="text-sm font-medium">You've vouched for {otherParty.display_name}</span>
+        </div>
+      </section>
+    {/if}
   </div>
 </main>
