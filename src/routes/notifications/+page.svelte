@@ -1,11 +1,33 @@
 <script lang="ts">
   import type { PageData } from './$types';
   import NotificationItem from '$lib/components/NotificationItem.svelte';
-  import { enhance } from '$app/forms';
+  import { pb } from '$lib/pocketbase';
 
   export let data: PageData;
 
-  $: hasUnread = data.unreadCount > 0;
+  let notifications = data.notifications;
+  let unreadCount = data.unreadCount;
+
+  $: hasUnread = unreadCount > 0;
+
+  async function handleMarkAllRead() {
+    try {
+      // Mark all unread notifications as read
+      const unreadNotifications = notifications.filter((n) => !n.read);
+
+      for (const notification of unreadNotifications) {
+        await pb.collection('notifications').update(notification.id, {
+          read: true,
+        });
+      }
+
+      // Update local state
+      notifications = notifications.map((n) => ({ ...n, read: true }));
+      unreadCount = 0;
+    } catch (err) {
+      console.error('Failed to mark all notifications as read', err);
+    }
+  }
 </script>
 
 <svelte:head>
@@ -29,11 +51,9 @@
       <!-- eslint-disable svelte/no-navigation-without-resolve -->
       <div class="flex gap-2">
         {#if hasUnread}
-          <form method="POST" action="?/mark_all_read" use:enhance>
-            <button type="submit" class="btn-primary px-4 py-2 text-sm font-medium">
-              Mark all read
-            </button>
-          </form>
+          <button on:click={handleMarkAllRead} class="btn-primary px-4 py-2 text-sm font-medium">
+            Mark all read
+          </button>
         {/if}
 
         <a href="/notifications/preferences" class="btn-ghost px-4 py-2 text-sm">
@@ -44,7 +64,7 @@
     </div>
 
     <!-- Notifications List -->
-    {#if data.notifications.length === 0}
+    {#if notifications.length === 0}
       <div
         class="rounded-2xl border-2 border-dashed border-subtle bg-surface-card p-12 text-center transition-colors"
       >
@@ -64,7 +84,7 @@
       </div>
     {:else}
       <div class="space-y-3">
-        {#each data.notifications as notification (notification.id)}
+        {#each notifications as notification (notification.id)}
           <NotificationItem {notification} />
         {/each}
       </div>

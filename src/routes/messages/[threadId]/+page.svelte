@@ -1,32 +1,57 @@
 <script lang="ts">
-  import type { PageData, ActionData } from './$types';
+  import type { PageData } from './$types';
   import MessageThread from '$lib/components/MessageThread.svelte';
   import MessageInput from '$lib/components/MessageInput.svelte';
-  import { invalidateAll } from '$app/navigation';
+  import { pb, currentUser } from '$lib/pocketbase';
 
   export let data: PageData;
-  export let form: ActionData;
 
   let sending = false;
+  let messages = data.messages;
 
   async function handleSend(event: CustomEvent<{ content: string }>) {
     if (!data.otherUser || !data.listing) return;
 
     sending = true;
-    const formData = new FormData();
-    formData.append('content', event.detail.content);
-    formData.append('listingId', data.listing.id);
-    formData.append('recipientId', data.otherUser.id);
 
     try {
-      const response = await fetch('?/send', {
-        method: 'POST',
-        body: formData,
+      // Create the message
+      const newMessage = await pb.collection('messages').create({
+        listing: data.listing.id,
+        thread_id: data.threadId,
+        sender: $currentUser!.id,
+        recipient: data.otherUser.id,
+        content: event.detail.content,
+        is_public: false,
+        read: false,
       });
 
-      if (response.ok) {
-        await invalidateAll();
-      }
+      // Add to messages array
+      messages = [
+        ...messages,
+        {
+          id: newMessage.id,
+          content: newMessage.content,
+          senderName: $currentUser!.display_name,
+          senderId: $currentUser!.id,
+          recipientName: data.otherUser.name,
+          recipientId: data.otherUser.id,
+          timestamp: newMessage.created,
+          isPublic: false,
+          isRead: false,
+          isOwnMessage: true,
+        },
+      ];
+
+      // Send notification to recipient
+      await pb.collection('notifications').create({
+        user: data.otherUser.id,
+        type: 'new_message',
+        title: 'New message',
+        message: `${$currentUser!.display_name} sent you a message about "${data.listing.title}"`,
+        link: `/messages/${data.threadId}`,
+        read: false,
+      });
     } catch (error) {
       console.error('Failed to send message', error);
     } finally {
@@ -94,7 +119,7 @@
   <!-- Messages -->
   <div class="flex-1 overflow-hidden">
     <div class="mx-auto h-full max-w-4xl">
-      <MessageThread messages={data.messages} loading={false} />
+      <MessageThread {messages} loading={false} />
     </div>
   </div>
 
