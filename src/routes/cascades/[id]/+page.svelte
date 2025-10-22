@@ -1,13 +1,13 @@
 <script lang="ts">
-  import type { PageData, ActionData } from './$types';
-  import { enhance } from '$app/forms';
+  import type { PageData } from './$types';
   import { page } from '$app/stores';
   import { REGION_LABELS } from '$lib/constants/regions';
+  import { pb, currentUser } from '$lib/pocketbase';
+  import { invalidate } from '$app/navigation';
 
   export let data: PageData;
-  export let form: ActionData;
 
-  const {
+  let {
     cascade,
     game,
     listing,
@@ -22,6 +22,59 @@
   let entryMessage = '';
   let isSubmitting = false;
   let showFullHistory = false;
+  let error: string | null = null;
+
+  async function handleEnter(e: Event) {
+    e.preventDefault();
+    error = null;
+    isSubmitting = true;
+
+    try {
+      // Create entry
+      await pb.collection('cascade_entries').create({
+        cascade: cascade.id,
+        user: $currentUser!.id,
+        message: entryMessage.trim() || null,
+      });
+
+      // Increment entry count
+      await pb.collection('cascades').update(cascade.id, {
+        entry_count: cascade.entryCount + 1,
+      });
+
+      // Reload page data
+      await invalidate('app:cascade');
+      location.reload();
+    } catch (err: any) {
+      console.error('Failed to enter cascade', err);
+      error = err.message || 'Failed to enter cascade. Please try again.';
+      isSubmitting = false;
+    }
+  }
+
+  async function handleWithdraw(e: Event) {
+    e.preventDefault();
+    error = null;
+    isSubmitting = true;
+
+    try {
+      // Delete entry
+      await pb.collection('cascade_entries').delete(userEntry.id);
+
+      // Decrement entry count
+      await pb.collection('cascades').update(cascade.id, {
+        entry_count: cascade.entryCount - 1,
+      });
+
+      // Reload page data
+      await invalidate('app:cascade');
+      location.reload();
+    } catch (err: any) {
+      console.error('Failed to withdraw from cascade', err);
+      error = err.message || 'Failed to withdraw. Please try again.';
+      isSubmitting = false;
+    }
+  }
 
   const statusLabels: Record<string, string> = {
     accepting_entries: 'Accepting Entries',
@@ -364,17 +417,7 @@
                     <p class="mt-2 text-sm text-emerald-200/80 italic">"{userEntry.message}"</p>
                   {/if}
                 </div>
-                <form
-                  method="POST"
-                  action="?/withdraw"
-                  use:enhance={() => {
-                    isSubmitting = true;
-                    return async ({ update }) => {
-                      await update();
-                      isSubmitting = false;
-                    };
-                  }}
-                >
+                <form on:submit={handleWithdraw}>
                   <button
                     type="submit"
                     disabled={isSubmitting}
@@ -387,15 +430,7 @@
             {:else if canEnter}
               <!-- Entry Form -->
               <form
-                method="POST"
-                action="?/enter"
-                use:enhance={() => {
-                  isSubmitting = true;
-                  return async ({ update }) => {
-                    await update();
-                    isSubmitting = false;
-                  };
-                }}
+                on:submit={handleEnter}
                 class="space-y-4"
               >
                 <div>

@@ -1,10 +1,10 @@
 <script lang="ts">
-  import type { PageData, ActionData } from './$types';
-  import { enhance } from '$app/forms';
+  import type { PageData } from './$types';
   import { NZ_REGIONS } from '$lib/constants/regions';
+  import { pb, currentUser } from '$lib/pocketbase';
+  import { goto } from '$app/navigation';
 
   export let data: PageData;
-  export let form: ActionData;
 
   const { availableGames } = data;
 
@@ -16,8 +16,59 @@
   let shippingRequirement = 'shipping_available';
   let specialRules = '';
   let isSubmitting = false;
+  let error: string | null = null;
 
   $: selectedGame = availableGames.find((g) => g.id === selectedGameId);
+
+  async function handleSubmit(e: Event) {
+    e.preventDefault();
+    error = null;
+
+    if (!selectedGameId) {
+      error = 'Please select a game';
+      return;
+    }
+
+    isSubmitting = true;
+
+    try {
+      // Calculate entry deadline
+      const deadline = new Date();
+      deadline.setDate(deadline.getDate() + deadlineDays);
+
+      // Create the cascade
+      const cascade = await pb.collection('cascades').create({
+        current_game: selectedGameId,
+        current_holder: $currentUser!.id,
+        status: 'accepting_entries',
+        generation: 1,
+        entry_count: 0,
+        entry_deadline: deadline.toISOString(),
+        name: cascadeName || null,
+        description: description || null,
+        region: region || null,
+        shipping_requirement: shippingRequirement,
+        special_rules: specialRules || null,
+      });
+
+      // Update game status to cascaded
+      await pb.collection('games').update(selectedGameId, {
+        status: 'cascaded',
+      });
+
+      // Update user's cascade stats
+      await pb.collection('users').update($currentUser!.id, {
+        cascades_seeded: $currentUser!.cascades_seeded + 1,
+      });
+
+      // Redirect to the new cascade
+      goto(`/cascades/${cascade.id}`);
+    } catch (err: any) {
+      console.error('Failed to create cascade', err);
+      error = err.message || 'Failed to create cascade. Please try again.';
+      isSubmitting = false;
+    }
+  }
 </script>
 
 <svelte:head>
@@ -59,20 +110,13 @@
     {:else}
       <!-- Form -->
       <form
-        method="POST"
-        use:enhance={() => {
-          isSubmitting = true;
-          return async ({ update }) => {
-            await update();
-            isSubmitting = false;
-          };
-        }}
+        on:submit={handleSubmit}
         class="space-y-6"
       >
         <!-- Error Message -->
-        {#if form?.error}
+        {#if error}
           <div class="rounded-lg border border-rose-500 bg-rose-500/10 p-4 text-rose-200">
-            {form.error}
+            {error}
           </div>
         {/if}
 
