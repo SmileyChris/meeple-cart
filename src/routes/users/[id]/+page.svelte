@@ -1,12 +1,12 @@
 <script lang="ts">
   import type { PageData } from './$types';
 
-  export let data: PageData;
+  let { data }: { data: PageData } = $props();
 
-  const profile = data.profile;
-  const listings = data.listings;
-  const vouches = data.vouches;
-  const reviews = data.reviews;
+  let profile = $derived(data.profile);
+  let listings = $derived(data.listings);
+  let vouches = $derived(data.vouches);
+  let reviews = $derived(data.reviews);
 
   const typeLabels: Record<string, string> = {
     trade: 'Trade',

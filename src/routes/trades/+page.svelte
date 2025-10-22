@@ -4,11 +4,11 @@
   import type { ListingRecord } from '$lib/types/listing';
   import { currentUser } from '$lib/pocketbase';
 
-  export let data: PageData;
+  let { data }: { data: PageData } = $props();
 
-  $: trades = data.trades;
-  $: filter = data.filter;
-  $: counts = data.counts;
+  let trades = $derived(data.trades);
+  let filter = $derived(data.filter);
+  let counts = $derived(data.counts);
 
   const statusLabels: Record<string, string> = {
     initiated: 'Initiated',

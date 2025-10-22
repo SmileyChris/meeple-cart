@@ -2,10 +2,9 @@
   import type { PageData, ActionData } from './$types';
   import { enhance } from '$app/forms';
 
-  export let data: PageData;
-  export let form: ActionData;
+  let { data, form }: { data: PageData; form: ActionData } = $props();
 
-  const prefs = data.preferences;
+  let prefs = $derived(data.preferences);
 </script>
 
 <svelte:head>

@@ -4,10 +4,10 @@
   import { formatRelativeTime } from '$lib/utils/time';
   import { enhance } from '$app/forms';
 
-  export let notification: NotificationItem;
+  let { notification }: { notification: NotificationItem } = $props();
 
-  const colors = NOTIFICATION_COLORS[notification.type];
-  const icon = NOTIFICATION_ICONS[notification.type];
+  let colors = $derived(NOTIFICATION_COLORS[notification.type]);
+  let icon = $derived(NOTIFICATION_ICONS[notification.type]);
 </script>
 
 <div

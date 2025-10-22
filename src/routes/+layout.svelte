@@ -3,10 +3,9 @@
   import NotificationBell from '$lib/components/NotificationBell.svelte';
   import ThemeToggle from '$lib/components/ThemeToggle.svelte';
   import { currentUser, pb } from '$lib/pocketbase';
-  import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
 
-  let unreadNotifications = 0;
+  let unreadNotifications = $state(0);
 
   // Fetch unread notifications count
   async function fetchUnreadCount() {
@@ -26,15 +25,13 @@
   }
 
   // Fetch on mount and when user changes
-  onMount(() => {
-    fetchUnreadCount();
+  $effect(() => {
+    if ($currentUser) {
+      fetchUnreadCount();
+    } else {
+      unreadNotifications = 0;
+    }
   });
-
-  $: if ($currentUser) {
-    fetchUnreadCount();
-  } else {
-    unreadNotifications = 0;
-  }
 
   // Handle logout
   function handleLogout() {
@@ -66,7 +63,7 @@
             {$currentUser.display_name ?? 'Profile'}
           </a>
           <a class="btn-primary" href="/listings/new"> New listing </a>
-          <button class="btn-ghost" type="button" on:click={handleLogout}> Log out </button>
+          <button class="btn-ghost" type="button" onclick={handleLogout}> Log out </button>
         {:else}
           <a class="btn-ghost" href="/login"> Log in </a>
           <a class="btn-primary" href="/register"> Create account </a>

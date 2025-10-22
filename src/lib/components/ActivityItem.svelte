@@ -4,7 +4,7 @@
   import { formatRelativeTime, isVeryRecent } from '$lib/utils/time';
   import MeepleIcon from './MeepleIcon.svelte';
 
-  export let activity: ActivityItem;
+  let { activity }: { activity: ActivityItem } = $props();
 
   const typeLabels: Record<ListingType, string> = {
     trade: 'Trade',
@@ -42,9 +42,9 @@
     poor: 'Well loved',
   };
 
-  const colors = typeColors[activity.type];
-  const relativeTime = formatRelativeTime(activity.timestamp);
-  const isNew = isVeryRecent(activity.timestamp);
+  let colors = $derived(typeColors[activity.type]);
+  let relativeTime = $derived(formatRelativeTime(activity.timestamp));
+  let isNew = $derived(isVeryRecent(activity.timestamp));
 
   const currencyFormatter = new Intl.NumberFormat('en-NZ', {
     style: 'currency',
@@ -53,7 +53,9 @@
     minimumFractionDigits: 0,
   });
 
-  const bggUrl = activity.bggId ? `https://boardgamegeek.com/boardgame/${activity.bggId}` : null;
+  let bggUrl = $derived(
+    activity.bggId ? `https://boardgamegeek.com/boardgame/${activity.bggId}` : null,
+  );
 </script>
 
 <!-- eslint-disable svelte/no-navigation-without-resolve -->

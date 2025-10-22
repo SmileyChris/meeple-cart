@@ -4,10 +4,10 @@
   import MessageInput from '$lib/components/MessageInput.svelte';
   import { pb, currentUser } from '$lib/pocketbase';
 
-  export let data: PageData;
+  let { data }: { data: PageData } = $props();
 
-  let sending = false;
-  let messages = data.messages;
+  let sending = $state(false);
+  let messages = $state(data.messages);
 
   async function handleSend(event: CustomEvent<{ content: string }>) {
     if (!data.otherUser || !data.listing) return;

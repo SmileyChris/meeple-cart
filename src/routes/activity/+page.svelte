@@ -4,7 +4,7 @@
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
 
-  export let data: PageData;
+  let { data }: { data: PageData } = $props();
 
   const filters = [
     { value: null, label: 'All', icon: '🎲' },
@@ -47,7 +47,7 @@
     <div class="flex flex-wrap justify-center gap-3">
       {#each filters as filter (filter.label)}
         <button
-          on:click={() => setFilter(filter.value)}
+          onclick={() => setFilter(filter.value)}
           class={`btn-ghost px-4 py-2 text-sm font-medium ${data.currentFilter === filter.value ? 'border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent-strong)]' : ''}`}
         >
           <span class="mr-1.5">{filter.icon}</span>
@@ -61,7 +61,7 @@
     <!-- Load More Button -->
     {#if data.hasMore}
       <div class="flex justify-center pt-8">
-        <button on:click={loadMore} class="btn-primary px-6 py-3 font-medium"> Load More </button>
+        <button onclick={loadMore} class="btn-primary px-6 py-3 font-medium"> Load More </button>
       </div>
     {/if}
 

@@ -1,14 +1,15 @@
 <script lang="ts">
-  import { onMount, afterUpdate } from 'svelte';
   import type { MessageItem } from '$lib/types/message';
   import MessageBubble from './MessageBubble.svelte';
 
-  export let messages: MessageItem[];
-  export let loading = false;
-  export let emptyMessage = 'No messages yet. Start the conversation!';
+  let {
+    messages,
+    loading = false,
+    emptyMessage = 'No messages yet. Start the conversation!',
+  }: { messages: MessageItem[]; loading?: boolean; emptyMessage?: string } = $props();
 
-  let scrollContainer: HTMLDivElement;
-  let shouldScrollToBottom = true;
+  let scrollContainer = $state<HTMLDivElement | undefined>(undefined);
+  let shouldScrollToBottom = $state(true);
 
   function scrollToBottom() {
     if (scrollContainer && shouldScrollToBottom) {
@@ -24,18 +25,17 @@
     }
   }
 
-  onMount(() => {
-    scrollToBottom();
+  $effect(() => {
+    // When messages change, allow scroll to bottom
+    if (messages) {
+      shouldScrollToBottom = true;
+    }
   });
 
-  afterUpdate(() => {
+  $effect(() => {
+    // Scroll to bottom when messages or scrollContainer changes
     scrollToBottom();
   });
-
-  $: if (messages) {
-    // Allow scroll to bottom when new messages arrive
-    shouldScrollToBottom = true;
-  }
 </script>
 
 <div

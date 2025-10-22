@@ -2,8 +2,10 @@
   import type { MessageThread } from '$lib/types/message';
   import { formatRelativeTime } from '$lib/utils/time';
 
-  export let threads: MessageThread[];
-  export let selectedThreadId: string | null = null;
+  let {
+    threads,
+    selectedThreadId = null,
+  }: { threads: MessageThread[]; selectedThreadId?: string | null } = $props();
 
   function handleThreadClick(threadId: string) {
     window.location.href = `/messages/${threadId}`;

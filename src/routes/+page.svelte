@@ -2,7 +2,7 @@
   import type { PageData } from './$types';
   import ListingCard from '$lib/components/ListingCard.svelte';
 
-  export let data: PageData;
+  let { data }: { data: PageData } = $props();
 
   const listingTypeOptions = [
     { label: 'All listing types', value: '' },

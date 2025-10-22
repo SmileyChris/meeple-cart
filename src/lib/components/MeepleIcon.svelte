@@ -1,7 +1,9 @@
 <script lang="ts">
-  export let size: number = 24;
-  export let className: string = '';
-  export let seed: string = '';
+  let {
+    size = 24,
+    className = '',
+    seed = '',
+  }: { size?: number; className?: string; seed?: string } = $props();
 
   const meepleVariations = [
     // Wizard meeple with hat and staff
@@ -173,12 +175,12 @@
   }
 
   // Select meeple variation based on seed
-  const hash = hashCode(seed);
-  const meepleIndex = hash % meepleVariations.length;
-  const selectedMeeple = meepleVariations[meepleIndex];
+  let hash = $derived(hashCode(seed));
+  let meepleIndex = $derived(hash % meepleVariations.length);
+  let selectedMeeple = $derived(meepleVariations[meepleIndex]);
 
   // Add slight rotation for more visual variety
-  const rotation = ((hash >> 4) % 7) * 5 - 15; // -15, -10, -5, 0, 5, 10, 15 degrees
+  let rotation = $derived(((hash >> 4) % 7) * 5 - 15); // -15, -10, -5, 0, 5, 10, 15 degrees
 </script>
 
 <svg

@@ -4,21 +4,21 @@
   import { pb, currentUser } from '$lib/pocketbase';
   import { goto } from '$app/navigation';
 
-  export let data: PageData;
+  let { data }: { data: PageData } = $props();
 
-  const { availableGames } = data;
+  let availableGames = $derived(data.availableGames);
 
-  let selectedGameId = '';
-  let cascadeName = '';
-  let description = '';
-  let deadlineDays = 14;
-  let region = '';
-  let shippingRequirement = 'shipping_available';
-  let specialRules = '';
-  let isSubmitting = false;
-  let error: string | null = null;
+  let selectedGameId = $state('');
+  let cascadeName = $state('');
+  let description = $state('');
+  let deadlineDays = $state(14);
+  let region = $state('');
+  let shippingRequirement = $state('shipping_available');
+  let specialRules = $state('');
+  let isSubmitting = $state(false);
+  let error = $state<string | null>(null);
 
-  $: selectedGame = availableGames.find((g) => g.id === selectedGameId);
+  let selectedGame = $derived(availableGames.find((g) => g.id === selectedGameId));
 
   async function handleSubmit(e: Event) {
     e.preventDefault();

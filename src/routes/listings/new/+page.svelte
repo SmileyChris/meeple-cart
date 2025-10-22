@@ -2,8 +2,7 @@
   import { onDestroy } from 'svelte';
   import type { ActionData, PageData } from './$types';
 
-  export let data: PageData;
-  export let form: ActionData | undefined;
+  let { data, form }: { data: PageData; form?: ActionData } = $props();
 
   interface GameEntry {
     title: string;
@@ -14,32 +13,35 @@
     bgg_id: string;
   }
 
-  const listingValues = form?.values ?? {
-    title: '',
-    listing_type: data.defaults.listing_type,
-    summary: '',
-    location: '',
-    shipping_available: false,
-    prefer_bundle: false,
-    bundle_discount: '',
-  };
+  let listingValues = $derived(
+    form?.values ?? {
+      title: '',
+      listing_type: data.defaults.listing_type,
+      summary: '',
+      location: '',
+      shipping_available: false,
+      prefer_bundle: false,
+      bundle_discount: '',
+    },
+  );
 
-  let games: GameEntry[] =
+  let games = $state<GameEntry[]>(
     form?.games ??
-    ([
-      {
-        title: '',
-        condition: data.defaults.condition,
-        price: '',
-        trade_value: '',
-        notes: '',
-        bgg_id: '',
-      },
-    ] as GameEntry[]);
+      ([
+        {
+          title: '',
+          condition: data.defaults.condition,
+          price: '',
+          trade_value: '',
+          notes: '',
+          bgg_id: '',
+        },
+      ] as GameEntry[]),
+  );
 
-  const fieldErrors = form?.fieldErrors ?? {};
+  let fieldErrors = $derived(form?.fieldErrors ?? {});
 
-  let photoPreviews: Array<{ name: string; url: string; size: string }> = [];
+  let photoPreviews = $state<Array<{ name: string; url: string; size: string }>>([]);
 
   const resetPreviews = () => {
     for (const preview of photoPreviews) {

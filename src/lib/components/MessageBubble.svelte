@@ -2,13 +2,17 @@
   import type { MessageItem } from '$lib/types/message';
   import { formatRelativeTime } from '$lib/utils/time';
 
-  export let message: MessageItem;
+  let { message }: { message: MessageItem } = $props();
 
-  const alignmentClass = message.isOwnMessage ? 'ml-auto' : 'mr-auto';
-  const bubbleClass = message.isOwnMessage
-    ? 'border-[var(--accent)] bg-[var(--accent-soft)]'
-    : 'border-subtle bg-surface-card-alt';
-  const textClass = message.isOwnMessage ? 'text-[var(--accent-strong)]' : 'text-secondary';
+  let alignmentClass = $derived(message.isOwnMessage ? 'ml-auto' : 'mr-auto');
+  let bubbleClass = $derived(
+    message.isOwnMessage
+      ? 'border-[var(--accent)] bg-[var(--accent-soft)]'
+      : 'border-subtle bg-surface-card-alt',
+  );
+  let textClass = $derived(
+    message.isOwnMessage ? 'text-[var(--accent-strong)]' : 'text-secondary',
+  );
 </script>
 
 <div class="flex flex-col {alignmentClass} max-w-[80%] gap-1">

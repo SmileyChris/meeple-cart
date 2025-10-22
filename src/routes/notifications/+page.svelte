@@ -3,12 +3,12 @@
   import NotificationItem from '$lib/components/NotificationItem.svelte';
   import { pb } from '$lib/pocketbase';
 
-  export let data: PageData;
+  let { data }: { data: PageData } = $props();
 
-  let notifications = data.notifications;
-  let unreadCount = data.unreadCount;
+  let notifications = $state(data.notifications);
+  let unreadCount = $state(data.unreadCount);
 
-  $: hasUnread = unreadCount > 0;
+  let hasUnread = $derived(unreadCount > 0);
 
   async function handleMarkAllRead() {
     try {
@@ -51,7 +51,7 @@
       <!-- eslint-disable svelte/no-navigation-without-resolve -->
       <div class="flex gap-2">
         {#if hasUnread}
-          <button on:click={handleMarkAllRead} class="btn-primary px-4 py-2 text-sm font-medium">
+          <button onclick={handleMarkAllRead} class="btn-primary px-4 py-2 text-sm font-medium">
             Mark all read
           </button>
         {/if}

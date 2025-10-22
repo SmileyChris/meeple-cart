@@ -15,5 +15,12 @@ export default defineConfig({
       exclude: ['src/test/**'],
     },
     exclude: ['coverage/**', 'dist/**', '**/node_modules/**', 'tests/e2e/**'],
+    // Force Svelte to compile for client-side (not SSR)
+    alias: {
+      'svelte/internal/server': 'svelte/internal/client',
+    },
+  },
+  resolve: {
+    conditions: ['browser'],
   },
 });

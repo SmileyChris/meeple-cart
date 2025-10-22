@@ -3,7 +3,7 @@
 
   type Theme = 'light' | 'dark';
 
-  let theme: Theme = 'dark';
+  let theme = $state<Theme>('dark');
 
   const storageKey = 'meeple-theme';
 
@@ -33,7 +33,7 @@
 <button
   class="btn-ghost gap-2"
   type="button"
-  on:click={toggleTheme}
+  onclick={toggleTheme}
   aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
 >
   {#if theme === 'dark'}

@@ -1,11 +1,10 @@
 <script lang="ts">
   import type { ActionData, PageData } from './$types';
 
-  export let data: PageData;
-  export let form: ActionData | undefined;
+  let { data, form }: { data: PageData; form?: ActionData } = $props();
 
-  let showAddForm = false;
-  let editingGameId: string | null = null;
+  let showAddForm = $state(false);
+  let editingGameId = $state<string | null>(null);
 
   const addFormValues = {
     title: '',
@@ -53,11 +52,14 @@
     }
   };
 
-  $: fieldErrors = form?.fieldErrors ?? {};
-  $: if (form?.success) {
-    showAddForm = false;
-    editingGameId = null;
-  }
+  let fieldErrors = $derived(form?.fieldErrors ?? {});
+
+  $effect(() => {
+    if (form?.success) {
+      showAddForm = false;
+      editingGameId = null;
+    }
+  });
 </script>
 
 <svelte:head>

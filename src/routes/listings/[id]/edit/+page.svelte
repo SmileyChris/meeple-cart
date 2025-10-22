@@ -2,13 +2,12 @@
   import type { PageData, ActionData } from './$types';
   import { enhance } from '$app/forms';
 
-  export let data: PageData;
-  export let form: ActionData;
+  let { data, form }: { data: PageData; form: ActionData } = $props();
 
-  const listing = data.listing;
-  const games = data.games;
+  let listing = $derived(data.listing);
+  let games = $derived(data.games);
 
-  let isSubmitting = false;
+  let isSubmitting = $state(false);
 
   const formatCurrency = (value: number | null | undefined) => {
     if (value == null) return '';

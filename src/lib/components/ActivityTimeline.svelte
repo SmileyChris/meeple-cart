@@ -3,7 +3,7 @@
   import { getTimeGroup } from '$lib/utils/time';
   import ActivityItemComponent from './ActivityItem.svelte';
 
-  export let activities: ActivityItem[];
+  let { activities }: { activities: ActivityItem[] } = $props();
 
   type TimeGroup = 'today' | 'yesterday' | 'this-week' | 'older';
 
@@ -22,21 +22,27 @@
   };
 
   // Group activities by time period
-  const groupedActivities: Record<TimeGroup, ActivityItem[]> = {
-    today: [],
-    yesterday: [],
-    'this-week': [],
-    older: [],
-  };
+  let groupedActivities = $derived.by(() => {
+    const groups: Record<TimeGroup, ActivityItem[]> = {
+      today: [],
+      yesterday: [],
+      'this-week': [],
+      older: [],
+    };
 
-  activities.forEach((activity) => {
-    const group = getTimeGroup(activity.timestamp);
-    groupedActivities[group].push(activity);
+    activities.forEach((activity) => {
+      const group = getTimeGroup(activity.timestamp);
+      groups[group].push(activity);
+    });
+
+    return groups;
   });
 
   // Determine which groups have items (in order)
-  const groupsToShow: TimeGroup[] = (['today', 'yesterday', 'this-week', 'older'] as const).filter(
-    (group) => groupedActivities[group].length > 0
+  let groupsToShow = $derived(
+    (['today', 'yesterday', 'this-week', 'older'] as const).filter(
+      (group) => groupedActivities[group].length > 0,
+    ),
   );
 </script>
 

@@ -4,9 +4,11 @@
   import { page } from '$app/stores';
   import { NZ_REGIONS, REGION_LABELS } from '$lib/constants/regions';
 
-  export let data: PageData;
+  let { data }: { data: PageData } = $props();
 
-  const { cascades, filters, pagination } = data;
+  let cascades = $derived(data.cascades);
+  let filters = $derived(data.filters);
+  let pagination = $derived(data.pagination);
 
   const statusLabels: Record<string, string> = {
     accepting_entries: 'Accepting Entries',
@@ -76,7 +78,7 @@
         <select
           id="status-filter"
           value={filters.status ?? ''}
-          on:change={(e) => updateFilter('status', e.currentTarget.value)}
+          onchange={(e) => updateFilter('status', e.currentTarget.value)}
           class="rounded border border-subtle bg-surface-card px-3 py-1.5 text-sm text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
         >
           <option value="">All Active</option>
@@ -93,7 +95,7 @@
         <select
           id="region-filter"
           value={filters.region ?? ''}
-          on:change={(e) => updateFilter('region', e.currentTarget.value)}
+          onchange={(e) => updateFilter('region', e.currentTarget.value)}
           class="rounded border border-subtle bg-surface-card px-3 py-1.5 text-sm text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
         >
           <option value="">All Regions</option>
@@ -109,7 +111,7 @@
         <select
           id="sort-filter"
           value={filters.sort ?? 'deadline'}
-          on:change={(e) => updateFilter('sort', e.currentTarget.value)}
+          onchange={(e) => updateFilter('sort', e.currentTarget.value)}
           class="rounded border border-subtle bg-surface-card px-3 py-1.5 text-sm text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
         >
           <option value="deadline">Ending Soon</option>
@@ -232,7 +234,7 @@
         <div class="flex items-center justify-center gap-2">
           <button
             disabled={pagination.page === 1}
-            on:click={() => goToPage(pagination.page - 1)}
+            onclick={() => goToPage(pagination.page - 1)}
             class="btn-ghost px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
           >
             Previous
@@ -244,7 +246,7 @@
 
           <button
             disabled={pagination.page === pagination.totalPages}
-            on:click={() => goToPage(pagination.page + 1)}
+            onclick={() => goToPage(pagination.page + 1)}
             class="btn-ghost px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
           >
             Next

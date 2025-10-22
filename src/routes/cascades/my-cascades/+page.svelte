@@ -1,11 +1,14 @@
 <script lang="ts">
   import type { PageData } from './$types';
 
-  export let data: PageData;
+  let { data }: { data: PageData } = $props();
 
-  const { enteredCascades, wonCascades, startedCascades, stats } = data;
+  let enteredCascades = $derived(data.enteredCascades);
+  let wonCascades = $derived(data.wonCascades);
+  let startedCascades = $derived(data.startedCascades);
+  let stats = $derived(data.stats);
 
-  let activeTab: 'entered' | 'won' | 'started' = 'entered';
+  let activeTab = $state<'entered' | 'won' | 'started'>('entered');
 
   const statusLabels: Record<string, string> = {
     accepting_entries: 'Accepting Entries',
@@ -30,8 +33,9 @@
     return `${diffDays}d remaining`;
   };
 
-  $: activeCascades =
-    activeTab === 'entered' ? enteredCascades : activeTab === 'won' ? wonCascades : startedCascades;
+  let activeCascades = $derived(
+    activeTab === 'entered' ? enteredCascades : activeTab === 'won' ? wonCascades : startedCascades,
+  );
 </script>
 
 <svelte:head>

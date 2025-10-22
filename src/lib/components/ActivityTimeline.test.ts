@@ -85,13 +85,13 @@ describe('ActivityTimeline', () => {
       },
     ];
 
-    const { getByText } = render(ActivityTimeline, { props: { activities } });
+    const { getByRole, getByText } = render(ActivityTimeline, { props: { activities } });
 
-    // Check that all group headers are rendered
-    expect(getByText('TODAY')).toBeTruthy();
-    expect(getByText('YESTERDAY')).toBeTruthy();
-    expect(getByText('THIS WEEK')).toBeTruthy();
-    expect(getByText('OLDER')).toBeTruthy();
+    // Check that all group headers are rendered (using role to target h2 elements specifically)
+    expect(getByRole('heading', { name: /today/i })).toBeTruthy();
+    expect(getByRole('heading', { name: /yesterday/i })).toBeTruthy();
+    expect(getByRole('heading', { name: /this week/i })).toBeTruthy();
+    expect(getByRole('heading', { name: /older/i })).toBeTruthy();
 
     // Check that all games are rendered
     expect(getByText('Game 1')).toBeTruthy();
@@ -121,13 +121,13 @@ describe('ActivityTimeline', () => {
       },
     ];
 
-    const { getByText, queryByText } = render(ActivityTimeline, { props: { activities } });
+    const { getByRole, queryByRole } = render(ActivityTimeline, { props: { activities } });
 
-    // Only "Today" should be shown
-    expect(getByText('TODAY')).toBeTruthy();
-    expect(queryByText('YESTERDAY')).toBeNull();
-    expect(queryByText('THIS WEEK')).toBeNull();
-    expect(queryByText('OLDER')).toBeNull();
+    // Only "Today" should be shown (using role to target h2 elements specifically)
+    expect(getByRole('heading', { name: /today/i })).toBeTruthy();
+    expect(queryByRole('heading', { name: /yesterday/i })).toBeNull();
+    expect(queryByRole('heading', { name: /this week/i })).toBeNull();
+    expect(queryByRole('heading', { name: /older/i })).toBeNull();
   });
 
   it('renders correct group icons', () => {

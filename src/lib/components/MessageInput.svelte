@@ -1,11 +1,13 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
 
-  export let placeholder = 'Type a message...';
-  export let disabled = false;
-  export let maxLength = 4000;
+  let {
+    placeholder = 'Type a message...',
+    disabled = false,
+    maxLength = 4000,
+  }: { placeholder?: string; disabled?: boolean; maxLength?: number } = $props();
 
-  let content = '';
+  let content = $state('');
   const dispatch = createEventDispatcher<{ send: { content: string } }>();
 
   function handleSubmit() {
@@ -23,8 +25,8 @@
     }
   }
 
-  $: remainingChars = maxLength - content.length;
-  $: isNearLimit = remainingChars < 100;
+  let remainingChars = $derived(maxLength - content.length);
+  let isNearLimit = $derived(remainingChars < 100);
 </script>
 
 <form on:submit|preventDefault={handleSubmit} class="flex flex-col gap-2">

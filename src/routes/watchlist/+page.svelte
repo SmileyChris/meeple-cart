@@ -2,9 +2,9 @@
   import type { PageData } from './$types';
   import { enhance } from '$app/forms';
 
-  export let data: PageData;
+  let { data }: { data: PageData } = $props();
 
-  const watchedListings = data.watchedListings;
+  let watchedListings = $derived(data.watchedListings);
 
   const typeLabels: Record<string, string> = {
     trade: 'Trade',

@@ -5,24 +5,22 @@
   import { pb, currentUser } from '$lib/pocketbase';
   import { invalidate } from '$app/navigation';
 
-  export let data: PageData;
+  let { data }: { data: PageData } = $props();
 
-  let {
-    cascade,
-    game,
-    listing,
-    holder,
-    entries,
-    history,
-    userEntry,
-    canEnter,
-    eligibilityMessage,
-  } = data;
+  let cascade = $derived(data.cascade);
+  let game = $derived(data.game);
+  let listing = $derived(data.listing);
+  let holder = $derived(data.holder);
+  let entries = $derived(data.entries);
+  let history = $derived(data.history);
+  let userEntry = $derived(data.userEntry);
+  let canEnter = $derived(data.canEnter);
+  let eligibilityMessage = $derived(data.eligibilityMessage);
 
-  let entryMessage = '';
-  let isSubmitting = false;
-  let showFullHistory = false;
-  let error: string | null = null;
+  let entryMessage = $state('');
+  let isSubmitting = $state(false);
+  let showFullHistory = $state(false);
+  let error = $state<string | null>(null);
 
   async function handleEnter(e: Event) {
     e.preventDefault();

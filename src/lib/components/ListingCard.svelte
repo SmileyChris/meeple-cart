@@ -2,7 +2,7 @@
   import type { ListingPreview } from '$lib/types/listing';
   import MeepleIcon from './MeepleIcon.svelte';
 
-  export let listing: ListingPreview;
+  let { listing }: { listing: ListingPreview } = $props();
 
   const typeLabels: Record<ListingPreview['listingType'], string> = {
     trade: 'Trade',
@@ -10,9 +10,11 @@
     want: 'Want to Buy',
   };
 
-  const createdLabel = new Intl.DateTimeFormat('en-NZ', {
-    dateStyle: 'medium',
-  }).format(new Date(listing.created));
+  let createdLabel = $derived(
+    new Intl.DateTimeFormat('en-NZ', {
+      dateStyle: 'medium',
+    }).format(new Date(listing.created)),
+  );
 
   const conditionLabels: Record<ListingPreview['games'][number]['condition'], string> = {
     mint: 'Mint',

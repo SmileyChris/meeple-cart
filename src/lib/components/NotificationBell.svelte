@@ -1,6 +1,6 @@
 <script lang="ts">
-  export let unreadCount = 0;
-  export let href = '/notifications';
+  let { unreadCount = 0, href = '/notifications' }: { unreadCount?: number; href?: string } =
+    $props();
 </script>
 
 <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->

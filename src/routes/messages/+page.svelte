@@ -2,7 +2,7 @@
   import type { PageData } from './$types';
   import MessageThreadList from '$lib/components/MessageThreadList.svelte';
 
-  export let data: PageData;
+  let { data }: { data: PageData } = $props();
 </script>
 
 <svelte:head>

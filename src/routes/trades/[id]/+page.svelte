@@ -5,30 +5,30 @@
   import type { TradeRecord, UserRecord } from '$lib/types/pocketbase';
   import type { ListingRecord } from '$lib/types/listing';
 
-  export let data: PageData;
+  let { data }: { data: PageData } = $props();
 
-  let trade = data.trade as TradeRecord;
-  let listing = trade.expand?.listing as ListingRecord;
-  let buyer = trade.expand?.buyer as UserRecord;
-  let seller = trade.expand?.seller as UserRecord;
-  let hasVouched = data.hasVouched;
+  let trade = $state(data.trade as TradeRecord);
+  let listing = $derived(trade.expand?.listing as ListingRecord);
+  let buyer = $derived(trade.expand?.buyer as UserRecord);
+  let seller = $derived(trade.expand?.seller as UserRecord);
+  let hasVouched = $state(data.hasVouched);
 
-  $: isBuyer = $currentUser?.id === trade.buyer;
-  $: isSeller = $currentUser?.id === trade.seller;
-  $: otherParty = isBuyer ? seller : buyer;
+  let isBuyer = $derived($currentUser?.id === trade.buyer);
+  let isSeller = $derived($currentUser?.id === trade.seller);
+  let otherParty = $derived(isBuyer ? seller : buyer);
 
-  let actionError: string | null = null;
-  let processing = false;
-  let showFeedbackForm = false;
-  let feedbackRating = 5;
-  let feedbackReview = '';
-  let feedbackError: string | null = null;
-  let submittingFeedback = false;
+  let actionError = $state<string | null>(null);
+  let processing = $state(false);
+  let showFeedbackForm = $state(false);
+  let feedbackRating = $state(5);
+  let feedbackReview = $state('');
+  let feedbackError = $state<string | null>(null);
+  let submittingFeedback = $state(false);
 
-  let showVouchForm = false;
-  let vouchMessage = '';
-  let vouchError: string | null = null;
-  let submittingVouch = false;
+  let showVouchForm = $state(false);
+  let vouchMessage = $state('');
+  let vouchError = $state<string | null>(null);
+  let submittingVouch = $state(false);
 
   const statusLabels: Record<string, string> = {
     initiated: 'Initiated',

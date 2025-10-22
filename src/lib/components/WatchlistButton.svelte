@@ -1,11 +1,13 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
 
-  export let listingId: string;
-  export let isWatching: boolean;
-  export let compact = false;
+  let {
+    listingId,
+    isWatching,
+    compact = false,
+  }: { listingId: string; isWatching: boolean; compact?: boolean } = $props();
 
-  let isSubmitting = false;
+  let isSubmitting = $state(false);
 </script>
 
 <form

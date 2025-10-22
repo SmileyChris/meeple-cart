@@ -6,28 +6,30 @@
   import { goto } from '$app/navigation';
   import { generateThreadId } from '$lib/types/message';
 
-  export let data: PageData;
+  let { data }: { data: PageData } = $props();
 
-  let message = '';
-  let showMessageForm = false;
-  let messageError: string | null = null;
-  let sendingMessage = false;
-  let initiatingTrade = false;
-  let tradeError: string | null = null;
+  let message = $state('');
+  let showMessageForm = $state(false);
+  let messageError = $state<string | null>(null);
+  let sendingMessage = $state(false);
+  let initiatingTrade = $state(false);
+  let tradeError = $state<string | null>(null);
 
-  const listing = data.listing;
-  const owner = data.owner;
-  const games = data.games;
-  const photos = data.photos ?? [];
-  let activePhotoIndex = 0;
+  let listing = $derived(data.listing);
+  let owner = $derived(data.owner);
+  let games = $derived(data.games);
+  let photos = $derived(data.photos ?? []);
+  let activePhotoIndex = $state(0);
 
   const selectPhoto = (index: number) => {
     activePhotoIndex = index;
   };
 
-  $: if (photos.length > 0 && activePhotoIndex >= photos.length) {
-    activePhotoIndex = 0;
-  }
+  $effect(() => {
+    if (photos.length > 0 && activePhotoIndex >= photos.length) {
+      activePhotoIndex = 0;
+    }
+  });
 
   const toCurrency = (value?: number | null) => {
     if (typeof value !== 'number' || Number.isNaN(value)) {

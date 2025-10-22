@@ -3,19 +3,19 @@
   import { pb, currentUser } from '$lib/pocketbase';
   import { invalidate } from '$app/navigation';
 
-  export let data: PageData;
+  let { data }: { data: PageData } = $props();
 
-  let profile = data.profile;
-  let listings = data.listings;
-  let updated = false;
-  let error: string | null = null;
-  let saving = false;
+  let profile = $state(data.profile);
+  let listings = $state(data.listings);
+  let updated = $state(false);
+  let error = $state<string | null>(null);
+  let saving = $state(false);
 
   // Form fields
-  let displayName = profile.display_name;
-  let location = profile.location || '';
-  let bio = profile.bio || '';
-  let preferredContact = profile.preferred_contact;
+  let displayName = $state(profile.display_name);
+  let location = $state(profile.location || '');
+  let bio = $state(profile.bio || '');
+  let preferredContact = $state(profile.preferred_contact);
 
   async function handleUpdate(e: Event) {
     e.preventDefault();
