@@ -80,28 +80,23 @@
   />
 </svelte:head>
 
-<main class="space-y-10 bg-slate-950 pb-16">
+<main class="space-y-10 bg-surface-body pb-16 transition-colors">
   <!-- eslint-disable svelte/no-navigation-without-resolve -->
-  <section class="px-6 pt-16 text-slate-100 sm:px-8">
+  <section class="px-6 pt-16 text-primary sm:px-8">
     <div class="mx-auto max-w-5xl space-y-6">
       <div class="space-y-4">
         <h1 class="text-4xl font-semibold tracking-tight sm:text-5xl">
           Trade board games across Aotearoa
         </h1>
-        <p class="max-w-2xl text-base text-slate-300 sm:text-lg">
+        <p class="max-w-2xl text-base text-secondary sm:text-lg">
           Discover active listings from trusted Meeple Cart members, filter by location or listing
           type, and organise trades without the Facebook shuffle.
         </p>
       </div>
       <div class="flex flex-wrap gap-4">
+        <a class="btn-primary px-6 py-3 text-base" href="/activity"> ⚡ Recent Activity </a>
         <a
-          class="rounded-full bg-emerald-500 px-6 py-3 font-semibold text-slate-900 transition hover:bg-emerald-400"
-          href="/activity"
-        >
-          ⚡ Recent Activity
-        </a>
-        <a
-          class="rounded-full border border-slate-700 px-6 py-3 text-sm text-slate-300 transition hover:border-emerald-500 hover:text-emerald-300"
+          class="btn-secondary px-6 py-3 text-sm"
           href="/spec/prd.md"
           target="_blank"
           rel="external noopener"
@@ -109,7 +104,7 @@
           Product spec
         </a>
         <a
-          class="rounded-full border border-slate-700 px-6 py-3 text-sm text-slate-300 transition hover:border-emerald-500 hover:text-emerald-300"
+          class="btn-secondary px-6 py-3 text-sm"
           href="/spec/tech.md"
           target="_blank"
           rel="external noopener"
@@ -122,14 +117,17 @@
 
   <section class="px-6 sm:px-8">
     <div class="mx-auto max-w-5xl space-y-8">
-      <form class="grid gap-4 rounded-xl border border-slate-800 bg-slate-900/60 p-6" method="GET">
+      <form
+        class="grid gap-4 rounded-xl border border-subtle bg-surface-panel p-6 shadow-elevated transition-colors"
+        method="GET"
+      >
         <!-- Search Bar -->
         <div class="sm:col-span-full">
-          <label class="block text-sm font-medium text-slate-200" for="search">
+          <label class="block text-sm font-medium text-secondary" for="search">
             Search game titles
           </label>
           <input
-            class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+            class="mt-2 w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
             id="search"
             name="search"
             placeholder="Search for a game..."
@@ -141,9 +139,9 @@
         <div class="grid gap-4 sm:grid-cols-3">
           <!-- Location -->
           <div>
-            <label class="block text-sm font-medium text-slate-200" for="location">Location</label>
+            <label class="block text-sm font-medium text-secondary" for="location">Location</label>
             <input
-              class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+              class="mt-2 w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
               id="location"
               name="location"
               placeholder="Eg: Wellington"
@@ -154,9 +152,9 @@
 
           <!-- Listing Type -->
           <div>
-            <label class="block text-sm font-medium text-slate-200" for="type">Listing type</label>
+            <label class="block text-sm font-medium text-secondary" for="type">Listing type</label>
             <select
-              class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+              class="mt-2 w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
               id="type"
               name="type"
               value={data.filters.type}
@@ -169,10 +167,10 @@
 
           <!-- Condition -->
           <div>
-            <label class="block text-sm font-medium text-slate-200" for="condition">Condition</label
+            <label class="block text-sm font-medium text-secondary" for="condition">Condition</label
             >
             <select
-              class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+              class="mt-2 w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
               id="condition"
               name="condition"
               value={data.filters.condition ?? ''}
@@ -187,11 +185,11 @@
         <!-- Price Range -->
         <div class="grid gap-4 sm:grid-cols-2">
           <div>
-            <label class="block text-sm font-medium text-slate-200" for="minPrice">
+            <label class="block text-sm font-medium text-secondary" for="minPrice">
               Min price (NZD)
             </label>
             <input
-              class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+              class="mt-2 w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
               id="minPrice"
               name="minPrice"
               type="number"
@@ -202,11 +200,11 @@
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-slate-200" for="maxPrice">
+            <label class="block text-sm font-medium text-secondary" for="maxPrice">
               Max price (NZD)
             </label>
             <input
-              class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none"
+              class="mt-2 w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
               id="maxPrice"
               name="maxPrice"
               type="number"
@@ -220,32 +218,22 @@
 
         <!-- Actions -->
         <div class="flex flex-wrap gap-3">
-          <button
-            class="rounded-lg bg-emerald-500 px-4 py-2 font-semibold text-slate-900 transition hover:bg-emerald-400"
-            type="submit"
-          >
-            Apply filters
-          </button>
+          <button class="btn-primary" type="submit"> Apply filters </button>
           {#if hasFilters}
-            <a
-              class="rounded-lg border border-slate-700 px-4 py-2 text-slate-200 transition hover:border-emerald-500 hover:text-emerald-300"
-              href="/"
-            >
-              Clear filters
-            </a>
+            <a class="btn-ghost" href="/"> Clear filters </a>
           {/if}
         </div>
       </form>
 
       <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 class="text-2xl font-semibold text-slate-100">Active listings</h2>
-          <p class="text-sm text-slate-400">
+          <h2 class="text-2xl font-semibold text-primary">Active listings</h2>
+          <p class="text-sm text-muted">
             {data.pagination.totalItems}
             {data.pagination.totalItems === 1 ? 'result' : 'results'}
           </p>
         </div>
-        <p class="text-sm text-slate-400">
+        <p class="text-sm text-muted">
           Whether you are trading, selling, or looking for a wanted post, use the filters to narrow
           the feed.
         </p>
@@ -259,7 +247,7 @@
         </div>
       {:else}
         <div
-          class="rounded-xl border border-dashed border-slate-800 bg-slate-900/40 p-10 text-center text-slate-400"
+          class="rounded-xl border border-dashed border-subtle bg-surface-card p-10 text-center text-muted transition-colors"
         >
           {#if data.loadError}
             <p>
@@ -275,34 +263,21 @@
 
       {#if data.pagination.totalPages > 1}
         <nav
-          class="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900/60 px-4 py-3 text-sm text-slate-300"
+          class="flex items-center justify-between rounded-xl border border-subtle bg-surface-panel px-4 py-3 text-sm text-secondary transition-colors"
         >
           <div>
             Page {data.pagination.page} of {data.pagination.totalPages}
           </div>
           <div class="flex items-center gap-3">
             {#if previousHref}
-              <a
-                class="rounded-lg border border-slate-700 px-3 py-1.5 transition hover:border-emerald-500 hover:text-emerald-300"
-                href={previousHref}
-              >
-                Previous
-              </a>
+              <a class="btn-ghost" href={previousHref}> Previous </a>
             {:else}
-              <span class="rounded-lg border border-slate-800 px-3 py-1.5 text-slate-600"
-                >Previous</span
-              >
+              <span class="rounded-full border border-subtle px-3 py-1.5 text-muted">Previous</span>
             {/if}
             {#if nextHref}
-              <a
-                class="rounded-lg border border-slate-700 px-3 py-1.5 transition hover:border-emerald-500 hover:text-emerald-300"
-                href={nextHref}
-              >
-                Next
-              </a>
+              <a class="btn-ghost" href={nextHref}> Next </a>
             {:else}
-              <span class="rounded-lg border border-slate-800 px-3 py-1.5 text-slate-600">Next</span
-              >
+              <span class="rounded-full border border-subtle px-3 py-1.5 text-muted">Next</span>
             {/if}
           </div>
         </nav>

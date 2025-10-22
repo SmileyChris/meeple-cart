@@ -11,7 +11,7 @@
 </script>
 
 <div
-  class="flex gap-4 rounded-xl border border-slate-800 bg-slate-900/60 p-4 transition hover:bg-slate-900 {notification.read
+  class="flex gap-4 rounded-xl border border-subtle bg-surface-card p-4 transition hover:bg-surface-card-alt {notification.read
     ? 'opacity-70'
     : ''}"
 >
@@ -28,20 +28,20 @@
   <div class="min-w-0 flex-1 space-y-2">
     <div class="flex items-start justify-between gap-3">
       <div class="min-w-0 flex-1">
-        <h3 class="font-semibold text-slate-100 {notification.read ? '' : 'font-bold'}">
+        <h3 class="font-semibold text-primary {notification.read ? '' : 'font-bold'}">
           {notification.title}
         </h3>
         {#if notification.message}
-          <p class="mt-1 text-sm text-slate-400">{notification.message}</p>
+          <p class="mt-1 text-sm text-muted">{notification.message}</p>
         {/if}
         {#if notification.listingTitle}
-          <p class="mt-1 text-sm text-slate-500">
-            Re: <span class="text-slate-400">{notification.listingTitle}</span>
+          <p class="mt-1 text-sm text-muted">
+            Re: <span class="text-secondary">{notification.listingTitle}</span>
           </p>
         {/if}
       </div>
 
-      <span class="flex-shrink-0 text-xs text-slate-500">
+      <span class="flex-shrink-0 text-xs text-muted">
         {formatRelativeTime(notification.timestamp)}
       </span>
     </div>
@@ -50,12 +50,7 @@
     <!-- eslint-disable svelte/no-navigation-without-resolve -->
     <div class="flex items-center gap-2">
       {#if notification.link}
-        <a
-          href={notification.link}
-          class="rounded-lg bg-emerald-500/10 px-3 py-1 text-sm font-medium text-emerald-300 transition hover:bg-emerald-500/20"
-        >
-          View
-        </a>
+        <a href={notification.link} class="btn-secondary px-3 py-1 text-sm font-medium"> View </a>
       {/if}
 
       {#if !notification.read}
@@ -63,7 +58,7 @@
           <input type="hidden" name="id" value={notification.id} />
           <button
             type="submit"
-            class="rounded-lg border border-slate-700 px-3 py-1 text-sm text-slate-400 transition hover:border-emerald-500 hover:text-emerald-300"
+            class="btn-ghost px-3 py-1 text-sm hover:border-[var(--accent)] hover:text-[var(--accent-strong)]"
           >
             Mark read
           </button>
@@ -74,7 +69,7 @@
         <input type="hidden" name="id" value={notification.id} />
         <button
           type="submit"
-          class="rounded-lg border border-slate-700 px-3 py-1 text-sm text-slate-400 transition hover:border-rose-500 hover:text-rose-300"
+          class="btn-ghost px-3 py-1 text-sm hover:border-rose-500 hover:text-rose-300"
         >
           Delete
         </button>

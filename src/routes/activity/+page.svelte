@@ -41,17 +41,14 @@
   />
 </svelte:head>
 
-<main class="min-h-screen bg-slate-950 px-6 py-16 sm:px-8">
+<main class="min-h-screen bg-surface-body px-6 py-16 text-primary transition-colors sm:px-8">
   <div class="mx-auto max-w-4xl space-y-8">
     <!-- Filter Buttons -->
     <div class="flex flex-wrap justify-center gap-3">
       {#each filters as filter (filter.label)}
         <button
           on:click={() => setFilter(filter.value)}
-          class="rounded-full border px-4 py-2 text-sm font-medium transition {data.currentFilter ===
-          filter.value
-            ? 'border-emerald-500 bg-emerald-500/20 text-emerald-200'
-            : 'border-slate-700 text-slate-300 hover:border-emerald-500 hover:text-emerald-300'}"
+          class={`btn-ghost px-4 py-2 text-sm font-medium ${data.currentFilter === filter.value ? 'border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent-strong)]' : ''}`}
         >
           <span class="mr-1.5">{filter.icon}</span>
           {filter.label}
@@ -64,18 +61,13 @@
     <!-- Load More Button -->
     {#if data.hasMore}
       <div class="flex justify-center pt-8">
-        <button
-          on:click={loadMore}
-          class="rounded-full border border-emerald-500 bg-emerald-500/10 px-6 py-3 font-medium text-emerald-200 transition hover:bg-emerald-500/20"
-        >
-          Load More
-        </button>
+        <button on:click={loadMore} class="btn-primary px-6 py-3 font-medium"> Load More </button>
       </div>
     {/if}
 
     <!-- Pagination Info -->
     {#if data.activities.length > 0}
-      <p class="text-center text-sm text-slate-500">
+      <p class="text-center text-sm text-muted">
         Page {data.currentPage} of {data.totalPages}
       </p>
     {/if}

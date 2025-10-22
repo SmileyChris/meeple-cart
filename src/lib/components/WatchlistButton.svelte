@@ -23,11 +23,11 @@
   <button
     type="submit"
     disabled={isSubmitting}
-    class="group flex items-center gap-2 rounded-lg border transition {compact
-      ? 'border-slate-700 p-2'
-      : 'border-slate-700 bg-slate-900/60 px-4 py-2'} {isWatching
-      ? 'border-amber-500 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20'
-      : 'text-slate-400 hover:border-amber-500 hover:text-amber-300'} disabled:opacity-50"
+    class={`group inline-flex items-center gap-2 rounded-full border transition ${compact ? 'btn-ghost px-2 py-1.5' : 'btn-ghost px-4 py-2 bg-surface-card'} ${
+      isWatching
+        ? 'border-amber-500 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20'
+        : 'text-muted hover:border-amber-500 hover:text-amber-300'
+    } disabled:opacity-50`}
   >
     <svg class="h-5 w-5" fill={isWatching ? 'currentColor' : 'none'} viewBox="0 0 24 24">
       <path

@@ -57,13 +57,13 @@
 </script>
 
 <!-- eslint-disable svelte/no-navigation-without-resolve -->
-<div class="relative flex gap-6 sm:gap-8">
+<div class="relative flex gap-6 text-primary sm:gap-8">
   <!-- Timeline connector -->
   <div class="relative flex flex-col items-center">
     <!-- Dot -->
     <div class="relative z-10 flex-shrink-0">
       <div
-        class="{colors.dot} h-4 w-4 rounded-full shadow-lg ring-4 ring-slate-950 {isNew
+        class="{colors.dot} h-4 w-4 rounded-full shadow-lg ring-4 ring-[color:var(--surface-body)] {isNew
           ? 'animate-pulse'
           : ''}"
       ></div>
@@ -72,12 +72,12 @@
       {/if}
     </div>
     <!-- Dotted line -->
-    <div class="mt-2 flex-1 border-l-2 border-dotted border-slate-700"></div>
+    <div class="mt-2 flex-1 border-l-2 border-dotted border-[color:var(--border-subtle)]"></div>
   </div>
 
   <!-- Activity card -->
   <div
-    class="group mb-10 flex-1 cursor-pointer pb-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 sm:mb-12"
+    class="group mb-10 flex-1 cursor-pointer pb-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-body)] sm:mb-12"
     role="link"
     tabindex="0"
     onclick={() => (window.location.href = activity.listingHref)}
@@ -89,7 +89,7 @@
     }}
   >
     <div
-      class="overflow-hidden rounded-2xl border-2 {colors.border} bg-slate-900/80 shadow-xl backdrop-blur-sm transition-all duration-300 group-hover:scale-[1.02] group-hover:shadow-2xl group-hover:shadow-{colors.dot}/20"
+      class="overflow-hidden rounded-2xl border-2 {colors.border} bg-surface-card shadow-elevated backdrop-blur-sm transition-all duration-300 group-hover:scale-[1.02] group-hover:shadow-2xl group-hover:shadow-{colors.dot}/20"
     >
       <!-- Image header -->
       {#if activity.thumbnail}
@@ -100,7 +100,9 @@
             src={activity.thumbnail}
             loading="lazy"
           />
-          <div class="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent"></div>
+          <div
+            class="absolute inset-0 bg-gradient-to-t from-[color:rgba(15,23,42,0.88)] to-transparent"
+          ></div>
           <!-- Type badge overlay -->
           <div class="absolute left-4 top-4">
             <span
@@ -121,7 +123,7 @@
         </div>
       {:else}
         <div
-          class="relative flex h-48 items-center justify-center overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900 sm:h-64"
+          class="relative flex h-48 items-center justify-center overflow-hidden bg-gradient-to-br from-[color:rgba(30,41,59,0.9)] to-[color:rgba(15,23,42,0.95)] sm:h-64 transition-colors"
         >
           <MeepleIcon size={96} className="opacity-20" seed={activity.id} />
           <!-- Type badge overlay -->
@@ -149,10 +151,10 @@
         <!-- Game title and BGG link -->
         <div>
           <div class="flex flex-wrap items-start justify-between gap-3">
-            <h3 class="text-2xl font-bold text-slate-100 sm:text-3xl">{activity.gameTitle}</h3>
+            <h3 class="text-2xl font-bold text-primary sm:text-3xl">{activity.gameTitle}</h3>
             {#if bggUrl}
               <a
-                class="shrink-0 rounded-lg border border-emerald-600 bg-emerald-500/10 px-3 py-1.5 text-sm font-semibold text-emerald-300 transition hover:bg-emerald-500/20"
+                class="btn-secondary shrink-0 px-3 py-1.5 text-sm"
                 href={bggUrl}
                 target="_blank"
                 rel="external noopener"
@@ -165,16 +167,18 @@
         </div>
 
         <!-- Details grid -->
-        <div class="flex flex-wrap items-center gap-4 text-sm">
+        <div class="flex flex-wrap items-center gap-4 text-sm text-secondary">
           <div class="flex items-center gap-2">
-            <span class="text-slate-500">Condition</span>
-            <span class="rounded-full bg-slate-800 px-3 py-1 font-semibold text-slate-200">
+            <span class="text-muted">Condition</span>
+            <span
+              class="rounded-full bg-surface-card-alt px-3 py-1 font-semibold text-primary transition-colors"
+            >
               {conditionLabels[activity.condition]}
             </span>
           </div>
           {#if activity.price !== null}
             <div class="flex items-center gap-2">
-              <span class="text-slate-500">Price</span>
+              <span class="text-muted">Price</span>
               <span
                 class="rounded-full bg-emerald-500/20 px-3 py-1 font-bold text-emerald-300 ring-1 ring-emerald-500/50"
               >
@@ -183,7 +187,7 @@
             </div>
           {:else if activity.tradeValue !== null}
             <div class="flex items-center gap-2">
-              <span class="text-slate-500">Trade Value</span>
+              <span class="text-muted">Trade Value</span>
               <span
                 class="rounded-full bg-emerald-500/20 px-3 py-1 font-bold text-emerald-300 ring-1 ring-emerald-500/50"
               >
@@ -195,19 +199,19 @@
 
         <!-- User info and timestamp -->
         <div
-          class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-800 pt-4"
+          class="flex flex-wrap items-center justify-between gap-3 border-t border-subtle pt-4 text-secondary"
         >
           <div class="flex flex-col gap-1">
             {#if activity.userName}
-              <span class="font-semibold text-slate-200">{activity.userName}</span>
+              <span class="font-semibold text-primary">{activity.userName}</span>
             {:else}
-              <span class="font-semibold text-slate-200">Meeple Cart member</span>
+              <span class="font-semibold text-primary">Meeple Cart member</span>
             {/if}
             {#if activity.userLocation}
-              <span class="text-sm text-slate-400">📍 {activity.userLocation}</span>
+              <span class="text-sm text-muted">📍 {activity.userLocation}</span>
             {/if}
           </div>
-          <span class="text-sm font-medium text-slate-500">{relativeTime}</span>
+          <span class="text-sm font-medium text-muted">{relativeTime}</span>
         </div>
       </div>
     </div>

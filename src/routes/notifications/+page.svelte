@@ -13,14 +13,14 @@
   <meta name="description" content="Your notifications from Meeple Cart" />
 </svelte:head>
 
-<main class="min-h-screen bg-slate-950 px-6 py-12">
+<main class="min-h-screen bg-surface-body px-6 py-12 text-primary transition-colors">
   <div class="mx-auto max-w-4xl space-y-6">
     <!-- Header -->
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-3xl font-bold text-slate-100">Notifications</h1>
+        <h1 class="text-3xl font-bold text-primary">Notifications</h1>
         {#if hasUnread}
-          <p class="mt-1 text-sm text-slate-400">
+          <p class="mt-1 text-sm text-muted">
             {data.unreadCount} unread {data.unreadCount === 1 ? 'notification' : 'notifications'}
           </p>
         {/if}
@@ -30,19 +30,13 @@
       <div class="flex gap-2">
         {#if hasUnread}
           <form method="POST" action="?/mark_all_read" use:enhance>
-            <button
-              type="submit"
-              class="rounded-lg border border-emerald-500 bg-emerald-500/10 px-4 py-2 text-sm font-medium text-emerald-200 transition hover:bg-emerald-500/20"
-            >
+            <button type="submit" class="btn-primary px-4 py-2 text-sm font-medium">
               Mark all read
             </button>
           </form>
         {/if}
 
-        <a
-          href="/notifications/preferences"
-          class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 transition hover:border-emerald-500 hover:text-emerald-300"
-        >
+        <a href="/notifications/preferences" class="btn-ghost px-4 py-2 text-sm">
           ⚙️ Preferences
         </a>
       </div>
@@ -52,17 +46,17 @@
     <!-- Notifications List -->
     {#if data.notifications.length === 0}
       <div
-        class="rounded-2xl border-2 border-dashed border-slate-800 bg-slate-900/40 p-12 text-center"
+        class="rounded-2xl border-2 border-dashed border-subtle bg-surface-card p-12 text-center transition-colors"
       >
         <div class="mb-4 text-6xl opacity-20">🔔</div>
-        <h2 class="text-xl font-semibold text-slate-300">No notifications yet</h2>
-        <p class="mt-2 text-slate-400">
+        <h2 class="text-xl font-semibold text-secondary">No notifications yet</h2>
+        <p class="mt-2 text-muted">
           We'll notify you about new listings in your watched regions and other important updates.
         </p>
         <!-- eslint-disable svelte/no-navigation-without-resolve -->
         <a
           href="/notifications/preferences"
-          class="mt-6 inline-block rounded-lg border border-emerald-500 bg-emerald-500/10 px-6 py-2 font-medium text-emerald-200 transition hover:bg-emerald-500/20"
+          class="btn-primary mt-6 inline-block px-6 py-2 font-medium"
         >
           Set up preferences
         </a>

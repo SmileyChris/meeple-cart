@@ -6,7 +6,7 @@
 <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 <a
   {href}
-  class="relative rounded-full border border-slate-700 px-3 py-1.5 transition hover:border-emerald-500 hover:text-emerald-300"
+  class="btn-ghost relative"
   aria-label={unreadCount > 0 ? `${unreadCount} unread notifications` : 'Notifications'}
 >
   <span class="flex items-center gap-2">
@@ -20,7 +20,7 @@
     </svg>
     {#if unreadCount > 0}
       <span
-        class="flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-emerald-500 px-1.5 text-xs font-bold text-slate-900"
+        class="flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-[var(--accent)] px-1.5 text-xs font-bold text-[var(--accent-contrast)] shadow-elevated"
       >
         {unreadCount > 99 ? '99+' : unreadCount}
       </span>

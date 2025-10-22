@@ -31,11 +31,7 @@
   };
 
   $: activeCascades =
-    activeTab === 'entered'
-      ? enteredCascades
-      : activeTab === 'won'
-        ? wonCascades
-        : startedCascades;
+    activeTab === 'entered' ? enteredCascades : activeTab === 'won' ? wonCascades : startedCascades;
 </script>
 
 <svelte:head>
@@ -43,52 +39,52 @@
   <meta name="description" content="Manage your gift cascade entries, wins, and creations" />
 </svelte:head>
 
-<main class="min-h-screen bg-slate-950 px-6 py-12">
+<main class="min-h-screen bg-surface-body px-6 py-12 text-primary transition-colors">
   <div class="mx-auto max-w-6xl space-y-6">
     <!-- Header -->
     <div class="space-y-2">
       <a
         href="/cascades"
-        class="inline-flex items-center gap-1 text-sm text-slate-400 transition hover:text-emerald-400"
+        class="inline-flex items-center gap-1 text-sm text-muted transition hover:text-[var(--accent)]"
       >
         ← Back to Gift Cascades
       </a>
-      <h1 class="text-3xl font-bold text-slate-100">My Gift Cascades</h1>
-      <p class="text-slate-400">Track your gift cascade activity and manage your entries.</p>
+      <h1 class="text-3xl font-bold text-primary">My Gift Cascades</h1>
+      <p class="text-muted">Track your gift cascade activity and manage your entries.</p>
     </div>
 
     <!-- Stats Cards -->
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-      <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
-        <p class="text-sm text-slate-400">Seeded</p>
+      <div class="rounded-lg border border-subtle bg-surface-card p-4 transition-colors">
+        <p class="text-sm text-muted">Seeded</p>
         <p class="mt-1 text-2xl font-bold text-emerald-400">{stats.cascadesSeeded}</p>
       </div>
-      <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
-        <p class="text-sm text-slate-400">Received</p>
+      <div class="rounded-lg border border-subtle bg-surface-card p-4 transition-colors">
+        <p class="text-sm text-muted">Received</p>
         <p class="mt-1 text-2xl font-bold text-blue-400">{stats.cascadesReceived}</p>
       </div>
-      <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
-        <p class="text-sm text-slate-400">Passed On</p>
+      <div class="rounded-lg border border-subtle bg-surface-card p-4 transition-colors">
+        <p class="text-sm text-muted">Passed On</p>
         <p class="mt-1 text-2xl font-bold text-purple-400">{stats.cascadesPassed}</p>
       </div>
-      <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
-        <p class="text-sm text-slate-400">Broken</p>
+      <div class="rounded-lg border border-subtle bg-surface-card p-4 transition-colors">
+        <p class="text-sm text-muted">Broken</p>
         <p class="mt-1 text-2xl font-bold text-orange-400">{stats.cascadesBroken}</p>
       </div>
-      <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
-        <p class="text-sm text-slate-400">Reputation</p>
+      <div class="rounded-lg border border-subtle bg-surface-card p-4 transition-colors">
+        <p class="text-sm text-muted">Reputation</p>
         <p class="mt-1 text-2xl font-bold text-amber-400">{stats.cascadeReputation}%</p>
       </div>
     </div>
 
     <!-- Tabs -->
-    <div class="flex gap-2 border-b border-slate-800">
+    <div class="flex gap-2 border-b border-subtle">
       <button
         on:click={() => (activeTab = 'entered')}
         class={`px-4 py-2 font-medium transition ${
           activeTab === 'entered'
             ? 'border-b-2 border-emerald-500 text-emerald-400'
-            : 'text-slate-400 hover:text-slate-300'
+            : 'text-muted hover:text-secondary'
         }`}
       >
         Entered ({enteredCascades.length})
@@ -98,7 +94,7 @@
         class={`px-4 py-2 font-medium transition ${
           activeTab === 'won'
             ? 'border-b-2 border-emerald-500 text-emerald-400'
-            : 'text-slate-400 hover:text-slate-300'
+            : 'text-muted hover:text-secondary'
         }`}
       >
         Received ({wonCascades.length})
@@ -108,7 +104,7 @@
         class={`px-4 py-2 font-medium transition ${
           activeTab === 'started'
             ? 'border-b-2 border-emerald-500 text-emerald-400'
-            : 'text-slate-400 hover:text-slate-300'
+            : 'text-muted hover:text-secondary'
         }`}
       >
         Started ({startedCascades.length})
@@ -118,12 +114,12 @@
     <!-- Cascade List -->
     {#if activeCascades.length === 0}
       <div
-        class="rounded-2xl border-2 border-dashed border-slate-800 bg-slate-900/40 p-12 text-center"
+        class="rounded-2xl border-2 border-dashed border-subtle bg-surface-card p-12 text-center transition-colors"
       >
         <div class="mb-4 text-6xl opacity-20">
           {activeTab === 'entered' ? '🎯' : activeTab === 'won' ? '🏆' : '🌱'}
         </div>
-        <h2 class="text-xl font-semibold text-slate-300">
+        <h2 class="text-xl font-semibold text-secondary">
           {#if activeTab === 'entered'}
             No entries yet
           {:else if activeTab === 'won'}
@@ -132,7 +128,7 @@
             No gift cascades started
           {/if}
         </h2>
-        <p class="mt-2 text-slate-400">
+        <p class="mt-2 text-muted">
           {#if activeTab === 'entered'}
             Browse gift cascades and enter to receive free games!
           {:else if activeTab === 'won'}
@@ -143,7 +139,7 @@
         </p>
         <a
           href={activeTab === 'started' ? '/cascades/create' : '/cascades'}
-          class="mt-6 inline-block rounded-lg border border-emerald-500 bg-emerald-500/10 px-6 py-2 font-medium text-emerald-200 transition hover:bg-emerald-500/20"
+          class="btn-primary mt-6 inline-block px-6 py-2 font-medium"
         >
           {activeTab === 'started' ? 'Start a Gift Cascade' : 'Browse Gift Cascades'}
         </a>
@@ -153,14 +149,14 @@
         {#each activeCascades as cascade (cascade.id)}
           <a
             href={`/cascades/${cascade.id}`}
-            class="flex flex-col rounded-xl border border-slate-800 bg-slate-900/60 p-4 shadow transition hover:border-emerald-500/80"
+            class="flex flex-col rounded-xl border border-subtle bg-surface-card p-4 shadow-elevated transition hover:border-[var(--accent)]"
           >
             <!-- Header -->
             <div class="flex items-start justify-between gap-2">
               <div class="flex-1">
-                <h3 class="font-semibold text-slate-100">{cascade.gameTitle}</h3>
+                <h3 class="font-semibold text-primary">{cascade.gameTitle}</h3>
                 {#if cascade.name}
-                  <p class="mt-1 text-xs italic text-slate-400">"{cascade.name}"</p>
+                  <p class="mt-1 text-xs italic text-muted">"{cascade.name}"</p>
                 {/if}
               </div>
               {#if cascade.generation > 0}
@@ -174,18 +170,20 @@
 
             <!-- Metadata -->
             <div class="mt-3 flex flex-wrap items-center gap-2 text-xs">
-              <span class="rounded-full border border-slate-700 px-2 py-0.5 text-slate-300">
+              <span
+                class="rounded-full border border-subtle bg-surface-card-alt px-2 py-0.5 text-secondary transition-colors"
+              >
                 {cascade.gameCondition}
               </span>
               <span
-                class="rounded-full border border-slate-700 px-2 py-0.5 uppercase text-slate-300"
+                class="rounded-full border border-subtle bg-surface-card-alt px-2 py-0.5 uppercase text-secondary transition-colors"
               >
                 {statusLabels[cascade.status] ?? cascade.status}
               </span>
             </div>
 
             <!-- Holder/Winner Info -->
-            <p class="mt-3 text-sm text-slate-400">
+            <p class="mt-3 text-sm text-muted">
               {#if activeTab === 'started'}
                 {cascade.entryCount}
                 {cascade.entryCount === 1 ? 'entry' : 'entries'}
@@ -209,7 +207,7 @@
             {/if}
 
             <!-- Action Hint -->
-            <div class="mt-auto pt-3 text-xs text-slate-500">
+            <div class="mt-auto pt-3 text-xs text-muted">
               {#if activeTab === 'won' && cascade.status === 'awaiting_pass'}
                 ⚠️ Action required: Pass it on
               {:else if activeTab === 'started' && cascade.status === 'selecting_winner'}

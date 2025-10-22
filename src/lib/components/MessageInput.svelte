@@ -36,7 +36,7 @@
       {disabled}
       maxlength={maxLength}
       rows="3"
-      class="w-full resize-none rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-slate-100 placeholder-slate-500 focus:border-emerald-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+      class="w-full resize-none rounded-xl border border-subtle bg-surface-card px-4 py-3 text-primary placeholder:text-muted transition focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)] disabled:cursor-not-allowed disabled:opacity-50"
     />
   </div>
 
@@ -53,7 +53,7 @@
       <button
         type="submit"
         disabled={disabled || !content.trim() || content.length > maxLength}
-        class="rounded-full bg-emerald-500 px-6 py-2 font-medium text-slate-900 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
+        class="btn-primary px-6 py-2 disabled:cursor-not-allowed disabled:opacity-50"
       >
         Send
       </button>

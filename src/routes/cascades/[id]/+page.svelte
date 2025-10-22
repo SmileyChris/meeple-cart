@@ -7,7 +7,17 @@
   export let data: PageData;
   export let form: ActionData;
 
-  const { cascade, game, listing, holder, entries, history, userEntry, canEnter, eligibilityMessage } = data;
+  const {
+    cascade,
+    game,
+    listing,
+    holder,
+    entries,
+    history,
+    userEntry,
+    canEnter,
+    eligibilityMessage,
+  } = data;
 
   let entryMessage = '';
   let isSubmitting = false;
@@ -91,12 +101,12 @@
   />
 </svelte:head>
 
-<main class="min-h-screen bg-slate-950 px-6 py-12">
+<main class="min-h-screen bg-surface-body px-6 py-12 text-primary transition-colors">
   <div class="mx-auto max-w-6xl space-y-6">
     <!-- Back Link -->
     <a
       href="/cascades"
-      class="inline-flex items-center gap-1 text-sm text-slate-400 transition hover:text-emerald-400"
+      class="inline-flex items-center gap-1 text-sm text-muted transition hover:text-[var(--accent)]"
     >
       ← Back to Gift Cascades
     </a>
@@ -105,11 +115,15 @@
       <!-- Main Content (Left Column - 2 cols) -->
       <div class="space-y-6 lg:col-span-2">
         <!-- Game Card -->
-        <div class="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/60 shadow-lg">
+        <div
+          class="overflow-hidden rounded-xl border border-subtle bg-surface-card shadow-elevated transition-colors"
+        >
           {#if gameImageUrl}
             <img alt={game?.title ?? 'Game'} class="h-64 w-full object-cover" src={gameImageUrl} />
           {:else}
-            <div class="flex h-64 items-center justify-center bg-slate-800 text-8xl opacity-20">
+            <div
+              class="flex h-64 items-center justify-center bg-surface-card-alt text-8xl opacity-20 transition-colors"
+            >
               🎲
             </div>
           {/if}
@@ -131,7 +145,7 @@
                 </span>
               {/if}
               <span
-                class="inline-block rounded-full border border-slate-700 px-3 py-1 text-sm text-slate-300"
+                class="inline-block rounded-full border border-subtle bg-surface-card-alt px-3 py-1 text-sm text-secondary transition-colors"
               >
                 {statusLabels[cascade.status] ?? cascade.status}
               </span>
@@ -139,27 +153,31 @@
 
             <!-- Game Title & Condition -->
             <div>
-              <h1 class="text-3xl font-bold text-slate-100">{game?.title ?? 'Unknown Game'}</h1>
+              <h1 class="text-3xl font-bold text-primary">{game?.title ?? 'Unknown Game'}</h1>
               {#if cascade.name}
-                <p class="mt-1 text-lg italic text-slate-400">"{cascade.name}"</p>
+                <p class="mt-1 text-lg italic text-muted">"{cascade.name}"</p>
               {/if}
-              <p class="mt-2 text-slate-300">
-                Condition: <span class="font-medium">{game?.condition ?? 'Unknown'}</span>
+              <p class="mt-2 text-secondary">
+                Condition: <span class="font-medium text-primary"
+                  >{game?.condition ?? 'Unknown'}</span
+                >
               </p>
             </div>
 
             <!-- Description -->
             {#if cascade.description}
-              <div class="rounded-lg border border-slate-700 bg-slate-800/40 p-4">
-                <p class="text-sm text-slate-300">{cascade.description}</p>
+              <div
+                class="rounded-lg border border-subtle bg-surface-card-alt p-4 transition-colors"
+              >
+                <p class="text-sm text-secondary">{cascade.description}</p>
               </div>
             {/if}
 
             <!-- Game Notes -->
             {#if game?.notes}
               <div>
-                <h3 class="font-semibold text-slate-200">Game Notes:</h3>
-                <p class="mt-1 text-sm text-slate-400">{game.notes}</p>
+                <h3 class="font-semibold text-secondary">Game Notes:</h3>
+                <p class="mt-1 text-sm text-muted">{game.notes}</p>
               </div>
             {/if}
 
@@ -174,15 +192,15 @@
             <!-- Shipping & Region -->
             <div class="flex flex-wrap gap-4 text-sm">
               <div>
-                <span class="text-slate-400">Shipping:</span>
-                <span class="ml-2 font-medium text-slate-200">
+                <span class="text-muted">Shipping:</span>
+                <span class="ml-2 font-medium text-secondary">
                   {shippingLabels[cascade.shippingRequirement] ?? cascade.shippingRequirement}
                 </span>
               </div>
               {#if cascade.region}
                 <div>
-                  <span class="text-slate-400">Region:</span>
-                  <span class="ml-2 font-medium text-slate-200">
+                  <span class="text-muted">Region:</span>
+                  <span class="ml-2 font-medium text-secondary">
                     {REGION_LABELS[cascade.region] ?? cascade.region.toUpperCase()}
                   </span>
                 </div>
@@ -205,17 +223,17 @@
 
         <!-- Holder Info -->
         {#if holder}
-          <div class="rounded-xl border border-slate-800 bg-slate-900/60 p-6">
-            <h2 class="text-xl font-semibold text-slate-100">Current Holder</h2>
+          <div class="rounded-xl border border-subtle bg-surface-card p-6 transition-colors">
+            <h2 class="text-xl font-semibold text-primary">Current Holder</h2>
             <div class="mt-4 flex items-start gap-4">
               <div class="flex-1">
                 <a
                   href={`/users/${holder.id}`}
-                  class="text-lg font-medium text-emerald-400 hover:text-emerald-300"
+                  class="text-lg font-medium text-emerald-400 transition hover:text-emerald-300"
                 >
                   {holder.displayName}
                 </a>
-                <div class="mt-2 flex flex-wrap gap-3 text-sm text-slate-400">
+                <div class="mt-2 flex flex-wrap gap-3 text-sm text-muted">
                   <span>{holder.vouchCount} vouches</span>
                   <span>·</span>
                   <span>{holder.tradeCount} trades</span>
@@ -233,27 +251,31 @@
 
         <!-- Entries List -->
         {#if cascade.status === 'accepting_entries'}
-          <div class="rounded-xl border border-slate-800 bg-slate-900/60 p-6">
-            <h2 class="text-xl font-semibold text-slate-100">
+          <div class="rounded-xl border border-subtle bg-surface-card p-6 transition-colors">
+            <h2 class="text-xl font-semibold text-primary">
               Entries ({entries.length})
             </h2>
             {#if entries.length === 0}
-              <p class="mt-4 text-sm text-slate-400">No entries yet. Be the first to enter this gift cascade!</p>
+              <p class="mt-4 text-sm text-muted">
+                No entries yet. Be the first to enter this gift cascade!
+              </p>
             {:else}
               <div class="mt-4 space-y-3">
                 {#each entries as entry (entry.id)}
-                  <div class="rounded-lg border border-slate-700 bg-slate-800/40 p-3">
+                  <div
+                    class="rounded-lg border border-subtle bg-surface-card-alt p-3 transition-colors"
+                  >
                     <a
                       href={entry.userId ? `/users/${entry.userId}` : '#'}
-                      class="font-medium text-slate-200 hover:text-emerald-400"
+                      class="font-medium text-secondary transition hover:text-[var(--accent)]"
                     >
                       {entry.userName}
                     </a>
-                    <span class="ml-2 text-xs text-slate-500">
+                    <span class="ml-2 text-xs text-muted">
                       {formatRelativeTime(entry.created)}
                     </span>
                     {#if entry.message}
-                      <p class="mt-1 text-sm text-slate-400 italic">"{entry.message}"</p>
+                      <p class="mt-1 text-sm italic text-muted">"{entry.message}"</p>
                     {/if}
                   </div>
                 {/each}
@@ -264,13 +286,13 @@
 
         <!-- History -->
         {#if history.length > 0}
-          <div class="rounded-xl border border-slate-800 bg-slate-900/60 p-6">
-            <h2 class="text-xl font-semibold text-slate-100">Gift Cascade History</h2>
+          <div class="rounded-xl border border-subtle bg-surface-card p-6 transition-colors">
+            <h2 class="text-xl font-semibold text-primary">Gift Cascade History</h2>
             <div class="mt-4 space-y-2">
               {#each history.slice(0, showFullHistory ? undefined : 5) as h (h.eventDate)}
                 <div class="flex items-start gap-3 text-sm">
-                  <span class="text-slate-500">{formatRelativeTime(h.eventDate)}</span>
-                  <span class="flex-1 text-slate-300">
+                  <span class="text-muted">{formatRelativeTime(h.eventDate)}</span>
+                  <span class="flex-1 text-secondary">
                     <strong>{h.actorName}</strong>
                     {#if h.eventType === 'seeded'}
                       started this gift cascade
@@ -292,7 +314,7 @@
             {#if history.length > 5 && !showFullHistory}
               <button
                 on:click={() => (showFullHistory = true)}
-                class="mt-3 text-sm text-emerald-400 hover:text-emerald-300"
+                class="mt-3 text-sm text-[var(--accent)] transition hover:text-[var(--accent-strong)]"
               >
                 Show all history ({history.length} events)
               </button>
@@ -304,19 +326,25 @@
       <!-- Sidebar (Right Column - 1 col) -->
       <div class="space-y-6">
         <!-- Deadline Card -->
-        <div class="rounded-xl border border-slate-800 bg-slate-900/60 p-6">
-          <h3 class="text-lg font-semibold text-slate-100">Entry Deadline</h3>
-          <p class="mt-2 text-2xl font-bold {timeRemaining.urgent ? 'text-orange-400' : 'text-emerald-400'}">
+        <div class="rounded-xl border border-subtle bg-surface-card p-6 transition-colors">
+          <h3 class="text-lg font-semibold text-primary">Entry Deadline</h3>
+          <p
+            class="mt-2 text-2xl font-bold {timeRemaining.urgent
+              ? 'text-orange-400'
+              : 'text-emerald-400'}"
+          >
             {timeRemaining.text}
           </p>
-          <p class="mt-1 text-xs text-slate-500">{formatDate(cascade.deadline)}</p>
+          <p class="mt-1 text-xs text-muted">{formatDate(cascade.deadline)}</p>
         </div>
 
         <!-- Entry Actions -->
         {#if cascade.status === 'accepting_entries'}
-          <div class="rounded-xl border border-slate-800 bg-slate-900/60 p-6">
+          <div class="rounded-xl border border-subtle bg-surface-card p-6 transition-colors">
             {#if form?.success}
-              <div class="rounded-lg border border-emerald-500 bg-emerald-500/10 p-4 text-emerald-200 mb-4">
+              <div
+                class="rounded-lg border border-emerald-500 bg-emerald-500/10 p-4 text-emerald-200 mb-4"
+              >
                 {form.message}
               </div>
             {/if}
@@ -350,7 +378,7 @@
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    class="w-full rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 transition hover:border-rose-500 hover:text-rose-300 disabled:opacity-50"
+                    class="btn-ghost w-full px-4 py-2 text-sm hover:border-rose-500 hover:text-rose-300 disabled:opacity-50"
                   >
                     {isSubmitting ? 'Withdrawing...' : 'Withdraw Entry'}
                   </button>
@@ -371,7 +399,7 @@
                 class="space-y-4"
               >
                 <div>
-                  <label for="message" class="block text-sm font-medium text-slate-300 mb-2">
+                  <label for="message" class="mb-2 block text-sm font-medium text-secondary">
                     Message (optional)
                   </label>
                   <textarea
@@ -381,13 +409,13 @@
                     maxlength="500"
                     rows="3"
                     placeholder="Why do you want this game?"
-                    class="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-2.5 text-slate-100 placeholder-slate-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                    class="w-full rounded-lg border border-subtle bg-surface-card px-4 py-2.5 text-primary placeholder:text-muted transition focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  class="w-full rounded-lg border border-emerald-500 bg-emerald-500/10 px-6 py-3 font-semibold text-emerald-200 transition hover:bg-emerald-500/20 disabled:opacity-50"
+                  class="btn-primary w-full px-6 py-3 font-semibold disabled:opacity-50"
                 >
                   {isSubmitting ? 'Entering...' : 'Enter to Receive'}
                 </button>
@@ -402,20 +430,20 @@
         {/if}
 
         <!-- Stats -->
-        <div class="rounded-xl border border-slate-800 bg-slate-900/60 p-6">
-          <h3 class="text-lg font-semibold text-slate-100">Stats</h3>
+        <div class="rounded-xl border border-subtle bg-surface-card p-6 transition-colors">
+          <h3 class="text-lg font-semibold text-primary">Stats</h3>
           <div class="mt-4 space-y-2 text-sm">
             <div class="flex justify-between">
-              <span class="text-slate-400">Total Entries:</span>
-              <span class="font-medium text-slate-200">{cascade.entryCount}</span>
+              <span class="text-muted">Total Entries:</span>
+              <span class="font-medium text-secondary">{cascade.entryCount}</span>
             </div>
             <div class="flex justify-between">
-              <span class="text-slate-400">Generation:</span>
-              <span class="font-medium text-slate-200">{cascade.generation}</span>
+              <span class="text-muted">Generation:</span>
+              <span class="font-medium text-secondary">{cascade.generation}</span>
             </div>
             <div class="flex justify-between">
-              <span class="text-slate-400">Views:</span>
-              <span class="font-medium text-slate-200">{cascade.viewCount}</span>
+              <span class="text-muted">Views:</span>
+              <span class="font-medium text-secondary">{cascade.viewCount}</span>
             </div>
           </div>
         </div>

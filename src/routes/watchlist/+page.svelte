@@ -39,29 +39,26 @@
   <meta name="description" content="Your watched listings on Meeple Cart" />
 </svelte:head>
 
-<main class="min-h-screen bg-slate-950 px-6 py-12">
+<main class="min-h-screen bg-surface-body px-6 py-12 text-primary transition-colors">
   <div class="mx-auto max-w-6xl space-y-6">
     <!-- Header -->
     <div class="space-y-2">
-      <h1 class="text-3xl font-bold text-slate-100">Watchlist</h1>
-      <p class="text-slate-400">Listings you're watching. You'll be notified when prices drop.</p>
+      <h1 class="text-3xl font-bold text-primary">Watchlist</h1>
+      <p class="text-muted">Listings you're watching. You'll be notified when prices drop.</p>
     </div>
 
     <!-- Listings -->
     {#if watchedListings.length === 0}
       <div
-        class="rounded-2xl border-2 border-dashed border-slate-800 bg-slate-900/40 p-12 text-center"
+        class="rounded-2xl border-2 border-dashed border-subtle bg-surface-card p-12 text-center transition-colors"
       >
         <div class="mb-4 text-6xl opacity-20">⭐</div>
-        <h2 class="text-xl font-semibold text-slate-300">No watched listings yet</h2>
-        <p class="mt-2 text-slate-400">
+        <h2 class="text-xl font-semibold text-secondary">No watched listings yet</h2>
+        <p class="mt-2 text-muted">
           Browse listings and click the star icon to add them to your watchlist.
         </p>
         <!-- eslint-disable svelte/no-navigation-without-resolve -->
-        <a
-          href="/"
-          class="mt-6 inline-block rounded-lg border border-emerald-500 bg-emerald-500/10 px-6 py-2 font-medium text-emerald-200 transition hover:bg-emerald-500/20"
-        >
+        <a href="/" class="btn-primary mt-6 inline-block px-6 py-2 font-medium">
           Browse listings
         </a>
         <!-- eslint-enable svelte/no-navigation-without-resolve -->
@@ -70,7 +67,7 @@
       <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {#each watchedListings as item (item.watchlistId)}
           <div
-            class="group flex flex-col overflow-hidden rounded-xl border border-slate-800 bg-slate-900/60 shadow transition hover:border-emerald-500/80 hover:shadow-lg"
+            class="group flex flex-col overflow-hidden rounded-xl border border-subtle bg-surface-card shadow-elevated transition hover:border-[var(--accent)] hover:shadow-lg"
           >
             <!-- Cover Image -->
             <!-- eslint-disable svelte/no-navigation-without-resolve -->
@@ -81,7 +78,7 @@
             {:else}
               <a
                 href={`/listings/${item.listingId}`}
-                class="flex h-48 items-center justify-center bg-slate-800 text-6xl opacity-20"
+                class="flex h-48 items-center justify-center bg-surface-card-alt text-6xl opacity-20"
               >
                 🎲
               </a>
@@ -89,18 +86,20 @@
 
             <div class="flex flex-1 flex-col p-4">
               <!-- Title -->
-              <a href={`/listings/${item.listingId}`} class="group-hover:text-emerald-300">
-                <h3 class="text-lg font-semibold text-slate-100">{item.title}</h3>
+              <a href={`/listings/${item.listingId}`} class="transition hover:text-[var(--accent)]">
+                <h3 class="text-lg font-semibold text-primary">{item.title}</h3>
               </a>
 
               <!-- Metadata -->
-              <div class="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-400">
+              <div class="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted">
                 <span
                   class="rounded-full border border-emerald-600 px-2 py-0.5 uppercase text-emerald-200"
                 >
                   {typeLabels[item.listingType] ?? item.listingType}
                 </span>
-                <span class="rounded-full border border-slate-700 px-2 py-0.5">
+                <span
+                  class="rounded-full border border-subtle bg-surface-card-alt px-2 py-0.5 text-secondary transition-colors"
+                >
                   {statusLabels[item.status] ?? item.status}
                 </span>
                 {#if item.location}
@@ -109,7 +108,7 @@
               </div>
 
               <!-- Game count & owner -->
-              <div class="mt-3 text-sm text-slate-400">
+              <div class="mt-3 text-sm text-muted">
                 {item.gameCount}
                 {item.gameCount === 1 ? 'game' : 'games'}
                 {#if item.ownerName}
@@ -118,15 +117,15 @@
               </div>
 
               <!-- Watched date -->
-              <div class="mt-2 text-xs text-slate-500">
+              <div class="mt-2 text-xs text-muted">
                 Watching since {formatRelativeTime(item.watchedAt)}
               </div>
 
               <!-- Actions -->
-              <div class="mt-4 flex gap-2 border-t border-slate-800 pt-3">
+              <div class="mt-4 flex gap-2 border-t border-subtle pt-3">
                 <a
                   href={`/listings/${item.listingId}`}
-                  class="flex-1 rounded-lg border border-slate-700 px-3 py-2 text-center text-sm text-slate-200 transition hover:border-emerald-500 hover:text-emerald-300"
+                  class="flex-1 rounded-lg border border-subtle px-3 py-2 text-center text-sm text-secondary transition hover:border-[var(--accent)] hover:text-[var(--accent-strong)]"
                 >
                   View listing
                 </a>
@@ -135,7 +134,7 @@
                   <input type="hidden" name="watchlist_id" value={item.watchlistId} />
                   <button
                     type="submit"
-                    class="rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-400 transition hover:border-rose-500 hover:text-rose-300"
+                    class="btn-ghost px-3 py-2 text-sm hover:border-rose-500 hover:text-rose-300"
                     title="Remove from watchlist"
                   >
                     ✕
@@ -148,7 +147,9 @@
       </div>
 
       <!-- Stats -->
-      <div class="rounded-lg border border-slate-800 bg-slate-900/40 p-4 text-sm text-slate-400">
+      <div
+        class="rounded-lg border border-subtle bg-surface-panel p-4 text-sm text-muted transition-colors"
+      >
         <p>
           Watching {watchedListings.length}
           {watchedListings.length === 1 ? 'listing' : 'listings'}
