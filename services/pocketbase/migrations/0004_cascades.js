@@ -4,122 +4,7 @@ migrate(
   (db) => {
     const dao = new Dao(db);
 
-    // 1. Update users collection - add cascade stats fields
-    const usersCollection = dao.findCollectionByNameOrId('fhggsowykv3hz86');
-
-    usersCollection.schema.addField(
-      new SchemaField({
-        id: 'casc1seeded0001',
-        name: 'cascades_seeded',
-        type: 'number',
-        required: true,
-        options: {
-          min: 0,
-          max: null,
-        },
-      })
-    );
-
-    usersCollection.schema.addField(
-      new SchemaField({
-        id: 'casc2received02',
-        name: 'cascades_received',
-        type: 'number',
-        required: true,
-        options: {
-          min: 0,
-          max: null,
-        },
-      })
-    );
-
-    usersCollection.schema.addField(
-      new SchemaField({
-        id: 'casc3passed0003',
-        name: 'cascades_passed',
-        type: 'number',
-        required: true,
-        options: {
-          min: 0,
-          max: null,
-        },
-      })
-    );
-
-    usersCollection.schema.addField(
-      new SchemaField({
-        id: 'casc4broken0004',
-        name: 'cascades_broken',
-        type: 'number',
-        required: true,
-        options: {
-          min: 0,
-          max: null,
-        },
-      })
-    );
-
-    usersCollection.schema.addField(
-      new SchemaField({
-        id: 'casc5reputation',
-        name: 'cascade_reputation',
-        type: 'number',
-        required: true,
-        options: {
-          min: 0,
-          max: 100,
-        },
-      })
-    );
-
-    usersCollection.schema.addField(
-      new SchemaField({
-        id: 'casc6restrict06',
-        name: 'cascade_restricted_until',
-        type: 'date',
-        required: false,
-        options: {
-          min: null,
-          max: null,
-        },
-      })
-    );
-
-    usersCollection.schema.addField(
-      new SchemaField({
-        id: 'casc7canenter7',
-        name: 'can_enter_cascades',
-        type: 'bool',
-        required: true,
-        options: {},
-      })
-    );
-
-    dao.saveCollection(usersCollection);
-
-    // Initialize cascade fields for existing users
-    db.newQuery(
-      'UPDATE users SET cascades_seeded = 0, cascades_received = 0, cascades_passed = 0, cascades_broken = 0, cascade_reputation = 50, can_enter_cascades = TRUE WHERE cascades_seeded IS NULL'
-    ).execute();
-
-    // 2. Update notifications collection - add cascade notification types
-    const notificationsCollection = dao.findCollectionByNameOrId('notifications_collection');
-    const typeField = notificationsCollection.schema.getFieldByName('type');
-    typeField.options.values = [
-      'new_listing',
-      'new_message',
-      'price_drop',
-      'listing_update',
-      'cascade_won',
-      'cascade_shipped',
-      'cascade_received',
-      'cascade_reminder',
-      'cascade_deadline',
-      'cascade_broken',
-    ];
-    dao.saveCollection(notificationsCollection);
-
-    // 3. Create cascades collection
+    // 1. Create cascades collection
     const cascadesCollection = new Collection({
       id: 'm5n6p7q8r9s0t1u',
       name: 'cascades',
@@ -357,7 +242,7 @@ migrate(
 
     dao.saveCollection(cascadesCollection);
 
-    // 4. Create cascade_entries collection
+    // 2. Create cascade_entries collection
     const entriesCollection = new Collection({
       id: 'v2w3x4y5z6a7b8c',
       name: 'cascade_entries',
@@ -421,7 +306,7 @@ migrate(
 
     dao.saveCollection(entriesCollection);
 
-    // 5. Create cascade_history collection
+    // 3. Create cascade_history collection
     const historyCollection = new Collection({
       id: 'd9e0f1g2h3i4j5k',
       name: 'cascade_history',
@@ -552,6 +437,121 @@ migrate(
     });
 
     dao.saveCollection(historyCollection);
+
+    // 4. Add cascade stats fields to users collection
+    const usersCollection = dao.findCollectionByNameOrId('fhggsowykv3hz86');
+
+    usersCollection.schema.addField(
+      new SchemaField({
+        id: 'casc1seeded0001',
+        name: 'cascades_seeded',
+        type: 'number',
+        required: true,
+        options: {
+          min: 0,
+          max: null,
+        },
+      })
+    );
+
+    usersCollection.schema.addField(
+      new SchemaField({
+        id: 'casc2received02',
+        name: 'cascades_received',
+        type: 'number',
+        required: true,
+        options: {
+          min: 0,
+          max: null,
+        },
+      })
+    );
+
+    usersCollection.schema.addField(
+      new SchemaField({
+        id: 'casc3passed0003',
+        name: 'cascades_passed',
+        type: 'number',
+        required: true,
+        options: {
+          min: 0,
+          max: null,
+        },
+      })
+    );
+
+    usersCollection.schema.addField(
+      new SchemaField({
+        id: 'casc4broken0004',
+        name: 'cascades_broken',
+        type: 'number',
+        required: true,
+        options: {
+          min: 0,
+          max: null,
+        },
+      })
+    );
+
+    usersCollection.schema.addField(
+      new SchemaField({
+        id: 'casc5reputation',
+        name: 'cascade_reputation',
+        type: 'number',
+        required: true,
+        options: {
+          min: 0,
+          max: 100,
+        },
+      })
+    );
+
+    usersCollection.schema.addField(
+      new SchemaField({
+        id: 'casc6restrict06',
+        name: 'cascade_restricted_until',
+        type: 'date',
+        required: false,
+        options: {
+          min: null,
+          max: null,
+        },
+      })
+    );
+
+    usersCollection.schema.addField(
+      new SchemaField({
+        id: 'casc7canenter7',
+        name: 'can_enter_cascades',
+        type: 'bool',
+        required: true,
+        options: {},
+      })
+    );
+
+    dao.saveCollection(usersCollection);
+
+    // Initialize cascade fields for existing users
+    db.newQuery(
+      'UPDATE users SET cascades_seeded = 0, cascades_received = 0, cascades_passed = 0, cascades_broken = 0, cascade_reputation = 50, can_enter_cascades = TRUE WHERE cascades_seeded IS NULL'
+    ).execute();
+
+    // 5. Update notifications collection - add cascade notification types
+    const notificationsCollection = dao.findCollectionByNameOrId('notifications_collection');
+    const typeField = notificationsCollection.schema.getFieldByName('type');
+    typeField.options.values = [
+      'new_listing',
+      'new_message',
+      'price_drop',
+      'listing_update',
+      'cascade_won',
+      'cascade_shipped',
+      'cascade_received',
+      'cascade_reminder',
+      'cascade_deadline',
+      'cascade_broken',
+    ];
+    dao.saveCollection(notificationsCollection);
 
     return null;
   },

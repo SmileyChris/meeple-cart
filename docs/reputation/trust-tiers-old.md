@@ -3,6 +3,7 @@
 ## Problem Statement
 
 New accounts pose higher risk in peer-to-peer trading platforms. Users need clear, immediate visibility into:
+
 - How long an account has existed
 - Whether the trader has a proven track record
 - What precautions to take when trading with new members
@@ -22,12 +23,12 @@ Currently, Meeple Cart shows trade counts and vouch counts, but doesn't prominen
 
 Users are automatically assigned to one of four trust tiers based on account age and activity:
 
-| Tier | Icon | Criteria | Description |
-|------|------|----------|-------------|
-| **New** | 🆕 | < 30 days old AND < 3 trades | Brand new member, highest caution advised |
-| **Growing** | 🌱 | 30-90 days old OR 3-9 trades | Building reputation, moderate trust |
-| **Established** | ✅ | 90+ days old AND 10+ trades | Experienced trader with proven history |
-| **Trusted** | ⭐ | 1+ year old AND (50+ trades OR 20+ vouches) | Highly trusted community pillar |
+| Tier            | Icon | Criteria                                    | Description                               |
+| --------------- | ---- | ------------------------------------------- | ----------------------------------------- |
+| **New**         | 🆕   | < 30 days old AND < 3 trades                | Brand new member, highest caution advised |
+| **Growing**     | 🌱   | 30-90 days old OR 3-9 trades                | Building reputation, moderate trust       |
+| **Established** | ✅   | 90+ days old AND 10+ trades                 | Experienced trader with proven history    |
+| **Trusted**     | ⭐   | 1+ year old AND (50+ trades OR 20+ vouches) | Highly trusted community pillar           |
 
 ### Tier Calculation Logic
 
@@ -46,6 +47,7 @@ ELSE
 ```
 
 **Key principles:**
+
 - Time alone isn't enough (except to exit "New" tier)
 - Activity accelerates trust building (3 trades moves you to "Growing" even if < 30 days)
 - Higher tiers require BOTH time AND activity
@@ -58,6 +60,7 @@ ELSE
 Trust badges appear as small, rounded pills next to user names throughout the platform.
 
 **New Member Badge:**
+
 ```
 🆕 New member (5 days old)
 Border: Amber (#f59e0b)
@@ -66,6 +69,7 @@ Text: Amber-200
 ```
 
 **Growing Member Badge:**
+
 ```
 🌱 Growing member
 Border: Sky blue (#0ea5e9)
@@ -74,6 +78,7 @@ Text: Sky-200
 ```
 
 **Established Member Badge:**
+
 ```
 ✅ Established member
 Border: Emerald (#10b981)
@@ -82,6 +87,7 @@ Text: Emerald-200
 ```
 
 **Trusted Member Badge:**
+
 ```
 ⭐ Trusted member
 Border: Violet (#8b5cf6)
@@ -104,6 +110,7 @@ Member since: [date]
 ```
 
 **Hover/tooltip:** Shows full tier description
+
 - "New member - use caution and prefer tracked shipping"
 
 #### 2. Listing Detail Pages
@@ -196,6 +203,7 @@ Member since Oct 15, 2025 (5 days ago)
 ```
 
 For new members specifically:
+
 ```
 Member since Oct 15, 2025 (joined 5 days ago, no trades yet)
 ```
@@ -234,17 +242,20 @@ Progress to Growing Member:
 **No intrusive warnings** - badges are informational only for Growing/Established/Trusted tiers
 
 **Optional:** Filter/sort search results by trust tier
+
 - "Show only Established or Trusted members"
 - Sort by: "Most trusted first"
 
 ## Data Requirements
 
 ### Existing Fields (already in schema)
+
 - `joined_date` - timestamp
 - `trade_count` - integer
 - `vouch_count` - integer
 
 ### Computed Fields (calculated on-the-fly)
+
 - `account_age_days` - days since joined_date
 - `trust_tier` - enum based on calculation
 - `is_high_risk` - boolean (new tier + < 2 trades)
@@ -254,6 +265,7 @@ Progress to Growing Member:
 ## Implementation Phases
 
 ### Phase 1: Core Visibility (Week 1)
+
 - [ ] Create trust tier utility functions
 - [ ] Add badges to user profile pages
 - [ ] Add badges to listing detail pages
@@ -261,18 +273,21 @@ Progress to Growing Member:
 - [ ] Update "Member since" displays to include relative time
 
 ### Phase 2: Universal Badges (Week 1-2)
+
 - [ ] Add badges to search results
 - [ ] Add badges to message threads
 - [ ] Add badges to vouch displays
 - [ ] Add badges to user mentions anywhere
 
 ### Phase 3: Warnings & Guidance (Week 2)
+
 - [ ] Implement high-risk trade confirmation dialog
 - [ ] Add onboarding messaging for new members
 - [ ] Add "progress to next tier" on own profile
 - [ ] Create "Safe Trading Guide" help page
 
 ### Phase 4: Search & Filtering (Week 3)
+
 - [ ] Add trust tier filter to search
 - [ ] Add "sort by trust" option
 - [ ] Show tier distribution in search results ("5 Trusted, 12 Established, 3 New")
@@ -284,9 +299,11 @@ The trust tier system must be resilient against manipulation by individuals or c
 ### Attack Vectors
 
 #### 1. Collusion Rings
+
 **Attack:** Group of 5-10 people trade only with each other to rapidly build trust scores.
 
 **Detection signals:**
+
 - Closed trading network (users only trade within small group)
 - Symmetric trade patterns (A↔B, B↔C, C↔A in loops)
 - Rapid succession trades (10 trades in 2 weeks all within same group)
@@ -294,6 +311,7 @@ The trust tier system must be resilient against manipulation by individuals or c
 - Similar IP addresses or device fingerprints
 
 **Automated flags:**
+
 ```
 IF user_trades_count >= 10 AND
    unique_trading_partners < 3 AND
@@ -302,15 +320,18 @@ IF user_trades_count >= 10 AND
 ```
 
 **Countermeasures:**
+
 - **Trust diversity requirement**: To reach Established tier, must have traded with at least 5 different users
 - **Network analysis**: Flag clusters of new accounts with only internal trades
 - **Vouch weight discount**: If 80%+ of vouches come from same 3 people, reduce weight by 50%
 - **Manual review trigger**: Automatic moderator review when patterns detected
 
 #### 2. Sockpuppet Accounts
+
 **Attack:** One person creates multiple accounts to vouch for their primary account.
 
 **Detection signals:**
+
 - Multiple accounts from same IP address
 - Similar writing style/patterns in messages (NLP analysis)
 - Vouches from accounts with no other trading activity
@@ -318,6 +339,7 @@ IF user_trades_count >= 10 AND
 - Payment method reuse across accounts
 
 **Automated flags:**
+
 ```
 IF new_vouch_received FROM voucher WHERE
    voucher.created_from_ip IN user.known_ips OR
@@ -327,21 +349,25 @@ IF new_vouch_received FROM voucher WHERE
 ```
 
 **Countermeasures:**
+
 - **Voucher minimum requirements**: Can't vouch others until Growing tier (30+ days OR 3+ trades with different people)
 - **Cross-account fingerprinting**: Track device IDs, IPs, browser fingerprints
 - **Vouch weighting**: Vouches from accounts with diverse trading history worth more
 - **New account restrictions**: Accounts < 14 days can't vouch anyone
 
 #### 3. Fast-Flip Scam
+
 **Attack:** Build trust over 90 days with small trades, then execute one large scam and disappear.
 
 **Detection signals:**
+
 - Sudden shift to high-value trades (pattern break)
 - User requests prepayment for first time
 - Rapid listing of many expensive items after period of small trades
 - Trading partner reports "user pressuring for quick payment"
 
 **Automated flags:**
+
 ```
 IF average_trade_value < $50 for last 10 trades AND
    new_listing_value > $500
@@ -349,6 +375,7 @@ IF average_trade_value < $50 for last 10 trades AND
 ```
 
 **Countermeasures:**
+
 - **Graduated value limits**:
   - New tier: Max $100 per trade
   - Growing tier: Max $500 per trade
@@ -358,9 +385,11 @@ IF average_trade_value < $50 for last 10 trades AND
 - **Trade value history**: Show average trade value on profile ("Typical trades: $20-60")
 
 #### 4. Account Purchase/Takeover
+
 **Attack:** Buy or hack an Established account to bypass trust building.
 
 **Detection signals:**
+
 - Sudden change in behavior patterns (listing style, communication tone, location)
 - Password reset from new IP/device
 - Change in preferred contact method
@@ -368,6 +397,7 @@ IF average_trade_value < $50 for last 10 trades AND
 - Old trading partners report "this doesn't seem like the same person"
 
 **Automated flags:**
+
 ```
 IF account_inactive > 180 days AND
    suddenly_active WITH (
@@ -379,15 +409,18 @@ IF account_inactive > 180 days AND
 ```
 
 **Countermeasures:**
+
 - **Re-verification on reactivation**: Require phone/email re-verification after 6+ months inactive
 - **Location change warnings**: If location changes, show notice to trading partners
 - **Behavioral analysis**: Flag dramatic shifts in communication style or trading patterns
 - **Cooling-off period**: After long inactivity, require 2-3 small trades before unlimited access
 
 #### 5. Vouch/Trade Buying
+
 **Attack:** Pay people (off-platform) to trade and vouch.
 
 **Detection signals:**
+
 - Vouches from users with no apparent connection (different cities, no mutual contacts)
 - Generic vouch messages ("good trader" × 10 with identical text)
 - Vouches clustered in time (5 vouches in one day)
@@ -395,6 +428,7 @@ IF account_inactive > 180 days AND
 - Vouchers have pattern of vouching many unrelated people
 
 **Automated flags:**
+
 ```
 IF user receives 5+ vouches within 48 hours FROM
    vouchers with no geographic/network proximity AND
@@ -403,6 +437,7 @@ IF user receives 5+ vouches within 48 hours FROM
 ```
 
 **Countermeasures:**
+
 - **Vouch rate limiting**: Max 5 vouches received per week
 - **Relationship signals required**: Weight vouches higher if users have mutual connections
 - **Generic message detection**: Flag repetitive vouch text
@@ -412,9 +447,11 @@ IF user receives 5+ vouches within 48 hours FROM
 ### Group Coordination Attacks
 
 #### Organized Fraud Rings
+
 **Attack:** Criminal group creates 20+ accounts, builds collective trust over months, then executes coordinated scam wave.
 
 **Detection patterns:**
+
 - Graph analysis reveals tight cluster
 - Accounts created in batches (10 accounts in one week)
 - Similar naming patterns or profile structures
@@ -422,6 +459,7 @@ IF user receives 5+ vouches within 48 hours FROM
 - IP address overlaps or sequential ranges
 
 **Advanced countermeasures:**
+
 - **Network graph analysis**: Visualize trading relationships, flag isolated dense clusters
 - **Velocity limits**: Cap new account registrations from same IP/subnet
 - **CAPTCHA strengthening**: Require phone verification before first trade
@@ -468,16 +506,19 @@ trust_flags {
 Enable the community to help identify bad actors:
 
 **Report mechanisms:**
+
 - "Report suspicious activity" on any profile
 - Required fields: Pattern observed, evidence/examples
 - Escalation threshold: 3 independent reports trigger moderator review
 
 **Transparency:**
+
 - Public log of moderation actions (anonymized)
 - "This account was flagged for review on [date]" visible on profile during investigation
 - Clear appeal process for false positives
 
 **Incentives:**
+
 - Users who report confirmed fraud get "Community Guardian 🛡️" badge
 - Reporters build meta-reputation for accurate flags
 
@@ -486,24 +527,28 @@ Enable the community to help identify bad actors:
 When bad actor patterns detected:
 
 **Level 1: Soft warning** (confidence < 50%)
+
 - Add temporary "Under review" notice to profile
 - Require tracked shipping for all trades
 - Limit to 1 trade per week
 - Notify user of concern and evidence
 
 **Level 2: Restriction** (confidence 50-80%)
+
 - Temporarily demote trust tier by one level
 - Require re-verification (phone, email)
 - Prohibit trades > $100
 - 30-day probation period
 
 **Level 3: Suspension** (confidence > 80%)
+
 - Account suspended pending investigation
 - All active trades/listings frozen
 - Moderator deep-dive review required
 - Contact recent trading partners for welfare check
 
 **Level 4: Ban** (confirmed fraud)
+
 - Permanent ban with public log entry
 - Fingerprint blacklist (prevent re-registration)
 - Notify recent trading partners
@@ -514,35 +559,42 @@ When bad actor patterns detected:
 Important: These systems must not punish legitimate behavior:
 
 **Family/household traders:**
+
 - Couple shares collection, both have accounts
 - **Solution:** Allow account linking, show "Linked to [Partner]" on profile
 
 **Game store owners:**
+
 - High volume, concentrated trades
 - **Solution:** "Verified Retailer" designation with different rules
 
 **Regional clubs:**
+
 - Members trade mostly within club
 - **Solution:** "Club Member" badge, group vouching allowed
 
 **Collection liquidation:**
+
 - Inactive user returns to sell entire collection
 - **Solution:** Reactivation verification flow, graduated re-onboarding
 
 ### Success Metrics
 
 **Detection effectiveness:**
+
 - False positive rate < 5% (legitimate users incorrectly flagged)
 - False negative rate < 10% (bad actors slip through)
 - Time to detection: < 3 trades for collusion rings
 - Community report accuracy: > 70%
 
 **Deterrence:**
+
 - Reduction in fraud attempts over time
 - Bad actors don't reach Established tier
 - Attempted gaming visible in analytics
 
 **Fairness:**
+
 - < 1% of users appeal trust tier calculation
 - Appeals resolved within 48 hours
 - User satisfaction with safety measures > 4.5/5
@@ -550,42 +602,51 @@ Important: These systems must not punish legitimate behavior:
 ## Edge Cases & Considerations
 
 ### Reactivated Accounts
+
 - User joined 2 years ago but hasn't traded in 18 months
 - **Approach:** Still counts as "Trusted" if criteria met, but consider future reputation decay
 
 ### Bulk Trades
+
 - User completes 10 trades in first week (possible gaming)
 - **Approach:** Account age still gates "Established" tier (90 days required)
 
 ### Vouch Bombing
+
 - User gets 25 vouches in one day from friends
 - **Mitigation:** Addressed by existing vouch moderation system
 
 ### Privacy Concerns
+
 - Some users may feel labeled/stigmatized as "New"
 - **Approach:** Frame positively ("Growing", "Building trust"), show as protective not punitive
 
 ### Display Clutter
+
 - Badges everywhere could be visual noise
 - **Approach:** Use subtle styling, only New tier gets prominent treatment
 
 ## Future Enhancements
 
 ### Reputation Decay (Phase 2+)
+
 - Vouches > 1 year old count at reduced weight
 - Inactivity > 6 months triggers re-verification
 - Account dormancy affects tier calculation
 
 ### Multi-Dimensional Trust
+
 - Separate scores for communication, shipping, grading accuracy
 - Category-specific badges ("Shipping Star ⭐", "Honest Grader ✓")
 
 ### Progressive Limits
+
 - New tier: Can't trade items > $100 value
 - Growing tier: Can't trade items > $500 value
 - Established/Trusted: No limits
 
 ### Network Trust
+
 - "You have 3 mutual trading partners with this user"
 - "Connected through [Friend Name]"
 - Trust path visualization
@@ -593,14 +654,17 @@ Important: These systems must not punish legitimate behavior:
 ## Success Metrics
 
 **Adoption:**
+
 - 100% of user touchpoints show trust badges within 2 weeks
 - User awareness survey: >80% understand tier system
 
 **Safety:**
+
 - Reduction in disputes with New members (target: -30%)
 - Increased use of tracked shipping with New members (target: +50%)
 
 **Engagement:**
+
 - New members motivated to reach Growing tier faster
 - Forum feedback on "feeling safer" when trading
 

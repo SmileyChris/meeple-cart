@@ -17,13 +17,16 @@ This document provides step-by-step procedures for responding to trust flags, co
 ### Level 1: Soft Warning (Confidence < 50%)
 
 **When to use:**
+
 - Single automated flag with low confidence
 - Minor pattern irregularity
 - First-time suspicious behavior
 - Community report without corroboration
 
 **Actions:**
+
 1. **Add temporary notice to profile:**
+
    ```
    ⚠️ Account under review
    This account is being reviewed for unusual activity.
@@ -41,6 +44,7 @@ This document provides step-by-step procedures for responding to trust flags, co
    - Prevents rapid-fire scamming
 
 4. **Notify user via email/platform message:**
+
    ```
    Subject: Account Security Review
 
@@ -79,18 +83,21 @@ This document provides step-by-step procedures for responding to trust flags, co
 **Duration:** 3-7 days or until manually cleared
 
 **De-escalation:**
+
 - If cleared: Remove all restrictions immediately, apologize for inconvenience
 - If confirmed: Escalate to Level 2
 
 ### Level 2: Restriction (Confidence 50-80%)
 
 **When to use:**
+
 - Multiple flags from different sources
 - Pattern confirmed but not definitive proof
 - Previous Level 1 warning with continued suspicious activity
 - Community reports with some corroboration
 
 **Actions:**
+
 1. **Temporarily demote trust tier by one level:**
    - Established → Growing
    - Growing → New
@@ -114,6 +121,7 @@ This document provides step-by-step procedures for responding to trust flags, co
    - Any new flags during probation → automatic Level 3
 
 5. **Update profile with notice:**
+
    ```
    ⚠️ Account Restricted (Probation)
    This account is on probation due to suspicious activity detected on [date].
@@ -121,6 +129,7 @@ This document provides step-by-step procedures for responding to trust flags, co
    ```
 
 6. **Notify user (more serious tone):**
+
    ```
    Subject: Account Restricted - Action Required
 
@@ -162,6 +171,7 @@ This document provides step-by-step procedures for responding to trust flags, co
 **Duration:** 30 days minimum
 
 **De-escalation:**
+
 - After 30 days + 2 successful trades: Restore original tier, remove restrictions
 - If new flags occur: Escalate to Level 3
 - User can appeal for early review after 15 days with strong evidence
@@ -169,12 +179,14 @@ This document provides step-by-step procedures for responding to trust flags, co
 ### Level 3: Suspension (Confidence > 80%)
 
 **When to use:**
+
 - Strong evidence of fraud or gaming
 - Multiple confirmed flags
 - User violated probation terms
 - Imminent risk to other users
 
 **Actions:**
+
 1. **Suspend account immediately:**
    - Login blocked (can still access read-only to gather evidence for appeal)
    - All active trades frozen in place
@@ -197,6 +209,7 @@ This document provides step-by-step procedures for responding to trust flags, co
    - Cross-reference with other flags/reports
 
 4. **Update profile:**
+
    ```
    🚫 Account Suspended
    This account has been suspended pending investigation.
@@ -205,6 +218,7 @@ This document provides step-by-step procedures for responding to trust flags, co
    ```
 
 5. **Notify user (formal tone):**
+
    ```
    Subject: Account Suspended - Investigation Required
 
@@ -256,6 +270,7 @@ This document provides step-by-step procedures for responding to trust flags, co
 **Duration:** Until investigation completes (max 7 days)
 
 **Outcomes:**
+
 - **Cleared (false positive)**: Full restoration, public apology, possible compensation
 - **Downgrade to Level 2**: Evidence insufficient for ban, but concerns remain
 - **Confirm ban**: Escalate to Level 4
@@ -263,12 +278,14 @@ This document provides step-by-step procedures for responding to trust flags, co
 ### Level 4: Permanent Ban (Confirmed Fraud)
 
 **When to use:**
+
 - Fraud confirmed through investigation
 - Multiple victims with evidence
 - Confession or overwhelming proof
 - Criminal activity
 
 **Actions:**
+
 1. **Permanent account ban:**
    - Account deleted from active use
    - Login completely disabled
@@ -283,6 +300,7 @@ This document provides step-by-step procedures for responding to trust flags, co
    - Payment method hashes → flagged for review
 
 3. **Notify victims:**
+
    ```
    Subject: Update on Investigation - Account Banned
 
@@ -306,6 +324,7 @@ This document provides step-by-step procedures for responding to trust flags, co
    ```
 
 4. **Public transparency log entry:**
+
    ```
    2025-10-20: User #48291 permanently banned
 
@@ -329,6 +348,7 @@ This document provides step-by-step procedures for responding to trust flags, co
    - Cooperate with any investigation
 
 6. **Notify banned user (final):**
+
    ```
    Subject: Account Permanently Banned
 
@@ -358,6 +378,7 @@ This document provides step-by-step procedures for responding to trust flags, co
 **Duration:** Permanent
 
 **Appeal process:**
+
 - Final appeal to senior admin/owner
 - Must provide substantial new evidence
 - Reviewed within 30 days
@@ -393,6 +414,7 @@ For borderline Level 2/3 decisions, involve community:
 ### Legitimate Edge Case Handling
 
 **Family/household accounts:**
+
 ```
 IF flag_type == 'sockpuppet' AND
    user_response == "My spouse and I both trade" AND
@@ -403,6 +425,7 @@ IF flag_type == 'sockpuppet' AND
 ```
 
 **Game store owners:**
+
 ```
 IF flag_type == 'unusual_volume' AND
    user_provides_business_verification
@@ -412,6 +435,7 @@ IF flag_type == 'unusual_volume' AND
 ```
 
 **Regional club members:**
+
 ```
 IF flag_type == 'collusion' AND
    users_are_verified_club_members
@@ -423,6 +447,7 @@ IF flag_type == 'collusion' AND
 ### Appeal Process
 
 **User submits appeal:**
+
 1. Required information:
    - Explanation of why decision is wrong
    - Supporting evidence (screenshots, receipts, character references)
@@ -442,6 +467,7 @@ IF flag_type == 'collusion' AND
    - Clear completely (apologize, restore)
 
 **Appeal success rates (expected):**
+
 - Level 1: ~30% overturned (low confidence flags, often false positives)
 - Level 2: ~20% overturned (some legitimate edge cases)
 - Level 3: ~10% overturned (high confidence, rarely wrong)
@@ -452,12 +478,14 @@ IF flag_type == 'collusion' AND
 ### Trust Flags Dashboard
 
 **View:**
+
 - List of all pending flags
 - Sorted by confidence score (high → low)
 - Filter by flag type, age, status
 - Quick actions: Review, Clear, Escalate, Assign to me
 
 **Flag detail view:**
+
 - User profile summary
 - Flag type and confidence
 - Evidence/data that triggered flag
@@ -468,6 +496,7 @@ IF flag_type == 'collusion' AND
 ### User Investigation View
 
 **Consolidated data:**
+
 - Trust tier history (timeline of changes)
 - All flags (current and historical)
 - Trade history with partners
@@ -479,6 +508,7 @@ IF flag_type == 'collusion' AND
 ### Action Templates
 
 **Pre-written messages for common scenarios:**
+
 - Level 1 notification (soft warning)
 - Level 2 notification (probation)
 - Level 3 notification (suspension)
@@ -490,6 +520,7 @@ IF flag_type == 'collusion' AND
 ### Public Moderation Log
 
 **Transparency view:**
+
 - All moderation actions (anonymized user IDs)
 - Date, action type, reason summary
 - Moderator initials (or "System" for automated)
@@ -499,22 +530,26 @@ IF flag_type == 'collusion' AND
 ## Moderation Metrics & KPIs
 
 ### Response Time
+
 - Level 1 flags: < 72 hours
 - Level 2 flags: < 48 hours
 - Level 3 flags: < 24 hours initial, 7 days full investigation
 - Appeals: < 48 hours
 
 ### Accuracy
+
 - False positive rate: < 5%
 - Appeal overturn rate: 10-30% (indicates healthy skepticism)
 - Repeat offender rate: < 5% (banned users successfully circumventing)
 
 ### Workload
+
 - Moderator hours per week: Track for capacity planning
 - Automated vs manual flags: Target >80% automated
 - Flags per 1000 users: Benchmark for system health
 
 ### Community Impact
+
 - User satisfaction with moderation: >4.0/5
 - "Moderation is fair" rating: >4.2/5
 - Support ticket reduction: Effective moderation reduces complaints
@@ -522,6 +557,7 @@ IF flag_type == 'collusion' AND
 ## Escalation to Admin/Owner
 
 **When to involve senior leadership:**
+
 - Legal threats from banned users
 - Media inquiries about moderation
 - Potential criminal activity (fraud >$5k, threats)
@@ -532,6 +568,7 @@ IF flag_type == 'collusion' AND
 ## Training & Onboarding
 
 **New moderator checklist:**
+
 - [ ] Read all reputation system docs
 - [ ] Shadow experienced moderator for 5 cases
 - [ ] Practice on test cases (predetermined flags)
