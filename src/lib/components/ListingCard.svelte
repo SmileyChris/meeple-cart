@@ -13,7 +13,7 @@
   let createdLabel = $derived(
     new Intl.DateTimeFormat('en-NZ', {
       dateStyle: 'medium',
-    }).format(new Date(listing.created)),
+    }).format(new Date(listing.created))
   );
 
   const conditionLabels: Record<ListingPreview['games'][number]['condition'], string> = {

@@ -67,7 +67,9 @@
 <main class="flex h-screen flex-col bg-surface-body transition-colors">
   <!-- Header -->
   <!-- eslint-disable svelte/no-navigation-without-resolve -->
-  <div class="flex-shrink-0 border-b border-subtle bg-surface-panel transition-colors backdrop-blur">
+  <div
+    class="flex-shrink-0 border-b border-subtle bg-surface-panel transition-colors backdrop-blur"
+  >
     <div class="mx-auto flex max-w-4xl items-center gap-4 px-4 py-4">
       <a
         href="/messages"
@@ -93,7 +95,9 @@
             />
           </a>
         {:else}
-          <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-surface-card-alt text-xl">
+          <div
+            class="flex h-12 w-12 items-center justify-center rounded-lg bg-surface-card-alt text-xl"
+          >
             🎲
           </div>
         {/if}
@@ -103,10 +107,7 @@
             {data.otherUser?.name || 'Unknown User'}
           </h1>
           {#if data.listing}
-            <a
-              href={data.listing.href}
-              class="truncate text-sm text-muted hover:text-emerald-400"
-            >
+            <a href={data.listing.href} class="truncate text-sm text-muted hover:text-emerald-400">
               {data.listing.title}
             </a>
           {/if}
@@ -124,7 +125,9 @@
   </div>
 
   <!-- Input -->
-  <div class="flex-shrink-0 border-t border-subtle bg-surface-panel transition-colors backdrop-blur">
+  <div
+    class="flex-shrink-0 border-t border-subtle bg-surface-panel transition-colors backdrop-blur"
+  >
     <div class="mx-auto max-w-4xl px-4 py-4">
       {#if form?.error}
         <div class="mb-3 rounded-lg bg-rose-500/10 px-4 py-2 text-sm text-rose-400">

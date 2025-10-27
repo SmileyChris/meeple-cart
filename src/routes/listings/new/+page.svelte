@@ -22,7 +22,7 @@
       shipping_available: false,
       prefer_bundle: false,
       bundle_discount: '',
-    },
+    }
   );
 
   let games = $state<GameEntry[]>(
@@ -36,7 +36,7 @@
           notes: '',
           bgg_id: '',
         },
-      ] as GameEntry[]),
+      ] as GameEntry[])
   );
 
   let fieldErrors = $derived(form?.fieldErrors ?? {});
@@ -120,7 +120,9 @@
     {/if}
 
     <form class="space-y-10" method="POST">
-      <section class="space-y-6 rounded-xl border border-subtle bg-surface-card transition-colors p-6">
+      <section
+        class="space-y-6 rounded-xl border border-subtle bg-surface-card transition-colors p-6"
+      >
         <div class="space-y-2">
           <h2 class="text-xl font-semibold text-primary">Photos</h2>
           <p class="text-sm text-muted">
@@ -150,7 +152,9 @@
         {#if photoPreviews.length > 0}
           <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {#each photoPreviews as preview (preview.url)}
-              <figure class="overflow-hidden rounded-lg border border-subtle bg-surface-card transition-colors">
+              <figure
+                class="overflow-hidden rounded-lg border border-subtle bg-surface-card transition-colors"
+              >
                 <img
                   alt={`Preview of ${preview.name}`}
                   class="h-40 w-full object-cover"
@@ -166,7 +170,9 @@
         {/if}
       </section>
 
-      <section class="space-y-6 rounded-xl border border-subtle bg-surface-card transition-colors p-6">
+      <section
+        class="space-y-6 rounded-xl border border-subtle bg-surface-card transition-colors p-6"
+      >
         <div class="space-y-2">
           <h2 class="text-xl font-semibold text-primary">Listing overview</h2>
           <p class="text-sm text-muted">
@@ -296,7 +302,9 @@
         </div>
 
         {#each games as game, index (index)}
-          <section class="space-y-6 rounded-xl border border-subtle bg-surface-card transition-colors p-6">
+          <section
+            class="space-y-6 rounded-xl border border-subtle bg-surface-card transition-colors p-6"
+          >
             <div class="flex items-center justify-between">
               <h3 class="text-lg font-medium text-primary">Game {index + 1}</h3>
               {#if games.length > 1}

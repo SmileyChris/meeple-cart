@@ -78,9 +78,7 @@ describe('listing detail client-side load', () => {
     vi.mocked(pb.files.getUrl).mockImplementation(
       (_record, file, options?) =>
         new URL(
-          options?.thumb
-            ? `https://example.com/thumb-${file}`
-            : `https://example.com/${file}`
+          options?.thumb ? `https://example.com/thumb-${file}` : `https://example.com/${file}`
         ) as any
     );
     vi.mocked(get).mockReturnValue(null); // No user watching

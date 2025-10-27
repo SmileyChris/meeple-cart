@@ -6,8 +6,7 @@ import type { UserRecord } from './types/pocketbase';
 // PocketBase URL - configurable via environment variable
 // For production, set VITE_PUBLIC_POCKETBASE_URL in your build environment
 const PB_URL =
-  (import.meta.env.VITE_PUBLIC_POCKETBASE_URL as string | undefined) ||
-  'http://127.0.0.1:8090';
+  (import.meta.env.VITE_PUBLIC_POCKETBASE_URL as string | undefined) || 'http://127.0.0.1:8090';
 
 // Create singleton PocketBase instance
 export const pb = new PocketBase(PB_URL);

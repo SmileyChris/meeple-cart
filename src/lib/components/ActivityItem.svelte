@@ -54,7 +54,7 @@
   });
 
   let bggUrl = $derived(
-    activity.bggId ? `https://boardgamegeek.com/boardgame/${activity.bggId}` : null,
+    activity.bggId ? `https://boardgamegeek.com/boardgame/${activity.bggId}` : null
   );
 </script>
 

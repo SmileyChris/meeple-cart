@@ -105,9 +105,7 @@
         </p>
         {#if filter === 'active'}
           <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-          <a href="/" class="btn-primary mt-4 inline-block">
-            Browse Listings
-          </a>
+          <a href="/" class="btn-primary mt-4 inline-block"> Browse Listings </a>
         {/if}
       </div>
     {:else}

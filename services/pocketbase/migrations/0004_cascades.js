@@ -40,7 +40,14 @@ migrate(
           required: true,
           options: {
             maxSelect: 1,
-            values: ['accepting_entries', 'selecting_winner', 'in_transit', 'awaiting_pass', 'completed', 'broken'],
+            values: [
+              'accepting_entries',
+              'selecting_winner',
+              'in_transit',
+              'awaiting_pass',
+              'completed',
+              'broken',
+            ],
           },
         }),
         new SchemaField({
@@ -342,7 +349,15 @@ migrate(
           required: true,
           options: {
             maxSelect: 1,
-            values: ['seeded', 'winner_selected', 'shipped', 'received', 'passed_on', 'deadline_missed', 'broken'],
+            values: [
+              'seeded',
+              'winner_selected',
+              'shipped',
+              'received',
+              'passed_on',
+              'deadline_missed',
+              'broken',
+            ],
           },
         }),
         new SchemaField({

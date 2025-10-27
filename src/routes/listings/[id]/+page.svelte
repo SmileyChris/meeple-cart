@@ -270,7 +270,9 @@
 
     {#if photos.length > 0}
       <section class="space-y-4">
-        <div class="overflow-hidden rounded-xl border border-subtle bg-surface-card transition-colors">
+        <div
+          class="overflow-hidden rounded-xl border border-subtle bg-surface-card transition-colors"
+        >
           <img
             alt={`${listing.title} photo ${activePhotoIndex + 1}`}
             class="h-full w-full max-h-[520px] object-cover"
@@ -326,7 +328,9 @@
         {#if games.length > 0}
           <div class="space-y-4">
             {#each games as game (game.id)}
-              <article class="space-y-4 rounded-lg border border-subtle bg-surface-panel transition-colors p-5">
+              <article
+                class="space-y-4 rounded-lg border border-subtle bg-surface-panel transition-colors p-5"
+              >
                 <header class="space-y-2">
                   <div class="flex flex-wrap items-center justify-between gap-3">
                     <h3 class="text-xl font-semibold text-primary">{game.title}</h3>
@@ -498,46 +502,46 @@
                 💬 Send message
               </button>
             {:else}
-            <form on:submit={handleSendMessage} class="space-y-3">
-              {#if messageError}
-                <div class="rounded-lg bg-rose-500/10 px-3 py-2 text-sm text-rose-400">
-                  {messageError}
-                </div>
-              {/if}
+              <form on:submit={handleSendMessage} class="space-y-3">
+                {#if messageError}
+                  <div class="rounded-lg bg-rose-500/10 px-3 py-2 text-sm text-rose-400">
+                    {messageError}
+                  </div>
+                {/if}
 
-              <textarea
-                name="message"
-                bind:value={message}
-                placeholder="Hi! I'm interested in this listing..."
-                rows="4"
-                maxlength="4000"
-                required
-                disabled={sendingMessage}
-                class="w-full resize-none rounded-lg border border-subtle bg-surface-card transition-colors px-3 py-2 text-primary placeholder-slate-500 focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
-              />
-
-              <div class="flex gap-2">
-                <button
-                  type="submit"
-                  disabled={!message.trim() || sendingMessage}
-                  class="flex-1 rounded-lg bg-emerald-500 px-4 py-2 font-medium text-[var(--accent-contrast)] transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {sendingMessage ? 'Sending...' : 'Send'}
-                </button>
-                <button
-                  type="button"
+                <textarea
+                  name="message"
+                  bind:value={message}
+                  placeholder="Hi! I'm interested in this listing..."
+                  rows="4"
+                  maxlength="4000"
+                  required
                   disabled={sendingMessage}
-                  on:click={() => {
-                    showMessageForm = false;
-                    message = '';
-                    messageError = null;
-                  }}
-                  class="rounded-lg border border-subtle px-4 py-2 text-secondary transition hover:bg-surface-card-alt disabled:opacity-50"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
+                  class="w-full resize-none rounded-lg border border-subtle bg-surface-card transition-colors px-3 py-2 text-primary placeholder-slate-500 focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+                />
+
+                <div class="flex gap-2">
+                  <button
+                    type="submit"
+                    disabled={!message.trim() || sendingMessage}
+                    class="flex-1 rounded-lg bg-emerald-500 px-4 py-2 font-medium text-[var(--accent-contrast)] transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {sendingMessage ? 'Sending...' : 'Send'}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={sendingMessage}
+                    on:click={() => {
+                      showMessageForm = false;
+                      message = '';
+                      messageError = null;
+                    }}
+                    class="rounded-lg border border-subtle px-4 py-2 text-secondary transition hover:bg-surface-card-alt disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
             {/if}
           </div>
 

@@ -85,7 +85,9 @@
       </h2>
 
       {#if listings.length === 0}
-        <div class="rounded-xl border border-subtle bg-surface-card transition-colors p-8 text-center">
+        <div
+          class="rounded-xl border border-subtle bg-surface-card transition-colors p-8 text-center"
+        >
           <p class="text-muted">No active listings</p>
         </div>
       {:else}
@@ -103,7 +105,9 @@
                   src={listing.coverImage}
                 />
               {:else}
-                <div class="flex h-40 items-center justify-center bg-surface-card-alt text-5xl opacity-20">
+                <div
+                  class="flex h-40 items-center justify-center bg-surface-card-alt text-5xl opacity-20"
+                >
                   🎲
                 </div>
               {/if}

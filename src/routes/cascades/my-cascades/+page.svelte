@@ -34,7 +34,7 @@
   };
 
   let activeCascades = $derived(
-    activeTab === 'entered' ? enteredCascades : activeTab === 'won' ? wonCascades : startedCascades,
+    activeTab === 'entered' ? enteredCascades : activeTab === 'won' ? wonCascades : startedCascades
   );
 </script>
 

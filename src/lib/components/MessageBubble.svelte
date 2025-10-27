@@ -8,11 +8,9 @@
   let bubbleClass = $derived(
     message.isOwnMessage
       ? 'border-[var(--accent)] bg-[var(--accent-soft)]'
-      : 'border-subtle bg-surface-card-alt',
+      : 'border-subtle bg-surface-card-alt'
   );
-  let textClass = $derived(
-    message.isOwnMessage ? 'text-[var(--accent-strong)]' : 'text-secondary',
-  );
+  let textClass = $derived(message.isOwnMessage ? 'text-[var(--accent-strong)]' : 'text-secondary');
 </script>
 
 <div class="flex flex-col {alignmentClass} max-w-[80%] gap-1">

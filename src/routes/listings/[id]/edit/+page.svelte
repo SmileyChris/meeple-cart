@@ -176,7 +176,9 @@
     </form>
 
     <!-- Help Text -->
-    <div class="rounded-lg border border-subtle bg-surface-card transition-colors p-4 text-sm text-muted">
+    <div
+      class="rounded-lg border border-subtle bg-surface-card transition-colors p-4 text-sm text-muted"
+    >
       <h3 class="mb-2 font-semibold text-secondary">💡 Price Drop Tips</h3>
       <ul class="space-y-1">
         <li>

@@ -24,6 +24,7 @@ This document identifies missing components in the Meeple Cart trade flow implem
 The following components are fully functional:
 
 ### 1. Communication System
+
 - **Status:** ✅ Complete
 - **Location:** `src/routes/messages/`
 - Private messaging between users per listing
@@ -32,6 +33,7 @@ The following components are fully functional:
 - Message threading and read status
 
 ### 2. Database Schema
+
 - **Status:** ✅ Complete
 - **Location:** `services/pocketbase/schema/pb_schema.json`
 - `trades` collection with all required fields:
@@ -42,6 +44,7 @@ The following components are fully functional:
 - Proper indexes and access rules configured
 
 ### 3. Listing Management
+
 - **Status:** ✅ Complete
 - **Location:** `src/routes/listings/[id]/manage/`
 - Create multi-game listings
@@ -50,6 +53,7 @@ The following components are fully functional:
 - Add/remove games from listings
 
 ### 4. Documentation
+
 - **Status:** ✅ Complete
 - **Location:** `docs/trust-and-vouches.md`, `spec/prd.md`
 - Trade flow requirements documented
@@ -70,6 +74,7 @@ The following components are fully functional:
 No way for users to create a formal trade record when buyer and seller reach agreement.
 
 #### Expected Flow
+
 ```
 1. Buyer and seller agree via messages
 2. Either party clicks "Initiate Trade" button
@@ -85,6 +90,7 @@ No way for users to create a formal trade record when buyer and seller reach agr
 #### Required Implementation
 
 **New API Endpoint:**
+
 ```typescript
 // src/routes/listings/[id]/+page.server.ts
 export const actions: Actions = {
@@ -94,11 +100,12 @@ export const actions: Actions = {
     // Create trade record
     // Send notification to counterparty
     // Return trade ID
-  }
-}
+  },
+};
 ```
 
 **UI Changes:**
+
 ```svelte
 <!-- src/routes/listings/[id]/+page.svelte -->
 <!-- Add to sidebar contact section -->
@@ -108,6 +115,7 @@ export const actions: Actions = {
 ```
 
 **Acceptance Criteria:**
+
 - [x] Button appears for logged-in non-owners
 - [x] Creates trade record in database
 - [x] Sends notification to seller
@@ -126,6 +134,7 @@ export const actions: Actions = {
 No dedicated page to view trade details, communicate about specific trade, or update trade status.
 
 #### Expected Flow
+
 ```
 1. User navigates to /trades/[id]
 2. View shows:
@@ -143,21 +152,24 @@ No dedicated page to view trade details, communicate about specific trade, or up
 #### Required Implementation
 
 **New Routes:**
+
 ```
 src/routes/trades/[id]/+page.server.ts
 src/routes/trades/[id]/+page.svelte
 ```
 
 **Server Load Function:**
+
 ```typescript
 export const load: PageServerLoad = async ({ locals, params }) => {
   // Fetch trade with expanded listing, buyer, seller
   // Verify user is participant
   // Return trade data
-}
+};
 ```
 
 **Server Actions:**
+
 ```typescript
 export const actions: Actions = {
   confirm_receipt: async ({ locals, params }) => {
@@ -184,11 +196,12 @@ export const actions: Actions = {
     // Capture dispute reason
     // Notify both parties
     // Alert moderators
-  }
-}
+  },
+};
 ```
 
 **UI Components:**
+
 ```svelte
 <!-- Trade Timeline -->
 <ol>
@@ -218,6 +231,7 @@ export const actions: Actions = {
 ```
 
 **Acceptance Criteria:**
+
 - [x] Trade detail page shows all trade information
 - [x] Status-specific actions visible to correct party
 - [x] Status transitions update database correctly
@@ -238,6 +252,7 @@ export const actions: Actions = {
 No page showing user's trade history (active, completed, disputed).
 
 #### Expected Flow
+
 ```
 1. User navigates to /trades (or "My Trades" nav link)
 2. View shows tabs:
@@ -255,12 +270,14 @@ No page showing user's trade history (active, completed, disputed).
 #### Required Implementation
 
 **New Routes:**
+
 ```
 src/routes/trades/+page.server.ts
 src/routes/trades/+page.svelte
 ```
 
 **Server Load:**
+
 ```typescript
 export const load: PageServerLoad = async ({ locals, url }) => {
   const user = locals.user;
@@ -278,14 +295,15 @@ export const load: PageServerLoad = async ({ locals, url }) => {
   const trades = await locals.pb.collection('trades').getFullList({
     filter: `(buyer = "${user.id}" || seller = "${user.id}") && (${statusFilter})`,
     expand: 'listing,buyer,seller',
-    sort: '-created'
+    sort: '-created',
   });
 
   return { trades, filter };
-}
+};
 ```
 
 **UI Layout:**
+
 ```svelte
 <nav>
   <a href="/trades?filter=active">Active (3)</a>
@@ -307,12 +325,14 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 ```
 
 **Navigation Addition:**
+
 ```svelte
 <!-- src/routes/+layout.svelte -->
 <a href="/trades">My Trades</a>
 ```
 
 **Acceptance Criteria:**
+
 - [x] Lists all trades where user is buyer or seller
 - [x] Filter by status (active/completed/disputed)
 - [x] Shows trade count per filter
@@ -333,6 +353,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 After completing a trade, users cannot leave ratings or reviews for their trading partner.
 
 #### Expected Flow
+
 ```
 1. Trade status = 'completed'
 2. User prompted to leave feedback
@@ -346,6 +367,7 @@ After completing a trade, users cannot leave ratings or reviews for their tradin
 #### Required Implementation
 
 **Update Trade Detail Page:**
+
 ```typescript
 // src/routes/trades/[id]/+page.server.ts
 export const actions: Actions = {
@@ -363,13 +385,14 @@ export const actions: Actions = {
 
     await locals.pb.collection('trades').update(params.id, {
       rating,
-      review
+      review,
     });
-  }
-}
+  },
+};
 ```
 
 **UI Component:**
+
 ```svelte
 <!-- Show after trade completed, if no rating yet -->
 {#if status === 'completed' && !trade.rating}
@@ -399,13 +422,14 @@ export const actions: Actions = {
 ```
 
 **Profile Display:**
+
 ```typescript
 // src/routes/users/[id]/+page.server.ts
 // Fetch recent trades with reviews
 const reviewsReceived = await pb.collection('trades').getList({
   filter: `seller = "${userId}" && review != ""`,
   sort: '-completed_date',
-  limit: 10
+  limit: 10,
 });
 
 return { user, reviewsReceived };
@@ -429,6 +453,7 @@ return { user, reviewsReceived };
 ```
 
 **Acceptance Criteria:**
+
 - [x] Feedback form appears after trade completion
 - [x] Rating (1-5) and review text captured
 - [x] Saved to trades.rating and trades.review
@@ -450,6 +475,7 @@ Database schema exists, documentation complete, but no UI to create or display v
 Per `docs/trust-and-vouches.md`: Vouches should be prompted after completed trades and displayed on profiles.
 
 #### Expected Flow
+
 ```
 1. Trade status = 'completed'
 2. User prompted: "Vouch for [partner]?"
@@ -464,6 +490,7 @@ Per `docs/trust-and-vouches.md`: Vouches should be prompted after completed trad
 **Vouch Creation UI:**
 
 Option A: Inline on trade detail page
+
 ```svelte
 <!-- src/routes/trades/[id]/+page.svelte -->
 {#if status === 'completed' && !hasVouched}
@@ -484,12 +511,14 @@ Option A: Inline on trade detail page
 ```
 
 Option B: Dedicated vouch page
+
 ```
 src/routes/users/[id]/vouch/+page.server.ts
 src/routes/users/[id]/vouch/+page.svelte
 ```
 
 **Server Action:**
+
 ```typescript
 // Option A: On trade detail page
 export const actions: Actions = {
@@ -499,13 +528,11 @@ export const actions: Actions = {
     const message = data.get('message')?.toString();
 
     // Determine vouchee (other party)
-    const vouchee = trade.buyer === locals.user.id
-      ? trade.seller
-      : trade.buyer;
+    const vouchee = trade.buyer === locals.user.id ? trade.seller : trade.buyer;
 
     // Check not already vouched
     const existing = await locals.pb.collection('vouches').getList({
-      filter: `voucher = "${locals.user.id}" && vouchee = "${vouchee}"`
+      filter: `voucher = "${locals.user.id}" && vouchee = "${vouchee}"`,
     });
 
     if (existing.items.length > 0) {
@@ -517,13 +544,13 @@ export const actions: Actions = {
       voucher: locals.user.id,
       vouchee,
       message: message || '',
-      created: new Date().toISOString()
+      created: new Date().toISOString(),
     });
 
     // Increment vouch_count
     const voucheeUser = await locals.pb.collection('users').getOne(vouchee);
     await locals.pb.collection('users').update(vouchee, {
-      vouch_count: voucheeUser.vouch_count + 1
+      vouch_count: voucheeUser.vouch_count + 1,
     });
 
     // Send notification
@@ -533,15 +560,16 @@ export const actions: Actions = {
       title: `${locals.user.display_name} vouched for you!`,
       message: message || 'New vouch from a trading partner',
       link: `/users/${locals.user.id}`,
-      read: false
+      read: false,
     });
 
     return { success: true };
-  }
-}
+  },
+};
 ```
 
 **Profile Display:**
+
 ```svelte
 <!-- src/routes/users/[id]/+page.svelte -->
 <section>
@@ -568,19 +596,21 @@ export const actions: Actions = {
 ```
 
 **Load Vouches on Profile:**
+
 ```typescript
 // src/routes/users/[id]/+page.server.ts
 const vouches = await pb.collection('vouches').getList({
   filter: `vouchee = "${userId}"`,
   expand: 'voucher',
   sort: '-created',
-  perPage: 10
+  perPage: 10,
 });
 
 return { user, listings, vouches };
 ```
 
 **Acceptance Criteria:**
+
 - [x] Vouch prompt appears after completed trade
 - [x] Creates vouch record in database
 - [x] Increments vouchee's vouch_count
@@ -604,15 +634,18 @@ Listing status must be manually updated. No automatic transitions when trades ar
 #### Expected Behavior
 
 **Automatic Transitions:**
+
 - Listing status → `pending` when trade initiated
 - Listing status → `completed` when trade completes
 - All games in listing → `sold` when listing completes
 
 **Manual Controls:**
+
 - Owner can revert `pending` → `active` if trade cancelled
 - Owner can mark listing `cancelled` anytime
 
 **Audit Trail:**
+
 - Log every status change with timestamp and actor
 - Display history to owner
 
@@ -628,41 +661,40 @@ export const actions: Actions = {
 
     // Auto-update listing status
     await locals.pb.collection('listings').update(params.id, {
-      status: 'pending'
+      status: 'pending',
     });
 
     // Log status change
-    await logStatusChange(params.id, 'active', 'pending',
-      'Trade initiated', locals.user.id);
-  }
-}
+    await logStatusChange(params.id, 'active', 'pending', 'Trade initiated', locals.user.id);
+  },
+};
 
 // src/routes/trades/[id]/+page.server.ts
 export const actions: Actions = {
   complete_trade: async ({ locals, params }) => {
     const trade = await locals.pb.collection('trades').getOne(params.id, {
-      expand: 'listing'
+      expand: 'listing',
     });
 
     // Update trade status
     await locals.pb.collection('trades').update(params.id, {
       status: 'completed',
-      completed_date: new Date().toISOString()
+      completed_date: new Date().toISOString(),
     });
 
     // Update listing status
     await locals.pb.collection('listings').update(trade.listing, {
-      status: 'completed'
+      status: 'completed',
     });
 
     // Update all games in listing to sold
     const games = await locals.pb.collection('games').getFullList({
-      filter: `listing = "${trade.listing}"`
+      filter: `listing = "${trade.listing}"`,
     });
 
     for (const game of games) {
       await locals.pb.collection('games').update(game.id, {
-        status: 'sold'
+        status: 'sold',
       });
     }
 
@@ -671,10 +703,9 @@ export const actions: Actions = {
     await incrementTradeCount(trade.seller);
 
     // Log status changes
-    await logStatusChange(trade.listing, 'pending', 'completed',
-      'Trade completed', locals.user.id);
-  }
-}
+    await logStatusChange(trade.listing, 'pending', 'completed', 'Trade completed', locals.user.id);
+  },
+};
 ```
 
 **Manual Status Controls:**
@@ -698,6 +729,7 @@ export const actions: Actions = {
 **Status Audit Trail:**
 
 Add new collection or JSON field:
+
 ```javascript
 // Option 1: JSON field on listing
 listings {
@@ -717,6 +749,7 @@ listing_status_logs {
 ```
 
 **Helper Function:**
+
 ```typescript
 async function logStatusChange(
   listingId: string,
@@ -733,16 +766,17 @@ async function logStatusChange(
     to: toStatus,
     reason,
     actor: actorId,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 
   await pb.collection('listings').update(listingId, {
-    status_history: history
+    status_history: history,
   });
 }
 ```
 
 **Acceptance Criteria:**
+
 - [x] Listing status auto-updates when trade initiated
 - [x] Listing status auto-updates when trade completed
 - [x] All games marked 'sold' when listing completed
@@ -758,12 +792,14 @@ async function logStatusChange(
 ### Week 1: Core Trade Flow
 
 **Days 1-2: Trade Initiation**
+
 - [ ] Add "Initiate Trade" button to listing detail page
 - [ ] Create API endpoint for trade creation
 - [ ] Send notifications on trade creation
 - [ ] Add basic trade confirmation UI
 
 **Days 3-5: Trade Detail Page**
+
 - [ ] Create `/trades/[id]` routes
 - [ ] Build trade detail UI
 - [ ] Implement status update actions
@@ -772,18 +808,21 @@ async function logStatusChange(
 ### Week 2: Completion & Feedback
 
 **Days 1-2: Trade Completion Flow**
+
 - [ ] Complete trade action with all side effects
 - [ ] Increment trade_count for both users
 - [ ] Update listing and games to sold
 - [ ] Send completion notifications
 
 **Days 3-4: Rating System**
+
 - [ ] Add feedback form to trade detail page
 - [ ] Store ratings and reviews
 - [ ] Display reviews on user profiles
 - [ ] Prevent duplicate feedback
 
 **Day 5: Testing & Polish**
+
 - [ ] End-to-end trade flow testing
 - [ ] Edge case handling
 - [ ] Error messages and validation
@@ -792,6 +831,7 @@ async function logStatusChange(
 ### Week 3: Trust System & History
 
 **Days 1-3: Vouch System**
+
 - [ ] Add vouch prompt after trade completion
 - [ ] Create vouch action and validation
 - [ ] Update vouch_count on creation
@@ -799,6 +839,7 @@ async function logStatusChange(
 - [ ] Send vouch notifications
 
 **Days 4-5: Trade History**
+
 - [ ] Create `/trades` page with filters
 - [ ] Add "My Trades" to navigation
 - [ ] Display trade history on profiles
@@ -809,6 +850,7 @@ async function logStatusChange(
 ## Testing Checklist
 
 ### Trade Initiation
+
 - [ ] Buyer can initiate trade from listing
 - [ ] Seller receives notification
 - [ ] Listing status becomes 'pending'
@@ -816,12 +858,14 @@ async function logStatusChange(
 - [ ] Cannot trade with self
 
 ### Trade Progression
+
 - [ ] Both parties can view trade details
 - [ ] Status updates correctly (initiated → confirmed → completed)
 - [ ] Notifications sent on each status change
 - [ ] Third parties cannot access trade details
 
 ### Trade Completion
+
 - [ ] trade_count increments for buyer
 - [ ] trade_count increments for seller
 - [ ] Listing status becomes 'completed'
@@ -829,6 +873,7 @@ async function logStatusChange(
 - [ ] Completion notifications sent
 
 ### Feedback System
+
 - [ ] Feedback form appears after completion
 - [ ] Rating and review saved correctly
 - [ ] Reviews appear on profiles
@@ -836,6 +881,7 @@ async function logStatusChange(
 - [ ] Only participants can leave feedback
 
 ### Vouch System
+
 - [ ] Vouch prompt appears after completion
 - [ ] Vouch creates database record
 - [ ] vouch_count increments
@@ -844,6 +890,7 @@ async function logStatusChange(
 - [ ] Notifications sent
 
 ### Trade History
+
 - [ ] "My Trades" shows all user trades
 - [ ] Filters work (active/completed/disputed)
 - [ ] Correct trade counts per filter
@@ -854,15 +901,18 @@ async function logStatusChange(
 ## Migration & Backward Compatibility
 
 ### Existing Listings
+
 - Add status_history field to existing listings (default empty array)
 - No action needed for existing listings - they continue to work
 
 ### Demo Data
+
 - Update `scripts/seed-demo-data.ts` to create sample trades
 - Include trades in various states (initiated, completed, disputed)
 - Add sample vouches between demo users
 
 ### Database Migrations
+
 - Add status_history JSON field to listings collection
 - No breaking changes to existing schema
 
@@ -885,13 +935,13 @@ The trade flow is complete when:
 
 ## Risk Assessment
 
-| Risk | Probability | Impact | Mitigation |
-|------|-------------|--------|------------|
-| Users bypass formal trade flow | Medium | Medium | Make trade flow rewarding (vouches, ratings); track informal trades don't count |
-| Trade disputes | Medium | High | Build dispute workflow; clear escalation path to moderators |
-| Fake reviews/vouches | Low | High | Require completed trades; rate limiting; moderation tools |
-| Status sync issues | Low | Medium | Use database transactions; comprehensive testing |
-| Performance (many trades) | Low | Low | Index on buyer/seller fields; pagination on history |
+| Risk                           | Probability | Impact | Mitigation                                                                      |
+| ------------------------------ | ----------- | ------ | ------------------------------------------------------------------------------- |
+| Users bypass formal trade flow | Medium      | Medium | Make trade flow rewarding (vouches, ratings); track informal trades don't count |
+| Trade disputes                 | Medium      | High   | Build dispute workflow; clear escalation path to moderators                     |
+| Fake reviews/vouches           | Low         | High   | Require completed trades; rate limiting; moderation tools                       |
+| Status sync issues             | Low         | Medium | Use database transactions; comprehensive testing                                |
+| Performance (many trades)      | Low         | Low    | Index on buyer/seller fields; pagination on history                             |
 
 ---
 

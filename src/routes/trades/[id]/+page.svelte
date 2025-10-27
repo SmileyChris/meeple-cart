@@ -252,9 +252,7 @@
     </header>
 
     <!-- Trade Progress Timeline -->
-    <section
-      class="rounded-xl border border-subtle bg-surface-card transition-colors p-6"
-    >
+    <section class="rounded-xl border border-subtle bg-surface-card transition-colors p-6">
       <h2 class="text-xl font-semibold text-primary mb-4">Trade Progress</h2>
       <ol class="space-y-3 text-sm">
         <li
@@ -284,7 +282,11 @@
               2
             {/if}
           </span>
-          <span>Seller confirmed - {trade.status === 'confirmed' || trade.status === 'completed' ? formatDate(trade.updated) : 'Pending'}</span>
+          <span
+            >Seller confirmed - {trade.status === 'confirmed' || trade.status === 'completed'
+              ? formatDate(trade.updated)
+              : 'Pending'}</span
+          >
         </li>
 
         <li
@@ -299,15 +301,17 @@
               3
             {/if}
           </span>
-          <span>Trade completed - {trade.status === 'completed' && trade.completed_date ? formatDate(trade.completed_date) : 'Pending'}</span>
+          <span
+            >Trade completed - {trade.status === 'completed' && trade.completed_date
+              ? formatDate(trade.completed_date)
+              : 'Pending'}</span
+          >
         </li>
       </ol>
     </section>
 
     <!-- Listing Details -->
-    <section
-      class="rounded-xl border border-subtle bg-surface-card transition-colors p-6"
-    >
+    <section class="rounded-xl border border-subtle bg-surface-card transition-colors p-6">
       <h2 class="text-xl font-semibold text-primary mb-4">Listing</h2>
       <div class="flex gap-4">
         <div class="flex-1">
@@ -403,9 +407,7 @@
           </p>
         </div>
         <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-        <a href={`/messages`} class="btn-secondary">
-          💬 Message
-        </a>
+        <a href={`/messages`} class="btn-secondary"> 💬 Message </a>
       </div>
     </section>
 
@@ -422,11 +424,7 @@
             </p>
           </div>
           {#if !showFeedbackForm}
-            <button
-              type="button"
-              on:click={() => (showFeedbackForm = true)}
-              class="btn-primary"
-            >
+            <button type="button" on:click={() => (showFeedbackForm = true)} class="btn-primary">
               Leave Feedback
             </button>
           {/if}
@@ -436,9 +434,7 @@
           <form on:submit={handleSubmitFeedback} class="space-y-4 border-t border-subtle pt-4">
             <!-- Rating -->
             <div class="space-y-2">
-              <label class="block text-sm font-medium text-secondary" for="rating">
-                Rating
-              </label>
+              <label class="block text-sm font-medium text-secondary" for="rating"> Rating </label>
               <div class="flex gap-2">
                 {#each [1, 2, 3, 4, 5] as star}
                   <button
@@ -552,11 +548,7 @@
             </p>
           </div>
           {#if !showVouchForm}
-            <button
-              type="button"
-              on:click={() => (showVouchForm = true)}
-              class="btn-primary"
-            >
+            <button type="button" on:click={() => (showVouchForm = true)} class="btn-primary">
               ✓ Vouch
             </button>
           {/if}
@@ -614,9 +606,7 @@
 
     <!-- Show if already vouched -->
     {#if hasVouched}
-      <section
-        class="rounded-xl border border-subtle bg-surface-card transition-colors p-6"
-      >
+      <section class="rounded-xl border border-subtle bg-surface-card transition-colors p-6">
         <div class="flex items-center gap-2 text-emerald-300">
           <span class="text-2xl">✓</span>
           <span class="text-sm font-medium">You've vouched for {otherParty.display_name}</span>

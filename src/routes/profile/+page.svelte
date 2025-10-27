@@ -81,8 +81,12 @@
       </p>
     </div>
     <div class="flex gap-4 text-sm text-secondary">
-      <span><span class="font-semibold" style="color: var(--accent)">{profile.trade_count}</span> trades</span>
-      <span><span class="font-semibold" style="color: var(--accent)">{profile.vouch_count}</span> vouches</span>
+      <span
+        ><span class="font-semibold" style="color: var(--accent)">{profile.trade_count}</span> trades</span
+      >
+      <span
+        ><span class="font-semibold" style="color: var(--accent)">{profile.vouch_count}</span> vouches</span
+      >
     </div>
   </header>
 
@@ -90,22 +94,17 @@
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div>
         <h2 class="text-xl font-semibold text-primary">My listings</h2>
-        <p class="text-sm text-muted">
-          Create, review, and manage the games you have on offer.
-        </p>
+        <p class="text-sm text-muted">Create, review, and manage the games you have on offer.</p>
       </div>
       <!-- eslint-disable svelte/no-navigation-without-resolve -->
-      <a
-        class="btn-secondary px-4 py-2"
-        href="/listings/new"
-      >
-        New listing
-      </a>
+      <a class="btn-secondary px-4 py-2" href="/listings/new"> New listing </a>
       <!-- eslint-enable svelte/no-navigation-without-resolve -->
     </div>
 
     {#if listings.length > 0}
-      <ul class="divide-y divide-[var(--border-subtle)] rounded-xl border border-subtle bg-surface-card transition-colors">
+      <ul
+        class="divide-y divide-[var(--border-subtle)] rounded-xl border border-subtle bg-surface-card transition-colors"
+      >
         {#each listings as listing (listing.id)}
           <li class="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
             <div class="space-y-1">
@@ -113,7 +112,10 @@
               <div
                 class="flex flex-wrap items-center gap-2 text-xs uppercase tracking-wide text-muted"
               >
-                <span class="rounded-full border px-2 py-0.5" style="border-color: var(--accent); color: var(--accent)">
+                <span
+                  class="rounded-full border px-2 py-0.5"
+                  style="border-color: var(--accent); color: var(--accent)"
+                >
                   {typeLabels[listing.listingType] ?? listing.listingType}
                 </span>
                 <span class="rounded-full border border-subtle px-2 py-0.5 text-secondary">
@@ -125,24 +127,9 @@
             </div>
             <div class="flex flex-wrap gap-3 text-sm">
               <!-- eslint-disable svelte/no-navigation-without-resolve -->
-              <a
-                class="btn-ghost"
-                href={`/listings/${listing.id}`}
-              >
-                View
-              </a>
-              <a
-                class="btn-ghost"
-                href={`/listings/${listing.id}/manage`}
-              >
-                Manage games
-              </a>
-              <a
-                class="btn-ghost"
-                href={`/listings/${listing.id}/edit`}
-              >
-                Edit prices
-              </a>
+              <a class="btn-ghost" href={`/listings/${listing.id}`}> View </a>
+              <a class="btn-ghost" href={`/listings/${listing.id}/manage`}> Manage games </a>
+              <a class="btn-ghost" href={`/listings/${listing.id}/edit`}> Edit prices </a>
               <!-- eslint-enable svelte/no-navigation-without-resolve -->
             </div>
           </li>

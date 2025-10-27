@@ -22,12 +22,14 @@ Group Kickstarter Buys enables Meeple Cart members to collaborate on bulk pledge
 ## Primary Usage Modes
 
 ### 1. Local Cohort Group Buy (Regional Mode)
+
 - Typically one region or store group coordinating an occasional campaign.
 - Single hub (or simple direct delivery) with tight-knit participants.
 - Emphasis on lightweight tracking, quick setup, and minimal administrative overhead.
 - Managers are usually participants; discussion and updates happen in real time.
 
 ### 2. Ongoing Network Group (Federated Mode)
+
 - Large, recurring community (mirrors existing Facebook groups) coordinating multiple concurrent buys.
 - Multiple hubs nationwide with designated hub managers, shared templates, and governance rules.
 - Requires richer reporting, templated workflows, and ability to duplicate past campaigns.
@@ -39,14 +41,15 @@ Group Kickstarter Buys enables Meeple Cart members to collaborate on bulk pledge
 
 ## Roles & Permissions
 
-| Role                | Description                                                                                          |
-|---------------------|------------------------------------------------------------------------------------------------------|
-| Group Manager       | Creates group buy, configures pledge tiers, manages participation, tracks payments, updates status. |
-| Hub Manager         | Coordinates distribution for a specific regional hub (can be same as Group Manager or delegated).   |
-| Participant         | Registers interest, confirms commitment, receives unique payment code, provides shipping details.   |
-| Observer            | Browses campaign info and discussion without registering (default community members).               |
+| Role          | Description                                                                                         |
+| ------------- | --------------------------------------------------------------------------------------------------- |
+| Group Manager | Creates group buy, configures pledge tiers, manages participation, tracks payments, updates status. |
+| Hub Manager   | Coordinates distribution for a specific regional hub (can be same as Group Manager or delegated).   |
+| Participant   | Registers interest, confirms commitment, receives unique payment code, provides shipping details.   |
+| Observer      | Browses campaign info and discussion without registering (default community members).               |
 
 Notes:
+
 - A group buy may have multiple managers for redundancy.
 - Participants can volunteer as hub managers; approval remains with group managers.
 
@@ -55,30 +58,35 @@ Notes:
 ## Key User Flows
 
 ### Flow 1: Create Group Buy
+
 1. Group Manager selects `Start Group Buy`.
 2. Manager enters campaign details (Kickstarter URL, pledge deadline, target pledge tier(s), estimated shipping, regions served) and selects usage mode (`regional` or `federated`).
 3. Manager defines required minimum participants and optional maximum capacity per tier; default hub/direct delivery settings pre-populate based on usage mode.
 4. System generates overview page with `Register Interest` CTA and discussion thread.
 
 ### Flow 2: Register Interest & Discussion
+
 1. Participant hits `Register Interest`.
 2. Participant selects desired pledge tier(s), quantity, preferred delivery method (regional hub pickup or direct delivery if enabled), associated hub, and notes.
 3. Participant is added to `Interested` list; auto-joins discussion thread with notification preferences.
 4. Participants and managers converse in threaded discussion (similar to listing comments) about add-ons, shipping, etc.
 
 ### Flow 3: Commitment & Payment Code
+
 1. Once minimum threshold reached (or manually triggered), manager requests confirmations.
 2. Participant confirms commitment, providing shipping information (hub pickup confirmation or direct delivery address) and agreeing to terms.
 3. System issues unique payment code (e.g., `MC-GB-AB12`) tied to participant entry.
 4. Manager shares payment instructions (bank account, reference format) and expected deadline.
 
 ### Flow 4: Manual Payment Tracking
+
 1. Participant transfers funds externally using provided code in transaction reference.
 2. Manager reviews bank statement/off-platform confirmation.
 3. Manager updates participant status to `Paid` and can attach note (e.g., date, amount).
 4. System logs change with manager name and timestamp; participants see updated state.
 
 ### Flow 5: Regional Hub Allocation & Fulfillment
+
 1. Manager assigns or confirms hub managers per region (Auckland, Wellington, etc.) and enables direct-delivery options where available.
 2. Hub manager receives list of participants assigned to their hub with quantities, shipping fees, and payment states; managers see separate queue for direct deliveries.
 3. After shipment arrival, manager records package receipt, splits quantities by hub, and updates status (e.g., `Arrived @ Main Hub`, `Sent to Wellington Hub`, `Ready for Pickup`) or creates direct-delivery batches with courier info.
@@ -89,6 +97,7 @@ Notes:
 ## Functional Requirements
 
 ### FR1: Group Buy Setup
+
 - **FR1.1** Collect campaign metadata (title, URL, pledge deadline, currency, estimated delivery).
 - **FR1.2** Support multiple pledge tiers with quantity caps, per-unit price, shipping surcharge, and notes.
 - **FR1.3** Allow invitation of co-managers via username/email.
@@ -97,6 +106,7 @@ Notes:
 - **FR1.6** Select usage mode (`regional` or `federated`) to tailor UI defaults (single hub auto-creation, template suggestions, reporting depth, permission prompts).
 
 ### FR2: Interest & Discussion
+
 - **FR2.1** Participants can register interest per tier, specifying quantity and preferred hub.
 - **FR2.2** Provide editable `Interest` status until confirmation request is sent.
 - **FR2.3** Embed discussion thread scoped to the group buy with notifications and moderation tools (pin, delete, report).
@@ -104,6 +114,7 @@ Notes:
 - **FR2.5** Display estimated shipping costs based on chosen delivery method and hub/direct option before participants submit interest.
 
 ### FR3: Commitment Management
+
 - **FR3.1** Managers trigger confirmation window with deadlines per tier.
 - **FR3.2** Participants confirm commitment and lock-in quantity; system transitions them to `Committed`.
 - **FR3.3** Generate unique payment codes per participant per group buy (stable identifier until completion).
@@ -111,12 +122,14 @@ Notes:
 - **FR3.5** Allow managers to override shipping method (e.g., enforce hub change) with participant notification and audit entry.
 
 ### FR4: Payment Tracking (Manual)
+
 - **FR4.1** Managers manually mark payments as `Pending Verification`, `Paid`, `Partial`, or `Refunded`.
 - **FR4.2** Every status change stores audit trail (manager, timestamp, note, optional attachment screenshot).
 - **FR4.3** Participants can upload optional proof of payment for managers to review.
 - **FR4.4** Dashboard totals show pledged amount, outstanding balance, and per-tier completion rates.
 
 ### FR5: Regional Hub Logistics
+
 - **FR5.1** Define hubs with name, city, pickup instructions, and manager(s).
 - **FR5.2** Store per-hub shipping costs (flat or per-unit) and indicate whether pickup fees apply.
 - **FR5.3** Auto-aggregate participant counts per hub and pledge tier.
@@ -126,11 +139,13 @@ Notes:
 - **FR5.7** Support exporting distribution lists (CSV) filtered by hub, direct delivery, and status.
 
 ### FR6: Notifications & Reminders
+
 - **FR6.1** Email/in-app notifications for key events (confirmation requested, payment overdue, hub arrival, pickup reminders).
 - **FR6.2** Managers can send bulk messages to all participants or per hub.
 - **FR6.3** Participants can mute non-critical updates while still receiving mandatory reminders.
 
 ### FR7: Security & Permissions
+
 - **FR7.1** Only managers/co-managers can edit pledge tiers, payments, or hubs.
 - **FR7.2** Hub managers have limited rights scoped to their hub (update distribution states, send hub-specific announcements).
 - **FR7.3** Participants can withdraw before confirmation deadline; post-confirmation withdrawal requires manager approval.
@@ -141,44 +156,52 @@ Notes:
 ## Administrative System for Group Managers
 
 ### Manager Home Dashboard
+
 - **Snapshot Cards:** Display campaign status, funds committed vs. collected, outstanding payments, and fulfillment progress per hub.
 - **Attention Queue:** Prioritized list of actions (new commitments to approve, payment proofs awaiting review, overdue reminders).
 - **Timeline Feed:** Chronological log of recent manager actions, participant updates, and hub status changes.
 - **Mode-Aware Views:** Regional mode collapses hub metrics into a single summary; federated mode surfaces cross-hub comparisons and allows switching between concurrent group buys run by the same network.
 
 ### Participant Management Console
+
 - **Smart Filters:** Search by payment status, pledge tier, hub, or alerted states (e.g., unpaid > 48h deadline).
 - **Bulk Actions:** Trigger reminder emails, export filtered lists, switch participants between hubs (with confirmation prompts).
 - **Detail Drawer:** Side panel showing participant history, audit trail, notes, proof attachments, and quick status update controls.
 
 ### Payment Verification Tools
+
 - **Reference Checklist:** Inline list of pending payment codes with expected amounts; managers can tick off as they reconcile bank statements.
 - **Proof Review:** Image/document viewer for uploaded receipts; ability to approve, request re-upload, or flag discrepancies.
 - **Dispute Handling:** Start a dispute workflow that notifies participant, allows comments, and tracks resolution state.
 
 ### Hub Coordination Workspace
+
 - **Hub Overview:** Map/list view showing hub capacity, packages in transit, items ready, and outstanding pickups.
 - **Assignment Board:** Drag-and-drop interface to reassign participants or quantities between hubs when logistics change.
 - **Hub Communications:** Templates for hub-specific announcements, pickup schedules, and meetup notes, with delivery tracking.
 - **Direct Delivery Queue:** Separate view for courier shipments showing address validation, shipping cost applied, tracking numbers, and delivery confirmations.
 
 ### Templates & Resources
+
 - **Message Templates:** Editable library for confirmation requests, payment instructions, reminders, and hub updates.
 - **Document Storage:** Attach shared files (e.g., pledge manager spreadsheets) with version notes visible to co-managers.
 - **Checklist Builder:** Create custom milestone checklists (e.g., pledge manager lock dates, shipment phases) with completion tracking.
 - **Mode Starter Packs:** Provide starter templates—regional (single hub, direct pickup instructions) vs. federated (multi-hub structure, code of conduct, escalation paths).
 
 ### Reporting & Audit
+
 - **Export Center:** Generate CSV/PDF summaries for payments, commitments, or fulfillment statuses with timestamped signatures.
 - **Audit Trail Viewer:** Filterable log showing who changed what and when, with diff view for critical fields (amounts, statuses).
 - **Manager Metrics:** Stats on response times, payment processing lag, hub turnaround times to identify bottlenecks.
 
 ### Administrative Safeguards
+
 - **Role Escalation Requests:** Allow managers to invite or demote co-managers/hub managers with confirmation workflows.
 - **Session Alerts:** Warn managers of concurrent edits on the same participant to prevent conflicting updates.
 - **Archive & Duplicate:** Archive completed group buys with immutable records; duplicate past campaigns as templates for new runs.
 
 ### Mode-Specific Adjustments
+
 - **Regional Simplification:** Option to hide unused hub features, condense dashboard to essential stats, and provide direct-delivery default prompts.
 - **Federated Governance:** Enable shared manager pools, standardized reporting exports across campaigns, and configurable permissions per hub manager cohort.
 
@@ -259,6 +282,7 @@ group_buy_discussions {
 ```
 
 Unique Constraints & Indices:
+
 - `payment_code` unique per `group_buy_participants` (format `GB-{groupBuyId}-{shortId}`).
 - Composite index on `(group_buy, hub)` for quick aggregation.
 - Audit log stored as JSON array of { action, actorId, timestamp, payload } for easy rendering.
@@ -309,12 +333,12 @@ Notifications leverage existing PocketBase email templates and in-app alerts.
 
 ## Risk & Mitigation
 
-| Risk                                   | Impact  | Mitigation                                                                 |
-|----------------------------------------|---------|-----------------------------------------------------------------------------|
-| Insufficient coordinators per hub      | Medium  | Allow recruitment posts, highlight hubs lacking managers, enable co-managers. |
-| Payment disputes due to manual tracking| Medium  | Maintain detailed audit logs, allow participant-uploaded proof, provide dispute escalation workflow. |
-| Campaign cancellation or delays        | Medium  | Enable status switch to `Cancelled` with bulk refund tracking notes.       |
-| Overlapping group buys causing confusion| Low    | Filter and tag group buys by status; highlight active commitments first.   |
+| Risk                                     | Impact | Mitigation                                                                                           |
+| ---------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------- |
+| Insufficient coordinators per hub        | Medium | Allow recruitment posts, highlight hubs lacking managers, enable co-managers.                        |
+| Payment disputes due to manual tracking  | Medium | Maintain detailed audit logs, allow participant-uploaded proof, provide dispute escalation workflow. |
+| Campaign cancellation or delays          | Medium | Enable status switch to `Cancelled` with bulk refund tracking notes.                                 |
+| Overlapping group buys causing confusion | Low    | Filter and tag group buys by status; highlight active commitments first.                             |
 
 ---
 

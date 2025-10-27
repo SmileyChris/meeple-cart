@@ -41,8 +41,8 @@
   // Determine which groups have items (in order)
   let groupsToShow = $derived(
     (['today', 'yesterday', 'this-week', 'older'] as const).filter(
-      (group) => groupedActivities[group].length > 0,
-    ),
+      (group) => groupedActivities[group].length > 0
+    )
   );
 </script>
 

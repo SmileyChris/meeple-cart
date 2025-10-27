@@ -69,7 +69,8 @@
                 type="checkbox"
                 name="region_{region}"
                 checked={prefs.watched_regions?.includes(region)}
-                class="h-4 w-4 rounded border-subtle bg-surface-card transition-colors style="color: var(--accent)" focus:ring-[color:rgba(52,211,153,0.35)] focus:ring-offset-0"
+                class="h-4 w-4 rounded border-subtle bg-surface-card transition-colors focus:ring-[color:rgba(52,211,153,0.35)] focus:ring-offset-0"
+                style="color: var(--accent)"
               />
               <span class="text-secondary">{region}</span>
             </label>
@@ -117,7 +118,8 @@
                 name="email_frequency"
                 value={option.value}
                 checked={prefs.email_frequency === option.value}
-                class="h-4 w-4 border-subtle bg-surface-card transition-colors style="color: var(--accent)" focus:ring-[color:rgba(52,211,153,0.35)] focus:ring-offset-0"
+                class="h-4 w-4 border-subtle bg-surface-card transition-colors focus:ring-[color:rgba(52,211,153,0.35)] focus:ring-offset-0"
+                style="color: var(--accent)"
               />
               <span class="text-secondary">{option.label}</span>
             </label>
@@ -145,7 +147,8 @@
                 value={option.value}
                 checked={prefs.in_app_digest === option.value ||
                   (!prefs.in_app_digest && option.value === 'instant')}
-                class="h-4 w-4 border-subtle bg-surface-card transition-colors style="color: var(--accent)" focus:ring-[color:rgba(52,211,153,0.35)] focus:ring-offset-0"
+                class="h-4 w-4 border-subtle bg-surface-card transition-colors focus:ring-[color:rgba(52,211,153,0.35)] focus:ring-offset-0"
+                style="color: var(--accent)"
               />
               <span class="text-secondary">{option.label}</span>
             </label>
@@ -168,7 +171,8 @@
               type="checkbox"
               name="notify_new_listings"
               checked={prefs.notify_new_listings}
-              class="h-4 w-4 rounded border-subtle bg-surface-card transition-colors style="color: var(--accent)" focus:ring-[color:rgba(52,211,153,0.35)] focus:ring-offset-0"
+              class="h-4 w-4 rounded border-subtle bg-surface-card transition-colors focus:ring-[color:rgba(52,211,153,0.35)] focus:ring-offset-0"
+              style="color: var(--accent)"
             />
             <div>
               <div class="font-medium text-secondary">New listings in watched regions</div>
@@ -183,7 +187,8 @@
               type="checkbox"
               name="notify_price_drops"
               checked={prefs.notify_price_drops}
-              class="h-4 w-4 rounded border-subtle bg-surface-card transition-colors style="color: var(--accent)" focus:ring-[color:rgba(52,211,153,0.35)] focus:ring-offset-0"
+              class="h-4 w-4 rounded border-subtle bg-surface-card transition-colors focus:ring-[color:rgba(52,211,153,0.35)] focus:ring-offset-0"
+              style="color: var(--accent)"
             />
             <div>
               <div class="font-medium text-secondary">Price drops (coming soon)</div>
@@ -198,7 +203,8 @@
               type="checkbox"
               name="notify_new_messages"
               checked={prefs.notify_new_messages}
-              class="h-4 w-4 rounded border-subtle bg-surface-card transition-colors style="color: var(--accent)" focus:ring-[color:rgba(52,211,153,0.35)] focus:ring-offset-0"
+              class="h-4 w-4 rounded border-subtle bg-surface-card transition-colors focus:ring-[color:rgba(52,211,153,0.35)] focus:ring-offset-0"
+              style="color: var(--accent)"
             />
             <div>
               <div class="font-medium text-secondary">New messages</div>

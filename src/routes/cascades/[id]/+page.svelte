@@ -427,10 +427,7 @@
               </div>
             {:else if canEnter}
               <!-- Entry Form -->
-              <form
-                on:submit={handleEnter}
-                class="space-y-4"
-              >
+              <form on:submit={handleEnter} class="space-y-4">
                 <div>
                   <label for="message" class="mb-2 block text-sm font-medium text-secondary">
                     Message (optional)
