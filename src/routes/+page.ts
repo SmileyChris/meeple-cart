@@ -115,7 +115,7 @@ const fetchActivityData = async (
   }
 };
 
-export const prerender = true;
+export const prerender = false;
 
 export const load: PageLoad = async ({ fetch, url }) => {
   const pageParam = Number.parseInt(url.searchParams.get('page') ?? '1', 10);

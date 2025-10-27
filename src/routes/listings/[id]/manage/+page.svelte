@@ -110,7 +110,7 @@
         <button
           class="rounded-lg border border-emerald-500 px-4 py-2 text-sm font-medium text-emerald-300 transition hover:bg-emerald-500/10"
           type="button"
-          on:click={toggleAddForm}
+          onclick={toggleAddForm}
         >
           {showAddForm ? 'Cancel' : '+ Add Game'}
         </button>
@@ -229,7 +229,7 @@
               <button
                 class="rounded-lg border border-subtle px-4 py-2 text-sm text-secondary transition hover:border-strong"
                 type="button"
-                on:click={toggleAddForm}
+                onclick={toggleAddForm}
               >
                 Cancel
               </button>
@@ -323,7 +323,7 @@
                   <button
                     class="rounded-lg border border-subtle px-4 py-2 text-sm text-secondary transition hover:border-strong"
                     type="button"
-                    on:click={cancelEditing}
+                    onclick={cancelEditing}
                   >
                     Cancel
                   </button>
@@ -368,7 +368,7 @@
                     <button
                       class="text-sm text-emerald-400 transition hover:text-emerald-300"
                       type="button"
-                      on:click={() => startEditing(game.id)}
+                      onclick={() => startEditing(game.id)}
                     >
                       Edit
                     </button>
@@ -378,7 +378,11 @@
                         <button
                           class="text-sm text-rose-400 transition hover:text-rose-300"
                           type="submit"
-                          onclick="return confirm('Are you sure you want to remove this game?')"
+                          onclick={(e) => {
+                            if (!confirm('Are you sure you want to remove this game?')) {
+                              e.preventDefault();
+                            }
+                          }}
                         >
                           Remove
                         </button>
@@ -396,7 +400,7 @@
                         class="rounded border border-subtle bg-surface-card transition-colors px-2 py-1 text-xs text-secondary"
                         name="status"
                         value={game.status}
-                        on:change={(e) => e.currentTarget.form?.requestSubmit()}
+                        onchange={(e) => e.currentTarget.form?.requestSubmit()}
                       >
                         {#each data.gameStatuses as status (status)}
                           <option value={status}

@@ -1,3 +1,3 @@
-// Enable prerendering for static export
-export const prerender = true;
+// Disable prerendering for SPA with dynamic data
+export const prerender = false;
 export const ssr = false;

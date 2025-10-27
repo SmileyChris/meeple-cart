@@ -3,7 +3,7 @@ import type { PageLoad } from './$types';
 import type { GameRecord, ListingGameDetail, ListingRecord } from '$lib/types/listing';
 import type { UserRecord } from '$lib/types/pocketbase';
 import { normalizeListingType } from '$lib/types/listing';
-import { getLowestHistoricalPrice } from '$lib/server/price-tracking';
+import { getLowestHistoricalPrice } from '$lib/utils/price-history';
 import { pb, currentUser } from '$lib/pocketbase';
 import { get } from 'svelte/store';
 
