@@ -9,13 +9,11 @@ export const load: PageServerLoad = async ({ locals }) => {
 
   try {
     // Fetch user's active listings with available games
-    const listings = await locals.pb
-      .collection('listings')
-      .getFullList<ListingRecord>({
-        filter: `owner = "${locals.user.id}" && status = "active"`,
-        expand: 'games(listing)',
-        sort: '-created',
-      });
+    const listings = await locals.pb.collection('listings').getFullList<ListingRecord>({
+      filter: `owner = "${locals.user.id}" && status = "active"`,
+      expand: 'games(listing)',
+      sort: '-created',
+    });
 
     // Format games for selection
     const availableGames = listings.flatMap((listing) => {
@@ -64,7 +62,10 @@ export const actions: Actions = {
       return fail(400, { error: 'Deadline must be between 7 and 30 days' });
     }
 
-    if (!shippingRequirement || !['pickup_only', 'shipping_available', 'shipping_only'].includes(shippingRequirement)) {
+    if (
+      !shippingRequirement ||
+      !['pickup_only', 'shipping_available', 'shipping_only'].includes(shippingRequirement)
+    ) {
       return fail(400, { error: 'Invalid shipping requirement' });
     }
 

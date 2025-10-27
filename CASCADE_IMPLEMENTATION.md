@@ -3,35 +3,44 @@
 ## Phase 1 MVP: COMPLETED ✅
 
 ### 1. Database Schema & Migrations ✅
+
 **File**: `services/pocketbase/migrations/0004_cascades.js`
 
 Created three new PocketBase collections:
+
 - **cascades**: Main cascade tracking with status, deadlines, game references, and lineage
 - **cascade_entries**: User entries to win cascades
 - **cascade_history**: Complete audit trail of all cascade events
 
 Added cascade statistics to users collection:
+
 - `cascades_seeded`, `cascades_received`, `cascades_passed`, `cascades_broken`
 - `cascade_reputation`, `cascade_restricted_until`, `can_enter_cascades`
 
 Updated notifications collection with 6 new cascade notification types.
 
 ### 2. TypeScript Types ✅
+
 **Files**:
+
 - `src/lib/types/cascade.ts` (new)
 - `src/lib/types/pocketbase.ts` (updated)
 
 Comprehensive type definitions for:
+
 - CascadeRecord, CascadeEntryRecord, CascadeHistoryRecord
 - Badge types and notification types
 - Helper types for UI display
 
 ### 3. Browse Cascades Page ✅
+
 **Files**:
+
 - `src/routes/cascades/+page.ts`
 - `src/routes/cascades/+page.svelte`
 
 Features:
+
 - Grid view of all active cascades
 - Filters: status, region, sort options
 - Time remaining countdown
@@ -41,11 +50,14 @@ Features:
 - Pagination support
 
 ### 4. Create Cascade Flow ✅
+
 **Files**:
+
 - `src/routes/cascades/create/+page.server.ts`
 - `src/routes/cascades/create/+page.svelte`
 
 Features:
+
 - Select game from user's active listings
 - Optional: name, description, special rules
 - Deadline selection (7-30 days)
@@ -56,11 +68,14 @@ Features:
 - User stats updates
 
 ### 5. Cascade Detail Page ✅
+
 **Files**:
+
 - `src/routes/cascades/[id]/+page.server.ts`
 - `src/routes/cascades/[id]/+page.svelte`
 
 Features:
+
 - Full game and cascade details
 - Holder information with stats
 - Entry form with optional message
@@ -72,6 +87,7 @@ Features:
 - Time remaining prominently displayed
 
 Eligibility rules implemented:
+
 - Account ≥30 days OR 2+ vouches OR 1+ completed trade
 - Not restricted from cascades
 - Not already entered
@@ -79,11 +95,14 @@ Eligibility rules implemented:
 - Cascade status = accepting_entries
 
 ### 6. My Cascades Dashboard ✅
+
 **Files**:
+
 - `src/routes/cascades/my-cascades/+page.server.ts`
 - `src/routes/cascades/my-cascades/+page.svelte`
 
 Features:
+
 - Three tabs: Entered, Won, Started
 - Stats cards: seeded, received, passed, broken, reputation
 - Per-cascade status and deadline tracking
@@ -91,6 +110,7 @@ Features:
 - Empty states with calls-to-action
 
 ### 7. Navigation Integration ✅
+
 **File**: `src/routes/+layout.svelte`
 
 Added "🌊 Cascades" link to main navigation between Activity and user menu.
@@ -100,7 +120,9 @@ Added "🌊 Cascades" link to main navigation between Activity and user menu.
 ## Phase 1 MVP: REMAINING 🚧
 
 ### 8. Winner Selection Mechanism ⏳
+
 **Needs**:
+
 - Server-side script or cron job to check deadlines
 - Random winner selection algorithm (cryptographically secure)
 - Automatic status transitions
@@ -108,12 +130,15 @@ Added "🌊 Cascades" link to main navigation between Activity and user menu.
 - History event logging
 
 **Suggested Implementation**:
+
 - PocketBase hook that runs on schedule (or triggered manually)
 - Or SvelteKit server route that can be called via cron
 - File: `src/routes/api/cascades/process-deadlines/+server.ts`
 
 ### 9. Badge Display Components ⏳
+
 **Needs**:
+
 - Reusable badge components for user profiles
 - Badge icons (Seed Starter 🌱, Cascade Keeper 🔗, etc.)
 - Badge logic (when to award each badge)
@@ -121,6 +146,7 @@ Added "🌊 Cascades" link to main navigation between Activity and user menu.
 - Maybe: badge tooltips with descriptions
 
 **Suggested Files**:
+
 - `src/lib/components/CascadeBadge.svelte`
 - `src/lib/components/CascadeBadges.svelte` (collection display)
 - Update `src/routes/users/[id]/+page.svelte` to show badges
@@ -171,6 +197,7 @@ Before production, test these flows:
 Based on the original spec, these features are planned for future phases:
 
 ### Phase 2: Trust & Verification
+
 - Automated reminders (email + in-app)
 - Deadline enforcement with auto-actions
 - Cascade reputation scoring improvements
@@ -179,6 +206,7 @@ Based on the original spec, these features are planned for future phases:
 - Enhanced verification (tracking numbers, auto-confirm)
 
 ### Phase 3: Social & Gamification
+
 - Cascade lineage visualization (tree/timeline)
 - Thank you messages between participants
 - Photo uploads for received games
@@ -188,6 +216,7 @@ Based on the original spec, these features are planned for future phases:
 - Social media sharing
 
 ### Phase 4: Advanced Features
+
 - Cascade themes/categories
 - Cascade collections ("Mystery Box Cascade")
 - Cascade healing (admin tools)
@@ -229,6 +258,7 @@ The full specification document with all phases, security measures, and edge cas
 **Estimated time to complete remaining**: 2-4 hours
 
 The core infrastructure is complete and functional. Users can now:
+
 - Create cascades with their games
 - Browse and filter all active cascades
 - Enter cascades to win games

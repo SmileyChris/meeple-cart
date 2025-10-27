@@ -7,7 +7,17 @@
   export let data: PageData;
   export let form: ActionData;
 
-  const { cascade, game, listing, holder, entries, history, userEntry, canEnter, eligibilityMessage } = data;
+  const {
+    cascade,
+    game,
+    listing,
+    holder,
+    entries,
+    history,
+    userEntry,
+    canEnter,
+    eligibilityMessage,
+  } = data;
 
   let entryMessage = '';
   let isSubmitting = false;
@@ -238,7 +248,9 @@
               Entries ({entries.length})
             </h2>
             {#if entries.length === 0}
-              <p class="mt-4 text-sm text-slate-400">No entries yet. Be the first to enter this gift cascade!</p>
+              <p class="mt-4 text-sm text-slate-400">
+                No entries yet. Be the first to enter this gift cascade!
+              </p>
             {:else}
               <div class="mt-4 space-y-3">
                 {#each entries as entry (entry.id)}
@@ -306,7 +318,11 @@
         <!-- Deadline Card -->
         <div class="rounded-xl border border-slate-800 bg-slate-900/60 p-6">
           <h3 class="text-lg font-semibold text-slate-100">Entry Deadline</h3>
-          <p class="mt-2 text-2xl font-bold {timeRemaining.urgent ? 'text-orange-400' : 'text-emerald-400'}">
+          <p
+            class="mt-2 text-2xl font-bold {timeRemaining.urgent
+              ? 'text-orange-400'
+              : 'text-emerald-400'}"
+          >
             {timeRemaining.text}
           </p>
           <p class="mt-1 text-xs text-slate-500">{formatDate(cascade.deadline)}</p>
@@ -316,7 +332,9 @@
         {#if cascade.status === 'accepting_entries'}
           <div class="rounded-xl border border-slate-800 bg-slate-900/60 p-6">
             {#if form?.success}
-              <div class="rounded-lg border border-emerald-500 bg-emerald-500/10 p-4 text-emerald-200 mb-4">
+              <div
+                class="rounded-lg border border-emerald-500 bg-emerald-500/10 p-4 text-emerald-200 mb-4"
+              >
                 {form.message}
               </div>
             {/if}

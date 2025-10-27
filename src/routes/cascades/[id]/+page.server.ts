@@ -10,7 +10,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
   try {
     // Fetch cascade with expanded relations
     const cascade = await locals.pb.collection('cascades').getOne<CascadeRecord>(id, {
-      expand: 'current_game,current_game.listing,current_holder,winner,origin_cascade,previous_cascade',
+      expand:
+        'current_game,current_game.listing,current_holder,winner,origin_cascade,previous_cascade',
     });
 
     // Fetch entries
@@ -21,19 +22,23 @@ export const load: PageServerLoad = async ({ params, locals }) => {
     });
 
     // Fetch history
-    const history = await locals.pb.collection('cascade_history').getFullList<CascadeHistoryRecord>({
-      filter: `cascade = "${id}"`,
-      expand: 'actor,related_user,game',
-      sort: '-event_date',
-    });
+    const history = await locals.pb
+      .collection('cascade_history')
+      .getFullList<CascadeHistoryRecord>({
+        filter: `cascade = "${id}"`,
+        expand: 'actor,related_user,game',
+        sort: '-event_date',
+      });
 
     // Check if current user has entered
     let userEntry: CascadeEntryRecord | null = null;
     if (locals.user) {
-      const userEntries = await locals.pb.collection('cascade_entries').getFullList<CascadeEntryRecord>({
-        filter: `cascade = "${id}" && user = "${locals.user.id}"`,
-      });
-      userEntry = userEntries.find(e => !e.withdrew) || null;
+      const userEntries = await locals.pb
+        .collection('cascade_entries')
+        .getFullList<CascadeEntryRecord>({
+          filter: `cascade = "${id}" && user = "${locals.user.id}"`,
+        });
+      userEntry = userEntries.find((e) => !e.withdrew) || null;
     }
 
     // Check eligibility to enter
@@ -51,7 +56,10 @@ export const load: PageServerLoad = async ({ params, locals }) => {
         eligibilityMessage = 'You have already entered this cascade.';
       } else if (cascade.current_holder === user.id) {
         eligibilityMessage = 'You are the current holder of this cascade.';
-      } else if (user.cascade_restricted_until && new Date(user.cascade_restricted_until) > new Date()) {
+      } else if (
+        user.cascade_restricted_until &&
+        new Date(user.cascade_restricted_until) > new Date()
+      ) {
         eligibilityMessage = 'You are temporarily restricted from entering cascades.';
       } else if (!user.can_enter_cascades) {
         eligibilityMessage = 'You are not eligible to enter cascades.';
@@ -137,10 +145,12 @@ export const load: PageServerLoad = async ({ params, locals }) => {
           notes: h.notes,
         };
       }),
-      userEntry: userEntry ? {
-        id: userEntry.id,
-        message: userEntry.message,
-      } : null,
+      userEntry: userEntry
+        ? {
+            id: userEntry.id,
+            message: userEntry.message,
+          }
+        : null,
       canEnter,
       eligibilityMessage,
     };
@@ -179,7 +189,7 @@ export const actions: Actions = {
           filter: `cascade = "${id}" && user = "${locals.user.id}"`,
         });
 
-      const activeEntry = existingEntries.find(e => !e.withdrew);
+      const activeEntry = existingEntries.find((e) => !e.withdrew);
       if (activeEntry) {
         return fail(400, { error: 'You have already entered this cascade' });
       }

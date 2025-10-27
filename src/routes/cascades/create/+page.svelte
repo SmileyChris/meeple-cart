@@ -239,7 +239,9 @@
           <ul class="mt-2 space-y-1 text-sm text-amber-200/80">
             <li>• Your game will be locked and unavailable for other trades/sales</li>
             <li>• You must ship the game to the recipient when selected</li>
-            <li>• The recipient will be expected to create their own gift cascade within 30 days</li>
+            <li>
+              • The recipient will be expected to create their own gift cascade within 30 days
+            </li>
             <li>• This builds your Gift Cascade Seed Starter badge!</li>
           </ul>
         </div>

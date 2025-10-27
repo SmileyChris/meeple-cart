@@ -21,6 +21,7 @@ The trust tier system must be resilient against manipulation by individuals or c
 **Attack:** Group of 5-10 people trade only with each other to rapidly build trust scores.
 
 **Example scenario:**
+
 - 8 friends create accounts on same day
 - Trade only within the group in round-robin pattern
 - Each person hits 10 trades in 3 weeks
@@ -29,6 +30,7 @@ The trust tier system must be resilient against manipulation by individuals or c
 - Execute coordinated scam wave
 
 **Detection signals:**
+
 - Closed trading network (users only trade within small group)
 - Symmetric trade patterns (A↔B, B↔C, C↔A in loops)
 - Rapid succession trades (10 trades in 2 weeks all within same group)
@@ -37,6 +39,7 @@ The trust tier system must be resilient against manipulation by individuals or c
 - Geographic clustering (all same city) without broader network
 
 **Automated flags:**
+
 ```javascript
 IF user.trade_count >= 10 AND
    unique_trading_partners.length < 3 AND
@@ -49,6 +52,7 @@ IF user.trading_partners.all(p => p.account_age_days < 90) AND
 ```
 
 **Countermeasures:**
+
 - **Trust diversity requirement**: To reach Established tier, must have traded with at least 5 different unique users
 - **Network analysis**: Flag clusters of new accounts with only internal trades
 - **Vouch weight discount**: If 80%+ of vouches come from same 3 people, reduce effective weight by 50%
@@ -60,6 +64,7 @@ IF user.trading_partners.all(p => p.account_age_days < 90) AND
 **Attack:** One person creates multiple accounts to vouch for their primary account.
 
 **Example scenario:**
+
 - User creates main account "TrustedTrader123"
 - Creates 5 alt accounts over 2 months
 - Uses VPN to mask IP
@@ -68,6 +73,7 @@ IF user.trading_partners.all(p => p.account_age_days < 90) AND
 - Main account appears to have social proof
 
 **Detection signals:**
+
 - Multiple accounts from same IP address (even if sporadic)
 - Similar writing style/patterns in messages (NLP analysis)
 - Vouches from accounts with no other trading activity (1-trick vouchers)
@@ -76,6 +82,7 @@ IF user.trading_partners.all(p => p.account_age_days < 90) AND
 - Behavioral patterns (login times, click patterns, typing speed)
 
 **Automated flags:**
+
 ```javascript
 IF new_vouch_received FROM voucher WHERE
    voucher.ip_addresses.overlap(user.ip_addresses) OR
@@ -89,6 +96,7 @@ IF user.vouches.count(v => v.voucher.total_trades == 1) > 3
 ```
 
 **Countermeasures:**
+
 - **Voucher eligibility requirements**: Can vouch if you've received ≥1 vouch OR have phone verification (Trust Buddy)
 - **Cross-account fingerprinting**: Track device IDs, IPs, browser fingerprints, payment hashes
 - **Vouch weighting**: Vouches from accounts with diverse trading history worth significantly more
@@ -100,6 +108,7 @@ IF user.vouches.count(v => v.voucher.total_trades == 1) > 3
 **Attack:** Build trust over 90 days with small trades, then execute one large scam and disappear.
 
 **Example scenario:**
+
 - User conducts 12 legitimate trades of $20-50 over 90 days
 - Builds Established tier status
 - Suddenly lists 20 expensive games ($500+ total value)
@@ -107,6 +116,7 @@ IF user.vouches.count(v => v.voucher.total_trades == 1) > 3
 - Never ships items, deletes account
 
 **Detection signals:**
+
 - Sudden shift to high-value trades (pattern break)
 - User requests prepayment for first time
 - Rapid listing of many expensive items after period of small trades
@@ -115,6 +125,7 @@ IF user.vouches.count(v => v.voucher.total_trades == 1) > 3
 - Change in payment method preference
 
 **Automated flags:**
+
 ```javascript
 average_trade_value = user.last_10_trades.avg(t => t.value)
 new_listing_total = user.recent_listings.sum(l => l.total_value)
@@ -130,6 +141,7 @@ IF user.messages.contains("bank transfer only") AND
 ```
 
 **Countermeasures:**
+
 - **Velocity checks**: Flag sudden increases in listing values
 - **Escrow suggestions**: Auto-suggest escrow/tracked shipping for trades > $200 with New/Seedling tier
 - **Trade value history**: Show average trade value on profile ("Typical trades: $20-60")
@@ -141,6 +153,7 @@ IF user.messages.contains("bank transfer only") AND
 **Attack:** Buy or hack an Established account to bypass trust building.
 
 **Example scenario:**
+
 - Legitimate user builds Established account over 2 years
 - Goes inactive for 9 months
 - Account credentials sold on dark web or phished
@@ -149,6 +162,7 @@ IF user.messages.contains("bank transfer only") AND
 - Original user unaware until victims contact them
 
 **Detection signals:**
+
 - Sudden change in behavior patterns (listing style, communication tone, location)
 - Password reset from new IP/device after long inactivity
 - Change in preferred contact method
@@ -158,6 +172,7 @@ IF user.messages.contains("bank transfer only") AND
 - New location significantly different from historical
 
 **Automated flags:**
+
 ```javascript
 IF user.inactive_days > 180 AND
    user.suddenly_active WITH (
@@ -174,6 +189,7 @@ IF user.historical_message_sentiment != user.recent_message_sentiment AND
 ```
 
 **Countermeasures:**
+
 - **Re-verification on reactivation**: Require phone/email re-verification after 6+ months inactive
 - **Location change warnings**: If location changes >200km, show notice to trading partners: "This user recently changed their location from Auckland to Christchurch"
 - **Behavioral analysis**: Flag dramatic shifts in communication style or trading patterns
@@ -186,6 +202,7 @@ IF user.historical_message_sentiment != user.recent_message_sentiment AND
 **Attack:** Pay people (off-platform) to trade and vouch.
 
 **Example scenario:**
+
 - User posts in forums/Discord: "Will pay $5 per vouch on Meeple Cart"
 - 10 people create accounts or use existing ones
 - Conduct fake trades (send empty packages or very low-value items)
@@ -194,6 +211,7 @@ IF user.historical_message_sentiment != user.recent_message_sentiment AND
 - Uses fake reputation for scams
 
 **Detection signals:**
+
 - Vouches from users with no apparent connection (different cities, no mutual contacts)
 - Generic vouch messages ("good trader" × 10 with identical or highly similar text)
 - Vouches clustered in time (5 vouches in one day)
@@ -202,6 +220,7 @@ IF user.historical_message_sentiment != user.recent_message_sentiment AND
 - Trades marked complete unusually quickly (< 24 hours)
 
 **Automated flags:**
+
 ```javascript
 recent_vouches = user.vouches.where(created_at > 7.days.ago)
 
@@ -216,6 +235,7 @@ IF voucher.total_vouches_given > 20 AND
 ```
 
 **Countermeasures:**
+
 - **Vouch rate limiting**: Max 5 vouches received per week per user
 - **Relationship signals required**: Weight vouches higher if users have mutual connections, geographic proximity
 - **Generic message detection**: Flag repetitive vouch text, require minimum 10 words
@@ -231,6 +251,7 @@ IF voucher.total_vouches_given > 20 AND
 **Attack:** Criminal group creates 20+ accounts, builds collective trust over months, then executes coordinated scam wave.
 
 **Example scenario:**
+
 - Professional fraud ring creates 25 accounts over 2 months
 - Uses rotating IPs and devices to avoid fingerprinting
 - Conducts legitimate small trades within ring for 90 days
@@ -240,6 +261,7 @@ IF voucher.total_vouches_given > 20 AND
 - Total fraud value: $10,000+
 
 **Detection patterns:**
+
 - Graph analysis reveals tight cluster with minimal external connections
 - Accounts created in batches (10 accounts in one week)
 - Similar naming patterns or profile structures ("GameTrader01", "GameTrader02")
@@ -249,6 +271,7 @@ IF voucher.total_vouches_given > 20 AND
 - Mass account deletions after fraud executed
 
 **Advanced countermeasures:**
+
 - **Network graph analysis**: Visualize trading relationships, flag isolated dense clusters
 - **Velocity limits**: Cap new account registrations from same IP/subnet (max 3 per week)
 - **CAPTCHA strengthening**: Require phone verification before first trade
@@ -261,6 +284,7 @@ IF voucher.total_vouches_given > 20 AND
 ## Data Schema for Anti-Gaming
 
 ### Account Fingerprints (Phase 2)
+
 ```javascript
 account_fingerprints {
   id: uuid PRIMARY KEY,
@@ -293,6 +317,7 @@ account_fingerprints {
 ```
 
 ### Trading Relationships (Phase 2)
+
 ```javascript
 trading_relationships {
   id: uuid PRIMARY KEY,
@@ -318,6 +343,7 @@ WHERE user_a = 'abc123'
 ```
 
 ### Trust Flags (Phase 2)
+
 ```javascript
 trust_flags {
   id: uuid PRIMARY KEY,
@@ -370,6 +396,7 @@ Enable the community to help identify bad actors:
 ### Report Mechanisms
 
 **"Report suspicious activity" on any profile:**
+
 - **Where**: Profile page, listing detail, message thread
 - **Required fields**:
   - Pattern observed (dropdown: Suspicious vouches, Fake trades, Pressure tactics, Account takeover, Other)
@@ -379,6 +406,7 @@ Enable the community to help identify bad actors:
 - **Escalation threshold**: 3 independent reports from Growing+ tier users trigger auto-review
 
 **Vouch reporting:**
+
 - "Report this vouch" button on each vouch
 - Quick report reasons: Generic/copied, Never traded, Suspicious timing, Fake trade
 - 2+ reports on same vouch → automatic moderation queue
@@ -386,6 +414,7 @@ Enable the community to help identify bad actors:
 ### Transparency
 
 **Public moderation log** (anonymized):
+
 ```
 2025-10-15: User #47291 - Vouch removed (sockpuppet detection)
    Reason: 3 vouches from accounts sharing IP addresses
@@ -399,11 +428,13 @@ Enable the community to help identify bad actors:
 ```
 
 **During investigation notice:**
+
 - Profile shows: "⚠️ This account is under review for unusual activity (as of Oct 15)"
 - Listings paused: "Listings temporarily unavailable pending review"
 - Clear status: "Review typically completed within 48 hours"
 
 **Appeal process:**
+
 - "Dispute this action" link on any restriction
 - Required: Explanation, supporting evidence
 - Reviewed by different moderator than original
@@ -413,17 +444,20 @@ Enable the community to help identify bad actors:
 ### Incentives
 
 **"Community Guardian 🛡️" badge:**
+
 - Awarded after 5 confirmed accurate reports
 - Visible on profile and listings
 - Reports from Guardians weighted higher
 - Progression: Guardian → Senior Guardian (15 reports) → Elite Guardian (50 reports)
 
 **Meta-reputation:**
+
 - Track reporting accuracy: confirmed / total reports
 - High accuracy (>80%) = reports fast-tracked
 - Low accuracy (<40%) = reports deprioritized, eventually blocked from reporting
 
 **Public recognition:**
+
 - Monthly "Top Guardian" leaderboard
 - Annual community safety awards
 - Special flair in messages/forums
@@ -433,24 +467,28 @@ Enable the community to help identify bad actors:
 Detailed procedures in [Moderation Playbook](./moderation.md). Summary:
 
 **Level 1: Soft Warning** (confidence < 50%)
+
 - Temporary "Under review" notice
 - Require tracked shipping
 - Limit to 1 trade per week
 - Notify user with evidence
 
 **Level 2: Restriction** (confidence 50-80%)
+
 - Demote trust tier temporarily
 - Require re-verification
 - Tracked shipping mandatory
 - 30-day probation
 
 **Level 3: Suspension** (confidence > 80%)
+
 - Account suspended pending investigation
 - All listings frozen
 - Moderator deep-dive required
 - Contact recent trading partners
 
 **Level 4: Ban** (confirmed fraud)
+
 - Permanent ban + public log
 - Fingerprint blacklist
 - Notify recent partners
@@ -461,30 +499,35 @@ Detailed procedures in [Moderation Playbook](./moderation.md). Summary:
 **Important**: These systems must not punish legitimate behavior.
 
 ### Family/Household Traders
+
 - **Scenario**: Couple shares collection, both have accounts
 - **Detection**: Same IP, device fingerprints, address
 - **Solution**: Allow account linking with "Linked to [Partner Name]" badge
 - **Benefit**: Vouches from linked accounts don't count (prevent gaming), but trades are allowed
 
 ### Game Store Owners
+
 - **Scenario**: High volume, concentrated trades, "unnatural" patterns
 - **Detection**: 100+ trades in 90 days, many one-off partners
 - **Solution**: "Verified Retailer 🏪" designation with different trust rules
 - **Requirements**: Business verification, phone, physical address
 
 ### Regional Gaming Clubs
+
 - **Scenario**: 20 members trade mostly within club
 - **Detection**: Closed network, high mutual connections
 - **Solution**: "Club Member" badge option, group vouching allowed
 - **Requirements**: Club registration, public meetup verification
 
 ### Collection Liquidation
+
 - **Scenario**: Inactive user returns to sell entire 200-game collection
 - **Detection**: Dormancy → sudden high-value listings
 - **Solution**: Reactivation verification flow, graduated re-onboarding
 - **Process**: Verify identity → small test trade → 7-day cooldown → full access
 
 ### Traveling Traders
+
 - **Scenario**: User travels NZ for work, trades in multiple cities
 - **Detection**: Frequent location changes, diverse partners (positive!)
 - **Solution**: "Road Warrior 🚗" badge, IP variance expected
@@ -493,6 +536,7 @@ Detailed procedures in [Moderation Playbook](./moderation.md). Summary:
 ## Success Metrics
 
 ### Detection Effectiveness
+
 - **False positive rate**: < 5% (legitimate users incorrectly flagged)
 - **False negative rate**: < 10% (bad actors slip through)
 - **Time to detection**: < 3 trades for collusion rings
@@ -500,18 +544,21 @@ Detailed procedures in [Moderation Playbook](./moderation.md). Summary:
 - **Community report accuracy**: > 70%
 
 ### Deterrence
+
 - **Attempted gaming reduction**: -50% year-over-year
 - **Bad actor tier cap**: <1% of bad actors reach Established
 - **Scam value prevented**: Track total $ value of prevented fraud
 - **Repeat offenders**: < 5% of banned users successfully re-register
 
 ### Fairness
+
 - **Appeal rate**: < 1% of users appeal trust tier calculation
 - **Appeal success**: 20-30% of appeals result in reversal (healthy skepticism)
 - **Resolution time**: < 48 hours for 95% of appeals
 - **User satisfaction**: > 4.5/5 for "Safety measures are fair"
 
 ### System Health
+
 - **Automation rate**: > 80% of flags auto-detected (not manual reports)
 - **Moderator efficiency**: < 5% of users require manual review
 - **Investigation time**: < 4 hours median for flag review
@@ -520,18 +567,21 @@ Detailed procedures in [Moderation Playbook](./moderation.md). Summary:
 ## Future Enhancements
 
 ### Machine Learning (Phase 3+)
+
 - **Anomaly detection**: Learn normal trading patterns, flag deviations
 - **NLP for fraud language**: Detect pressure tactics, scam phrasing
 - **Network clustering**: Automated graph analysis for ring detection
 - **Behavioral biometrics**: Typing patterns, mouse movements
 
 ### Cross-Platform Intelligence
+
 - **BGG integration**: Check trading reputation from BoardGameGeek
 - **Facebook history**: Optional FB profile link for social proof
 - **TradeMe/eBay**: Import seller ratings (if NZ resident)
 - **Shared blocklists**: Coordinate with other NZ trading platforms
 
 ### Predictive Scoring
+
 - **Fraud risk score**: 0-100 likelihood of future scam
 - **Dynamic limits**: Adjust trade caps based on real-time behavior
 - **Early warning**: Notify mods before pattern reaches flag threshold

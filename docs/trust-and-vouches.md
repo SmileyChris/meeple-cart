@@ -59,12 +59,12 @@ Want-to-buy listings work slightly differently:
 
 ## Data model touchpoints
 
-| Collection | Usage |
-| ---------- | ----- |
-| `vouches` | Stores individual testimonials. Fields: `voucher`, `vouchee`, `message`, `trade`, `created`. |
-| `users` | Maintains aggregate counters (`vouch_count`, `trade_count`) and surfaces reputation in UI. |
-| `trades` | Acts as the eligibility anchor; fulfilled trades unlock the vouch UI and optionally link the vouch. |
-| `notifications` | Sends “You received a vouch” or “Your vouch was moderated” alerts. |
+| Collection      | Usage                                                                                               |
+| --------------- | --------------------------------------------------------------------------------------------------- |
+| `vouches`       | Stores individual testimonials. Fields: `voucher`, `vouchee`, `message`, `trade`, `created`.        |
+| `users`         | Maintains aggregate counters (`vouch_count`, `trade_count`) and surfaces reputation in UI.          |
+| `trades`        | Acts as the eligibility anchor; fulfilled trades unlock the vouch UI and optionally link the vouch. |
+| `notifications` | Sends “You received a vouch” or “Your vouch was moderated” alerts.                                  |
 
 The data model reference in `development/data-models.md#vouches-vouches` includes the full schema for `vouches`.
 

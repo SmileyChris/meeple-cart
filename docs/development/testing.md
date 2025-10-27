@@ -7,11 +7,13 @@ Meeple Cart uses a comprehensive testing strategy to ensure code quality, preven
 ## Testing Philosophy
 
 **Test pyramid approach:**
+
 - **Many unit tests** - Fast, focused, test individual functions/components
 - **Some integration tests** - Test component interactions with mocked dependencies
 - **Few E2E tests** - Test critical user flows through the full stack
 
 **What to test:**
+
 - ✅ Business logic (trust tier calculations, validation, pricing)
 - ✅ Component behavior (user interactions, conditional rendering)
 - ✅ API endpoints (request handling, error cases)
@@ -38,9 +40,9 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html'],
-      exclude: ['**/*.spec.ts', '**/*.test.ts', '**/node_modules/**']
-    }
-  }
+      exclude: ['**/*.spec.ts', '**/*.test.ts', '**/node_modules/**'],
+    },
+  },
 });
 ```
 
@@ -78,7 +80,7 @@ describe('getTrustTier', () => {
       id: '123',
       joined_date: '2025-10-01',
       vouch_count: 0,
-      trade_count: 5
+      trade_count: 5,
     };
 
     // Act
@@ -93,7 +95,7 @@ describe('getTrustTier', () => {
       id: '123',
       joined_date: '2025-10-01',
       vouch_count: 1,
-      trade_count: 5
+      trade_count: 5,
     };
 
     const tier = getTrustTier(user);
@@ -106,7 +108,7 @@ describe('getTrustTier', () => {
       id: '123',
       joined_date: '2025-09-01', // 50 days ago
       vouch_count: 2,
-      trade_count: 10
+      trade_count: 10,
     };
 
     const tier = getTrustTier(user);
@@ -163,7 +165,7 @@ describe('TrustBadge', () => {
       joined_date: '2025-10-15',
       vouch_count: 0,
       trade_count: 0,
-      name: 'John'
+      name: 'John',
     };
 
     render(TrustBadge, { props: { user } });
@@ -178,7 +180,7 @@ describe('TrustBadge', () => {
       joined_date: '2023-01-01', // >1 year ago
       vouch_count: 10,
       trade_count: 20,
-      name: 'Jane'
+      name: 'Jane',
     };
 
     render(TrustBadge, { props: { user } });
@@ -193,7 +195,7 @@ describe('TrustBadge', () => {
       joined_date: '2025-01-01',
       vouch_count: 5,
       trade_count: 8,
-      name: 'Alice'
+      name: 'Alice',
     };
 
     render(TrustBadge, { props: { user, showDetails: true } });
@@ -222,7 +224,7 @@ describe('SearchBar', () => {
     await fireEvent.input(input, { target: { value: 'Wingspan' } });
 
     // Assuming debounced search
-    await new Promise(resolve => setTimeout(resolve, 400));
+    await new Promise((resolve) => setTimeout(resolve, 400));
 
     expect(onSearch).toHaveBeenCalledWith('Wingspan');
   });
@@ -258,13 +260,13 @@ export const createMockPB = () => {
       create: vi.fn(),
       update: vi.fn(),
       delete: vi.fn(),
-      subscribe: vi.fn()
+      subscribe: vi.fn(),
     })),
     authStore: {
       model: null,
       isValid: false,
-      clear: vi.fn()
-    }
+      clear: vi.fn(),
+    },
   };
 };
 
@@ -277,7 +279,7 @@ export const mockUser = (overrides = {}) => ({
   trade_count: 0,
   joined_date: '2025-10-01',
   phone_verified: false,
-  ...overrides
+  ...overrides,
 });
 
 export const mockListing = (overrides = {}) => ({
@@ -289,7 +291,7 @@ export const mockListing = (overrides = {}) => ({
   status: 'published',
   created: '2025-10-15',
   updated: '2025-10-15',
-  ...overrides
+  ...overrides,
 });
 ```
 
@@ -314,13 +316,13 @@ describe('Listing detail page', () => {
 
     const result = await load({
       locals: { pb: mockPb },
-      params: { id: 'listing123' }
+      params: { id: 'listing123' },
     });
 
     expect(result.listing).toEqual(listing);
     expect(mockPb.collection).toHaveBeenCalledWith('listings');
     expect(mockPb.collection('listings').getOne).toHaveBeenCalledWith('listing123', {
-      expand: 'owner,games'
+      expand: 'owner,games',
     });
   });
 
@@ -330,7 +332,7 @@ describe('Listing detail page', () => {
     await expect(
       load({
         locals: { pb: mockPb },
-        params: { id: 'nonexistent' }
+        params: { id: 'nonexistent' },
       })
     ).rejects.toThrow('Listing not found');
   });
@@ -360,19 +362,17 @@ describe('Create listing form action', () => {
 
     const request = new Request('http://localhost', {
       method: 'POST',
-      body: formData
+      body: formData,
     });
 
-    await expect(
-      actions.default({ request, locals: { pb: mockPb, user } })
-    ).rejects.toThrow(); // Expects redirect
+    await expect(actions.default({ request, locals: { pb: mockPb, user } })).rejects.toThrow(); // Expects redirect
 
     expect(mockPb.collection('listings').create).toHaveBeenCalledWith({
       title: 'Wingspan',
       description: 'Great bird game',
       type: 'sell',
       owner: user.id,
-      status: 'draft'
+      status: 'draft',
     });
   });
 
@@ -387,12 +387,12 @@ describe('Create listing form action', () => {
 
     const request = new Request('http://localhost', {
       method: 'POST',
-      body: formData
+      body: formData,
     });
 
     const result = await actions.default({
       request,
-      locals: { pb: mockPb, user }
+      locals: { pb: mockPb, user },
     });
 
     expect(result.status).toBe(400);
@@ -407,12 +407,12 @@ describe('Create listing form action', () => {
 
     const request = new Request('http://localhost', {
       method: 'POST',
-      body: formData
+      body: formData,
     });
 
     const result = await actions.default({
       request,
-      locals: { pb: mockPb, user: null }
+      locals: { pb: mockPb, user: null },
     });
 
     expect(result.status).toBe(401);
@@ -475,18 +475,14 @@ export default defineConfig({
       branches: 75,
       functions: 80,
       lines: 80,
-      exclude: [
-        '**/*.spec.ts',
-        '**/*.test.ts',
-        '**/node_modules/**',
-        '**/.svelte-kit/**'
-      ]
-    }
-  }
+      exclude: ['**/*.spec.ts', '**/*.test.ts', '**/node_modules/**', '**/.svelte-kit/**'],
+    },
+  },
 });
 ```
 
 **Focus coverage on:**
+
 - Business logic (trust calculations, pricing, validation)
 - Complex components
 - API endpoints and form actions
@@ -504,13 +500,13 @@ import type { PlaywrightTestConfig } from '@playwright/test';
 const config: PlaywrightTestConfig = {
   webServer: {
     command: 'npm run build && npm run preview',
-    port: 4173
+    port: 4173,
   },
   testDir: 'tests/e2e',
   testMatch: /(.+\.)?(test|spec)\.[jt]s/,
   use: {
-    baseURL: 'http://localhost:4173'
-  }
+    baseURL: 'http://localhost:4173',
+  },
 };
 
 export default config;
@@ -566,7 +562,7 @@ test.describe('Listings', () => {
 
     // Verify only sell listings shown
     const typeLabels = await page.locator('[data-testid="listing-type"]').allTextContents();
-    expect(typeLabels.every(label => label.includes('Sell'))).toBe(true);
+    expect(typeLabels.every((label) => label.includes('Sell'))).toBe(true);
   });
 
   test('searches for listings', async ({ page }) => {
@@ -576,7 +572,7 @@ test.describe('Listings', () => {
 
     // Verify results contain search term
     const titles = await page.locator('[data-testid="listing-title"]').allTextContents();
-    expect(titles.some(title => title.toLowerCase().includes('wingspan'))).toBe(true);
+    expect(titles.some((title) => title.toLowerCase().includes('wingspan'))).toBe(true);
   });
 });
 ```
@@ -782,14 +778,10 @@ Prefer `data-testid` over CSS classes or text content:
 
 ```svelte
 <!-- ✅ Good -->
-<button data-testid="create-listing-button" type="submit">
-  Create Listing
-</button>
+<button data-testid="create-listing-button" type="submit"> Create Listing </button>
 
 <!-- ❌ Avoid (fragile) -->
-<button class="btn btn-primary" type="submit">
-  Create Listing
-</button>
+<button class="btn btn-primary" type="submit"> Create Listing </button>
 ```
 
 ### 2. Test User Behavior, Not Implementation
@@ -822,8 +814,12 @@ test.beforeEach(async ({ page }) => {
 });
 
 // ❌ Bad - tests depend on order
-test('creates listing', () => { /* ... */ });
-test('edits listing created in previous test', () => { /* ... */ });
+test('creates listing', () => {
+  /* ... */
+});
+test('edits listing created in previous test', () => {
+  /* ... */
+});
 ```
 
 ### 4. Use Descriptive Test Names
@@ -858,7 +854,7 @@ beforeEach(() => {
     if (url.includes('boardgamegeek.com')) {
       return Promise.resolve({
         ok: true,
-        text: () => Promise.resolve(mockBGGResponse('266192'))
+        text: () => Promise.resolve(mockBGGResponse('266192')),
       });
     }
   });
@@ -871,12 +867,10 @@ Always test error handling:
 
 ```typescript
 test('shows error message when listing fetch fails', async () => {
-  mockPb.collection('listings').getOne.mockRejectedValue(
-    new Error('Network error')
-  );
+  mockPb.collection('listings').getOne.mockRejectedValue(new Error('Network error'));
 
   const { container } = render(ListingDetail, {
-    props: { listingId: '123' }
+    props: { listingId: '123' },
   });
 
   await waitFor(() => {

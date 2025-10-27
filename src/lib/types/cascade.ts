@@ -90,7 +90,13 @@ export interface CascadeHistoryRecord extends RecordModel {
 }
 
 // Badge types for the cascade system
-export type CascadeBadgeType = 'seed_starter' | 'cascade_keeper' | 'cascade_champion' | 'cascade_legend' | 'ancient_lineage' | 'regional_hero';
+export type CascadeBadgeType =
+  | 'seed_starter'
+  | 'cascade_keeper'
+  | 'cascade_champion'
+  | 'cascade_legend'
+  | 'ancient_lineage'
+  | 'regional_hero';
 
 export interface CascadeBadge {
   type: CascadeBadgeType;

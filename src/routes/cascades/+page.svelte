@@ -44,10 +44,7 @@
 
 <svelte:head>
   <title>Gift Cascades · Meeple Cart</title>
-  <meta
-    name="description"
-    content="Browse gift cascades - win free games and pay it forward"
-  />
+  <meta name="description" content="Browse gift cascades - win free games and pay it forward" />
 </svelte:head>
 
 <main class="min-h-screen bg-slate-950 px-6 py-12">
@@ -56,7 +53,8 @@
     <div class="space-y-3">
       <h1 class="text-4xl font-bold text-slate-100">Gift Cascades</h1>
       <p class="text-lg text-slate-400">
-        Receive free games, then pass on the generosity. Each gift cascade creates a lineage of giving.
+        Receive free games, then pass on the generosity. Each gift cascade creates a lineage of
+        giving.
       </p>
       <div class="flex gap-3">
         <a
@@ -164,9 +162,7 @@
                 src={cascade.gameImage}
               />
             {:else}
-              <div
-                class="flex h-48 items-center justify-center bg-slate-800 text-6xl opacity-20"
-              >
+              <div class="flex h-48 items-center justify-center bg-slate-800 text-6xl opacity-20">
                 🎲
               </div>
             {/if}
@@ -267,14 +263,21 @@
     <!-- How it Works & Why Start One -->
     <div class="space-y-6">
       <!-- Concept Explainer -->
-      <div class="rounded-xl border border-emerald-600 bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 p-6">
+      <div
+        class="rounded-xl border border-emerald-600 bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 p-6"
+      >
         <h2 class="text-2xl font-bold text-slate-100">💚 The Spirit of Gift Cascades</h2>
         <p class="mt-3 text-slate-300">
-          A gift cascade is a <strong>chain of generosity</strong>. Someone gifts you a game, you pass one on to someone else.
-          Each cascade creates a ripple effect of kindness through the board game community.
+          A gift cascade is a <strong>chain of generosity</strong>. Someone gifts you a game, you
+          pass one on to someone else. Each cascade creates a ripple effect of kindness through the
+          board game community.
         </p>
         <p class="mt-2 text-sm text-slate-400">
-          Inspired by the <a href="https://boardgamegeek.com/wiki/page/BGG_Chain_of_Generosity" target="_blank" class="text-emerald-400 hover:text-emerald-300 underline">BGG Chain of Generosity</a>, but streamlined for modern trading.
+          Inspired by the <a
+            href="https://boardgamegeek.com/wiki/page/BGG_Chain_of_Generosity"
+            target="_blank"
+            class="text-emerald-400 hover:text-emerald-300 underline">BGG Chain of Generosity</a
+          >, but streamlined for modern trading.
         </p>
       </div>
 
@@ -294,14 +297,16 @@
             <div class="text-3xl">🎲</div>
             <h3 class="font-semibold text-emerald-400">2. Random Selection</h3>
             <p class="text-sm text-slate-400">
-              At the deadline, a recipient is randomly selected. Ship them the game (you usually cover shipping for gifts).
+              At the deadline, a recipient is randomly selected. Ship them the game (you usually
+              cover shipping for gifts).
             </p>
           </div>
           <div class="space-y-2">
             <div class="text-3xl">🔗</div>
             <h3 class="font-semibold text-emerald-400">3. Chain Continues</h3>
             <p class="text-sm text-slate-400">
-              The recipient creates their own gift cascade within 30 days, keeping the generosity flowing.
+              The recipient creates their own gift cascade within 30 days, keeping the generosity
+              flowing.
             </p>
           </div>
         </div>
@@ -311,32 +316,48 @@
       <div class="rounded-xl border border-slate-800 bg-slate-900/40 p-6">
         <h2 class="text-xl font-bold text-slate-100">Why Start a Gift Cascade?</h2>
         <div class="mt-4 grid gap-3 md:grid-cols-2">
-          <div class="flex items-start gap-3 rounded-lg border border-slate-700 bg-slate-800/40 p-3">
+          <div
+            class="flex items-start gap-3 rounded-lg border border-slate-700 bg-slate-800/40 p-3"
+          >
             <div class="text-2xl">🏡</div>
             <div class="flex-1">
               <h3 class="font-semibold text-slate-200">Declutter Your Shelf</h3>
-              <p class="mt-1 text-sm text-slate-400">Give an unloved game a new home where it'll actually get played</p>
+              <p class="mt-1 text-sm text-slate-400">
+                Give an unloved game a new home where it'll actually get played
+              </p>
             </div>
           </div>
-          <div class="flex items-start gap-3 rounded-lg border border-slate-700 bg-slate-800/40 p-3">
+          <div
+            class="flex items-start gap-3 rounded-lg border border-slate-700 bg-slate-800/40 p-3"
+          >
             <div class="text-2xl">🤝</div>
             <div class="flex-1">
               <h3 class="font-semibold text-slate-200">Build Community</h3>
-              <p class="mt-1 text-sm text-slate-400">Connect with other gamers and spread the joy of board gaming</p>
+              <p class="mt-1 text-sm text-slate-400">
+                Connect with other gamers and spread the joy of board gaming
+              </p>
             </div>
           </div>
-          <div class="flex items-start gap-3 rounded-lg border border-slate-700 bg-slate-800/40 p-3">
+          <div
+            class="flex items-start gap-3 rounded-lg border border-slate-700 bg-slate-800/40 p-3"
+          >
             <div class="text-2xl">✨</div>
             <div class="flex-1">
               <h3 class="font-semibold text-slate-200">Feel Good Karma</h3>
-              <p class="mt-1 text-sm text-slate-400">The recipient's excitement is genuinely rewarding (and you might receive one later!)</p>
+              <p class="mt-1 text-sm text-slate-400">
+                The recipient's excitement is genuinely rewarding (and you might receive one later!)
+              </p>
             </div>
           </div>
-          <div class="flex items-start gap-3 rounded-lg border border-slate-700 bg-slate-800/40 p-3">
+          <div
+            class="flex items-start gap-3 rounded-lg border border-slate-700 bg-slate-800/40 p-3"
+          >
             <div class="text-2xl">🎖️</div>
             <div class="flex-1">
               <h3 class="font-semibold text-slate-200">Earn Badges</h3>
-              <p class="mt-1 text-sm text-slate-400">Get recognition with Seed Starter, Keeper, and Champion badges</p>
+              <p class="mt-1 text-sm text-slate-400">
+                Get recognition with Seed Starter, Keeper, and Champion badges
+              </p>
             </div>
           </div>
         </div>
@@ -360,8 +381,8 @@
           <div class="flex-1">
             <h3 class="font-semibold text-purple-200">Want to give anonymously?</h3>
             <p class="mt-1 text-sm text-purple-200/80">
-              Just leave the cascade name blank when creating. Recipients will see "Anonymous" as the giver.
-              Perfect for pure generosity with zero recognition.
+              Just leave the cascade name blank when creating. Recipients will see "Anonymous" as
+              the giver. Perfect for pure generosity with zero recognition.
             </p>
           </div>
         </div>

@@ -13,6 +13,7 @@ Meeple Cart's reputation system enables safe peer-to-peer trading through transp
 ## System Components
 
 ### 1. [Trust Tiers](./trust-tiers.md)
+
 Five-level system based on vouched trades (trades where partner left a vouch).
 
 - 🆕 **New** (0 vouched trades) - Warning flag for unproven accounts
@@ -26,6 +27,7 @@ Five-level system based on vouched trades (trades where partner left a vouch).
 Badges appear everywhere users interact, providing instant context about trading partner reliability.
 
 ### 2. [Trust & Vouches](../trust-and-vouches.md)
+
 Post-trade testimonials that build verifiable reputation.
 
 - Short testimonials tied to completed trades
@@ -34,6 +36,7 @@ Post-trade testimonials that build verifiable reputation.
 - Eligibility: Can vouch if you've received ≥1 vouch OR have phone verification
 
 ### 3. [Trust Buddy](../../spec/trust.md) (Phone Verification)
+
 Community-powered phone verification system.
 
 - Verified members volunteer to send verification links
@@ -43,6 +46,7 @@ Community-powered phone verification system.
 - **Unlocks vouching privileges**: Phone-verified users can vouch for others immediately, even if New tier
 
 ### 4. [Anti-Gaming Measures](./anti-gaming.md)
+
 Comprehensive fraud prevention and detection.
 
 - Collusion ring detection
@@ -52,6 +56,7 @@ Comprehensive fraud prevention and detection.
 - Community reporting mechanisms
 
 ### 5. [Moderation Playbook](./moderation.md)
+
 Graduated response system for handling flagged accounts.
 
 - Level 1: Soft warnings and restrictions
@@ -62,13 +67,17 @@ Graduated response system for handling flagged accounts.
 ## Key Principles
 
 ### Transparency
+
 Every trust signal is explainable and visible:
+
 - "Why does this user have this tier?" → Clear criteria shown
 - "Why was this vouch removed?" → Public moderation log
 - "How do I improve my tier?" → Progress indicators on profile
 
 ### Multi-Signal Trust
+
 No single point of failure - trust is calculated from:
+
 - Account age (time)
 - Trade count (volume)
 - Vouch count (social proof)
@@ -77,19 +86,21 @@ No single point of failure - trust is calculated from:
 - Verification status (identity)
 
 ### Graduated Access
+
 Privileges unlock progressively:
 
-| Feature | New | Seedling | Growing | Established | Trusted |
-|---------|-----|----------|---------|-------------|---------|
-| Daily messages | 5 | Unlimited | Unlimited | Unlimited | Unlimited |
-| Can vouch others | ✅* | ✅ | ✅ | ✅ | ✅ |
-| Can flag content | ❌ | ✅ | ✅ | ✅ | ✅ |
-| Request to join chains | ✅ | ✅ | ✅ | ✅ | ✅ (priority) |
-| Jury duty | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Feature                | New  | Seedling  | Growing   | Established | Trusted       |
+| ---------------------- | ---- | --------- | --------- | ----------- | ------------- |
+| Daily messages         | 5    | Unlimited | Unlimited | Unlimited   | Unlimited     |
+| Can vouch others       | ✅\* | ✅        | ✅        | ✅          | ✅            |
+| Can flag content       | ❌   | ✅        | ✅        | ✅          | ✅            |
+| Request to join chains | ✅   | ✅        | ✅        | ✅          | ✅ (priority) |
+| Jury duty              | ❌   | ❌        | ❌        | ❌          | ✅            |
 
 **\*Vouching eligibility:** Can vouch if you have received ≥1 vouch OR have phone verification.
 
 **Notes:**
+
 - No trade value limits - tier badges provide transparency for users to make informed decisions
 - Gift chain creators can optionally set minimum tier requirements when selecting recipients
 - Phone verification (Trust Buddy) unlocks vouching privileges immediately, even for New members
@@ -97,7 +108,9 @@ Privileges unlock progressively:
 - See [Listings & Marketplace](../listings.md) for listing visibility and bumping mechanics
 
 ### Community-Powered
+
 The community helps maintain trust:
+
 - Report suspicious vouches/profiles
 - Community jury for disputes (Trusted members)
 - Top verifiers get recognition
@@ -106,6 +119,7 @@ The community helps maintain trust:
 ## Data Architecture
 
 ### Existing Schema (PocketBase)
+
 ```javascript
 users {
   joined_date: timestamp        // Foundation for account age
@@ -131,12 +145,15 @@ trades {
 ```
 
 ### Computed Fields (No DB changes needed)
+
 All trust tier logic calculated on-the-fly:
+
 - `account_age_days` = now - joined_date
 - `trust_tier` = getTrustTier(age, trades, vouches)
 - `is_high_risk` = tier === 'new' AND trades < 2
 
 ### Future Additions for Anti-Gaming
+
 ```javascript
 // Phase 2: Advanced fraud detection
 account_fingerprints {
@@ -165,6 +182,7 @@ trust_flags {
 ## Implementation Roadmap
 
 ### Phase 1: Visibility (Weeks 1-2)
+
 **Goal:** Make new accounts obvious
 
 - [x] Trust tier utility functions
@@ -176,6 +194,7 @@ trust_flags {
 **Success:** Users can instantly identify new vs. established traders
 
 ### Phase 2: Progressive Restrictions (Weeks 2-3)
+
 **Goal:** Limit new account capabilities
 
 - [ ] Vouch eligibility gating
@@ -186,6 +205,7 @@ trust_flags {
 **Success:** New members understand the path to building trust
 
 ### Phase 3: Anti-Gaming (Weeks 4-6)
+
 **Goal:** Detect and prevent fraud
 
 - [ ] Trust diversity requirement (5+ unique partners for Established)
@@ -197,6 +217,7 @@ trust_flags {
 **Success:** Collusion rings and sockpuppets flagged automatically
 
 ### Phase 4: Advanced Detection (Weeks 7-10)
+
 **Goal:** Sophisticated fraud prevention
 
 - [ ] Trading network graph analysis
@@ -208,6 +229,7 @@ trust_flags {
 **Success:** Fast-flip scams and account takeovers prevented
 
 ### Phase 5: Community Moderation (Weeks 11-12)
+
 **Goal:** Empower community self-regulation
 
 - [ ] Community jury system for disputes
@@ -221,18 +243,21 @@ trust_flags {
 ## Success Metrics
 
 ### Safety Metrics
+
 - **Dispute rate**: < 0.5% of all trades
 - **Scam attempts**: < 0.1% of trades involving New members
 - **False flag rate**: < 5% of automated flags
 - **Time to fraud detection**: < 3 trades on average
 
 ### User Experience Metrics
+
 - **Trust awareness**: >80% of users understand tier system (survey)
 - **New member completion**: >70% of New members reach Growing tier
 - **Established member retention**: >90% remain active monthly
 - **Safety perception**: >4.5/5 rating for "I feel safe trading"
 
 ### Community Health Metrics
+
 - **Vouch authenticity**: >95% of vouches remain un-flagged
 - **Report quality**: >70% of community reports confirmed valid
 - **Moderator efficiency**: <5% of users ever require manual review
@@ -242,25 +267,25 @@ trust_flags {
 
 ### Trust Tier Requirements
 
-| Tier | Icon | Vouched Trades | Account Age | Unlocks |
-|------|------|----------------|-------------|---------|
-| **New** | 🆕 | 0 | Any | Can trade, 5 msg/day limit |
-| **Seedling** | 🌱 | 1+ | Any | Unlimited messages, can vouch* |
-| **Growing** | 🪴 | 2+ | 30+ days | Can flag content |
-| **Established** | 🌳 | 5+ | Any | Community respect |
-| **Trusted** | ⭐ | 8+ | 1+ year | Jury duty, priority |
+| Tier            | Icon | Vouched Trades | Account Age | Unlocks                         |
+| --------------- | ---- | -------------- | ----------- | ------------------------------- |
+| **New**         | 🆕   | 0              | Any         | Can trade, 5 msg/day limit      |
+| **Seedling**    | 🌱   | 1+             | Any         | Unlimited messages, can vouch\* |
+| **Growing**     | 🪴   | 2+             | 30+ days    | Can flag content                |
+| **Established** | 🌳   | 5+             | Any         | Community respect               |
+| **Trusted**     | ⭐   | 8+             | 1+ year     | Jury duty, priority             |
 
 **\*Vouching:** Can vouch if received ≥1 vouch OR have phone verification (Trust Buddy)
 
 ### Key Concepts at a Glance
 
-| Concept | Definition | Where Used |
-|---------|------------|------------|
-| **Vouched Trade** | A trade where you received a vouch from your partner | Tier progression |
-| **Trust Tier** | One of 5 levels (New → Seedling → Growing → Established → Trusted) | All user interactions |
-| **Trust Buddy** | Community-powered phone verification system | Unlocks vouching for New members |
-| **Collusion Ring** | Group trading only with each other to build fake reputation | Anti-gaming detection |
-| **Sockpuppet** | Multiple accounts controlled by one person | Anti-gaming detection |
+| Concept            | Definition                                                         | Where Used                       |
+| ------------------ | ------------------------------------------------------------------ | -------------------------------- |
+| **Vouched Trade**  | A trade where you received a vouch from your partner               | Tier progression                 |
+| **Trust Tier**     | One of 5 levels (New → Seedling → Growing → Established → Trusted) | All user interactions            |
+| **Trust Buddy**    | Community-powered phone verification system                        | Unlocks vouching for New members |
+| **Collusion Ring** | Group trading only with each other to build fake reputation        | Anti-gaming detection            |
+| **Sockpuppet**     | Multiple accounts controlled by one person                         | Anti-gaming detection            |
 
 ## Glossary
 
@@ -314,6 +339,7 @@ trust_flags {
    - Volunteer earns karma points
 
 **Benefits:**
+
 - Zero operational cost (no SMS gateway fees)
 - Community-powered trust building
 - Prevents sockpuppet accounts (phone numbers are unique)
@@ -324,18 +350,18 @@ trust_flags {
 
 ## Cross-Reference: Where to Find What
 
-| Topic | Primary Document | Related Docs |
-|-------|------------------|--------------|
-| **Trust tier requirements** | [trust-tiers.md](./trust-tiers.md) | README (overview) |
-| **How vouching works** | [trust-and-vouches.md](../trust-and-vouches.md) | trust-tiers.md (eligibility) |
-| **Phone verification** | [spec/trust.md](../../spec/trust.md) | README (flow overview) |
-| **Listing bumping/visibility** | [listings.md](../listings.md) | N/A |
-| **Anti-gaming detection** | [anti-gaming.md](./anti-gaming.md) | moderation.md (responses) |
-| **Moderation procedures** | [moderation.md](./moderation.md) | anti-gaming.md (detection) |
-| **Gift chain restrictions** | [CASCADE_IMPLEMENTATION.md](../../CASCADE_IMPLEMENTATION.md) | README (tier access table) |
-| **Database schema** | [development/data-models.md](../development/data-models.md) | All docs (references) |
-| **Vouched trade definition** | [trust-tiers.md](./trust-tiers.md#what-is-a-vouched-trade) | trust-and-vouches.md |
-| **Badge visual design** | [trust-tiers.md](./trust-tiers.md#visual-design) | N/A |
+| Topic                          | Primary Document                                             | Related Docs                 |
+| ------------------------------ | ------------------------------------------------------------ | ---------------------------- |
+| **Trust tier requirements**    | [trust-tiers.md](./trust-tiers.md)                           | README (overview)            |
+| **How vouching works**         | [trust-and-vouches.md](../trust-and-vouches.md)              | trust-tiers.md (eligibility) |
+| **Phone verification**         | [spec/trust.md](../../spec/trust.md)                         | README (flow overview)       |
+| **Listing bumping/visibility** | [listings.md](../listings.md)                                | N/A                          |
+| **Anti-gaming detection**      | [anti-gaming.md](./anti-gaming.md)                           | moderation.md (responses)    |
+| **Moderation procedures**      | [moderation.md](./moderation.md)                             | anti-gaming.md (detection)   |
+| **Gift chain restrictions**    | [CASCADE_IMPLEMENTATION.md](../../CASCADE_IMPLEMENTATION.md) | README (tier access table)   |
+| **Database schema**            | [development/data-models.md](../development/data-models.md)  | All docs (references)        |
+| **Vouched trade definition**   | [trust-tiers.md](./trust-tiers.md#what-is-a-vouched-trade)   | trust-and-vouches.md         |
+| **Badge visual design**        | [trust-tiers.md](./trust-tiers.md#visual-design)             | N/A                          |
 
 ## Documentation Index
 

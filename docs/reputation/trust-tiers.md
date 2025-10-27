@@ -3,6 +3,7 @@
 ## Problem Statement
 
 New accounts pose higher risk in peer-to-peer trading platforms. Users need clear, immediate visibility into:
+
 - How long an account has existed
 - Whether the trader has a proven track record
 - What precautions to take when trading with new members
@@ -22,13 +23,13 @@ Currently, Meeple Cart shows trade counts and vouch counts, but doesn't prominen
 
 Users are automatically assigned to one of five trust levels based on account age and activity:
 
-| Level | Icon | Criteria | Description |
-|-------|------|----------|-------------|
-| **New** (flag) | 🆕 | 0 vouched trades | Brand new member, highest caution advised |
-| **Seedling** | 🌱 | 1 vouched trade | First vouched trade completed |
-| **Growing** | 🪴 | 30+ days old AND 2 vouched trades | Building reputation with community feedback |
-| **Established** | 🌳 | 5 vouched trades | Experienced trader with proven positive history |
-| **Trusted** | ⭐ | 1+ year old AND 8 vouched trades | Highly trusted, long-term community member |
+| Level           | Icon | Criteria                          | Description                                     |
+| --------------- | ---- | --------------------------------- | ----------------------------------------------- |
+| **New** (flag)  | 🆕   | 0 vouched trades                  | Brand new member, highest caution advised       |
+| **Seedling**    | 🌱   | 1 vouched trade                   | First vouched trade completed                   |
+| **Growing**     | 🪴   | 30+ days old AND 2 vouched trades | Building reputation with community feedback     |
+| **Established** | 🌳   | 5 vouched trades                  | Experienced trader with proven positive history |
+| **Trusted**     | ⭐   | 1+ year old AND 8 vouched trades  | Highly trusted, long-term community member      |
 
 ### Tier Calculation Logic
 
@@ -56,12 +57,14 @@ ELSE
 **Definition:** A **vouched trade** is a completed trade where you received a vouch from your trading partner.
 
 **Important clarifications:**
+
 - **Counts trades, not vouches:** If you complete a trade and your partner vouches for you, that counts as **1 vouched trade** (regardless of whether you also vouched them back)
 - **Both vouch = still 1 trade:** If both partners vouch each other after a trade, each person gets credit for **1 vouched trade** (not 2)
 - **Multiple vouches from one partner = multiple trades:** If you trade with the same person 3 times and get vouched each time, that's **3 vouched trades**
 - **Unvouched trades don't count:** Completing a trade without receiving a vouch does not contribute to tier progression
 
 **Example:**
+
 ```
 User A trades with User B → Trade completes → User B vouches User A
 Result: User A has 1 vouched trade, User B has 0 vouched trades (unless User A also vouches back)
@@ -73,6 +76,7 @@ Result: User A has 1 vouched trade, User B has 1 vouched trade (each counts the 
 **Why this matters:** Tier progression requires vouched trades, not just total trades. This ensures members are incentivized to provide good trading experiences that result in vouches.
 
 **Key principles:**
+
 - **Vouches are mandatory**: Only vouched trades count toward tier progression
 - **New is a warning state**: Zero vouched trades = needs to prove trustworthiness
 - **Quality over quantity**: Can complete 100 trades but won't progress without vouches
@@ -89,6 +93,7 @@ Result: User A has 1 vouched trade, User B has 1 vouched trade (each counts the 
 Trust badges appear as small, rounded pills next to user names throughout the platform.
 
 **New Member Flag:**
+
 ```
 🆕 New member (5 days old, no trades yet)
 Border: Amber (#f59e0b)
@@ -99,6 +104,7 @@ Warning: Most prominent styling
 ```
 
 **Seedling Badge:**
+
 ```
 🌱 Seedling
 Border: Lime (#84cc16)
@@ -108,6 +114,7 @@ CSS: border-lime-500/80 bg-lime-500/10 text-lime-200
 ```
 
 **Growing Member Badge:**
+
 ```
 🪴 Growing member
 Border: Sky blue (#0ea5e9)
@@ -117,6 +124,7 @@ CSS: border-sky-500/80 bg-sky-500/10 text-sky-200
 ```
 
 **Established Member Badge:**
+
 ```
 🌳 Established member
 Border: Emerald (#10b981)
@@ -126,6 +134,7 @@ CSS: border-emerald-500/80 bg-emerald-500/10 text-emerald-200
 ```
 
 **Trusted Member Badge:**
+
 ```
 ⭐ Trusted member
 Border: Violet (#8b5cf6)
@@ -149,6 +158,7 @@ Member since: Oct 15, 2025 (joined 5 days ago)
 ```
 
 **Hover/tooltip:** Shows full tier description
+
 - "New member - use caution and prefer tracked shipping"
 
 #### 2. Listing Detail Pages
@@ -254,16 +264,19 @@ Trading always carries risk. Be cautious and trust your instincts.
 Everywhere we show "Member since [date]", also show relative time for context:
 
 **Established/Trusted members:**
+
 ```
 Member since Oct 15, 2023 (2 years)
 ```
 
 **New members specifically:**
+
 ```
 Member since Oct 15, 2025 (joined 5 days ago, no trades yet)
 ```
 
 **Growing members:**
+
 ```
 Member since Sep 1, 2025 (7 weeks, 4 trades)
 ```
@@ -271,32 +284,40 @@ Member since Sep 1, 2025 (7 weeks, 4 trades)
 ### Badge Text Edge Cases
 
 **Account with age but no vouched trades:**
+
 ```
 🆕 New member (45 days old, 0 vouched trades)
 ```
+
 - Shows "New member" tier since vouched trades = 0
 - Age displayed to show account isn't brand new
 - Clarifies they have completed time requirement but need vouches
 
 **Account with vouched trades but waiting on age:**
+
 ```
 🌱 Seedling (15 days, 2 vouched trades)
 ```
+
 - Shows Seedling tier (has 1+ vouched trades)
 - Cannot reach Growing yet (needs 30 days AND 2 vouched trades)
 - Badge text shows progress: "15 days / 30 needed"
 
 **Account exactly at threshold:**
+
 ```
 🪴 Growing member (30 days, 2 vouched trades)
 ```
+
 - Just met requirements (30+ days AND 2+ vouched trades)
 - Badge text simply shows tier name
 
 **Phone verified New member:**
+
 ```
 🆕 New member (5 days, 0 vouched trades) ✓ Phone verified
 ```
+
 - Shows phone verification badge alongside tier
 - Indicates they can vouch for others despite being New tier
 - See [Trust Buddy spec](../../spec/trust.md) for phone verification details
@@ -359,6 +380,7 @@ Next milestone: 🌳 Established at 5 vouched trades
 **No intrusive warnings** - badges are informational only for Growing/Established/Trusted tiers.
 
 **Optional filtering:**
+
 - Filter search results by minimum tier: "Show only Established or Trusted"
 - Sort by: "Most trusted first" (sorts by tier, then vouch count)
 
@@ -381,20 +403,22 @@ Keep building trust to reach ⭐ Trusted tier!
 
 ## Progressive Access by Tier
 
-| Feature | New | Seedling | Growing | Established | Trusted |
-|---------|-----|----------|---------|-------------|---------|
-| **Daily messages** | 5 | Unlimited | Unlimited | Unlimited | Unlimited |
-| **Can vouch others** | ✅* | ✅ | ✅ | ✅ | ✅ |
-| **Can request to join gift chains** | ✅ | ✅ | ✅ | ✅ | ✅ (priority) |
-| **Can flag content** | ❌ | ✅ | ✅ | ✅ | ✅ |
-| **Community jury duty** | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Feature                             | New  | Seedling  | Growing   | Established | Trusted       |
+| ----------------------------------- | ---- | --------- | --------- | ----------- | ------------- |
+| **Daily messages**                  | 5    | Unlimited | Unlimited | Unlimited   | Unlimited     |
+| **Can vouch others**                | ✅\* | ✅        | ✅        | ✅          | ✅            |
+| **Can request to join gift chains** | ✅   | ✅        | ✅        | ✅          | ✅ (priority) |
+| **Can flag content**                | ❌   | ✅        | ✅        | ✅          | ✅            |
+| **Community jury duty**             | ❌   | ❌        | ❌        | ❌          | ✅            |
 
 **\*Vouching eligibility:**
+
 - Can vouch if you have **received at least 1 vouch** (any tier), OR
 - Can vouch if you have **phone verification** (even if New tier)
 - Otherwise, cannot vouch until you meet one of these criteria
 
 **Rationale:**
+
 - **No trade value limits** - Let community decide what they're comfortable with; tier badges provide transparency
 - **Message limit for New only** - Prevent spam from unproven accounts; unlocks immediately after first vouched trade
 - **Gift chains open to all** - Chain creators can optionally exclude New members (see below)
@@ -424,6 +448,7 @@ This gives chain creators control without blanket banning new members from parti
 ## Data Requirements
 
 ### Existing Fields (Already in PocketBase)
+
 ```javascript
 users {
   joined_date: timestamp,     // Foundation for account age
@@ -440,6 +465,7 @@ vouches {
 ```
 
 ### Computed Fields (Calculated on-the-fly or via query)
+
 ```typescript
 // Utility functions in src/lib/utils/trust.ts
 
@@ -456,7 +482,7 @@ async function getVouchedTradeCount(userId: string): Promise<number> {
     filter: `vouchee = "${userId}" && trade != null`,
   });
   // Count unique trade IDs
-  const uniqueTrades = new Set(vouches.map(v => v.trade));
+  const uniqueTrades = new Set(vouches.map((v) => v.trade));
   return uniqueTrades.size;
 }
 
@@ -510,6 +536,7 @@ users {
 ```
 
 This avoids querying the vouches table on every tier calculation. Update via:
+
 - PocketBase hook when vouch created
 - Scheduled job to recalculate periodically
 - Lazy update on profile view
@@ -517,6 +544,7 @@ This avoids querying the vouches table on every tier calculation. Update via:
 ## Implementation Checklist
 
 ### Phase 1: Core Visibility (Week 1)
+
 - [ ] Create `src/lib/utils/trust.ts` with tier calculation functions
 - [ ] Create `TrustBadge.svelte` component
 - [ ] Add badges to user profile pages (`/users/[id]`)
@@ -526,6 +554,7 @@ This avoids querying the vouches table on every tier calculation. Update via:
 - [ ] Write unit tests for tier calculation logic
 
 ### Phase 2: Universal Badges (Week 1-2)
+
 - [ ] Add badges to search result listing cards
 - [ ] Add badges to message thread headers
 - [ ] Add badges to vouch displays on profiles
@@ -533,6 +562,7 @@ This avoids querying the vouches table on every tier calculation. Update via:
 - [ ] Ensure badges are accessible (proper ARIA labels, screen reader support)
 
 ### Phase 3: Warnings & Guidance (Week 2)
+
 - [ ] Implement high-risk trade confirmation modal (trigger on message send to New member)
 - [ ] Create onboarding welcome modal for new registrations
 - [ ] Add "Progress to next tier" card on own profile view
@@ -540,6 +570,7 @@ This avoids querying the vouches table on every tier calculation. Update via:
 - [ ] Add tooltips/popovers explaining each tier
 
 ### Phase 4: Restrictions & Filters (Week 2-3)
+
 - [ ] Implement trade value limits (enforce in offer/trade creation)
 - [ ] Implement message rate limits by tier
 - [ ] Add vouch eligibility check (Growing+ tier only)
@@ -548,6 +579,7 @@ This avoids querying the vouches table on every tier calculation. Update via:
 - [ ] Display tier distribution in search ("15 Trusted, 42 Established, 8 Growing, 2 New")
 
 ### Phase 5: Analytics & Monitoring (Week 3)
+
 - [ ] Track tier distribution across user base
 - [ ] Monitor tier progression rates (time to Growing, Established, Trusted)
 - [ ] Track warning dismissal rates (are users heeding warnings?)
@@ -557,6 +589,7 @@ This avoids querying the vouches table on every tier calculation. Update via:
 ## Edge Cases
 
 ### Account Reactivation
+
 **Scenario:** User joined 2 years ago, hasn't traded in 18 months, returns to platform.
 
 **Current approach:** Still Trusted tier if criteria met (1 year + 50 trades).
@@ -564,23 +597,28 @@ This avoids querying the vouches table on every tier calculation. Update via:
 **Future consideration:** Implement reputation decay - vouches/trades > 1 year count at reduced weight. See [Anti-Gaming](./anti-gaming.md) for reactivation security measures.
 
 ### Bulk Trading
+
 **Scenario:** User completes 10 trades in first week.
 
 **Mitigation:** Account age still gates "Established" tier (90 days minimum required). Fast trading is flagged for review in [Anti-Gaming](./anti-gaming.md) system.
 
 ### Privacy Concerns
+
 **Concern:** Some users may feel stigmatized by "New" label.
 
 **Approach:**
+
 - Frame positively: "Building trust", "Growing member"
 - Show as protective measure, not punishment
 - Emphasize progress: "You're 50% to Growing tier!"
 - Highlight that everyone starts here, including site founders
 
 ### Display Clutter
+
 **Concern:** Badges everywhere could be visual noise.
 
 **Approach:**
+
 - Use subtle, consistent styling (small pills, muted colors)
 - Only New tier gets prominent yellow/amber treatment
 - Higher tiers are understated (green/violet, less urgent)
@@ -639,24 +677,28 @@ This makes it visible when someone has un-vouched trades and encourages partners
 ## Success Metrics
 
 ### Awareness & Understanding
+
 - **User surveys:** >80% of users can explain tier system
 - **Badge visibility:** 100% of user touchpoints show badges within 2 weeks of launch
 - **Onboarding completion:** >90% of new users view welcome modal
 - **Vouch rate:** >70% of completed trades result in at least one vouch
 
 ### Safety Impact
+
 - **Dispute reduction:** -30% disputes with New tier members (compared to pre-badge baseline)
 - **Tracked shipping adoption:** +50% use of tracked shipping when trading with New tier
 - **Scam prevention:** < 0.1% of trades involving New members result in scams
 - **User confidence:** "I feel safe trading on Meeple Cart" rating >4.5/5
 
 ### Engagement & Progression
+
 - **Tier progression:** >70% of New members reach Growing within 60 days
 - **Trade velocity:** New members complete first trade within 14 days (median)
 - **Retention:** >85% of users who reach Established tier remain active monthly
 - **Motivation:** "Tier system motivates me to build reputation" rating >4.0/5
 
 ### Fairness & Appeals
+
 - **Appeal rate:** < 1% of users appeal their tier calculation
 - **Accuracy:** > 99% of tier calculations are correct (no bugs/edge cases)
 - **Support tickets:** < 5% of support tickets relate to tier confusion

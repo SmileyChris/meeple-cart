@@ -45,26 +45,26 @@ flowchart LR
 
 ### `trade_chains.status`
 
-| Status | Meaning |
-| ------ | ------- |
-| `draft` | Step has not been announced; games or copy still in progress. |
-| `collecting_interest` | Interest submissions are open. |
+| Status                | Meaning                                                         |
+| --------------------- | --------------------------------------------------------------- |
+| `draft`               | Step has not been announced; games or copy still in progress.   |
+| `collecting_interest` | Interest submissions are open.                                  |
 | `selecting_recipient` | Interest window closed; giver/moderators reviewing submissions. |
-| `awaiting_dispatch` | Recipient selected; awaiting shipment. |
-| `in_transit` | Trade created; shipment is on the way. |
-| `fulfilled` | Recipient confirmed receipt. |
-| `cancelled` | Step aborted by giver or moderators. |
+| `awaiting_dispatch`   | Recipient selected; awaiting shipment.                          |
+| `in_transit`          | Trade created; shipment is on the way.                          |
+| `fulfilled`           | Recipient confirmed receipt.                                    |
+| `cancelled`           | Step aborted by giver or moderators.                            |
 
 ### `chain_interest.status`
 
-| Status | Meaning |
-| ------ | ------- |
-| `pending` | Submitted and awaiting review. |
-| `shortlisted` | Highlighted as a strong candidate. |
-| `selected` | Chosen to receive the gift. |
-| `declined` | Not selected this round. |
-| `withdrawn` | Requester retracted their submission. |
-| `fulfilled` | Gift delivered and acknowledged. |
+| Status        | Meaning                               |
+| ------------- | ------------------------------------- |
+| `pending`     | Submitted and awaiting review.        |
+| `shortlisted` | Highlighted as a strong candidate.    |
+| `selected`    | Chosen to receive the gift.           |
+| `declined`    | Not selected this round.              |
+| `withdrawn`   | Requester retracted their submission. |
+| `fulfilled`   | Gift delivered and acknowledged.      |
 
 ## Selection methods
 

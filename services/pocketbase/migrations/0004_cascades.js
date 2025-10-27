@@ -205,8 +205,7 @@ migrate(
       listRule: '', // Public listing
       viewRule: '', // Public view
       createRule: '@request.auth.id != ""', // Authenticated users can create
-      updateRule:
-        'current_holder = @request.auth.id || winner = @request.auth.id', // Holder or winner can update
+      updateRule: 'current_holder = @request.auth.id || winner = @request.auth.id', // Holder or winner can update
       deleteRule: 'current_holder = @request.auth.id && status = "accepting_entries"', // Only delete if still accepting entries
     });
 

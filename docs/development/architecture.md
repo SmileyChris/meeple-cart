@@ -6,14 +6,14 @@ Meeple Cart is built with SvelteKit 2 and PocketBase, providing a modern, type-s
 
 ## Tech Stack
 
-| Layer | Technology | Purpose |
-|-------|-----------|---------|
-| **Frontend** | SvelteKit 2 | File-based routing, SSR/SSG, progressive enhancement |
-| **Language** | TypeScript | Type safety across client and server |
-| **Styling** | Tailwind CSS 4 | Utility-first CSS with design system consistency |
-| **Backend** | PocketBase | Embedded SQLite, REST/realtime APIs, auth, file storage |
-| **Testing** | Vitest + Playwright | Unit tests and end-to-end testing |
-| **Build** | Vite | Fast builds, HMR, optimized production bundles |
+| Layer        | Technology          | Purpose                                                 |
+| ------------ | ------------------- | ------------------------------------------------------- |
+| **Frontend** | SvelteKit 2         | File-based routing, SSR/SSG, progressive enhancement    |
+| **Language** | TypeScript          | Type safety across client and server                    |
+| **Styling**  | Tailwind CSS 4      | Utility-first CSS with design system consistency        |
+| **Backend**  | PocketBase          | Embedded SQLite, REST/realtime APIs, auth, file storage |
+| **Testing**  | Vitest + Playwright | Unit tests and end-to-end testing                       |
+| **Build**    | Vite                | Fast builds, HMR, optimized production bundles          |
 
 ## Project Structure
 
@@ -88,20 +88,21 @@ src/routes/
 
 ### Special Route Files
 
-| File | Purpose | Runs On |
-|------|---------|---------|
-| `+page.svelte` | Page component | Client + Server (SSR) |
-| `+page.ts` | Page data loading (shared) | Client + Server |
-| `+page.server.ts` | Server-only data loading | Server only |
-| `+layout.svelte` | Layout wrapper for child routes | Client + Server |
-| `+layout.ts` | Layout data loading (shared) | Client + Server |
-| `+layout.server.ts` | Server-only layout data | Server only |
-| `+server.ts` | API endpoint (no UI) | Server only |
-| `+error.svelte` | Error page for this route | Client + Server |
+| File                | Purpose                         | Runs On               |
+| ------------------- | ------------------------------- | --------------------- |
+| `+page.svelte`      | Page component                  | Client + Server (SSR) |
+| `+page.ts`          | Page data loading (shared)      | Client + Server       |
+| `+page.server.ts`   | Server-only data loading        | Server only           |
+| `+layout.svelte`    | Layout wrapper for child routes | Client + Server       |
+| `+layout.ts`        | Layout data loading (shared)    | Client + Server       |
+| `+layout.server.ts` | Server-only layout data         | Server only           |
+| `+server.ts`        | API endpoint (no UI)            | Server only           |
+| `+error.svelte`     | Error page for this route       | Client + Server       |
 
 ### Data Loading Pattern
 
 **Use `+page.server.ts` for:**
+
 - Database queries (PocketBase)
 - Authentication checks
 - Sensitive operations
@@ -115,11 +116,11 @@ import { error } from '@sveltejs/kit';
 export const load: PageServerLoad = async ({ locals, params }) => {
   try {
     const listing = await locals.pb.collection('listings').getOne(params.id, {
-      expand: 'owner,games'
+      expand: 'owner,games',
     });
 
     return {
-      listing
+      listing,
     };
   } catch (err) {
     throw error(404, 'Listing not found');
@@ -128,6 +129,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 ```
 
 **Use `+page.ts` for:**
+
 - Client-side data transformation
 - Fetching from external APIs (that can run on client)
 - Non-sensitive operations
@@ -142,7 +144,7 @@ export const load: PageLoad = async ({ fetch, params }) => {
   const xml = await response.text();
 
   return {
-    bggData: parseXML(xml)
+    bggData: parseXML(xml),
   };
 };
 ```
@@ -182,7 +184,8 @@ src/routes/
 </nav>
 
 <main>
-  <slot /> <!-- Child routes render here -->
+  <slot />
+  <!-- Child routes render here -->
 </main>
 
 <footer>
@@ -230,39 +233,44 @@ export const handle: Handle = async ({ event, resolve }) => {
 ### CRUD Patterns
 
 **Create:**
+
 ```typescript
 const listing = await locals.pb.collection('listings').create({
   owner: userId,
   title: 'Wingspan Collection',
   type: 'sell',
-  status: 'published'
+  status: 'published',
 });
 ```
 
 **Read (single):**
+
 ```typescript
 const listing = await locals.pb.collection('listings').getOne(listingId, {
-  expand: 'owner,games' // Expand relations
+  expand: 'owner,games', // Expand relations
 });
 ```
 
 **Read (list):**
+
 ```typescript
 const listings = await locals.pb.collection('listings').getList(1, 20, {
   filter: 'status="published" && type="sell"',
   sort: '-created',
-  expand: 'owner'
+  expand: 'owner',
 });
 ```
 
 **Update:**
+
 ```typescript
 const updated = await locals.pb.collection('listings').update(listingId, {
-  status: 'completed'
+  status: 'completed',
 });
 ```
 
 **Delete:**
+
 ```typescript
 await locals.pb.collection('listings').delete(listingId);
 ```
@@ -290,9 +298,9 @@ Subscribe to collection changes for real-time updates:
       if (e.action === 'create') {
         listings = [e.record, ...listings];
       } else if (e.action === 'update') {
-        listings = listings.map(l => l.id === e.record.id ? e.record : l);
+        listings = listings.map((l) => (l.id === e.record.id ? e.record : l));
       } else if (e.action === 'delete') {
-        listings = listings.filter(l => l.id !== e.record.id);
+        listings = listings.filter((l) => l.id !== e.record.id);
       }
     });
   });
@@ -345,7 +353,7 @@ interface ListingWithOwner extends ListingsRecord {
 }
 
 const listing = await pb.collection('listings').getOne<ListingWithOwner>(id, {
-  expand: 'owner'
+  expand: 'owner',
 });
 
 // Type-safe access
@@ -397,7 +405,7 @@ import { z } from 'zod';
 const listingSchema = z.object({
   title: z.string().min(3).max(100),
   description: z.string().min(10),
-  type: z.enum(['trade', 'sell', 'want'])
+  type: z.enum(['trade', 'sell', 'want']),
 });
 
 export const actions: Actions = {
@@ -410,7 +418,7 @@ export const actions: Actions = {
     const data = {
       title: formData.get('title'),
       description: formData.get('description'),
-      type: formData.get('type')
+      type: formData.get('type'),
     };
 
     // Validate
@@ -418,7 +426,7 @@ export const actions: Actions = {
     if (!result.success) {
       return fail(400, {
         errors: result.error.flatten().fieldErrors,
-        data
+        data,
       });
     }
 
@@ -427,14 +435,14 @@ export const actions: Actions = {
       const listing = await locals.pb.collection('listings').create({
         ...result.data,
         owner: locals.user.id,
-        status: 'draft'
+        status: 'draft',
       });
 
       throw redirect(303, `/listings/${listing.id}`);
     } catch (err) {
       return fail(500, { error: 'Failed to create listing' });
     }
-  }
+  },
 };
 ```
 
@@ -494,7 +502,7 @@ export const actions: Actions = {
     seedling: '🌱',
     growing: '🪴',
     established: '🌳',
-    trusted: '⭐'
+    trusted: '⭐',
   }[tier];
 
   $: colorClass = {
@@ -502,12 +510,13 @@ export const actions: Actions = {
     seedling: 'border-lime-500/80 bg-lime-500/10 text-lime-200',
     growing: 'border-sky-500/80 bg-sky-500/10 text-sky-200',
     established: 'border-emerald-500/80 bg-emerald-500/10 text-emerald-200',
-    trusted: 'border-violet-500/80 bg-violet-500/10 text-violet-200'
+    trusted: 'border-violet-500/80 bg-violet-500/10 text-violet-200',
   }[tier];
 </script>
 
 <span class="trust-badge {colorClass}" title={tier}>
-  {icon} {tier}
+  {icon}
+  {tier}
   {#if showDetails}
     <span class="details">
       ({user.vouch_count} vouches, {user.trade_count} trades)
@@ -579,7 +588,7 @@ For state that doesn't need to be shared, use reactive declarations:
   let selectedType: 'all' | 'trade' | 'sell' | 'want' = 'all';
 
   // Reactive - recalculates when dependencies change
-  $: filteredListings = listings.filter(l => {
+  $: filteredListings = listings.filter((l) => {
     const matchesSearch = l.title.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = selectedType === 'all' || l.type === selectedType;
     return matchesSearch && matchesType;
@@ -594,18 +603,21 @@ For state that doesn't need to be shared, use reactive declarations:
 Group Tailwind classes logically for readability:
 
 ```svelte
-<article class="
+<article
+  class="
   flex flex-col gap-4
   p-6 rounded-lg
   bg-white dark:bg-gray-800
   border border-gray-200 dark:border-gray-700
   hover:shadow-lg transition-shadow
-">
+"
+>
   <!-- Content -->
 </article>
 ```
 
 **Order:**
+
 1. Layout (flex, grid, block)
 2. Spacing (padding, margin, gap)
 3. Typography (text size, weight, color)
@@ -705,9 +717,7 @@ export function formatRelativeTime(date: string | Date): string {
 }
 
 export function formatAccountAge(joinedDate: string): string {
-  const days = Math.floor(
-    (Date.now() - new Date(joinedDate).getTime()) / (1000 * 60 * 60 * 24)
-  );
+  const days = Math.floor((Date.now() - new Date(joinedDate).getTime()) / (1000 * 60 * 60 * 24));
 
   if (days < 30) return `${days} days`;
   if (days < 365) return `${Math.floor(days / 30)} months`;
@@ -725,9 +735,12 @@ import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals, params }) => {
   // 404 Not Found
-  const listing = await locals.pb.collection('listings').getOne(params.id).catch(() => {
-    throw error(404, { message: 'Listing not found' });
-  });
+  const listing = await locals.pb
+    .collection('listings')
+    .getOne(params.id)
+    .catch(() => {
+      throw error(404, { message: 'Listing not found' });
+    });
 
   // 403 Forbidden
   if (listing.owner !== locals.user?.id && listing.status === 'draft') {
@@ -759,7 +772,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
     try {
       const response = await fetch('/api/listings', {
         method: 'POST',
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       });
 
       if (!response.ok) {
@@ -838,11 +851,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
   $: performSearch(searchTerm);
 </script>
 
-<input
-  type="search"
-  bind:value={searchTerm}
-  placeholder="Search listings..."
-/>
+<input type="search" bind:value={searchTerm} placeholder="Search listings..." />
 ```
 
 ### Pagination
@@ -856,13 +865,13 @@ export const load: PageServerLoad = async ({ locals, url }) => {
   const listings = await locals.pb.collection('listings').getList(page, perPage, {
     filter: 'status="published"',
     sort: '-created',
-    expand: 'owner'
+    expand: 'owner',
   });
 
   return {
     listings: listings.items,
     page: listings.page,
-    totalPages: listings.totalPages
+    totalPages: listings.totalPages,
   };
 };
 ```
@@ -896,9 +905,7 @@ SvelteKit provides CSRF protection automatically for form actions. Always use fo
 </form>
 
 <!-- ❌ Not protected - avoid -->
-<button on:click={() => fetch('/api/delete', { method: 'POST' })}>
-  Delete
-</button>
+<button on:click={() => fetch('/api/delete', { method: 'POST' })}> Delete </button>
 ```
 
 ### Input Validation
@@ -911,7 +918,7 @@ import { z } from 'zod';
 
 const schema = z.object({
   title: z.string().min(3).max(100),
-  price: z.number().positive().max(10000)
+  price: z.number().positive().max(10000),
 });
 
 export const actions: Actions = {
@@ -924,7 +931,7 @@ export const actions: Actions = {
     }
 
     // Proceed with validated data
-  }
+  },
 };
 ```
 

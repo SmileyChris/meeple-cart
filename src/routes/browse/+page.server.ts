@@ -14,15 +14,15 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 
   // Build filter
   let filter = '(type = "sell" || type = "trade")';
-  
+
   if (minPrice > 0) {
     filter += ` && price >= ${minPrice}`;
   }
-  
+
   if (maxPrice < 10000) {
     filter += ` && price <= ${maxPrice}`;
   }
-  
+
   if (seller) {
     filter += ` && user = "${seller}"`;
   }
