@@ -1,7 +1,6 @@
 <script lang="ts">
   import { currentUser, pb } from '$lib/pocketbase';
   import { goto } from '$app/navigation';
-  import { onMount } from 'svelte';
 
   let displayName = '';
   let email = '';
@@ -14,13 +13,6 @@
     messages: true,
     trades: true,
   };
-
-  // Redirect if already logged in
-  onMount(() => {
-    if ($currentUser) {
-      goto('/profile');
-    }
-  });
 
   async function handleSubmit(e: Event) {
     e.preventDefault();

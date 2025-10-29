@@ -167,13 +167,12 @@ test.describe('Authentication', () => {
       await expect(page).toHaveURL('/profile');
 
       // Store email for test
-      page.evaluate((email) => {
+      await page.evaluate((email) => {
         sessionStorage.setItem('testLoginEmail', email);
       }, loginTestEmail);
 
       // Logout
       await page.goto('/logout');
-      await page.waitForURL('/');
     });
 
     test('should successfully login with valid credentials', async ({ page }) => {
@@ -325,7 +324,7 @@ test.describe('Authentication', () => {
 
       // 2. Verify auto-login
       await expect(page).toHaveURL('/profile');
-      await expect(page.locator(`text=${flowDisplayName}`)).toBeVisible();
+      await expect(page.getByRole('link', { name: flowDisplayName })).toBeVisible();
 
       // 3. Logout
       await page.goto('/logout');
@@ -339,7 +338,7 @@ test.describe('Authentication', () => {
 
       // 5. Verify logged in
       await expect(page).toHaveURL('/profile');
-      await expect(page.locator(`text=${flowDisplayName}`)).toBeVisible();
+      await expect(page.getByRole('link', { name: flowDisplayName })).toBeVisible();
     });
   });
 
@@ -347,10 +346,11 @@ test.describe('Authentication', () => {
     test('login form should be keyboard navigable', async ({ page }) => {
       await page.goto('/login');
 
-      // Tab through form elements
-      await page.keyboard.press('Tab'); // Email input
+      // Focus the email input to start keyboard navigation
+      await page.locator('input[name="email"]').focus();
       await expect(page.locator('input[name="email"]')).toBeFocused();
 
+      // Tab through form elements
       await page.keyboard.press('Tab'); // Password input
       await expect(page.locator('input[name="password"]')).toBeFocused();
 
@@ -361,12 +361,13 @@ test.describe('Authentication', () => {
     test('register form should be keyboard navigable', async ({ page }) => {
       await page.goto('/register');
 
+      // Focus the first input to start keyboard navigation
+      await page.locator('input[name="display_name"]').focus();
+      await expect(page.locator('input[name="display_name"]')).toBeFocused();
+
       // Tab through form elements
       await page.keyboard.press('Tab'); // Email
       await expect(page.locator('input[name="email"]')).toBeFocused();
-
-      await page.keyboard.press('Tab'); // Display name
-      await expect(page.locator('input[name="display_name"]')).toBeFocused();
 
       await page.keyboard.press('Tab'); // Password
       await expect(page.locator('input[name="password"]')).toBeFocused();

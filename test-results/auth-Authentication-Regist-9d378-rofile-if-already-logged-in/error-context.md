@@ -1,0 +1,58 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - link "Meeple Cart" [ref=e6] [cursor=pointer]:
+        - /url: /
+      - navigation [ref=e7]:
+        - link "Activity" [ref=e8] [cursor=pointer]:
+          - /url: /activity
+        - link "🎁 Gift Cascades" [ref=e9] [cursor=pointer]:
+          - /url: /cascades
+        - button "Switch to dark mode" [ref=e10]:
+          - generic [ref=e11]: ☀️
+          - generic [ref=e12]: Light
+        - link "Log in" [ref=e13] [cursor=pointer]:
+          - /url: /login
+        - link "Create account" [ref=e14] [cursor=pointer]:
+          - /url: /register
+    - navigation [ref=e15]:
+      - generic [ref=e17]:
+        - link "Activity Feed" [ref=e18] [cursor=pointer]:
+          - /url: /
+          - img [ref=e19] [cursor=pointer]
+          - text: Activity Feed
+        - link "Browse Games" [ref=e21] [cursor=pointer]:
+          - /url: /browse
+          - img [ref=e22] [cursor=pointer]
+          - text: Browse Games
+        - link "Wanted" [ref=e24] [cursor=pointer]:
+          - /url: /wanted
+          - img [ref=e25] [cursor=pointer]
+          - text: Wanted
+  - generic [ref=e27]:
+    - heading "Create your account" [level=1] [ref=e28]
+    - paragraph [ref=e29]: Sign up with an email address to start trading.
+    - generic [ref=e30]:
+      - generic [ref=e31]:
+        - generic [ref=e32]: Full name
+        - textbox "Full name" [ref=e33]
+      - generic [ref=e34]:
+        - generic [ref=e35]: Email
+        - textbox "Email" [ref=e36]
+      - generic [ref=e37]:
+        - generic [ref=e38]: Password
+        - textbox "Password" [ref=e39]
+        - paragraph [ref=e40]: Use at least 10 characters.
+      - generic [ref=e41]:
+        - generic [ref=e42]: Confirm password
+        - textbox "Confirm password" [ref=e43]
+      - button "Sign up" [ref=e44]
+    - paragraph [ref=e45]:
+      - text: Already registered?
+      - link "Log in" [ref=e46] [cursor=pointer]:
+        - /url: /login
+      - text: .
+```
