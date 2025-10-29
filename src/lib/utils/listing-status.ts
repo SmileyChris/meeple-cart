@@ -41,11 +41,10 @@ export async function logStatusChange(
     timestamp: new Date().toISOString(),
   };
 
-  // Log to console for now
+  // Log to console for debugging
   console.log(`[Listing ${listingId}] Status change:`, change);
 
-  // TODO: Once status_history field is added to listings schema:
-  /*
+  // Persist to database
   try {
     const listing = await pb.collection('listings').getOne(listingId);
     const history = (listing.status_history as StatusChange[]) || [];
@@ -57,8 +56,8 @@ export async function logStatusChange(
     });
   } catch (err) {
     console.error('Failed to log status change:', err);
+    // Don't throw - logging failure shouldn't break the main flow
   }
-  */
 }
 
 /**

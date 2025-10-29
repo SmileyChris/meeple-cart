@@ -1,7 +1,8 @@
 <script lang="ts">
-  import type { ActionData, PageData } from './$types';
+  import type { PageData } from './$types';
+  import StatusHistory from '$lib/components/StatusHistory.svelte';
 
-  let { data, form }: { data: PageData; form?: ActionData } = $props();
+  let { data }: { data: PageData } = $props();
 
   let showAddForm = $state(false);
   let editingGameId = $state<string | null>(null);
@@ -52,14 +53,8 @@
     }
   };
 
-  let fieldErrors = $derived(form?.fieldErrors ?? {});
-
-  $effect(() => {
-    if (form?.success) {
-      showAddForm = false;
-      editingGameId = null;
-    }
-  });
+  // TODO: Migrate form actions to client-side mutations
+  // Form submissions won't work until migrated to use PocketBase SDK directly
 </script>
 
 <svelte:head>
@@ -91,16 +86,6 @@
         </div>
       </div>
     </header>
-
-    {#if form?.message}
-      <div
-        class="rounded-lg border border-{form.success ? 'emerald' : 'rose'}-500 bg-{form.success
-          ? 'emerald'
-          : 'rose'}-500/10 px-4 py-3 text-sm text-{form.success ? 'emerald' : 'rose'}-200"
-      >
-        {form.message}
-      </div>
-    {/if}
 
     <div class="space-y-6">
       <div class="flex items-center justify-between">
@@ -134,9 +119,6 @@
                   maxlength="200"
                   bind:value={addFormValues.title}
                 />
-                {#if form?.action === 'add_game' && fieldErrors.title}
-                  <p class="mt-2 text-sm text-rose-300">{fieldErrors.title}</p>
-                {/if}
               </div>
 
               <div>
@@ -170,9 +152,6 @@
                   inputmode="decimal"
                   bind:value={addFormValues.price}
                 />
-                {#if form?.action === 'add_game' && fieldErrors.price}
-                  <p class="mt-2 text-sm text-rose-300">{fieldErrors.price}</p>
-                {/if}
               </div>
 
               <div>
@@ -187,9 +166,6 @@
                   inputmode="decimal"
                   bind:value={addFormValues.trade_value}
                 />
-                {#if form?.action === 'add_game' && fieldErrors.trade_value}
-                  <p class="mt-2 text-sm text-rose-300">{fieldErrors.trade_value}</p>
-                {/if}
               </div>
 
               <div>
@@ -205,9 +181,6 @@
                   pattern="[0-9]*"
                   bind:value={addFormValues.bgg_id}
                 />
-                {#if form?.action === 'add_game' && fieldErrors.bgg_id}
-                  <p class="mt-2 text-sm text-rose-300">{fieldErrors.bgg_id}</p>
-                {/if}
               </div>
 
               <div class="sm:col-span-2">
@@ -416,6 +389,8 @@
           </section>
         {/each}
       </div>
+
+      <StatusHistory statusHistory={data.statusHistory} />
     </div>
   </div>
 </main>

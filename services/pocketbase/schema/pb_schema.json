@@ -346,6 +346,14 @@
           "required": false,
           "unique": false,
           "options": {}
+        },
+        {
+          "id": "status_history_field",
+          "name": "status_history",
+          "type": "json",
+          "required": false,
+          "unique": false,
+          "options": {}
         }
       ],
       "indexes": [
