@@ -33,26 +33,19 @@
           - img [ref=e25] [cursor=pointer]
           - text: Wanted
   - generic [ref=e27]:
-    - heading "Create your account" [level=1] [ref=e28]
-    - paragraph [ref=e29]: Sign up with an email address to start trading.
+    - heading "Log in" [level=1] [ref=e28]
+    - paragraph [ref=e29]: Use the email and password you registered with.
     - generic [ref=e30]:
       - generic [ref=e31]:
-        - generic [ref=e32]: Full name
-        - textbox "Full name" [ref=e33]
+        - generic [ref=e32]: Email
+        - textbox "Email" [ref=e33]: test@example.com
       - generic [ref=e34]:
-        - generic [ref=e35]: Email
-        - textbox "Email" [ref=e36]
-      - generic [ref=e37]:
-        - generic [ref=e38]: Password
-        - textbox "Password" [ref=e39]
-        - paragraph [ref=e40]: Use at least 10 characters.
-      - generic [ref=e41]:
-        - generic [ref=e42]: Confirm password
-        - textbox "Confirm password" [ref=e43]
-      - button "Sign up" [ref=e44]
-    - paragraph [ref=e45]:
-      - text: Already registered?
-      - link "Log in" [ref=e46] [cursor=pointer]:
-        - /url: /login
+        - generic [ref=e35]: Password
+        - textbox "Password" [active] [ref=e36]
+      - button "Continue" [ref=e37]
+    - paragraph [ref=e38]:
+      - text: Need an account?
+      - link "Create one" [ref=e39] [cursor=pointer]:
+        - /url: /register
       - text: .
 ```
