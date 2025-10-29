@@ -338,6 +338,14 @@
             "mimeTypes": ["image/png", "image/jpeg", "image/webp"],
             "thumbs": ["100x100", "800x600"]
           }
+        },
+        {
+          "id": "photo_region_map_field",
+          "name": "photo_region_map",
+          "type": "json",
+          "required": false,
+          "unique": false,
+          "options": {}
         }
       ],
       "indexes": [

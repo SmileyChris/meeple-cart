@@ -1,5 +1,6 @@
 import type { RecordModel } from 'pocketbase';
 import type { UserRecord } from './pocketbase';
+import type { PhotoRegion } from './photo-region';
 
 export type ListingType = 'trade' | 'sell' | 'want';
 
@@ -46,6 +47,7 @@ export interface ListingRecord extends RecordModel {
   views: number;
   bump_date?: string;
   photos?: string[];
+  photo_region_map?: PhotoRegion[];
   // Expiration fields
   last_activity?: string;
   expires_at?: string;

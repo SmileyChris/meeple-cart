@@ -2,6 +2,7 @@
   import type { PageData } from './$types';
   import { formatCurrency } from '$lib/utils/currency';
   import WatchlistButton from '$lib/components/WatchlistButton.svelte';
+  import PhotoRegionOverlay from '$lib/components/PhotoRegionOverlay.svelte';
   import { pb, currentUser } from '$lib/pocketbase';
   import { goto } from '$app/navigation';
   import { generateThreadId } from '$lib/types/message';
@@ -21,9 +22,35 @@
   let photos = $derived(data.photos ?? []);
   let activePhotoIndex = $state(0);
 
+  // Photo region state
+  let photoRegions = $derived(listing.photo_region_map ?? []);
+  let mainImageRef: HTMLImageElement;
+  let imageWidth = $state(0);
+  let imageHeight = $state(0);
+
   const selectPhoto = (index: number) => {
     activePhotoIndex = index;
   };
+
+  // Update image dimensions when photo loads or changes
+  function handleImageLoad() {
+    if (!mainImageRef) return;
+    imageWidth = mainImageRef.clientWidth;
+    imageHeight = mainImageRef.clientHeight;
+  }
+
+  // Scroll to a game when its region is clicked
+  function scrollToGame(gameId: string) {
+    const gameElement = document.getElementById(`game-${gameId}`);
+    if (gameElement) {
+      gameElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // Add a highlight effect
+      gameElement.classList.add('highlight-flash');
+      setTimeout(() => {
+        gameElement.classList.remove('highlight-flash');
+      }, 2000);
+    }
+  }
 
   $effect(() => {
     if (photos.length > 0 && activePhotoIndex >= photos.length) {
@@ -271,14 +298,28 @@
     {#if photos.length > 0}
       <section class="space-y-4">
         <div
-          class="overflow-hidden rounded-xl border border-subtle bg-surface-card transition-colors"
+          class="relative overflow-hidden rounded-xl border border-subtle bg-surface-card transition-colors"
         >
           <img
+            bind:this={mainImageRef}
             alt={`${listing.title} photo ${activePhotoIndex + 1}`}
             class="h-full w-full max-h-[520px] object-cover"
             src={photos[activePhotoIndex].full}
             loading="lazy"
+            onload={handleImageLoad}
           />
+
+          <!-- Photo Region Overlay -->
+          {#if imageWidth > 0 && imageHeight > 0 && photoRegions.length > 0}
+            <PhotoRegionOverlay
+              regions={photoRegions}
+              photoId={photos[activePhotoIndex].id}
+              {games}
+              {imageWidth}
+              {imageHeight}
+              onRegionClick={scrollToGame}
+            />
+          {/if}
         </div>
 
         {#if photos.length > 1}
@@ -329,6 +370,7 @@
           <div class="space-y-4">
             {#each games as game (game.id)}
               <article
+                id="game-{game.id}"
                 class="space-y-4 rounded-lg border border-subtle bg-surface-panel transition-colors p-5"
               >
                 <header class="space-y-2">
@@ -472,6 +514,12 @@
             >
               Edit prices
             </a>
+            <a
+              href={`/listings/${listing.id}/photos`}
+              class="block w-full rounded-lg border border-emerald-500 bg-emerald-500/10 px-4 py-2 text-center font-semibold text-emerald-200 transition hover:bg-emerald-500/20"
+            >
+              Manage photos
+            </a>
             <!-- eslint-enable svelte/no-navigation-without-resolve -->
           </div>
         {:else if owner}
@@ -553,3 +601,25 @@
     </section>
   </div>
 </main>
+
+<style>
+  /* Highlight flash animation for when clicking photo regions */
+  :global(.highlight-flash) {
+    animation: highlight-pulse 2s ease-out;
+  }
+
+  @keyframes highlight-pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7);
+      transform: scale(1);
+    }
+    50% {
+      box-shadow: 0 0 0 10px rgba(52, 211, 153, 0);
+      transform: scale(1.02);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(52, 211, 153, 0);
+      transform: scale(1);
+    }
+  }
+</style>

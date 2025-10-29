@@ -1,5 +1,6 @@
-migrate((app) => {
-  const collection = app.findCollectionByNameOrId('listings');
+migrate((db) => {
+  const dao = new Dao(db);
+  const collection = dao.findCollectionByNameOrId('w3c43ufqz9ejshk'); // listings collection
 
   // Add last_activity field - tracks the last time the listing was active
   collection.schema.addField(
@@ -109,12 +110,13 @@ migrate((app) => {
     })
   );
 
-  return app.save(collection);
+  return dao.saveCollection(collection);
 });
 
 // Add a rule to automatically set expires_at on creation
-migrate((app) => {
-  const collection = app.findCollectionByNameOrId('listings');
+migrate((db) => {
+  const dao = new Dao(db);
+  const collection = dao.findCollectionByNameOrId('w3c43ufqz9ejshk'); // listings collection
 
   // Set default expiration to 30 days from creation for wanted listings
   // and 45 days for sale/trade listings
@@ -135,5 +137,5 @@ migrate((app) => {
       null
   `;
 
-  return app.save(collection);
+  return dao.saveCollection(collection);
 });
