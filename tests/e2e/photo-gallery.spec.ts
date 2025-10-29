@@ -4,23 +4,66 @@ test.describe('Photo Gallery Manager', () => {
   let page: Page;
   let listingId: string;
 
-  test.beforeEach(async ({ browser }) => {
+  // Generate unique test data for each test run
+  const timestamp = Date.now();
+  const testUser = {
+    email: `photo-test-${timestamp}@example.com`,
+    displayName: `PhotoTest${timestamp}`,
+    password: 'testpassword123',
+  };
+
+  test.beforeEach(async ({ browser, request }) => {
     page = await browser.newPage();
 
-    // Setup: Create a test user and listing
-    // Note: This assumes you have a test database setup
-    // You may need to adjust this based on your test infrastructure
-
-    await page.goto('/');
-
-    // Login as test user (adjust credentials as needed)
-    await page.goto('/login');
-    await page.fill('input[name="email"]', 'test@example.com');
-    await page.fill('input[name="password"]', 'testpassword123');
+    // Setup: Register a new user
+    await page.goto('/register');
+    await page.fill('input[name="email"]', testUser.email);
+    await page.fill('input[name="display_name"]', testUser.displayName);
+    await page.fill('input[name="password"]', testUser.password);
+    await page.fill('input[name="passwordConfirm"]', testUser.password);
     await page.click('button[type="submit"]');
 
-    // Wait for redirect to home
-    await page.waitForURL('/');
+    // Wait for redirect to profile after registration
+    await page.waitForURL('/profile', { timeout: 5000 });
+
+    // Get auth token from localStorage
+    const authData = await page.evaluate(() => {
+      const data = localStorage.getItem('pocketbase_auth');
+      return data ? JSON.parse(data) : null;
+    });
+
+    if (!authData || !authData.token) {
+      throw new Error('No auth token found after registration');
+    }
+
+    // Create a test listing directly via PocketBase REST API
+    // (The /listings/new form is broken - uses method="POST" but no server action)
+    const response = await request.post('http://127.0.0.1:8090/api/collections/listings/records', {
+      headers: {
+        'Authorization': authData.token,
+        'Content-Type': 'application/json',
+      },
+      data: {
+        title: 'Test Listing for Photos',
+        listing_type: 'trade',
+        location: 'auckland',
+        summary: 'Test listing for photo gallery tests',
+        status: 'active',
+        owner: authData.record.id,
+      },
+    });
+
+    if (!response.ok()) {
+      const error = await response.text();
+      throw new Error(`Failed to create listing: ${response.status()} - ${error}`);
+    }
+
+    const listing = await response.json();
+    if (!listing || !listing.id) {
+      throw new Error(`Listing creation returned invalid data: ${JSON.stringify(listing)}`);
+    }
+
+    listingId = listing.id;
   });
 
   test.afterEach(async () => {
@@ -29,8 +72,8 @@ test.describe('Photo Gallery Manager', () => {
 
   test.describe('Photo Upload', () => {
     test('should allow owner to access photo manager', async () => {
-      // Navigate to a listing owned by the test user
-      await page.goto('/listings/test-listing-id');
+      // Navigate to the listing owned by the test user
+      await page.goto(`/listings/${listingId}`);
 
       // Should see "Manage photos" button
       const manageButton = page.getByRole('link', { name: /manage photos/i });
@@ -41,7 +84,7 @@ test.describe('Photo Gallery Manager', () => {
 
       // Should be on photo manager page
       await expect(page).toHaveURL(/\/listings\/.*\/photos/);
-      await expect(page.getByRole('heading', { name: /manage photos/i })).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Manage Photos', exact: true })).toBeVisible();
     });
 
     test('should not show manage button to non-owners', async () => {

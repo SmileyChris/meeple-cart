@@ -471,10 +471,11 @@
             {#each regions as region}
               {@const gameName = getGameName(region.gameId)}
               <div
-                class="cursor-pointer rounded-lg border p-3 transition"
-                class:border-accent={selectedRegionId === region.id}
-                class:bg-accent/5={selectedRegionId === region.id}
-                class:border-subtle={selectedRegionId !== region.id}
+                class={`cursor-pointer rounded-lg border p-3 transition ${
+                  selectedRegionId === region.id
+                    ? 'border-accent bg-accent/5'
+                    : 'border-subtle'
+                }`}
                 onclick={() => selectRegion(region.id)}
                 role="button"
                 tabindex="0"

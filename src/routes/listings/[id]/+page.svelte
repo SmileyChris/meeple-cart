@@ -332,7 +332,7 @@
                     ? 'border-emerald-500 shadow-[0_0_0_2px_rgba(16,185,129,0.4)]'
                     : 'border-subtle hover:border-emerald-400'
                 }`}
-                on:click={() => selectPhoto(index)}
+                onclick={() => selectPhoto(index)}
                 aria-label={`View photo ${index + 1}`}
                 aria-current={index === activePhotoIndex}
               >
@@ -527,7 +527,7 @@
             <!-- Initiate Trade Button -->
             <button
               type="button"
-              on:click={handleInitiateTrade}
+              onclick={handleInitiateTrade}
               disabled={initiatingTrade}
               class="w-full rounded-lg border border-emerald-500 bg-emerald-500 px-4 py-2 font-semibold text-[var(--accent-contrast)] shadow-[0_10px_25px_rgba(16,185,129,0.25)] transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
             >
@@ -544,13 +544,13 @@
             {#if !showMessageForm}
               <button
                 type="button"
-                on:click={() => (showMessageForm = true)}
+                onclick={() => (showMessageForm = true)}
                 class="w-full rounded-lg border border-subtle px-4 py-2 font-semibold text-secondary transition hover:bg-surface-ghost hover:border-emerald-500 hover:text-emerald-200"
               >
                 💬 Send message
               </button>
             {:else}
-              <form on:submit={handleSendMessage} class="space-y-3">
+              <form onsubmit={handleSendMessage} class="space-y-3">
                 {#if messageError}
                   <div class="rounded-lg bg-rose-500/10 px-3 py-2 text-sm text-rose-400">
                     {messageError}
@@ -579,7 +579,7 @@
                   <button
                     type="button"
                     disabled={sendingMessage}
-                    on:click={() => {
+                    onclick={() => {
                       showMessageForm = false;
                       message = '';
                       messageError = null;
