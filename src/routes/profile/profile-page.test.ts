@@ -5,6 +5,10 @@ import * as pocketbaseModule from '$lib/pocketbase';
 // Mock the pocketbase module
 vi.mock('$lib/pocketbase', () => ({
   pb: {
+    authStore: {
+      isValid: false,
+      model: null,
+    },
     collection: vi.fn(),
   },
   currentUser: {
@@ -37,8 +41,9 @@ describe('profile client-side load', () => {
   });
 
   it('redirects to login when user is not authenticated', async () => {
-    const { get } = await import('svelte/store');
-    vi.mocked(get).mockReturnValue(null);
+    const { pb } = pocketbaseModule;
+    pb.authStore.isValid = false;
+    pb.authStore.model = null;
 
     await expect(load({} as any)).rejects.toMatchObject({
       message: 'REDIRECT',
@@ -59,11 +64,11 @@ describe('profile client-side load', () => {
       },
     ];
 
-    const { get } = await import('svelte/store');
-    vi.mocked(get).mockReturnValue(mockUser);
+    const { pb } = pocketbaseModule;
+    pb.authStore.isValid = true;
+    pb.authStore.model = mockUser;
 
     const getFullList = vi.fn().mockResolvedValue(mockListings);
-    const { pb } = pocketbaseModule;
     vi.mocked(pb.collection).mockReturnValue({ getFullList } as any);
 
     const result = await load({} as any);
@@ -80,11 +85,11 @@ describe('profile client-side load', () => {
   it('returns empty listings array when query fails', async () => {
     const mockUser = { id: 'user123', display_name: 'Chris' };
 
-    const { get } = await import('svelte/store');
-    vi.mocked(get).mockReturnValue(mockUser);
+    const { pb } = pocketbaseModule;
+    pb.authStore.isValid = true;
+    pb.authStore.model = mockUser;
 
     const getFullList = vi.fn().mockRejectedValue(new Error('Database error'));
-    const { pb } = pocketbaseModule;
     vi.mocked(pb.collection).mockReturnValue({ getFullList } as any);
 
     await expect(load({} as any)).rejects.toThrow('Database error');
