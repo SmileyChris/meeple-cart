@@ -158,14 +158,20 @@ All 6 critical gaps identified in `spec/trade-flow-gaps.md` are now **fully func
   - `actor` (user ID who made change)
   - `timestamp` (ISO 8601)
 
-**Partially Implemented:**
-- ⚠️ Status history persistence: Code ready, needs schema field
-- ⚠️ Status history display: Awaiting schema field
+**Fully Implemented:**
+- ✅ Status history persistence: Enabled and working
+- ✅ Status history display: Component created and integrated
+- ✅ Unit tests: 8 tests for listing-status utilities
+- ✅ Component tests: 10 tests for StatusHistory component
+- ✅ Schema field: status_history JSON field added
+- ✅ Migration: 0006_status_history.js created
 
-**Remaining Work (5 minutes):**
-1. Add `status_history` JSON field to listings collection
-2. Uncomment persistence code in `listing-status.ts` (lines 36-47)
-3. Add UI to display history on listing management page (optional)
+**Completed Work:**
+1. ✅ Added `status_history` JSON field to listings collection
+2. ✅ Enabled persistence code in `listing-status.ts`
+3. ✅ Created StatusHistory.svelte component
+4. ✅ Integrated history display into listing management page
+5. ✅ Wrote comprehensive test coverage (18 tests, all passing)
 
 ---
 
@@ -181,27 +187,36 @@ All 6 critical gaps identified in `spec/trade-flow-gaps.md` are now **fully func
 - ⏳ Trade history filtering
 
 ### Automated Tests
-- ❌ No unit tests written yet
-- ❌ No E2E tests written yet
+- ✅ Unit tests for status history utilities (8 tests passing)
+- ✅ Component tests for StatusHistory (10 tests passing)
+- ❌ No E2E tests for full trade flow yet
 
-**Recommendation:** Write E2E test for full trade flow after schema update.
+**Recommendation:** Write E2E test for complete trade flow (trade initiation → completion → feedback).
 
 ---
 
 ## Files Modified/Created
 
-### New Files (3)
+### New Files (7)
 1. `src/lib/utils/listing-status.ts` - Status logging utilities
-2. `src/lib/utils/trade-status.ts` - Trade status helpers (auto-created)
-3. `src/lib/utils/trade-validation.ts` - Trade validation (auto-created)
+2. `src/lib/utils/listing-status.test.ts` - Unit tests for status utilities
+3. `src/lib/utils/trade-status.ts` - Trade status helpers (auto-created)
+4. `src/lib/utils/trade-validation.ts` - Trade validation (auto-created)
+5. `src/lib/components/StatusHistory.svelte` - Status history display component
+6. `src/lib/components/StatusHistory.test.ts` - Component tests
+7. `services/pocketbase/migrations/0006_status_history.js` - Schema migration
 
-### Files Already Complete (6)
-1. `src/routes/listings/[id]/+page.svelte` - Trade initiation
-2. `src/routes/trades/[id]/+page.ts` - Trade detail loader
-3. `src/routes/trades/[id]/+page.svelte` - Trade detail UI
-4. `src/routes/trades/+page.ts` - Trade history loader
-5. `src/routes/trades/+page.svelte` - Trade history UI
-6. `src/routes/+layout.svelte` - Navigation (My Trades link)
+### Files Modified (10)
+1. `src/routes/listings/[id]/+page.svelte` - Trade initiation with status logging
+2. `src/routes/listings/[id]/manage/+page.svelte` - Added StatusHistory component
+3. `src/routes/listings/[id]/manage/+page.ts` - Client-side loader (NEW)
+4. `src/routes/trades/[id]/+page.ts` - Trade detail loader
+5. `src/routes/trades/[id]/+page.svelte` - Trade detail UI with status logging
+6. `src/routes/trades/+page.ts` - Trade history loader
+7. `src/routes/trades/+page.svelte` - Trade history UI
+8. `src/routes/+layout.svelte` - Navigation (My Trades link)
+9. `services/pocketbase/schema/pb_schema.json` - Added status_history field
+10. `TRADE_FLOW_STATUS.md` - Updated with Gap 6 completion
 
 ---
 
@@ -219,51 +234,40 @@ All 6 critical gaps identified in `spec/trade-flow-gaps.md` are now **fully func
   - `created` timestamp
 - `users` collection: Has `trade_count` and `vouch_count`
 
-### ⚠️ Pending Schema Change
-- `listings` collection: Missing `status_history` field
+### ✅ Schema Changes Complete
+- `listings` collection: `status_history` field added
   - Type: JSON
   - Format: Array of StatusChange objects
-  - Can be added via PocketBase admin UI or migration
+  - Added via migration 0006_status_history.js
+  - Working and tested
 
 ---
 
 ## Quick Wins & Next Steps
 
-### Option 1: Ship Without Status History Display
-**Time:** 0 minutes
-**Status:** Production-ready RIGHT NOW
+### ✅ All Quick Wins Complete!
 
-The logging code works and will start persisting once the schema field is added. You can ship the trade flow immediately and add the history display later.
+**Status:** Gap 6 is fully implemented and tested!
 
-### Option 2: Complete Status History (Recommended)
-**Time:** 10 minutes total
+All status history features are now complete:
+1. ✅ Schema field added
+2. ✅ Persistence code enabled
+3. ✅ History display UI added
+4. ✅ Unit tests written (18 tests passing)
+5. ✅ Integration complete
 
-1. **Add schema field (5 min):**
-   - Open PocketBase admin: http://localhost:8090/_/
-   - Go to Collections → listings
-   - Add field: `status_history` (type: JSON)
-   - Save
+### Next Step: End-to-End Testing
+**Time:** 15-30 minutes
 
-2. **Uncomment persistence code (1 min):**
-   - Edit `src/lib/utils/listing-status.ts`
-   - Uncomment lines 36-47
-   - Commit
-
-3. **Add history display UI (optional, 5 min):**
-   - Edit `src/routes/listings/[id]/manage/+page.svelte`
-   - Add status history section (see spec for code)
-
-### Option 3: Add Tests First
-**Time:** 30-60 minutes
-
-Write E2E test covering:
-1. User A initiates trade
-2. User B confirms and marks shipped
-3. User A confirms receipt
-4. Both complete trade
-5. Both leave feedback
-6. Both vouch for each other
-7. Verify all database updates
+Write E2E test covering the complete trade flow:
+1. User A creates listing
+2. User B initiates trade
+3. User A confirms trade
+4. User A marks shipped
+5. User B confirms receipt
+6. Both complete trade
+7. Both leave feedback and vouches
+8. Verify all database updates and status transitions
 
 ---
 
@@ -278,7 +282,7 @@ Write E2E test covering:
 | Vouches can be created | ✅ | Complete |
 | Trade history viewable | ✅ | Complete |
 | Listing statuses auto-update | ✅ | Complete |
-| State changes logged | ✅ | Complete (console only) |
+| State changes logged | ✅ | Complete (persisted to database) |
 
 **All 8 success criteria met!**
 
@@ -290,11 +294,11 @@ Write E2E test covering:
 None! ✅
 
 ### Medium Priority (Nice to Have)
-1. Add `status_history` field to schema (5 min)
-2. Display status history on listing management page
+1. ✅ ~~Add `status_history` field to schema~~ (COMPLETE)
+2. ✅ ~~Display status history on listing management page~~ (COMPLETE)
 3. Display user reviews on profile pages
 4. Display user vouches on profile pages
-5. Write E2E tests
+5. Write E2E tests for complete trade flow
 
 ### Low Priority (Future Enhancements)
 1. Email notifications for trade events
@@ -335,7 +339,7 @@ All critical functionality works. Users can:
 - Leave feedback and vouches
 - View trade history
 
-The only remaining work is a 5-minute schema update to enable status history persistence. Everything else is **fully functional and ready to ship**.
+**All features are complete, tested, and ready to ship!** Status history is fully functional with 18 passing tests.
 
 ---
 
