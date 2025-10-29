@@ -4,6 +4,7 @@
   import { invalidate } from '$app/navigation';
   import type { TradeRecord, UserRecord } from '$lib/types/pocketbase';
   import type { ListingRecord } from '$lib/types/listing';
+  import { logStatusChange } from '$lib/utils/listing-status';
 
   let { data }: { data: PageData } = $props();
 
@@ -71,9 +72,19 @@
   async function completeTradeFlow() {
     try {
       // Update listing status
+      const oldStatus = listing.status;
       await pb.collection('listings').update(listing.id, {
         status: 'completed',
       });
+
+      // Log status change
+      await logStatusChange(
+        listing.id,
+        oldStatus,
+        'completed',
+        'Trade completed',
+        $currentUser!.id
+      );
 
       // Update all games in listing to sold
       const games = await pb.collection('games').getFullList({

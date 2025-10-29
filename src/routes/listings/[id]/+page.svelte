@@ -6,6 +6,7 @@
   import { pb, currentUser } from '$lib/pocketbase';
   import { goto } from '$app/navigation';
   import { generateThreadId } from '$lib/types/message';
+  import { logStatusChange } from '$lib/utils/listing-status';
 
   let { data }: { data: PageData } = $props();
 
@@ -187,9 +188,19 @@
       });
 
       // Update listing status to pending
+      const oldStatus = listing.status;
       await pb.collection('listings').update(listing.id, {
         status: 'pending',
       });
+
+      // Log status change
+      await logStatusChange(
+        listing.id,
+        oldStatus,
+        'pending',
+        'Trade initiated',
+        $currentUser.id
+      );
 
       // Send notification to seller
       await pb.collection('notifications').create({
