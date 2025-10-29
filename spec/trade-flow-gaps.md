@@ -89,19 +89,66 @@ No way for users to create a formal trade record when buyer and seller reach agr
 
 #### Required Implementation
 
-**New API Endpoint:**
+**Client-Side Function:**
 
 ```typescript
-// src/routes/listings/[id]/+page.server.ts
-export const actions: Actions = {
-  initiate_trade: async ({ locals, params, request }) => {
-    // Verify authenticated
-    // Verify not trading with self
+// src/routes/listings/[id]/+page.svelte
+import { pb, currentUser } from '$lib/pocketbase';
+import { goto } from '$app/navigation';
+
+async function initiateTrade() {
+  if (!$currentUser) {
+    goto('/login');
+    return;
+  }
+
+  // Verify not trading with self
+  if ($currentUser.id === listing.owner) {
+    alert('You cannot trade with yourself');
+    return;
+  }
+
+  try {
+    // Check for duplicate trades
+    const existing = await pb.collection('trades').getList(1, 1, {
+      filter: `listing = "${listing.id}" && buyer = "${$currentUser.id}"`
+    });
+
+    if (existing.items.length > 0) {
+      alert('You already have a trade for this listing');
+      return;
+    }
+
     // Create trade record
-    // Send notification to counterparty
-    // Return trade ID
-  },
-};
+    const trade = await pb.collection('trades').create({
+      listing: listing.id,
+      buyer: $currentUser.id,
+      seller: listing.owner,
+      status: 'initiated'
+    });
+
+    // Update listing status to pending
+    await pb.collection('listings').update(listing.id, {
+      status: 'pending'
+    });
+
+    // Send notification to seller
+    await pb.collection('notifications').create({
+      user: listing.owner,
+      type: 'trade_initiated',
+      title: 'New trade proposal',
+      message: `${$currentUser.display_name} wants to trade for "${listing.title}"`,
+      link: `/trades/${trade.id}`,
+      read: false
+    });
+
+    // Redirect to trade detail
+    goto(`/trades/${trade.id}`);
+  } catch (err) {
+    console.error('Failed to initiate trade:', err);
+    alert('Failed to initiate trade. Please try again.');
+  }
+}
 ```
 
 **UI Changes:**
@@ -109,9 +156,11 @@ export const actions: Actions = {
 ```svelte
 <!-- src/routes/listings/[id]/+page.svelte -->
 <!-- Add to sidebar contact section -->
-<form method="POST" action="?/initiate_trade">
-  <button>Propose Trade</button>
-</form>
+{#if $currentUser && $currentUser.id !== listing.owner}
+  <button class="btn-primary w-full" onclick={initiateTrade}>
+    Propose Trade
+  </button>
+{/if}
 ```
 
 **Acceptance Criteria:**
@@ -154,80 +203,251 @@ No dedicated page to view trade details, communicate about specific trade, or up
 **New Routes:**
 
 ```
-src/routes/trades/[id]/+page.server.ts
+src/routes/trades/[id]/+page.ts
 src/routes/trades/[id]/+page.svelte
 ```
 
-**Server Load Function:**
+**Client-Side Loader:**
 
 ```typescript
-export const load: PageServerLoad = async ({ locals, params }) => {
-  // Fetch trade with expanded listing, buyer, seller
-  // Verify user is participant
-  // Return trade data
+// src/routes/trades/[id]/+page.ts
+import type { PageLoad } from './$types';
+import { pb, currentUser } from '$lib/pocketbase';
+import { error } from '@sveltejs/kit';
+import { get } from 'svelte/store';
+
+export const load: PageLoad = async ({ params }) => {
+  const user = get(currentUser);
+
+  if (!user) {
+    throw error(401, 'Must be logged in');
+  }
+
+  try {
+    const trade = await pb.collection('trades').getOne(params.id, {
+      expand: 'listing,buyer,seller,listing.games_via_listing'
+    });
+
+    // Verify user is participant
+    if (trade.buyer !== user.id && trade.seller !== user.id) {
+      throw error(403, 'Not authorized to view this trade');
+    }
+
+    return { trade };
+  } catch (err) {
+    throw error(404, 'Trade not found');
+  }
 };
 ```
 
-**Server Actions:**
+**Client-Side Functions:**
 
 ```typescript
-export const actions: Actions = {
-  confirm_receipt: async ({ locals, params }) => {
-    // Update trade status
-    // Notify other party
-  },
+// src/routes/trades/[id]/+page.svelte
+import { pb, currentUser } from '$lib/pocketbase';
+import { invalidate } from '$app/navigation';
 
-  mark_shipped: async ({ locals, params }) => {
-    // Update trade status
+async function confirmReceipt() {
+  try {
+    await pb.collection('trades').update(trade.id, {
+      status: 'confirmed'
+    });
+
+    // Notify seller
+    await pb.collection('notifications').create({
+      user: trade.seller,
+      type: 'trade_confirmed',
+      title: 'Buyer confirmed receipt',
+      message: `${$currentUser.display_name} confirmed receipt of the trade`,
+      link: `/trades/${trade.id}`,
+      read: false
+    });
+
+    // Reload trade data
+    invalidate(`/trades/${trade.id}`);
+  } catch (err) {
+    console.error('Failed to confirm receipt:', err);
+    alert('Failed to confirm receipt. Please try again.');
+  }
+}
+
+async function markShipped() {
+  try {
+    await pb.collection('trades').update(trade.id, {
+      status: 'shipped'
+    });
+
     // Notify buyer
-  },
+    await pb.collection('notifications').create({
+      user: trade.buyer,
+      type: 'trade_shipped',
+      title: 'Item shipped',
+      message: `${$currentUser.display_name} marked the item as shipped`,
+      link: `/trades/${trade.id}`,
+      read: false
+    });
 
-  complete_trade: async ({ locals, params }) => {
-    // Set status to 'completed'
-    // Increment both users' trade_count
-    // Update listing status to 'completed'
-    // Update all games in listing to 'sold'
-    // Trigger vouch prompts
+    // Reload trade data
+    invalidate(`/trades/${trade.id}`);
+  } catch (err) {
+    console.error('Failed to mark as shipped:', err);
+    alert('Failed to mark as shipped. Please try again.');
+  }
+}
+
+async function completeTrade() {
+  try {
+    // Update trade status
+    await pb.collection('trades').update(trade.id, {
+      status: 'completed',
+      completed_date: new Date().toISOString()
+    });
+
+    // Update listing status
+    await pb.collection('listings').update(trade.listing, {
+      status: 'completed'
+    });
+
+    // Update all games to sold
+    const listing = trade.expand.listing;
+    if (listing?.expand?.games_via_listing) {
+      for (const game of listing.expand.games_via_listing) {
+        await pb.collection('games').update(game.id, {
+          status: 'sold'
+        });
+      }
+    }
+
+    // Increment trade counts
+    const buyer = await pb.collection('users').getOne(trade.buyer);
+    await pb.collection('users').update(trade.buyer, {
+      trade_count: buyer.trade_count + 1
+    });
+
+    const seller = await pb.collection('users').getOne(trade.seller);
+    await pb.collection('users').update(trade.seller, {
+      trade_count: seller.trade_count + 1
+    });
+
     // Send completion notifications
-  },
+    await pb.collection('notifications').create({
+      user: trade.buyer,
+      type: 'trade_completed',
+      title: 'Trade completed!',
+      message: 'Please leave feedback for your trading partner',
+      link: `/trades/${trade.id}`,
+      read: false
+    });
 
-  dispute_trade: async ({ locals, params, request }) => {
-    // Set status to 'disputed'
-    // Capture dispute reason
+    await pb.collection('notifications').create({
+      user: trade.seller,
+      type: 'trade_completed',
+      title: 'Trade completed!',
+      message: 'Please leave feedback for your trading partner',
+      link: `/trades/${trade.id}`,
+      read: false
+    });
+
+    // Reload trade data
+    invalidate(`/trades/${trade.id}`);
+  } catch (err) {
+    console.error('Failed to complete trade:', err);
+    alert('Failed to complete trade. Please try again.');
+  }
+}
+
+async function disputeTrade() {
+  const reason = prompt('Please describe the issue:');
+  if (!reason) return;
+
+  try {
+    await pb.collection('trades').update(trade.id, {
+      status: 'disputed',
+      dispute_reason: reason
+    });
+
     // Notify both parties
-    // Alert moderators
-  },
-};
+    await pb.collection('notifications').create({
+      user: trade.buyer,
+      type: 'trade_disputed',
+      title: 'Trade disputed',
+      message: 'A dispute has been raised. A moderator will review.',
+      link: `/trades/${trade.id}`,
+      read: false
+    });
+
+    await pb.collection('notifications').create({
+      user: trade.seller,
+      type: 'trade_disputed',
+      title: 'Trade disputed',
+      message: 'A dispute has been raised. A moderator will review.',
+      link: `/trades/${trade.id}`,
+      read: false
+    });
+
+    // Reload trade data
+    invalidate(`/trades/${trade.id}`);
+  } catch (err) {
+    console.error('Failed to dispute trade:', err);
+    alert('Failed to dispute trade. Please try again.');
+  }
+}
 ```
 
 **UI Components:**
 
 ```svelte
+<script lang="ts">
+  import type { PageData } from './$types';
+  import { currentUser } from '$lib/pocketbase';
+
+  let { data }: { data: PageData } = $props();
+  let trade = $derived(data.trade);
+  let isBuyer = $derived($currentUser?.id === trade.buyer);
+  let isSeller = $derived($currentUser?.id === trade.seller);
+  let status = $derived(trade.status);
+</script>
+
 <!-- Trade Timeline -->
-<ol>
-  <li>✓ Trade initiated - Oct 20</li>
-  <li>✓ Seller confirmed - Oct 21</li>
-  <li>→ Awaiting shipment</li>
+<ol class="steps">
+  <li class="step step-primary">✓ Trade initiated - {formatDate(trade.created)}</li>
+  <li class="step {['confirmed', 'shipped', 'completed'].includes(status) ? 'step-primary' : ''}">
+    {['confirmed', 'shipped', 'completed'].includes(status) ? '✓' : '→'} Seller confirmed
+  </li>
+  <li class="step {['shipped', 'completed'].includes(status) ? 'step-primary' : ''}">
+    {['shipped', 'completed'].includes(status) ? '✓' : '→'} Item shipped
+  </li>
+  <li class="step {status === 'completed' ? 'step-primary' : ''}">
+    {status === 'completed' ? '✓' : '→'} Trade completed
+  </li>
 </ol>
 
 <!-- Action Buttons (conditional based on status & role) -->
-{#if isBuyer && status === 'confirmed'}
-  <form method="POST" action="?/confirm_receipt">
-    <button>Confirm Receipt</button>
-  </form>
-{/if}
+<div class="flex gap-2 mt-4">
+  {#if isSeller && status === 'initiated'}
+    <button class="btn-primary" onclick={markShipped}>
+      Mark as Shipped
+    </button>
+  {/if}
 
-{#if isSeller && status === 'initiated'}
-  <form method="POST" action="?/mark_shipped">
-    <button>Mark as Shipped</button>
-  </form>
-{/if}
+  {#if isBuyer && status === 'shipped'}
+    <button class="btn-primary" onclick={confirmReceipt}>
+      Confirm Receipt
+    </button>
+  {/if}
 
-{#if status === 'confirmed'}
-  <form method="POST" action="?/complete_trade">
-    <button>Complete Trade</button>
-  </form>
-{/if}
+  {#if (isBuyer || isSeller) && status === 'confirmed'}
+    <button class="btn-success" onclick={completeTrade}>
+      Complete Trade
+    </button>
+  {/if}
+
+  {#if status !== 'completed' && status !== 'disputed'}
+    <button class="btn-error btn-outline" onclick={disputeTrade}>
+      Report Issue
+    </button>
+  {/if}
+</div>
 ```
 
 **Acceptance Criteria:**
@@ -272,30 +492,41 @@ No page showing user's trade history (active, completed, disputed).
 **New Routes:**
 
 ```
-src/routes/trades/+page.server.ts
+src/routes/trades/+page.ts
 src/routes/trades/+page.svelte
 ```
 
-**Server Load:**
+**Client-Side Loader:**
 
 ```typescript
-export const load: PageServerLoad = async ({ locals, url }) => {
-  const user = locals.user;
+// src/routes/trades/+page.ts
+import type { PageLoad } from './$types';
+import { pb, currentUser } from '$lib/pocketbase';
+import { error } from '@sveltejs/kit';
+import { get } from 'svelte/store';
+
+export const load: PageLoad = async ({ url }) => {
+  const user = get(currentUser);
+
+  if (!user) {
+    throw error(401, 'Must be logged in');
+  }
+
   const filter = url.searchParams.get('filter') ?? 'active';
 
   let statusFilter = '';
   if (filter === 'active') {
-    statusFilter = 'status = "initiated" || status = "confirmed"';
+    statusFilter = 'status = "initiated" || status = "confirmed" || status = "shipped"';
   } else if (filter === 'completed') {
     statusFilter = 'status = "completed"';
   } else if (filter === 'disputed') {
     statusFilter = 'status = "disputed"';
   }
 
-  const trades = await locals.pb.collection('trades').getFullList({
+  const trades = await pb.collection('trades').getFullList({
     filter: `(buyer = "${user.id}" || seller = "${user.id}") && (${statusFilter})`,
     expand: 'listing,buyer,seller',
-    sort: '-created',
+    sort: '-created'
   });
 
   return { trades, filter };
