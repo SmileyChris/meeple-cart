@@ -9,22 +9,14 @@
 
 migrate(
   (db) => {
-    const dao = new Dao(db);
-    const collection = dao.findCollectionByNameOrId('fhggsowykv3hz86'); // users collection ID
-
-    // Allow anyone to create user accounts
-    // For auth collections, null createRule allows public registration
-    collection.createRule = null;
-
-    return dao.saveCollection(collection);
+    // Execute raw SQL to update the createRule for users collection
+    // Setting to empty string means anyone can create (for auth collections)
+    db.newQuery(
+      "UPDATE _collections SET createRule = NULL WHERE id = 'fhggsowykv3hz86'"
+    ).execute();
   },
   (db) => {
-    const dao = new Dao(db);
-    const collection = dao.findCollectionByNameOrId('fhggsowykv3hz86');
-
-    // Rollback: set back to deny all
-    collection.createRule = '';
-
-    return dao.saveCollection(collection);
+    // Rollback: set back to empty string (deny all)
+    db.newQuery("UPDATE _collections SET createRule = '' WHERE id = 'fhggsowykv3hz86'").execute();
   }
 );

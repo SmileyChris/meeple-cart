@@ -38,38 +38,71 @@
 
     loading = true;
     try {
-      await pb.collection('users').create({
+      // Create user with only essential fields
+      // System fields (trade_count, etc.) should have defaults in the schema
+      const userData: any = {
         email: email.trim().toLowerCase(),
         password,
         passwordConfirm,
         display_name: displayName.trim(),
-        preferred_contact: 'platform',
-        trade_count: 0,
-        vouch_count: 0,
-        joined_date: new Date().toISOString(),
-        notification_prefs: DEFAULT_NOTIFICATION_PREFS,
-        cascades_seeded: 0,
-        cascades_received: 0,
-        cascades_passed: 0,
-        cascades_broken: 0,
-        cascade_reputation: 50,
-        can_enter_cascades: true,
-      });
+      };
+
+      // Only set optional fields if they're allowed
+      // Try with minimal fields first, then add more if needed
+      try {
+        await pb.collection('users').create(userData);
+      } catch (firstErr: any) {
+        // If basic creation fails due to missing required fields, add them
+        if (firstErr?.response?.data) {
+          const requiredFields = Object.keys(firstErr.response.data);
+          if (requiredFields.length > 0) {
+            // Add the required fields with defaults
+            if (requiredFields.includes('preferred_contact')) userData.preferred_contact = 'platform';
+            if (requiredFields.includes('trade_count')) userData.trade_count = 0;
+            if (requiredFields.includes('vouch_count')) userData.vouch_count = 0;
+            if (requiredFields.includes('joined_date'))
+              userData.joined_date = new Date().toISOString();
+            if (requiredFields.includes('cascades_seeded')) userData.cascades_seeded = 0;
+            if (requiredFields.includes('cascades_received')) userData.cascades_received = 0;
+            if (requiredFields.includes('cascades_passed')) userData.cascades_passed = 0;
+            if (requiredFields.includes('cascades_broken')) userData.cascades_broken = 0;
+            if (requiredFields.includes('cascade_reputation')) userData.cascade_reputation = 50;
+            if (requiredFields.includes('can_enter_cascades')) userData.can_enter_cascades = true;
+
+            // Try again with the required fields
+            await pb.collection('users').create(userData);
+          } else {
+            throw firstErr;
+          }
+        } else {
+          throw firstErr;
+        }
+      }
 
       // Auto-login after registration
       await currentUser.login(email.trim().toLowerCase(), password);
       goto('/profile');
     } catch (err: any) {
       console.error('Registration failed', err);
+      console.error('Error details:', JSON.stringify(err, null, 2));
+      console.error('Error response:', err?.response);
+      console.error('Error data:', err?.response?.data);
 
       // Extract PocketBase error message if available
       let errorMessage = 'Unable to create account, please check the details and try again.';
       if (err?.response?.data) {
         const data = err.response.data;
+        console.error('PocketBase error data:', data);
         if (data.message) {
           errorMessage = data.message;
         } else if (data.email) {
           errorMessage = 'This email is already registered.';
+        } else if (data.data) {
+          // Handle field-specific errors
+          const fieldErrors = Object.entries(data.data)
+            .map(([field, err]: [string, any]) => `${field}: ${err.message}`)
+            .join(', ');
+          errorMessage = `Validation failed: ${fieldErrors}`;
         }
       }
       error = errorMessage;
