@@ -85,7 +85,7 @@
   <h1 class="text-2xl font-semibold text-primary">Create your account</h1>
   <p class="mt-2 text-sm text-muted">Sign up with an email address to start trading.</p>
 
-  <form class="mt-6 space-y-4" on:submit={handleSubmit}>
+  <form class="mt-6 space-y-4" onsubmit={handleSubmit}>
     <div class="space-y-2">
       <label class="block text-sm font-medium text-secondary" for="display_name">Full name</label>
       <input

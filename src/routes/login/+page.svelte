@@ -43,7 +43,7 @@
   <h1 class="text-2xl font-semibold text-primary">Log in</h1>
   <p class="mt-2 text-sm text-muted">Use the email and password you registered with.</p>
 
-  <form class="mt-6 space-y-4" on:submit={handleSubmit}>
+  <form class="mt-6 space-y-4" onsubmit={handleSubmit}>
     <div class="space-y-2">
       <label class="block text-sm font-medium text-secondary" for="email">Email</label>
       <input
