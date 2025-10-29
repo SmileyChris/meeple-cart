@@ -1,11 +1,27 @@
 <script lang="ts">
   import { currentUser } from '$lib/pocketbase';
   import { goto } from '$app/navigation';
+  import { onMount } from 'svelte';
 
   let email = '';
   let password = '';
   let error: string | null = null;
   let loading = false;
+
+  // Backup redirect check in case loader didn't catch it
+  onMount(() => {
+    const authData = localStorage.getItem('pocketbase_auth');
+    if (authData) {
+      try {
+        const parsed = JSON.parse(authData);
+        if (parsed.token) {
+          goto('/profile', { replaceState: true });
+        }
+      } catch (e) {
+        // Invalid auth data, stay on page
+      }
+    }
+  });
 
   async function handleSubmit(e: Event) {
     e.preventDefault();

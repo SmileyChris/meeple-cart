@@ -24,11 +24,11 @@ function createAuthStore() {
     // Initialize auth from localStorage
     init: () => {
       if (browser) {
-        pb.authStore.loadFromCookie(document.cookie);
+        // PocketBase automatically loads from localStorage, so just sync the store
         const user = pb.authStore.isValid ? (pb.authStore.model as UserRecord) : null;
         set(user);
 
-        // Listen to auth changes
+        // Listen to auth changes and sync to our Svelte store
         pb.authStore.onChange(() => {
           const user = pb.authStore.isValid ? (pb.authStore.model as UserRecord) : null;
           set(user);
