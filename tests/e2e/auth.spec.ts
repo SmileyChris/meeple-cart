@@ -25,8 +25,8 @@ test.describe('Authentication', () => {
       // Should redirect to profile page after successful registration
       await expect(page).toHaveURL('/profile');
 
-      // Should be logged in (check for user display name or logout button)
-      await expect(page.locator(`text=${testUser.displayName}`)).toBeVisible();
+      // Should be logged in (check for user display name in header)
+      await expect(page.getByRole('link', { name: testUser.displayName })).toBeVisible();
     });
 
     test('should show error for password mismatch', async ({ page }) => {
@@ -109,8 +109,8 @@ test.describe('Authentication', () => {
 
       await page.click('button[type="submit"]');
 
-      // Should show error about password length
-      await expect(page.locator('text=/password.*8.*characters/i')).toBeVisible();
+      // Should show error about password length (minimum is 10 characters)
+      await expect(page.locator('text=/password.*10.*characters/i')).toBeVisible();
     });
 
     test('should redirect to profile if already logged in', async ({ page }) => {
