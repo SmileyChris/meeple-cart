@@ -96,7 +96,7 @@ test.describe('Photo Gallery Manager', () => {
       await page.click('button[type="submit"]');
 
       // Navigate to listing owned by someone else
-      await page.goto('/listings/test-listing-id');
+      await page.goto(`/listings/${listingId}`);
 
       // Should NOT see "Manage photos" button
       const manageButton = page.getByRole('link', { name: /manage photos/i });
@@ -104,7 +104,7 @@ test.describe('Photo Gallery Manager', () => {
     });
 
     test('should display photo count correctly', async () => {
-      await page.goto('/listings/test-listing-id/photos');
+      await page.goto(`/listings/${listingId}/photos`);
 
       // Check photo count display
       const photoCount = page.locator('text=/\\d+ \\/ 6 photos/');
@@ -112,7 +112,7 @@ test.describe('Photo Gallery Manager', () => {
     });
 
     test('should upload a new photo', async () => {
-      await page.goto('/listings/test-listing-id/photos');
+      await page.goto(`/listings/${listingId}/photos`);
 
       // Get initial photo count
       const initialCount = await page.locator('[role="button"]').count();
@@ -134,7 +134,7 @@ test.describe('Photo Gallery Manager', () => {
 
     test('should show error when exceeding 6 photo limit', async () => {
       // This test assumes listing already has 6 photos
-      await page.goto('/listings/test-listing-id-with-max-photos/photos');
+      await page.goto(`/listings/${listingId}-with-max-photos/photos`);
 
       // Upload button should be disabled
       const uploadButton = page.getByRole('button', { name: /maximum photos reached/i });
@@ -142,7 +142,7 @@ test.describe('Photo Gallery Manager', () => {
     });
 
     test('should validate file type', async () => {
-      await page.goto('/listings/test-listing-id/photos');
+      await page.goto(`/listings/${listingId}/photos`);
 
       // Try to upload invalid file type
       const fileInput = page.locator('input[type="file"]');
@@ -153,7 +153,7 @@ test.describe('Photo Gallery Manager', () => {
     });
 
     test('should validate file size', async () => {
-      await page.goto('/listings/test-listing-id/photos');
+      await page.goto(`/listings/${listingId}/photos`);
 
       // Try to upload file > 5MB
       const fileInput = page.locator('input[type="file"]');
@@ -166,7 +166,7 @@ test.describe('Photo Gallery Manager', () => {
 
   test.describe('Photo Deletion', () => {
     test('should delete a photo with confirmation', async () => {
-      await page.goto('/listings/test-listing-id/photos');
+      await page.goto(`/listings/${listingId}/photos`);
 
       // Get initial count
       const initialCount = await page.locator('img[alt*="Listing photo"]').count();
@@ -189,7 +189,7 @@ test.describe('Photo Gallery Manager', () => {
     });
 
     test('should cancel deletion on dialog dismiss', async () => {
-      await page.goto('/listings/test-listing-id/photos');
+      await page.goto(`/listings/${listingId}/photos`);
 
       // Get initial count
       const initialCount = await page.locator('img[alt*="Listing photo"]').count();
@@ -212,7 +212,7 @@ test.describe('Photo Gallery Manager', () => {
 
   test.describe('Photo Reordering', () => {
     test('should reorder photos via drag and drop', async () => {
-      await page.goto('/listings/test-listing-id/photos');
+      await page.goto(`/listings/${listingId}/photos`);
 
       // Get initial order
       const firstPhoto = page.locator('img[alt="Listing photo 1"]');
@@ -235,7 +235,7 @@ test.describe('Photo Gallery Manager', () => {
     });
 
     test('should show saving indicator during reorder', async () => {
-      await page.goto('/listings/test-listing-id/photos');
+      await page.goto(`/listings/${listingId}/photos`);
 
       // Drag and drop
       const dragHandle = page.locator('[role="button"]').first();
@@ -250,7 +250,7 @@ test.describe('Photo Gallery Manager', () => {
 
   test.describe('Region Editor', () => {
     test('should open region editor for a photo', async () => {
-      await page.goto('/listings/test-listing-id/photos');
+      await page.goto(`/listings/${listingId}/photos`);
 
       // Hover over first photo
       await page.hover('img[alt="Listing photo 1"]');
@@ -263,7 +263,7 @@ test.describe('Photo Gallery Manager', () => {
     });
 
     test('should close region editor on cancel', async () => {
-      await page.goto('/listings/test-listing-id/photos');
+      await page.goto(`/listings/${listingId}/photos`);
 
       // Open editor
       await page.hover('img[alt="Listing photo 1"]');
@@ -277,7 +277,7 @@ test.describe('Photo Gallery Manager', () => {
     });
 
     test('should switch between rectangle and polygon modes', async () => {
-      await page.goto('/listings/test-listing-id/photos');
+      await page.goto(`/listings/${listingId}/photos`);
 
       // Open editor
       await page.hover('img[alt="Listing photo 1"]');
@@ -295,7 +295,7 @@ test.describe('Photo Gallery Manager', () => {
     });
 
     test('should draw a rectangle region', async () => {
-      await page.goto('/listings/test-listing-id/photos');
+      await page.goto(`/listings/${listingId}/photos`);
 
       // Open editor
       await page.hover('img[alt="Listing photo 1"]');
@@ -320,7 +320,7 @@ test.describe('Photo Gallery Manager', () => {
     });
 
     test('should assign game to region', async () => {
-      await page.goto('/listings/test-listing-id/photos');
+      await page.goto(`/listings/${listingId}/photos`);
 
       // Open editor and draw region (abbreviated)
       await page.hover('img[alt="Listing photo 1"]');
@@ -347,7 +347,7 @@ test.describe('Photo Gallery Manager', () => {
     });
 
     test('should delete a region', async () => {
-      await page.goto('/listings/test-listing-id/photos');
+      await page.goto(`/listings/${listingId}/photos`);
 
       // Open editor with existing region
       await page.hover('img[alt="Listing photo 1"]');
@@ -366,7 +366,7 @@ test.describe('Photo Gallery Manager', () => {
   test.describe('Region Display on Listing Page', () => {
     test('should display regions on listing detail page', async () => {
       // Navigate to listing with regions
-      await page.goto('/listings/test-listing-id-with-regions');
+      await page.goto(`/listings/${listingId}-with-regions`);
 
       // Should see region overlays
       const regions = page.locator('.photo-region, .polygon-region');
@@ -374,7 +374,7 @@ test.describe('Photo Gallery Manager', () => {
     });
 
     test('should blur regions for sold games', async () => {
-      await page.goto('/listings/test-listing-id-with-sold-game');
+      await page.goto(`/listings/${listingId}-with-sold-game`);
 
       // Region linked to sold game should have blur effect
       const blurredRegion = page.locator('.region-blurred, .polygon-blurred').first();
@@ -382,7 +382,7 @@ test.describe('Photo Gallery Manager', () => {
     });
 
     test('should show game name on hover for non-blurred regions', async () => {
-      await page.goto('/listings/test-listing-id-with-regions');
+      await page.goto(`/listings/${listingId}-with-regions`);
 
       // Hover over region
       const region = page.locator('.photo-region').first();
@@ -394,7 +394,7 @@ test.describe('Photo Gallery Manager', () => {
     });
 
     test('should scroll to game when region is clicked', async () => {
-      await page.goto('/listings/test-listing-id-with-regions');
+      await page.goto(`/listings/${listingId}-with-regions`);
 
       // Click on a region
       const region = page.locator('.photo-region').first();
@@ -407,7 +407,7 @@ test.describe('Photo Gallery Manager', () => {
     });
 
     test('should apply highlight animation when region clicked', async () => {
-      await page.goto('/listings/test-listing-id-with-regions');
+      await page.goto(`/listings/${listingId}-with-regions`);
 
       // Click region
       const region = page.locator('.photo-region').first();
@@ -427,7 +427,7 @@ test.describe('Photo Gallery Manager', () => {
 
   test.describe('Accessibility', () => {
     test('photo manager should be keyboard navigable', async () => {
-      await page.goto('/listings/test-listing-id/photos');
+      await page.goto(`/listings/${listingId}/photos`);
 
       // Tab through elements
       await page.keyboard.press('Tab'); // Upload button
@@ -442,7 +442,7 @@ test.describe('Photo Gallery Manager', () => {
     });
 
     test('regions should have proper ARIA labels', async () => {
-      await page.goto('/listings/test-listing-id-with-regions');
+      await page.goto(`/listings/${listingId}-with-regions`);
 
       // Regions should have role="button"
       const region = page.locator('.photo-region[role="button"]').first();
@@ -454,7 +454,7 @@ test.describe('Photo Gallery Manager', () => {
     });
 
     test('region editor canvas should be accessible', async () => {
-      await page.goto('/listings/test-listing-id/photos');
+      await page.goto(`/listings/${listingId}/photos`);
 
       // Open editor
       await page.hover('img[alt="Listing photo 1"]');
@@ -474,7 +474,7 @@ test.describe('Photo Gallery Manager', () => {
       // Mock network failure
       await page.route('**/api/collections/listings/*', (route) => route.abort());
 
-      await page.goto('/listings/test-listing-id/photos');
+      await page.goto(`/listings/${listingId}/photos`);
 
       // Try to upload
       const fileInput = page.locator('input[type="file"]');
@@ -488,7 +488,7 @@ test.describe('Photo Gallery Manager', () => {
       // Mock network failure
       await page.route('**/api/collections/listings/*', (route) => route.abort());
 
-      await page.goto('/listings/test-listing-id/photos');
+      await page.goto(`/listings/${listingId}/photos`);
 
       // Try to delete
       await page.hover('img[alt="Listing photo 1"]');
@@ -504,7 +504,7 @@ test.describe('Photo Gallery Manager', () => {
       // Mock network failure
       await page.route('**/api/collections/listings/*', (route) => route.abort());
 
-      await page.goto('/listings/test-listing-id/photos');
+      await page.goto(`/listings/${listingId}/photos`);
 
       // Open editor and try to save
       await page.hover('img[alt="Listing photo 1"]');
