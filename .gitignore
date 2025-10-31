@@ -10,6 +10,7 @@ build
 .vercel
 .netlify
 .wrangler
+coverage
 
 # OS cruft
 .DS_Store

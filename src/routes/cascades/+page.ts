@@ -1,11 +1,15 @@
 import { PUBLIC_POCKETBASE_URL } from '$env/static/public';
 import type { PageLoad } from './$types';
 import type { CascadeRecord, CascadeRegion, CascadeStatus } from '$lib/types/cascade';
+import { NZ_REGIONS } from '$lib/constants/regions';
 import type { UserRecord } from '$lib/types/pocketbase';
 import type { GameRecord } from '$lib/types/listing';
 
 const PAGE_LIMIT = 24;
 const FALLBACK_BASE_URL = 'http://127.0.0.1:8090';
+const VALID_CASCADE_REGIONS = new Set(
+  NZ_REGIONS.map((region) => region.value).filter((value): value is CascadeRegion => value !== '')
+);
 
 type PocketBaseListResponse<T> = {
   page: number;
@@ -65,7 +69,7 @@ export const load: PageLoad = async ({ fetch, url }) => {
     : undefined;
 
   const regionParam = url.searchParams.get('region') ?? '';
-  const region = ['nz', 'au', 'worldwide', 'north_island', 'south_island'].includes(regionParam)
+  const region = VALID_CASCADE_REGIONS.has(regionParam as CascadeRegion)
     ? (regionParam as CascadeRegion)
     : undefined;
 

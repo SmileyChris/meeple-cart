@@ -1,4 +1,5 @@
 import type { RecordModel } from 'pocketbase';
+import type { CascadeRegionValue } from '$lib/constants/regions';
 import type { UserRecord } from './pocketbase';
 import type { GameRecord } from './listing';
 
@@ -10,7 +11,7 @@ export type CascadeStatus =
   | 'completed'
   | 'broken';
 
-export type CascadeRegion = 'nz' | 'au' | 'worldwide' | 'north_island' | 'south_island';
+export type CascadeRegion = Exclude<CascadeRegionValue, ''>;
 
 export type ShippingRequirement = 'pickup_only' | 'shipping_available' | 'shipping_only';
 

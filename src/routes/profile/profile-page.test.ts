@@ -52,6 +52,18 @@ describe('profile client-side load', () => {
     });
   });
 
+  it('redirects to login when auth store has no user model', async () => {
+    const { pb } = pocketbaseModule;
+    pb.authStore.isValid = true;
+    pb.authStore.model = null;
+
+    await expect(load({} as any)).rejects.toMatchObject({
+      message: 'REDIRECT',
+      status: 302,
+      location: '/login',
+    });
+  });
+
   it('returns the profile and listings for authenticated user', async () => {
     const mockUser = { id: 'user123', display_name: 'Chris' };
     const mockListings = [
