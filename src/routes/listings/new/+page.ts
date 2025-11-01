@@ -17,5 +17,7 @@ export const load: PageLoad = async ({ url }) => {
       listing_type: 'trade',
       condition: 'excellent',
     },
+    listingTypes: ['trade', 'sell', 'want'] as const,
+    conditionOptions: ['mint', 'excellent', 'good', 'fair', 'poor'] as const,
   };
 };
