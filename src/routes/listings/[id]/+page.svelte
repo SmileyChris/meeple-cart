@@ -3,6 +3,7 @@
   import { formatCurrency } from '$lib/utils/currency';
   import WatchlistButton from '$lib/components/WatchlistButton.svelte';
   import PhotoRegionOverlay from '$lib/components/PhotoRegionOverlay.svelte';
+  import ListingReactions from '$lib/components/ListingReactions.svelte';
   import { pb, currentUser } from '$lib/pocketbase';
   import { goto } from '$app/navigation';
   import { generateThreadId } from '$lib/types/message';
@@ -242,6 +243,14 @@
     <header class="flex flex-col gap-6 lg:flex-row">
       <div class="flex-1 space-y-4">
         <h1 class="text-4xl font-semibold tracking-tight text-primary">{listing.title}</h1>
+
+        <!-- Reactions -->
+        <ListingReactions
+          listingId={listing.id}
+          initialCounts={data.reactionCounts}
+          initialUserReaction={data.userReaction}
+        />
+
         <div class="flex flex-wrap gap-3 text-sm text-secondary">
           <span
             class="rounded-full border border-emerald-500/80 bg-emerald-500/10 px-3 py-1 font-semibold text-emerald-200 uppercase"

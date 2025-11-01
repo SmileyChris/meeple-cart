@@ -37,3 +37,24 @@ export interface TradeRecord extends RecordModel {
     seller?: UserRecord;
   };
 }
+
+export const REACTION_EMOJIS = ['👀', '❤️', '🔥', '👍', '🎉', '😍'] as const;
+export type ReactionEmoji = (typeof REACTION_EMOJIS)[number];
+
+export interface ReactionRecord extends RecordModel {
+  user: string;
+  listing: string;
+  emoji: ReactionEmoji;
+  expand?: {
+    user?: UserRecord;
+  };
+}
+
+export interface ReactionCounts {
+  '👀': number;
+  '❤️': number;
+  '🔥': number;
+  '👍': number;
+  '🎉': number;
+  '😍': number;
+}

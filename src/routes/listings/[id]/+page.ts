@@ -1,7 +1,7 @@
 import { error } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 import type { GameRecord, ListingGameDetail, ListingRecord } from '$lib/types/listing';
-import type { UserRecord } from '$lib/types/pocketbase';
+import type { UserRecord, ReactionCounts, ReactionEmoji, ReactionRecord } from '$lib/types/pocketbase';
 import { normalizeListingType } from '$lib/types/listing';
 import { getLowestHistoricalPrice } from '$lib/utils/price-history';
 import { pb, currentUser } from '$lib/pocketbase';
@@ -92,12 +92,38 @@ export const load: PageLoad = async ({ params }) => {
       isWatching = watchlist.length > 0;
     }
 
+    // Fetch reaction counts and user's reaction
+    const reactions = await pb.collection('reactions').getFullList<ReactionRecord>({
+      filter: `listing = "${id}"`,
+    });
+
+    const reactionCounts: ReactionCounts = {
+      '👀': 0,
+      '❤️': 0,
+      '🔥': 0,
+      '👍': 0,
+      '🎉': 0,
+      '😍': 0,
+    };
+
+    let userReaction: ReactionEmoji | null = null;
+
+    reactions.forEach((reaction) => {
+      const emoji = reaction.emoji as ReactionEmoji;
+      reactionCounts[emoji]++;
+      if (user && reaction.user === user.id) {
+        userReaction = emoji;
+      }
+    });
+
     return {
       listing: normalizedListing,
       owner: owner || null,
       games: formattedGames,
       photos,
       isWatching,
+      reactionCounts,
+      userReaction,
     };
   } catch (err) {
     console.error(`Failed to load listing ${id}`, err);
