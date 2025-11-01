@@ -26,6 +26,14 @@
     --accent-strong: #10b981;
     --accent-soft: rgba(52, 211, 153, 0.12);
     --accent-contrast: #022c22;
+
+    /* Badge colors - adapt to theme */
+    --badge-emerald: #a7f3d0;
+    --badge-amber: #fcd34d;
+    --badge-rose: #fda4af;
+    --badge-sky: #7dd3fc;
+    --badge-blue: #93c5fd;
+    --badge-purple: #d8b4fe;
   }
 
   [data-theme='light'] {
@@ -48,6 +56,14 @@
     --accent-strong: #047857;
     --accent-soft: rgba(5, 150, 105, 0.12);
     --accent-contrast: #f1fff7;
+
+    /* Badge colors - darker for light mode */
+    --badge-emerald: #047857;
+    --badge-amber: #b45309;
+    --badge-rose: #be123c;
+    --badge-sky: #0369a1;
+    --badge-blue: #1d4ed8;
+    --badge-purple: #7e22ce;
   }
 
   body {
@@ -116,6 +132,30 @@
 
   .shadow-elevated {
     box-shadow: var(--shadow-elevated);
+  }
+
+  .text-badge-emerald {
+    color: var(--badge-emerald);
+  }
+
+  .text-badge-amber {
+    color: var(--badge-amber);
+  }
+
+  .text-badge-rose {
+    color: var(--badge-rose);
+  }
+
+  .text-badge-sky {
+    color: var(--badge-sky);
+  }
+
+  .text-badge-blue {
+    color: var(--badge-blue);
+  }
+
+  .text-badge-purple {
+    color: var(--badge-purple);
   }
 }
 

@@ -15,17 +15,17 @@
     trade: {
       border: 'border-emerald-600',
       bg: 'bg-emerald-500/10',
-      text: 'text-emerald-200',
+      text: 'text-badge-emerald',
     },
     sell: {
       border: 'border-blue-600',
       bg: 'bg-blue-500/10',
-      text: 'text-blue-200',
+      text: 'text-badge-blue',
     },
     want: {
       border: 'border-purple-600',
       bg: 'bg-purple-500/10',
-      text: 'text-purple-200',
+      text: 'text-badge-purple',
     },
   };
 
@@ -137,7 +137,7 @@
           <div class="flex items-center gap-2">
             <span class="text-muted">Price</span>
             <span
-              class="rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-bold text-emerald-300 ring-1 ring-emerald-500/50"
+              class="rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-bold text-badge-emerald ring-1 ring-emerald-500/50"
             >
               {currencyFormatter.format(game.price)}
             </span>
@@ -146,7 +146,7 @@
           <div class="flex items-center gap-2">
             <span class="text-muted">Value</span>
             <span
-              class="rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-bold text-emerald-300 ring-1 ring-emerald-500/50"
+              class="rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-bold text-badge-emerald ring-1 ring-emerald-500/50"
             >
               {currencyFormatter.format(game.tradeValue)}
             </span>

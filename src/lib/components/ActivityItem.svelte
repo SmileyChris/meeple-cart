@@ -21,19 +21,19 @@
       trade: {
         border: 'border-emerald-600',
         bg: 'bg-emerald-500/10',
-        text: 'text-emerald-200',
+        text: 'text-badge-emerald',
         dot: 'bg-emerald-500',
       },
       sell: {
         border: 'border-blue-600',
         bg: 'bg-blue-500/10',
-        text: 'text-blue-200',
+        text: 'text-badge-blue',
         dot: 'bg-blue-500',
       },
       want: {
         border: 'border-purple-600',
         bg: 'bg-purple-500/10',
-        text: 'text-purple-200',
+        text: 'text-badge-purple',
         dot: 'bg-purple-500',
       },
     };
@@ -160,7 +160,7 @@
           {#if isNew}
             <div class="absolute right-4 top-4">
               <span
-                class="animate-pulse rounded-full border-2 border-emerald-500 bg-emerald-500/20 px-3 py-1 text-xs font-bold uppercase tracking-wider text-emerald-300 backdrop-blur-sm"
+                class="animate-pulse rounded-full border-2 border-emerald-500 bg-emerald-500/20 px-3 py-1 text-xs font-bold uppercase tracking-wider text-badge-emerald backdrop-blur-sm"
               >
                 New
               </span>
@@ -183,7 +183,7 @@
           {#if isNew}
             <div class="absolute right-4 top-4">
               <span
-                class="animate-pulse rounded-full border-2 border-emerald-500 bg-emerald-500/20 px-3 py-1 text-xs font-bold uppercase tracking-wider text-emerald-300 backdrop-blur-sm"
+                class="animate-pulse rounded-full border-2 border-emerald-500 bg-emerald-500/20 px-3 py-1 text-xs font-bold uppercase tracking-wider text-badge-emerald backdrop-blur-sm"
               >
                 New
               </span>
@@ -226,7 +226,7 @@
             <div class="flex items-center gap-2">
               <span class="text-muted">Price</span>
               <span
-                class="rounded-full bg-emerald-500/20 px-3 py-1 font-bold text-emerald-300 ring-1 ring-emerald-500/50"
+                class="rounded-full bg-emerald-500/20 px-3 py-1 font-bold text-badge-emerald ring-1 ring-emerald-500/50"
               >
                 {currencyFormatter.format(activity.price)}
               </span>
@@ -235,7 +235,7 @@
             <div class="flex items-center gap-2">
               <span class="text-muted">Trade Value</span>
               <span
-                class="rounded-full bg-emerald-500/20 px-3 py-1 font-bold text-emerald-300 ring-1 ring-emerald-500/50"
+                class="rounded-full bg-emerald-500/20 px-3 py-1 font-bold text-badge-emerald ring-1 ring-emerald-500/50"
               >
                 {currencyFormatter.format(activity.tradeValue)}
               </span>

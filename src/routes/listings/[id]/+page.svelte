@@ -118,10 +118,10 @@
   };
 
   const statusTone: Record<(typeof games)[number]['status'], string> = {
-    available: 'border-emerald-500/80 bg-emerald-500/10 text-emerald-200',
-    pending: 'border-amber-500/80 bg-amber-500/10 text-amber-200',
-    sold: 'border-rose-500/80 bg-rose-500/10 text-rose-200',
-    bundled: 'border-sky-500/80 bg-sky-500/10 text-sky-200',
+    available: 'border-emerald-500/80 bg-emerald-500/10 text-badge-emerald',
+    pending: 'border-amber-500/80 bg-amber-500/10 text-badge-amber',
+    sold: 'border-rose-500/80 bg-rose-500/10 text-badge-rose',
+    bundled: 'border-sky-500/80 bg-sky-500/10 text-badge-sky',
   };
 
   async function handleSendMessage(e: Event) {
@@ -268,7 +268,7 @@
 
         <div class="flex flex-wrap gap-3 text-sm text-secondary">
           <span
-            class="rounded-full border border-emerald-500/80 bg-emerald-500/10 px-3 py-1 font-semibold text-emerald-200 uppercase"
+            class="rounded-full border border-emerald-500/80 bg-emerald-500/10 px-3 py-1 font-semibold text-badge-emerald uppercase"
           >
             {listing.listing_type === 'want'
               ? 'Want to Buy'
