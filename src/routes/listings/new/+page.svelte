@@ -124,56 +124,6 @@
         class="space-y-6 rounded-xl border border-subtle bg-surface-card transition-colors p-6"
       >
         <div class="space-y-2">
-          <h2 class="text-xl font-semibold text-primary">Photos</h2>
-          <p class="text-sm text-muted">
-            Upload up to 6 images (PNG, JPG, WEBP, 5MB maximum each).
-          </p>
-        </div>
-
-        <div class="space-y-3">
-          <label class="block text-sm font-medium text-secondary" for="photos">Upload photos</label>
-          <input
-            class="w-full cursor-pointer rounded-lg border border-dashed border-subtle bg-surface-body transition-colors px-3 py-8 text-sm text-secondary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
-            id="photos"
-            name="photos"
-            type="file"
-            accept="image/png,image/jpeg,image/webp"
-            multiple
-            onchange={handlePhotoChange}
-          />
-          {#if fieldErrors.photos}
-            <p class="text-sm text-rose-300">{fieldErrors.photos}</p>
-          {/if}
-          <p class="text-xs text-muted">
-            You'll need to reselect images if the form submission fails.
-          </p>
-        </div>
-
-        {#if photoPreviews.length > 0}
-          <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {#each photoPreviews as preview (preview.url)}
-              <figure
-                class="overflow-hidden rounded-lg border border-subtle bg-surface-card transition-colors"
-              >
-                <img
-                  alt={`Preview of ${preview.name}`}
-                  class="h-40 w-full object-cover"
-                  src={preview.url}
-                />
-                <figcaption class="px-3 py-2 text-xs text-secondary">
-                  <span class="block truncate font-medium text-primary">{preview.name}</span>
-                  <span class="text-muted">{preview.size}</span>
-                </figcaption>
-              </figure>
-            {/each}
-          </div>
-        {/if}
-      </section>
-
-      <section
-        class="space-y-6 rounded-xl border border-subtle bg-surface-card transition-colors p-6"
-      >
-        <div class="space-y-2">
           <h2 class="text-xl font-semibold text-primary">Listing overview</h2>
           <p class="text-sm text-muted">
             These details describe how your listing appears in the feed.
@@ -284,6 +234,56 @@
             {/if}
           </div>
         </div>
+      </section>
+
+      <section
+        class="space-y-6 rounded-xl border border-subtle bg-surface-card transition-colors p-6"
+      >
+        <div class="space-y-2">
+          <h2 class="text-xl font-semibold text-primary">Photos</h2>
+          <p class="text-sm text-muted">
+            Upload up to 6 images (PNG, JPG, WEBP, 5MB maximum each).
+          </p>
+        </div>
+
+        <div class="space-y-3">
+          <label class="block text-sm font-medium text-secondary" for="photos">Upload photos</label>
+          <input
+            class="w-full cursor-pointer rounded-lg border border-dashed border-subtle bg-surface-body transition-colors px-3 py-8 text-sm text-secondary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+            id="photos"
+            name="photos"
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            multiple
+            onchange={handlePhotoChange}
+          />
+          {#if fieldErrors.photos}
+            <p class="text-sm text-rose-300">{fieldErrors.photos}</p>
+          {/if}
+          <p class="text-xs text-muted">
+            You'll need to reselect images if the form submission fails.
+          </p>
+        </div>
+
+        {#if photoPreviews.length > 0}
+          <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {#each photoPreviews as preview (preview.url)}
+              <figure
+                class="overflow-hidden rounded-lg border border-subtle bg-surface-card transition-colors"
+              >
+                <img
+                  alt={`Preview of ${preview.name}`}
+                  class="h-40 w-full object-cover"
+                  src={preview.url}
+                />
+                <figcaption class="px-3 py-2 text-xs text-secondary">
+                  <span class="block truncate font-medium text-primary">{preview.name}</span>
+                  <span class="text-muted">{preview.size}</span>
+                </figcaption>
+              </figure>
+            {/each}
+          </div>
+        {/if}
       </section>
 
       <div class="space-y-6">
