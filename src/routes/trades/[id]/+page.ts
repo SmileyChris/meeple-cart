@@ -1,14 +1,15 @@
 import { error, redirect } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
+import { redirectToLogin } from '$lib/utils/auth-redirect';
 import type { TradeRecord } from '$lib/types/pocketbase';
 import { pb, currentUser } from '$lib/pocketbase';
 import { get } from 'svelte/store';
 
-export const load: PageLoad = async ({ params }) => {
+export const load: PageLoad = async ({ params, url }) => {
   const user = get(currentUser);
 
   if (!user) {
-    throw redirect(302, '/login');
+    redirectToLogin(url.pathname);
   }
 
   const { id } = params;

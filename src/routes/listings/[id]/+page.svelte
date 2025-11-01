@@ -60,6 +60,21 @@
     }
   });
 
+  // Scroll to game if game ID is in URL
+  $effect(() => {
+    if (typeof window === 'undefined') return;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const gameId = urlParams.get('game');
+
+    if (gameId && games.length > 0) {
+      // Wait for the DOM to be ready
+      setTimeout(() => {
+        scrollToGame(gameId);
+      }, 100);
+    }
+  });
+
   const toCurrency = (value?: number | null) => {
     if (typeof value !== 'number' || Number.isNaN(value)) {
       return null;
@@ -434,9 +449,9 @@
                 </header>
 
                 <dl class="grid gap-3 text-sm sm:grid-cols-2">
-                  {#if game.price !== null}
+                  {#if listing.listing_type === 'sell' && game.price !== null}
                     <div>
-                      <dt class="text-muted">Price guide</dt>
+                      <dt class="text-muted">Price</dt>
                       <dd class="text-lg font-semibold">
                         {#if game.previousPrice !== null && game.previousPrice > game.price}
                           <span class="text-muted line-through">
@@ -454,7 +469,7 @@
                       </dd>
                     </div>
                   {/if}
-                  {#if game.tradeValue !== null}
+                  {#if listing.listing_type === 'trade' && game.tradeValue !== null}
                     <div>
                       <dt class="text-muted">Trade value</dt>
                       <dd class="text-lg font-semibold">
@@ -474,7 +489,17 @@
                       </dd>
                     </div>
                   {/if}
-                  {#if game.price === null && game.tradeValue === null}
+                  {#if listing.listing_type === 'want' && game.price !== null}
+                    <div>
+                      <dt class="text-muted">Max price</dt>
+                      <dd class="text-lg font-semibold">
+                        <span class="text-emerald-200">
+                          {toCurrency(game.price) ?? `${game.price.toFixed(2)} NZD`}
+                        </span>
+                      </dd>
+                    </div>
+                  {/if}
+                  {#if (listing.listing_type === 'sell' && game.price === null) || (listing.listing_type === 'trade' && game.tradeValue === null) || (listing.listing_type === 'want' && game.price === null)}
                     <div class="sm:col-span-2">
                       <dt class="text-muted">Negotiable</dt>
                       <dd class="text-sm text-secondary">Price to be discussed with the trader.</dd>

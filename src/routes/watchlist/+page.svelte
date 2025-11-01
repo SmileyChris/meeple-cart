@@ -69,8 +69,8 @@
           React to listings to add them to your watchlist and keep track of what interests you.
         </p>
         <!-- eslint-disable svelte/no-navigation-without-resolve -->
-        <a href="/browse" class="btn-primary mt-6 inline-block px-6 py-2 font-medium">
-          Browse listings
+        <a href="/games" class="btn-primary mt-6 inline-block px-6 py-2 font-medium">
+          Browse games
         </a>
         <!-- eslint-enable svelte/no-navigation-without-resolve -->
       </div>

@@ -186,7 +186,7 @@
         "CREATE INDEX idx_users_location ON users (location)"
       ],
       "listRule": "@request.auth.id != ''",
-      "viewRule": "id = @request.auth.id",
+      "viewRule": "",
       "createRule": "",
       "updateRule": "id = @request.auth.id",
       "deleteRule": "",
@@ -381,7 +381,7 @@
           "required": true,
           "unique": false,
           "options": {
-            "collectionId": "listings",
+            "collectionId": "w3c43ufqz9ejshk",
             "cascadeDelete": true,
             "minSelect": 1,
             "maxSelect": 1

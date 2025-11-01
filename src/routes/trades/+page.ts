@@ -1,5 +1,6 @@
-import { redirect } from '@sveltejs/kit';
+
 import type { PageLoad } from './$types';
+import { redirectToLogin } from '$lib/utils/auth-redirect';
 import type { TradeRecord } from '$lib/types/pocketbase';
 import { pb, currentUser } from '$lib/pocketbase';
 import { get } from 'svelte/store';
@@ -8,7 +9,7 @@ export const load: PageLoad = async ({ url }) => {
   const user = get(currentUser);
 
   if (!user) {
-    throw redirect(302, '/login');
+    redirectToLogin(url.pathname);
   }
 
   const filter = url.searchParams.get('filter') ?? 'active';

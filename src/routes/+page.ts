@@ -1,7 +1,10 @@
 import { PUBLIC_POCKETBASE_URL } from '$env/static/public';
 import type { PageLoad } from './$types';
-import type { ActivityItem, ListingActivity, SignupActivity } from '$lib/types/activity';
-import type { GameRecord, ListingRecord } from '$lib/types/listing';
+import type {
+  GameRecord,
+  ListingPreview,
+  ListingRecord,
+} from '$lib/types/listing';
 import type { UserRecord } from '$lib/types/pocketbase';
 import { normalizeListingType } from '$lib/types/listing';
 
@@ -14,16 +17,6 @@ type PocketBaseListResponse<T> = {
   totalPages: number;
   totalItems: number;
   items: T[];
-};
-
-type ExpandedGameRecord = GameRecord & {
-  expand?: {
-    listing?: ListingRecord & {
-      expand?: {
-        owner?: UserRecord;
-      };
-    };
-  };
 };
 
 const buildFileUrl = (
@@ -48,23 +41,22 @@ export const load: PageLoad = async ({ fetch, url }) => {
   const typeFilter = url.searchParams.get('type');
 
   // Build filter - always include active status
-  const filters = ['listing.status = "active"'];
+  const filters = ['status = "active"'];
   if (typeFilter && ['trade', 'sell', 'want'].includes(typeFilter)) {
-    filters.push(`listing.listing_type = "${typeFilter}"`);
+    filters.push(`listing_type = "${typeFilter}"`);
   }
 
   const activityParams = new URLSearchParams({
     page,
     perPage: String(ACTIVITY_LIMIT),
     sort: '-created',
-    expand: 'listing,listing.owner',
+    expand: 'owner,games(listing)',
     filter: filters.join(' && '),
   });
 
   try {
-    // Fetch listing activities
     const response = await fetch(
-      `${baseUrl}/api/collections/games/records?${activityParams.toString()}`,
+      `${baseUrl}/api/collections/listings/records?${activityParams.toString()}`,
       {
         headers: {
           accept: 'application/json',
@@ -76,109 +68,47 @@ export const load: PageLoad = async ({ fetch, url }) => {
       throw new Error(`Failed to fetch activity: ${response.status} ${response.statusText}`);
     }
 
-    const result = (await response.json()) as PocketBaseListResponse<ExpandedGameRecord>;
+    const result = (await response.json()) as PocketBaseListResponse<ListingRecord>;
 
-    const listingActivities: ListingActivity[] = result.items
-      .filter((game) => {
-        return game.expand?.listing && game.expand.listing.status === 'active';
-      })
-      .map((game) => {
-        const listing = game.expand!.listing!;
-        const owner = listing.expand?.owner;
-        const bggId = typeof game.bgg_id === 'number' ? game.bgg_id : null;
+    const listings: ListingPreview[] = result.items.map((item) => {
+      const owner = item.expand?.owner as UserRecord | undefined;
+      const games = Array.isArray(item.expand?.['games(listing)'])
+        ? (item.expand?.['games(listing)'] as GameRecord[]).map((game) => {
+            const bggId = typeof game.bgg_id === 'number' ? game.bgg_id : null;
+            return {
+              id: game.id,
+              title: game.title,
+              condition: game.condition,
+              status: game.status,
+              bggId,
+              bggUrl: bggId ? `https://boardgamegeek.com/boardgame/${bggId}` : null,
+              price: typeof game.price === 'number' ? game.price : null,
+              tradeValue: typeof game.trade_value === 'number' ? game.trade_value : null,
+            };
+          })
+        : [];
+      const coverImage =
+        Array.isArray(item.photos) && item.photos.length > 0
+          ? buildFileUrl(baseUrl, item, item.photos[0], '800x600')
+          : null;
 
-        const thumbnail =
-          Array.isArray(listing.photos) && listing.photos.length > 0
-            ? buildFileUrl(baseUrl, listing, listing.photos[0], '800x600')
-            : null;
-
-        return {
-          id: game.id,
-          activityType: 'listing' as const,
-          type: normalizeListingType(String(listing.listing_type)),
-          gameTitle: game.title,
-          bggId,
-          condition: game.condition,
-          price: typeof game.price === 'number' ? game.price : null,
-          tradeValue: typeof game.trade_value === 'number' ? game.trade_value : null,
-          timestamp: game.created,
-          userName: owner?.display_name ?? null,
-          userLocation: listing.location ?? null,
-          listingHref: `/listings/${listing.id}`,
-          thumbnail,
-        };
-      });
-
-    // Fetch recent signups (today and yesterday only)
-    const now = new Date();
-    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const yesterdayStart = new Date(todayStart);
-    yesterdayStart.setDate(yesterdayStart.getDate() - 1);
-
-    const signupParams = new URLSearchParams({
-      perPage: '200',
-      sort: '-created',
-      filter: `created >= "${yesterdayStart.toISOString()}"`,
+      return {
+        id: item.id,
+        title: item.title,
+        listingType: normalizeListingType(String(item.listing_type)),
+        summary: item.summary ?? '',
+        location: item.location ?? null,
+        created: item.created,
+        ownerName: owner?.display_name ?? null,
+        ownerId: owner?.id ?? null,
+        coverImage,
+        href: `/listings/${item.id}`,
+        games,
+      };
     });
 
-    const signupResponse = await fetch(
-      `${baseUrl}/api/collections/users/records?${signupParams.toString()}`,
-      {
-        headers: {
-          accept: 'application/json',
-        },
-      }
-    );
-
-    const signupActivities: SignupActivity[] = [];
-
-    if (signupResponse.ok) {
-      const signupResult = (await signupResponse.json()) as PocketBaseListResponse<UserRecord>;
-
-      // Group signups by today/yesterday
-      const todaySignups: UserRecord[] = [];
-      const yesterdaySignups: UserRecord[] = [];
-
-      signupResult.items.forEach((user) => {
-        const created = new Date(user.created);
-        if (created >= todayStart) {
-          todaySignups.push(user);
-        } else {
-          yesterdaySignups.push(user);
-        }
-      });
-
-      // Create signup activities
-      if (todaySignups.length > 0) {
-        signupActivities.push({
-          id: `signup-today`,
-          activityType: 'signup',
-          count: todaySignups.length,
-          userNames: todaySignups.map((u) => u.display_name),
-          timestamp: todaySignups[0].created,
-          timePeriod: 'today',
-        });
-      }
-
-      if (yesterdaySignups.length > 0) {
-        signupActivities.push({
-          id: `signup-yesterday`,
-          activityType: 'signup',
-          count: yesterdaySignups.length,
-          userNames: yesterdaySignups.map((u) => u.display_name),
-          timestamp: yesterdaySignups[0].created,
-          timePeriod: 'yesterday',
-        });
-      }
-    }
-
-    // Merge and sort all activities by timestamp
-    const allActivities: ActivityItem[] = [...listingActivities, ...signupActivities].sort(
-      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-    );
-
     return {
-      activities: allActivities,
+      listings,
       loadError: false as const,
       currentPage: result.page,
       totalPages: result.totalPages,
@@ -189,7 +119,7 @@ export const load: PageLoad = async ({ fetch, url }) => {
     console.error('Failed to load activity', error);
 
     return {
-      activities: [],
+      listings: [],
       loadError: true as const,
       currentPage: 1,
       totalPages: 1,

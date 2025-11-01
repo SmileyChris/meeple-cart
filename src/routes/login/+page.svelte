@@ -1,12 +1,16 @@
 <script lang="ts">
   import { currentUser } from '$lib/pocketbase';
   import { goto } from '$app/navigation';
+  import { page } from '$app/stores';
   import { onMount } from 'svelte';
 
   let email = '';
   let password = '';
   let error: string | null = null;
   let loading = false;
+
+  // Get the redirect destination from URL parameter
+  let nextUrl = $derived($page.url.searchParams.get('next') || '/profile');
 
   // Backup redirect check in case loader didn't catch it
   onMount(() => {
@@ -15,7 +19,7 @@
       try {
         const parsed = JSON.parse(authData);
         if (parsed.token) {
-          goto('/profile', { replaceState: true });
+          goto(nextUrl, { replaceState: true });
         }
       } catch (e) {
         // Invalid auth data, stay on page
@@ -35,7 +39,7 @@
     loading = true;
     try {
       await currentUser.login(email, password);
-      goto('/profile');
+      goto(nextUrl);
     } catch (err) {
       console.error('Login failed', err);
       error = "We couldn't find that account. Double-check your credentials.";

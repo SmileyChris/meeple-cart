@@ -12,6 +12,8 @@ export interface ListingActivity {
   type: ListingType;
   /** Game title */
   gameTitle: string;
+  /** Optional listing title (for context when showing games) */
+  listingTitle?: string;
   /** Optional BoardGameGeek ID */
   bggId: number | null;
   /** Game condition */

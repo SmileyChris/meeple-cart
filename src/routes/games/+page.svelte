@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { PageData } from './$types';
-  import ListingCard from '$lib/components/ListingCard.svelte';
+  import GameCard from '$lib/components/GameCard.svelte';
   import {
     NZ_REGIONS,
     NORTH_ISLAND_REGIONS,
@@ -71,7 +71,7 @@
   }
 
   function clearFilters() {
-    window.location.href = '/browse';
+    window.location.href = '/games';
   }
 
   function removeFilter(filterType: string, value?: string) {
@@ -95,7 +95,7 @@
     }
 
     const query = params.toString();
-    window.location.href = query ? `/browse?${query}` : '/browse';
+    window.location.href = query ? `/games?${query}` : '/games';
   }
 
   const buildPageLink = (pageNumber: number): string => {
@@ -144,7 +144,7 @@
 </script>
 
 <svelte:head>
-  <title>Browse Games · Meeple Cart</title>
+  <title>Games · Meeple Cart</title>
   <meta
     name="description"
     content="Browse active board game listings from Meeple Cart members across New Zealand. Filter by region, condition, price, and more."
@@ -156,7 +156,7 @@
   <section class="px-6 pt-16 text-primary sm:px-8">
     <div class="mx-auto max-w-5xl space-y-6">
       <div class="space-y-4">
-        <h1 class="text-4xl font-semibold tracking-tight sm:text-5xl">Browse Games</h1>
+        <h1 class="text-4xl font-semibold tracking-tight sm:text-5xl">Games</h1>
         <p class="max-w-2xl text-base text-secondary sm:text-lg">
           Search and filter through active listings from Meeple Cart members across New Zealand.
         </p>
@@ -491,22 +491,21 @@
 
       <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 class="text-2xl font-semibold text-primary">Active listings</h2>
+          <h2 class="text-2xl font-semibold text-primary">Available games</h2>
           <p class="text-sm text-muted">
-            {data.pagination.totalItems}
-            {data.pagination.totalItems === 1 ? 'result' : 'results'}
+            {data.activities.length}
+            {data.activities.length === 1 ? 'game' : 'games'}
           </p>
         </div>
         <p class="text-sm text-muted">
-          Whether you are trading, selling, or looking for a wanted post, use the filters to narrow
-          the feed.
+          Browse individual games from all listings. Use filters to narrow your search.
         </p>
       </div>
 
-      {#if data.listings.length > 0}
+      {#if data.activities.length > 0}
         <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {#each data.listings as listing (listing.id)}
-            <ListingCard {listing} />
+          {#each data.activities as game (game.id)}
+            <GameCard {game} />
           {/each}
         </div>
       {:else}
@@ -515,11 +514,11 @@
         >
           {#if data.loadError}
             <p>
-              We couldn't reach the listings service. Try refreshing once PocketBase is running.
+              We couldn't reach the games service. Try refreshing once PocketBase is running.
             </p>
           {:else}
             <p>
-              No active listings match your filters yet. Check back soon or create the first one.
+              No games match your filters yet. Check back soon or create the first listing.
             </p>
           {/if}
         </div>

@@ -201,12 +201,12 @@
               </a>
 
               <a
-                href="/browse"
+                href="/games"
                 class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition whitespace-nowrap {currentPath ===
-                '/browse'
+                '/games'
                   ? 'text-secondary'
                   : 'text-muted hover:text-secondary'}"
-                style={currentPath === '/browse'
+                style={currentPath === '/games'
                   ? 'background-color: var(--accent-soft); color: var(--accent-strong)'
                   : ''}
               >
@@ -218,7 +218,7 @@
                     d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
                   />
                 </svg>
-                Browse Games
+                Games
               </a>
 
               <a
