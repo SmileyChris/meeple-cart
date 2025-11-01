@@ -89,47 +89,25 @@
 
       {#if listing.games.length > 0}
         <div class="space-y-2">
-          <h4 class="text-xs font-semibold uppercase tracking-wide text-muted">Games included</h4>
-          <ul class="space-y-2">
-            {#each listing.games as game (game.id)}
-              <li
-                class="flex items-start justify-between gap-3 rounded-lg border border-subtle bg-surface-card-alt p-3 transition-colors"
+          <h4 class="text-xs font-semibold uppercase tracking-wide text-muted">
+            {listing.games.length} {listing.games.length === 1 ? 'game' : 'games'} included
+          </h4>
+          <div class="flex flex-wrap gap-2">
+            {#each listing.games.slice(0, 3) as game (game.id)}
+              <span
+                class="rounded-full border border-subtle bg-surface-card-alt px-3 py-1 text-xs font-medium text-primary transition-colors"
               >
-                <div class="space-y-1">
-                  <div class="flex flex-wrap items-center gap-2">
-                    <span class="font-medium text-primary">{game.title}</span>
-                    {#if game.bggUrl}
-                      <a
-                        class="text-xs font-medium text-[var(--accent)] transition hover:text-[var(--accent-strong)]"
-                        href={game.bggUrl}
-                        target="_blank"
-                        rel="external noopener"
-                        onclick={(e) => e.stopPropagation()}
-                      >
-                        BGG
-                      </a>
-                    {/if}
-                  </div>
-                  <div class="text-xs text-muted">
-                    {conditionLabels[game.condition]} · {statusLabels[game.status]}
-                  </div>
-                </div>
-                <div class="text-right text-xs font-semibold">
-                  {#if game.price !== null}
-                    <span class="text-[var(--accent)]">
-                      {currencyFormatter.format(game.price)}
-                    </span>
-                  {:else if game.tradeValue !== null}
-                    <span class="text-[var(--accent)]">
-                      {currencyFormatter.format(game.tradeValue)} value
-                    </span>
-                  {:else}
-                    <span class="uppercase text-muted">{statusLabels[game.status]}</span>
-                  {/if}
-                </div>
-              </li>
+                {game.title}
+              </span>
             {/each}
-          </ul>
+            {#if listing.games.length > 3}
+              <span
+                class="rounded-full border border-dashed border-subtle bg-surface-card-alt px-3 py-1 text-xs font-medium text-muted transition-colors"
+              >
+                +{listing.games.length - 3} more
+              </span>
+            {/if}
+          </div>
         </div>
       {/if}
 
