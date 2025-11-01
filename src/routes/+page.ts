@@ -1,17 +1,10 @@
 import { PUBLIC_POCKETBASE_URL } from '$env/static/public';
 import type { PageLoad } from './$types';
-import type {
-  GameRecord,
-  ListingFilters,
-  ListingPreview,
-  ListingRecord,
-  ListingType,
-} from '$lib/types/listing';
-import { LISTING_TYPES, normalizeListingType } from '$lib/types/listing';
+import type { ActivityItem, ListingActivity, SignupActivity } from '$lib/types/activity';
+import type { GameRecord, ListingRecord } from '$lib/types/listing';
 import type { UserRecord } from '$lib/types/pocketbase';
-import type { ActivityItem } from '$lib/types/activity';
+import { normalizeListingType } from '$lib/types/listing';
 
-const PAGE_LIMIT = 24;
 const ACTIVITY_LIMIT = 50;
 const FALLBACK_BASE_URL = 'http://127.0.0.1:8090';
 
@@ -23,8 +16,14 @@ type PocketBaseListResponse<T> = {
   items: T[];
 };
 
-const sanitizeForFilter = (value: string): string => {
-  return value.replace(/"/g, '\\"').replace(/\n/g, ' ').trim();
+type ExpandedGameRecord = GameRecord & {
+  expand?: {
+    listing?: ListingRecord & {
+      expand?: {
+        owner?: UserRecord;
+      };
+    };
+  };
 };
 
 const buildFileUrl = (
@@ -40,30 +39,31 @@ const buildFileUrl = (
   return thumb ? `${fileUrl}?thumb=${encodeURIComponent(thumb)}` : fileUrl;
 };
 
-type ExpandedGameRecord = GameRecord & {
-  expand?: {
-    listing?: ListingRecord & {
-      expand?: {
-        owner?: UserRecord;
-      };
-    };
-  };
-};
+export const prerender = false;
 
-const fetchActivityData = async (
-  baseUrl: string,
-  fetchFn: typeof fetch
-): Promise<ActivityItem[]> => {
+export const load: PageLoad = async ({ fetch, url }) => {
+  const baseUrl = (PUBLIC_POCKETBASE_URL || FALLBACK_BASE_URL).replace(/\/$/, '');
+
+  const page = url.searchParams.get('page') || '1';
+  const typeFilter = url.searchParams.get('type');
+
+  // Build filter - always include active status
+  const filters = ['listing.status = "active"'];
+  if (typeFilter && ['trade', 'sell', 'want'].includes(typeFilter)) {
+    filters.push(`listing.listing_type = "${typeFilter}"`);
+  }
+
   const activityParams = new URLSearchParams({
-    page: '1',
+    page,
     perPage: String(ACTIVITY_LIMIT),
     sort: '-created',
     expand: 'listing,listing.owner',
-    filter: 'listing.status = "active"',
+    filter: filters.join(' && '),
   });
 
   try {
-    const response = await fetchFn(
+    // Fetch listing activities
+    const response = await fetch(
       `${baseUrl}/api/collections/games/records?${activityParams.toString()}`,
       {
         headers: {
@@ -78,9 +78,8 @@ const fetchActivityData = async (
 
     const result = (await response.json()) as PocketBaseListResponse<ExpandedGameRecord>;
 
-    return result.items
+    const listingActivities: ListingActivity[] = result.items
       .filter((game) => {
-        // Ensure we have the expanded listing data
         return game.expand?.listing && game.expand.listing.status === 'active';
       })
       .map((game) => {
@@ -88,14 +87,14 @@ const fetchActivityData = async (
         const owner = listing.expand?.owner;
         const bggId = typeof game.bgg_id === 'number' ? game.bgg_id : null;
 
-        // Get thumbnail from listing photos
         const thumbnail =
           Array.isArray(listing.photos) && listing.photos.length > 0
-            ? buildFileUrl(baseUrl, listing, listing.photos[0], '100x100')
+            ? buildFileUrl(baseUrl, listing, listing.photos[0], '800x600')
             : null;
 
         return {
           id: game.id,
+          activityType: 'listing' as const,
           type: normalizeListingType(String(listing.listing_type)),
           gameTitle: game.title,
           bggId,
@@ -109,179 +108,93 @@ const fetchActivityData = async (
           thumbnail,
         };
       });
-  } catch (error) {
-    console.error('Failed to load activity', error);
-    return [];
-  }
-};
 
-export const prerender = false;
+    // Fetch recent signups (today and yesterday only)
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterdayStart = new Date(todayStart);
+    yesterdayStart.setDate(yesterdayStart.getDate() - 1);
 
-export const load: PageLoad = async ({ fetch, url }) => {
-  const pageParam = Number.parseInt(url.searchParams.get('page') ?? '1', 10);
-  const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
+    const signupParams = new URLSearchParams({
+      perPage: '200',
+      sort: '-created',
+      filter: `created >= "${yesterdayStart.toISOString()}"`,
+    });
 
-  const rawType = (url.searchParams.get('type') ?? '').toLowerCase();
-  let type: ListingType | '' = '';
-
-  if (rawType === 'bundle') {
-    type = 'sell';
-  } else if (LISTING_TYPES.includes(rawType as ListingType)) {
-    type = rawType as ListingType;
-  }
-
-  const locationParam = url.searchParams.get('location')?.trim() ?? '';
-  const location = locationParam.slice(0, 120);
-
-  const searchParam = url.searchParams.get('search')?.trim() ?? '';
-  const search = searchParam.slice(0, 200);
-
-  const conditionParam = url.searchParams.get('condition')?.trim() ?? '';
-  const condition = ['mint', 'excellent', 'good', 'fair', 'poor'].includes(conditionParam)
-    ? conditionParam
-    : '';
-
-  const minPriceParam = url.searchParams.get('minPrice')?.trim() ?? '';
-  const maxPriceParam = url.searchParams.get('maxPrice')?.trim() ?? '';
-  const minPrice = minPriceParam;
-  const maxPrice = maxPriceParam;
-
-  const filters: string[] = ['status = "active"'];
-
-  if (type) {
-    filters.push(`listing_type = "${type}"`);
-  }
-
-  if (location) {
-    filters.push(`location ~ "${sanitizeForFilter(location)}"`);
-  }
-
-  // Search in game titles via relation
-  if (search) {
-    filters.push(`games_via_listing.title ~ "${sanitizeForFilter(search)}"`);
-  }
-
-  // Filter by game condition via relation
-  if (condition) {
-    filters.push(`games_via_listing.condition = "${condition}"`);
-  }
-
-  // Filter by price range via relation
-  if (minPrice) {
-    const minVal = parseFloat(minPrice);
-    if (!isNaN(minVal) && minVal >= 0) {
-      filters.push(`games_via_listing.price >= ${minVal}`);
-    }
-  }
-
-  if (maxPrice) {
-    const maxVal = parseFloat(maxPrice);
-    if (!isNaN(maxVal) && maxVal >= 0) {
-      filters.push(`games_via_listing.price <= ${maxVal}`);
-    }
-  }
-
-  const filtersState: ListingFilters = {
-    type,
-    location,
-    search: search || undefined,
-    condition: condition || undefined,
-    minPrice: minPrice || undefined,
-    maxPrice: maxPrice || undefined,
-  };
-
-  const baseUrl = (PUBLIC_POCKETBASE_URL || FALLBACK_BASE_URL).replace(/\/$/, '');
-  const searchParams = new URLSearchParams({
-    page: String(page),
-    perPage: String(PAGE_LIMIT),
-    sort: '-created',
-    expand: 'owner,games(listing)',
-  });
-
-  if (filters.length > 0) {
-    searchParams.set('filter', filters.join(' && '));
-  }
-
-  try {
-    // Fetch both listings and activity in parallel
-    const [listingsResponse, activities] = await Promise.all([
-      fetch(`${baseUrl}/api/collections/listings/records?${searchParams.toString()}`, {
+    const signupResponse = await fetch(
+      `${baseUrl}/api/collections/users/records?${signupParams.toString()}`,
+      {
         headers: {
           accept: 'application/json',
         },
-      }),
-      fetchActivityData(baseUrl, fetch),
-    ]);
+      }
+    );
 
-    if (!listingsResponse.ok) {
-      throw new Error(
-        `Failed to fetch listings: ${listingsResponse.status} ${listingsResponse.statusText}`
-      );
+    const signupActivities: SignupActivity[] = [];
+
+    if (signupResponse.ok) {
+      const signupResult = (await signupResponse.json()) as PocketBaseListResponse<UserRecord>;
+
+      // Group signups by today/yesterday
+      const todaySignups: UserRecord[] = [];
+      const yesterdaySignups: UserRecord[] = [];
+
+      signupResult.items.forEach((user) => {
+        const created = new Date(user.created);
+        if (created >= todayStart) {
+          todaySignups.push(user);
+        } else {
+          yesterdaySignups.push(user);
+        }
+      });
+
+      // Create signup activities
+      if (todaySignups.length > 0) {
+        signupActivities.push({
+          id: `signup-today`,
+          activityType: 'signup',
+          count: todaySignups.length,
+          userNames: todaySignups.map((u) => u.display_name),
+          timestamp: todaySignups[0].created,
+          timePeriod: 'today',
+        });
+      }
+
+      if (yesterdaySignups.length > 0) {
+        signupActivities.push({
+          id: `signup-yesterday`,
+          activityType: 'signup',
+          count: yesterdaySignups.length,
+          userNames: yesterdaySignups.map((u) => u.display_name),
+          timestamp: yesterdaySignups[0].created,
+          timePeriod: 'yesterday',
+        });
+      }
     }
 
-    const result = (await listingsResponse.json()) as PocketBaseListResponse<ListingRecord>;
-
-    const listings: ListingPreview[] = result.items.map((item) => {
-      const owner = item.expand?.owner as UserRecord | undefined;
-      const games = Array.isArray(item.expand?.['games(listing)'])
-        ? (item.expand?.['games(listing)'] as GameRecord[]).map((game) => {
-            const bggId = typeof game.bgg_id === 'number' ? game.bgg_id : null;
-            return {
-              id: game.id,
-              title: game.title,
-              condition: game.condition,
-              status: game.status,
-              bggId,
-              bggUrl: bggId ? `https://boardgamegeek.com/boardgame/${bggId}` : null,
-              price: typeof game.price === 'number' ? game.price : null,
-              tradeValue: typeof game.trade_value === 'number' ? game.trade_value : null,
-            };
-          })
-        : [];
-      const coverImage =
-        Array.isArray(item.photos) && item.photos.length > 0
-          ? buildFileUrl(baseUrl, item, item.photos[0], '800x600')
-          : null;
-
-      return {
-        id: item.id,
-        title: item.title,
-        listingType: normalizeListingType(String(item.listing_type)),
-        summary: item.summary ?? '',
-        location: item.location ?? null,
-        created: item.created,
-        ownerName: owner?.display_name ?? null,
-        ownerId: owner?.id ?? null,
-        coverImage,
-        href: `/listings/${item.id}`,
-        games,
-      };
-    });
+    // Merge and sort all activities by timestamp
+    const allActivities: ActivityItem[] = [...listingActivities, ...signupActivities].sort(
+      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
 
     return {
-      listings,
-      activities,
-      filters: filtersState,
-      pagination: {
-        page: result.page,
-        totalPages: result.totalPages,
-        totalItems: result.totalItems,
-      },
+      activities: allActivities,
       loadError: false as const,
+      currentPage: result.page,
+      totalPages: result.totalPages,
+      hasMore: result.page < result.totalPages,
+      currentFilter: typeFilter || null,
     };
   } catch (error) {
-    console.error('Failed to load listings', error);
+    console.error('Failed to load activity', error);
 
     return {
-      listings: [],
       activities: [],
-      filters: filtersState,
-      pagination: {
-        page: 1,
-        totalPages: 1,
-        totalItems: 0,
-      },
       loadError: true as const,
+      currentPage: 1,
+      totalPages: 1,
+      hasMore: false,
+      currentFilter: null,
     };
   }
 };

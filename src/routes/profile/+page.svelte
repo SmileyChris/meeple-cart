@@ -2,6 +2,11 @@
   import type { PageData } from './$types';
   import { pb, currentUser } from '$lib/pocketbase';
   import { invalidate } from '$app/navigation';
+  import {
+    NORTH_ISLAND_REGIONS,
+    SOUTH_ISLAND_REGIONS,
+    getIslandRegions,
+  } from '$lib/constants/regions';
 
   let { data }: { data: PageData } = $props();
 
@@ -16,6 +21,37 @@
   let location = $state(profile.location || '');
   let bio = $state(profile.bio || '');
   let preferredContact = $state(profile.preferred_contact);
+  let preferredRegions = $state<string[]>(profile.preferred_regions || []);
+
+  // Island selection logic
+  let northIslandChecked = $derived(
+    NORTH_ISLAND_REGIONS.every((r) => preferredRegions.includes(r.value))
+  );
+  let southIslandChecked = $derived(
+    SOUTH_ISLAND_REGIONS.every((r) => preferredRegions.includes(r.value))
+  );
+
+  function toggleIsland(island: 'north_island' | 'south_island') {
+    const islandRegionValues = getIslandRegions(island);
+    const allSelected = island === 'north_island' ? northIslandChecked : southIslandChecked;
+
+    if (allSelected) {
+      // Deselect all regions in this island
+      preferredRegions = preferredRegions.filter((r) => !islandRegionValues.includes(r));
+    } else {
+      // Select all regions in this island
+      const newRegions = islandRegionValues.filter((r) => !preferredRegions.includes(r));
+      preferredRegions = [...preferredRegions, ...newRegions];
+    }
+  }
+
+  function toggleRegion(regionValue: string) {
+    if (preferredRegions.includes(regionValue)) {
+      preferredRegions = preferredRegions.filter((r) => r !== regionValue);
+    } else {
+      preferredRegions = [...preferredRegions, regionValue];
+    }
+  }
 
   async function handleUpdate(e: Event) {
     e.preventDefault();
@@ -34,6 +70,7 @@
         location: location.trim() || null,
         bio: bio.trim() || null,
         preferred_contact: preferredContact,
+        preferred_regions: preferredRegions.length > 0 ? preferredRegions : null,
       });
 
       // Update the store
@@ -146,7 +183,7 @@
     {/if}
   </section>
 
-  <form class="mt-6 grid gap-4 sm:grid-cols-2" on:submit={handleUpdate}>
+  <form class="mt-6 grid gap-4 sm:grid-cols-2" onsubmit={handleUpdate}>
     <div class="sm:col-span-2">
       <label class="block text-sm font-medium text-secondary" for="display_name">Display name</label
       >
@@ -205,6 +242,70 @@
         disabled={saving}
       ></textarea>
       <p class="mt-1 text-xs text-muted">Share a short intro or trading preferences.</p>
+    </div>
+
+    <div class="sm:col-span-2">
+      <label class="block text-sm font-medium text-secondary">Preferred regions</label>
+      <p class="mt-1 text-xs text-muted">
+        Select your favorite regions to automatically filter listings when you visit the browse page.
+      </p>
+      <div class="mt-3 space-y-4">
+        <!-- North Island -->
+        <div class="space-y-2">
+          <label class="flex items-center gap-2 text-sm font-medium text-primary">
+            <input
+              type="checkbox"
+              class="h-4 w-4 rounded border border-subtle bg-surface-card transition-colors"
+              checked={northIslandChecked}
+              disabled={saving}
+              onchange={() => toggleIsland('north_island')}
+            />
+            North Island
+          </label>
+          <div class="ml-6 grid gap-2 sm:grid-cols-2">
+            {#each NORTH_ISLAND_REGIONS as region (region.value)}
+              <label class="flex items-center gap-2 text-sm text-secondary">
+                <input
+                  type="checkbox"
+                  class="h-4 w-4 rounded border border-subtle bg-surface-card transition-colors"
+                  checked={preferredRegions.includes(region.value)}
+                  disabled={saving}
+                  onchange={() => toggleRegion(region.value)}
+                />
+                {region.label}
+              </label>
+            {/each}
+          </div>
+        </div>
+
+        <!-- South Island -->
+        <div class="space-y-2">
+          <label class="flex items-center gap-2 text-sm font-medium text-primary">
+            <input
+              type="checkbox"
+              class="h-4 w-4 rounded border border-subtle bg-surface-card transition-colors"
+              checked={southIslandChecked}
+              disabled={saving}
+              onchange={() => toggleIsland('south_island')}
+            />
+            South Island
+          </label>
+          <div class="ml-6 grid gap-2 sm:grid-cols-2">
+            {#each SOUTH_ISLAND_REGIONS as region (region.value)}
+              <label class="flex items-center gap-2 text-sm text-secondary">
+                <input
+                  type="checkbox"
+                  class="h-4 w-4 rounded border border-subtle bg-surface-card transition-colors"
+                  checked={preferredRegions.includes(region.value)}
+                  disabled={saving}
+                  onchange={() => toggleRegion(region.value)}
+                />
+                {region.label}
+              </label>
+            {/each}
+          </div>
+        </div>
+      </div>
     </div>
 
     {#if error}

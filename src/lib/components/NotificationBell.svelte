@@ -1,12 +1,17 @@
 <script lang="ts">
-  let { unreadCount = 0, href = '/notifications' }: { unreadCount?: number; href?: string } =
-    $props();
+  let {
+    unreadCount = 0,
+    href = '/notifications',
+    currentPath = '',
+  }: { unreadCount?: number; href?: string; currentPath?: string } = $props();
+
+  let isActive = $derived(currentPath.startsWith('/notifications'));
 </script>
 
 <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 <a
   {href}
-  class="btn-ghost relative"
+  class="btn-ghost relative {isActive ? 'bg-[color:var(--accent-soft)] text-[color:var(--accent-strong)]' : ''}"
   aria-label={unreadCount > 0 ? `${unreadCount} unread notifications` : 'Notifications'}
 >
   <span class="flex items-center gap-2">

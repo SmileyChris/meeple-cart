@@ -109,7 +109,7 @@
       </div>
     {:else}
       <!-- Form -->
-      <form on:submit={handleSubmit} class="space-y-6">
+      <form onsubmit={handleSubmit} class="space-y-6">
         <!-- Error Message -->
         {#if error}
           <div class="rounded-lg border border-rose-500 bg-rose-500/10 p-4 text-rose-200">

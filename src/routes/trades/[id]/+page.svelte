@@ -355,7 +355,7 @@
       <div class="flex flex-wrap gap-3">
         {#if isSeller && trade.status === 'initiated'}
           <button
-            on:click={handleMarkShipped}
+            onclick={handleMarkShipped}
             disabled={processing}
             class="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
           >
@@ -365,7 +365,7 @@
 
         {#if isBuyer && trade.status === 'confirmed'}
           <button
-            on:click={handleConfirmReceipt}
+            onclick={handleConfirmReceipt}
             disabled={processing}
             class="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
           >
@@ -375,7 +375,7 @@
 
         {#if trade.status === 'confirmed'}
           <button
-            on:click={handleCompleteTrade}
+            onclick={handleCompleteTrade}
             disabled={processing}
             class="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
           >
@@ -385,7 +385,7 @@
 
         {#if trade.status !== 'completed' && trade.status !== 'disputed'}
           <button
-            on:click={handleDisputeTrade}
+            onclick={handleDisputeTrade}
             disabled={processing}
             class="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
           >
@@ -435,14 +435,14 @@
             </p>
           </div>
           {#if !showFeedbackForm}
-            <button type="button" on:click={() => (showFeedbackForm = true)} class="btn-primary">
+            <button type="button" onclick={() => (showFeedbackForm = true)} class="btn-primary">
               Leave Feedback
             </button>
           {/if}
         </div>
 
         {#if showFeedbackForm}
-          <form on:submit={handleSubmitFeedback} class="space-y-4 border-t border-subtle pt-4">
+          <form onsubmit={handleSubmitFeedback} class="space-y-4 border-t border-subtle pt-4">
             <!-- Rating -->
             <div class="space-y-2">
               <label class="block text-sm font-medium text-secondary" for="rating"> Rating </label>
@@ -450,7 +450,7 @@
                 {#each [1, 2, 3, 4, 5] as star}
                   <button
                     type="button"
-                    on:click={() => (feedbackRating = star)}
+                    onclick={() => (feedbackRating = star)}
                     class={`h-12 w-12 rounded-lg border transition ${
                       feedbackRating >= star
                         ? 'border-amber-500 bg-amber-500/20 text-amber-300'
@@ -509,7 +509,7 @@
               </button>
               <button
                 type="button"
-                on:click={() => {
+                onclick={() => {
                   showFeedbackForm = false;
                   feedbackError = null;
                 }}
@@ -559,14 +559,14 @@
             </p>
           </div>
           {#if !showVouchForm}
-            <button type="button" on:click={() => (showVouchForm = true)} class="btn-primary">
+            <button type="button" onclick={() => (showVouchForm = true)} class="btn-primary">
               ✓ Vouch
             </button>
           {/if}
         </div>
 
         {#if showVouchForm}
-          <form on:submit={handleSubmitVouch} class="space-y-4 border-t border-subtle pt-4">
+          <form onsubmit={handleSubmitVouch} class="space-y-4 border-t border-subtle pt-4">
             <!-- Vouch Message -->
             <div class="space-y-2">
               <label class="block text-sm font-medium text-secondary" for="vouch-message">
@@ -600,7 +600,7 @@
               </button>
               <button
                 type="button"
-                on:click={() => {
+                onclick={() => {
                   showVouchForm = false;
                   vouchError = null;
                 }}

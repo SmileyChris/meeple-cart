@@ -10,21 +10,19 @@
   <meta name="description" content="Your message inbox for board game trades and conversations." />
 </svelte:head>
 
-<main class="min-h-screen bg-surface-body transition-colors">
-  <div class="mx-auto max-w-4xl">
+<main class="bg-surface-body px-6 py-12 text-primary transition-colors sm:px-8">
+  <div class="mx-auto max-w-5xl space-y-8">
     <!-- Header -->
-    <div class="border-b border-subtle bg-surface-panel transition-colors px-6 py-6 backdrop-blur">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="text-3xl font-bold text-primary">Messages</h1>
-          {#if data.unreadTotal > 0}
-            <p class="mt-1 text-sm text-muted">
-              {data.unreadTotal} unread {data.unreadTotal === 1 ? 'message' : 'messages'}
-            </p>
-          {/if}
-        </div>
-      </div>
-    </div>
+    <header>
+      <h1 class="text-3xl font-semibold tracking-tight text-primary">Messages</h1>
+      {#if data.unreadTotal > 0}
+        <p class="mt-2 text-sm text-muted">
+          {data.unreadTotal} unread {data.unreadTotal === 1 ? 'message' : 'messages'}
+        </p>
+      {:else}
+        <p class="mt-2 text-sm text-muted">Your message inbox for trades and conversations.</p>
+      {/if}
+    </header>
 
     <!-- Thread List -->
     <MessageThreadList threads={data.threads} />

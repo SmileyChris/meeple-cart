@@ -1,19 +1,23 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
-
   let {
     placeholder = 'Type a message...',
     disabled = false,
     maxLength = 4000,
-  }: { placeholder?: string; disabled?: boolean; maxLength?: number } = $props();
+    onsend,
+  }: {
+    placeholder?: string;
+    disabled?: boolean;
+    maxLength?: number;
+    onsend?: (event: CustomEvent<{ content: string }>) => void;
+  } = $props();
 
   let content = $state('');
-  const dispatch = createEventDispatcher<{ send: { content: string } }>();
 
-  function handleSubmit() {
+  function handleSubmit(event?: SubmitEvent) {
+    event?.preventDefault();
     const trimmed = content.trim();
     if (trimmed && trimmed.length <= maxLength) {
-      dispatch('send', { content: trimmed });
+      onsend?.(new CustomEvent('send', { detail: { content: trimmed } }));
       content = '';
     }
   }
@@ -29,11 +33,11 @@
   let isNearLimit = $derived(remainingChars < 100);
 </script>
 
-<form on:submit|preventDefault={handleSubmit} class="flex flex-col gap-2">
+<form onsubmit={handleSubmit} class="flex flex-col gap-2">
   <div class="relative">
     <textarea
       bind:value={content}
-      on:keydown={handleKeydown}
+      onkeydown={handleKeydown}
       {placeholder}
       {disabled}
       maxlength={maxLength}

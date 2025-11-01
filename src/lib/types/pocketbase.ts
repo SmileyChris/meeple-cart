@@ -10,6 +10,7 @@ export interface UserRecord extends RecordModel {
   bio?: string;
   preferred_contact: 'platform' | 'email' | 'phone';
   notification_prefs?: Record<string, unknown>;
+  preferred_regions?: string[]; // User's favorite regions for default filtering
   // Cascade stats
   cascades_seeded: number;
   cascades_received: number;

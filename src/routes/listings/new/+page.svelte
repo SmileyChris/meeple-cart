@@ -139,7 +139,7 @@
             type="file"
             accept="image/png,image/jpeg,image/webp"
             multiple
-            on:change={handlePhotoChange}
+            onchange={handlePhotoChange}
           />
           {#if fieldErrors.photos}
             <p class="text-sm text-rose-300">{fieldErrors.photos}</p>
@@ -295,7 +295,7 @@
           <button
             class="rounded-lg border border-emerald-500 px-4 py-2 text-sm font-medium text-emerald-300 transition hover:bg-emerald-500/10"
             type="button"
-            on:click={addGame}
+            onclick={addGame}
           >
             + Add game
           </button>
@@ -311,7 +311,7 @@
                 <button
                   class="text-sm text-rose-400 transition hover:text-rose-300"
                   type="button"
-                  on:click={() => removeGame(index)}
+                  onclick={() => removeGame(index)}
                 >
                   Remove
                 </button>

@@ -84,7 +84,7 @@
     <!-- Tabs -->
     <div class="flex gap-2 border-b border-subtle">
       <button
-        on:click={() => (activeTab = 'entered')}
+        onclick={() => (activeTab = 'entered')}
         class={`px-4 py-2 font-medium transition ${
           activeTab === 'entered'
             ? 'border-b-2 border-emerald-500 text-emerald-400'
@@ -94,7 +94,7 @@
         Entered ({enteredCascades.length})
       </button>
       <button
-        on:click={() => (activeTab = 'won')}
+        onclick={() => (activeTab = 'won')}
         class={`px-4 py-2 font-medium transition ${
           activeTab === 'won'
             ? 'border-b-2 border-emerald-500 text-emerald-400'
@@ -104,7 +104,7 @@
         Received ({wonCascades.length})
       </button>
       <button
-        on:click={() => (activeTab = 'started')}
+        onclick={() => (activeTab = 'started')}
         class={`px-4 py-2 font-medium transition ${
           activeTab === 'started'
             ? 'border-b-2 border-emerald-500 text-emerald-400'

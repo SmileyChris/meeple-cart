@@ -109,7 +109,7 @@ export interface OwnerListingSummary {
 }
 
 export interface ListingFilters {
-  location: string;
+  regions?: string[];
   type: ListingType | '';
   search?: string;
   condition?: string;

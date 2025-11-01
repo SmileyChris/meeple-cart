@@ -6,6 +6,10 @@
 
   let { activity }: { activity: ActivityItem } = $props();
 
+  // Type guard to check if activity is a signup
+  let isSignup = $derived(activity.activityType === 'signup');
+  let isListing = $derived(activity.activityType === 'listing');
+
   const typeLabels: Record<ListingType, string> = {
     trade: 'Trade',
     sell: 'Sell',
@@ -42,7 +46,7 @@
     poor: 'Well loved',
   };
 
-  let colors = $derived(typeColors[activity.type]);
+  let colors = $derived(isListing ? typeColors[activity.type] : null);
   let relativeTime = $derived(formatRelativeTime(activity.timestamp));
   let isNew = $derived(isVeryRecent(activity.timestamp));
 
@@ -54,12 +58,52 @@
   });
 
   let bggUrl = $derived(
-    activity.bggId ? `https://boardgamegeek.com/boardgame/${activity.bggId}` : null
+    isListing && activity.bggId ? `https://boardgamegeek.com/boardgame/${activity.bggId}` : null
   );
 </script>
 
-<!-- eslint-disable svelte/no-navigation-without-resolve -->
-<div class="relative flex gap-6 text-primary sm:gap-8">
+{#if isSignup}
+  <!-- Compact signup display -->
+  <div class="relative flex gap-6 text-primary sm:gap-8">
+    <!-- Timeline connector -->
+    <div class="relative flex flex-col items-center">
+      <!-- Dot -->
+      <div class="relative z-10 flex-shrink-0">
+        <div
+          class="h-4 w-4 rounded-full bg-slate-500 shadow-lg ring-4 ring-[color:var(--surface-body)]"
+        ></div>
+      </div>
+      <!-- Dotted line -->
+      <div class="mt-2 flex-1 border-l-2 border-dotted border-[color:var(--border-subtle)]"></div>
+    </div>
+
+    <!-- Signup content -->
+    <div class="mb-6 flex-1 pb-4">
+      <div
+        class="rounded-lg border border-subtle bg-surface-card px-4 py-3 text-sm transition-colors"
+      >
+        <div class="flex items-center gap-3">
+          <span class="text-2xl">👋</span>
+          <div class="flex-1">
+            <p class="font-medium text-secondary">
+              {activity.count}
+              {activity.count === 1 ? 'new member' : 'new members'} joined {activity.timePeriod}
+            </p>
+            <p class="mt-1 text-xs text-muted">
+              {activity.userNames.slice(0, 3).join(', ')}
+              {#if activity.count > 3}
+                and {activity.count - 3} more
+              {/if}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{:else}
+  <!-- Listing activity display -->
+  <!-- eslint-disable svelte/no-navigation-without-resolve -->
+  <div class="relative flex gap-6 text-primary sm:gap-8">
   <!-- Timeline connector -->
   <div class="relative flex flex-col items-center">
     <!-- Dot -->
@@ -219,4 +263,5 @@
     </div>
   </div>
 </div>
-<!-- eslint-enable svelte/no-navigation-without-resolve -->
+  <!-- eslint-enable svelte/no-navigation-without-resolve -->
+{/if}

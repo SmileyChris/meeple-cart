@@ -9,6 +9,17 @@
   let unreadNotifications = $state(0);
   let currentPath = $derived($page.url.pathname);
 
+  // Determine if we're in a profile-related section
+  let isProfileSection = $derived(
+    currentPath.startsWith('/profile') ||
+      currentPath.startsWith('/trades') ||
+      currentPath.startsWith('/watchlist') ||
+      currentPath.startsWith('/messages') ||
+      currentPath.startsWith('/notifications') ||
+      currentPath.startsWith('/logout') ||
+      currentPath.startsWith('/users/')
+  );
+
   // Fetch unread notifications count
   async function fetchUnreadCount() {
     if (!$currentUser) {
@@ -48,24 +59,21 @@
   >
     <div class="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
       <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-      <a class="text-lg font-semibold transition-colors hover:text-[var(--accent)]" href="/">
-        Meeple Cart
+      <a
+        class="flex items-center gap-3 transition-opacity hover:opacity-80"
+        href="/"
+      >
+        <img src="/logo.png" alt="Meeple Cart" class="h-8" />
+        <span class="text-lg font-semibold" style="font-family: var(--font-heading)">
+          Meeple Cart
+        </span>
       </a>
       <!-- eslint-disable svelte/no-navigation-without-resolve -->
       <nav class="flex items-center gap-3 text-sm">
-        <a class="btn-ghost" href="/activity"> Activity </a>
-        <a class="btn-ghost" href="/cascades"> 🎁 Gift Cascades </a>
         <ThemeToggle />
         {#if $currentUser}
-          <NotificationBell unreadCount={unreadNotifications} />
-          <a class="btn-ghost" href="/trades"> 🤝 My Trades </a>
-          <a class="btn-ghost" href="/watchlist"> ⭐ Watchlist </a>
-          <a class="btn-ghost" href="/messages"> 💬 Messages </a>
-          <a class="btn-ghost" href="/profile">
-            {$currentUser.display_name ?? 'Profile'}
-          </a>
+          <NotificationBell unreadCount={unreadNotifications} currentPath={currentPath} />
           <a class="btn-primary" href="/listings/new"> New listing </a>
-          <button class="btn-ghost" type="button" onclick={handleLogout}> Log out </button>
         {:else}
           <a class="btn-ghost" href="/login"> Log in </a>
           <a class="btn-primary" href="/register"> Create account </a>
@@ -75,99 +83,205 @@
     </div>
 
     <!-- Main Navigation Bar -->
-    <nav class="bg-slate-900/50 border-t border-slate-800">
+    <nav class="border-t transition-colors" style="background-color: var(--surface-nav); border-color: var(--border-nav)">
       <div class="mx-auto max-w-5xl px-4">
-        <div class="flex items-center gap-1 overflow-x-auto py-2">
-          <a
-            href="/"
-            class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition whitespace-nowrap {currentPath ===
-            '/'
-              ? 'bg-emerald-500/10 text-emerald-300'
-              : 'text-slate-300 hover:bg-slate-800/50 hover:text-slate-100'}"
-          >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            Activity Feed
-          </a>
+        <div class="flex items-center justify-between gap-1 overflow-x-auto py-2">
+          {#if isProfileSection}
+            <!-- Profile Section Navigation -->
+            <div class="flex items-center gap-1">
+              <a
+                href="/"
+                class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition whitespace-nowrap text-muted hover:text-secondary"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
+                Activity Feed
+              </a>
+            </div>
 
-          <a
-            href="/browse"
-            class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition whitespace-nowrap {currentPath ===
-            '/browse'
-              ? 'bg-emerald-500/10 text-emerald-300'
-              : 'text-slate-300 hover:bg-slate-800/50 hover:text-slate-100'}"
-          >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-              />
-            </svg>
-            Browse Games
-          </a>
+            <div class="flex items-center gap-1">
+              <a
+                href="/profile"
+                class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition whitespace-nowrap {currentPath.startsWith(
+                  '/profile'
+                )
+                  ? 'text-secondary'
+                  : 'text-muted hover:text-secondary'}"
+                style={currentPath.startsWith('/profile')
+                  ? 'background-color: var(--accent-soft); color: var(--accent-strong)'
+                  : ''}
+              >
+                Profile
+              </a>
 
-          <a
-            href="/wanted"
-            class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition whitespace-nowrap {currentPath ===
-            '/wanted'
-              ? 'bg-emerald-500/10 text-emerald-300'
-              : 'text-slate-300 hover:bg-slate-800/50 hover:text-slate-100'}"
-          >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
-            Wanted
-          </a>
+              <a
+                href="/trades"
+                class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition whitespace-nowrap {currentPath.startsWith(
+                  '/trades'
+                )
+                  ? 'text-secondary'
+                  : 'text-muted hover:text-secondary'}"
+                style={currentPath.startsWith('/trades')
+                  ? 'background-color: var(--accent-soft); color: var(--accent-strong)'
+                  : ''}
+              >
+                My Trades
+              </a>
 
-          {#if $currentUser}
-            <a
-              href="/my-listings"
-              class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition whitespace-nowrap {currentPath ===
-              '/my-listings'
-                ? 'bg-emerald-500/10 text-emerald-300'
-                : 'text-slate-300 hover:bg-slate-800/50 hover:text-slate-100'}"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                />
-              </svg>
-              My Listings
-            </a>
+              <a
+                href="/watchlist"
+                class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition whitespace-nowrap {currentPath.startsWith(
+                  '/watchlist'
+                )
+                  ? 'text-secondary'
+                  : 'text-muted hover:text-secondary'}"
+                style={currentPath.startsWith('/watchlist')
+                  ? 'background-color: var(--accent-soft); color: var(--accent-strong)'
+                  : ''}
+              >
+                Watchlist
+              </a>
 
-            <a
-              href="/watchlist"
-              class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition whitespace-nowrap {currentPath ===
-              '/watchlist'
-                ? 'bg-emerald-500/10 text-emerald-300'
-                : 'text-slate-300 hover:bg-slate-800/50 hover:text-slate-100'}"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
-                />
-              </svg>
-              Watchlist
-            </a>
+              <a
+                href="/messages"
+                class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition whitespace-nowrap {currentPath.startsWith(
+                  '/messages'
+                )
+                  ? 'text-secondary'
+                  : 'text-muted hover:text-secondary'}"
+                style={currentPath.startsWith('/messages')
+                  ? 'background-color: var(--accent-soft); color: var(--accent-strong)'
+                  : ''}
+              >
+                Messages
+              </a>
+
+              <a
+                href="/logout"
+                class="ml-2 flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition whitespace-nowrap {currentPath.startsWith(
+                  '/logout'
+                )
+                  ? 'text-secondary'
+                  : 'text-muted hover:text-secondary'}"
+                style={currentPath.startsWith('/logout')
+                  ? 'background-color: var(--accent-soft); color: var(--accent-strong)'
+                  : ''}
+              >
+                Log out
+              </a>
+            </div>
+          {:else}
+            <!-- Standard Navigation -->
+            <div class="flex items-center gap-1">
+              <a
+                href="/"
+                class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition whitespace-nowrap {currentPath ===
+                '/'
+                  ? 'text-secondary'
+                  : 'text-muted hover:text-secondary'}"
+                style={currentPath === '/'
+                  ? 'background-color: var(--accent-soft); color: var(--accent-strong)'
+                  : ''}
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                Activity Feed
+              </a>
+
+              <a
+                href="/browse"
+                class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition whitespace-nowrap {currentPath ===
+                '/browse'
+                  ? 'text-secondary'
+                  : 'text-muted hover:text-secondary'}"
+                style={currentPath === '/browse'
+                  ? 'background-color: var(--accent-soft); color: var(--accent-strong)'
+                  : ''}
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                  />
+                </svg>
+                Browse Games
+              </a>
+
+              <a
+                href="/cascades"
+                class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition whitespace-nowrap {currentPath.startsWith(
+                  '/cascades'
+                )
+                  ? 'text-secondary'
+                  : 'text-muted hover:text-secondary'}"
+                style={currentPath.startsWith('/cascades')
+                  ? 'background-color: var(--accent-soft); color: var(--accent-strong)'
+                  : ''}
+              >
+                🎁 Gift Cascades
+              </a>
+
+              <a
+                href="/discussions"
+                class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition whitespace-nowrap opacity-40 cursor-default {currentPath.startsWith(
+                  '/discussions'
+                )
+                  ? 'text-secondary'
+                  : 'text-muted'}"
+                style={currentPath.startsWith('/discussions')
+                  ? 'background-color: var(--accent-soft); color: var(--accent-strong)'
+                  : ''}
+              >
+                💬 Discussions
+              </a>
+
+              <a
+                href="/group-buys"
+                class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition whitespace-nowrap opacity-40 cursor-default {currentPath.startsWith(
+                  '/group-buys'
+                )
+                  ? 'text-secondary'
+                  : 'text-muted'}"
+                style={currentPath.startsWith('/group-buys')
+                  ? 'background-color: var(--accent-soft); color: var(--accent-strong)'
+                  : ''}
+              >
+                🛒 Group Buys
+              </a>
+            </div>
+
+            {#if $currentUser}
+              <div class="flex items-center gap-1">
+                <a
+                  href="/profile"
+                  class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition whitespace-nowrap text-muted hover:text-secondary"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
+                  </svg>
+                  {$currentUser.display_name ?? 'Profile'}
+                </a>
+              </div>
+            {/if}
           {/if}
         </div>
       </div>

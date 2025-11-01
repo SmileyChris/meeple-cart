@@ -47,14 +47,6 @@
 </script>
 
 <div class="space-y-12">
-  <!-- Header -->
-  <div class="space-y-4 text-center">
-    <h1 class="text-4xl font-bold tracking-tight text-primary sm:text-5xl">Recent Activity</h1>
-    <p class="mx-auto max-w-2xl text-lg text-muted">
-      Latest games listed and wanted by the Meeple Cart community across Aotearoa
-    </p>
-  </div>
-
   {#if activities.length === 0}
     <div
       class="mx-auto max-w-md rounded-2xl border-2 border-dashed border-subtle bg-surface-card p-12 text-center transition-colors"

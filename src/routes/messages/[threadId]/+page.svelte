@@ -134,7 +134,7 @@
           {form.error}
         </div>
       {/if}
-      <MessageInput on:send={handleSend} disabled={sending} />
+      <MessageInput onsend={handleSend} disabled={sending} />
     </div>
   </div>
 </main>

@@ -364,7 +364,7 @@
             </div>
             {#if history.length > 5 && !showFullHistory}
               <button
-                on:click={() => (showFullHistory = true)}
+                onclick={() => (showFullHistory = true)}
                 class="mt-3 text-sm text-[var(--accent)] transition hover:text-[var(--accent-strong)]"
               >
                 Show all history ({history.length} events)
@@ -415,7 +415,7 @@
                     <p class="mt-2 text-sm text-emerald-200/80 italic">"{userEntry.message}"</p>
                   {/if}
                 </div>
-                <form on:submit={handleWithdraw}>
+                <form onsubmit={handleWithdraw}>
                   <button
                     type="submit"
                     disabled={isSubmitting}
@@ -427,7 +427,7 @@
               </div>
             {:else if canEnter}
               <!-- Entry Form -->
-              <form on:submit={handleEnter} class="space-y-4">
+              <form onsubmit={handleEnter} class="space-y-4">
                 <div>
                   <label for="message" class="mb-2 block text-sm font-medium text-secondary">
                     Message (optional)

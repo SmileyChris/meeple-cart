@@ -40,7 +40,7 @@
 
 <div
   bind:this={scrollContainer}
-  on:scroll={handleScroll}
+  onscroll={handleScroll}
   class="flex flex-1 flex-col gap-4 overflow-y-auto px-4 py-6"
 >
   {#if loading}
