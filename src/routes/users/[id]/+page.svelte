@@ -1,5 +1,8 @@
 <script lang="ts">
   import type { PageData } from './$types';
+  import { currentUser } from '$lib/pocketbase';
+  import TrustBadge from '$lib/components/TrustBadge.svelte';
+  import VerificationWarning from '$lib/components/VerificationWarning.svelte';
 
   let { data }: { data: PageData } = $props();
 
@@ -7,6 +10,11 @@
   let listings = $derived(data.listings);
   let vouches = $derived(data.vouches);
   let reviews = $derived(data.reviews);
+  let averageRating = $derived(data.averageRating);
+  let vouchedTradesCount = $derived(data.vouchedTradesCount);
+
+  // Check if this is the current user's own profile
+  let isOwnProfile = $derived($currentUser?.id === profile.id);
 
   const typeLabels: Record<string, string> = {
     trade: 'Trade',
@@ -41,11 +49,24 @@
 
 <main class="min-h-screen bg-surface-body transition-colors px-6 py-12">
   <div class="mx-auto max-w-5xl space-y-8">
+    <!-- Verification Warning (only for own profile if unverified) -->
+    {#if isOwnProfile && !profile.verified}
+      <VerificationWarning emailVerified={profile.verified} />
+    {/if}
+
     <!-- Profile Header -->
     <div class="rounded-xl border border-subtle bg-surface-card transition-colors p-8">
       <div class="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
         <div class="space-y-3">
           <h1 class="text-3xl font-bold text-primary">{profile.display_name}</h1>
+
+          <!-- Trust Badge -->
+          <TrustBadge
+            joinedDate={profile.joined_date}
+            vouchedTrades={vouchedTradesCount}
+            size="large"
+          />
+
           {#if profile.location}
             <p class="flex items-center gap-2 text-secondary">
               <span class="text-lg">📍</span>
@@ -67,6 +88,14 @@
             <div class="text-3xl font-bold text-emerald-300">{profile.vouch_count}</div>
             <div class="text-sm text-muted">Vouches</div>
           </div>
+          {#if averageRating !== null}
+            <div class="text-center">
+              <div class="text-3xl font-bold text-emerald-300">
+                {averageRating.toFixed(1)}
+              </div>
+              <div class="text-sm text-muted">Avg Rating</div>
+            </div>
+          {/if}
         </div>
       </div>
 

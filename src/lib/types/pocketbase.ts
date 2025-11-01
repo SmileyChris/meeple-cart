@@ -4,6 +4,8 @@ export interface UserRecord extends RecordModel {
   display_name: string;
   location?: string;
   phone?: string;
+  phone_verified?: boolean; // Trust Buddy: Phone verification status
+  phone_hash?: string; // Trust Buddy: SHA-256 hash of phone number
   trade_count: number;
   vouch_count: number;
   joined_date: string;
@@ -94,5 +96,69 @@ export interface DiscussionSubscriptionRecord extends RecordModel {
   expand?: {
     user?: UserRecord;
     thread?: DiscussionThreadRecord;
+  };
+}
+
+// ============================================
+// TRUST BUDDY VERIFICATION SYSTEM
+// ============================================
+
+export type VerificationRequestStatus =
+  | 'pending'
+  | 'assigned'
+  | 'sent'
+  | 'completed'
+  | 'expired'
+  | 'cancelled';
+
+export interface VerificationRequestRecord extends RecordModel {
+  user: string; // User requesting verification
+  phone_hash: string; // SHA-256 hash of phone number
+  phone_last_four?: string; // Last 4 digits for display
+  status: VerificationRequestStatus;
+  queue_position?: number;
+  assigned_at?: string;
+  completed_at?: string;
+  expires_at?: string;
+  expand?: {
+    user?: UserRecord;
+  };
+}
+
+export interface VerificationLinkRecord extends RecordModel {
+  code: string; // 8-character alphanumeric code
+  request: string; // Relation to verification_requests
+  verifier: string; // User who is verifying
+  target_phone_hash: string; // SHA-256 hash of target phone
+  attempt_count: number;
+  used: boolean;
+  expires_at: string;
+  used_at?: string;
+  expand?: {
+    request?: VerificationRequestRecord;
+    verifier?: UserRecord;
+  };
+}
+
+export interface VerifierSettingsRecord extends RecordModel {
+  user: string; // User ID (unique)
+  is_active: boolean;
+  weekly_limit: number;
+  total_verifications: number;
+  success_count: number;
+  last_verification?: string;
+  karma_earned: number;
+  expand?: {
+    user?: UserRecord;
+  };
+}
+
+export interface VerificationPairRecord extends RecordModel {
+  verifier: string; // User who verified
+  verified: string; // User who was verified
+  verified_at: string;
+  expand?: {
+    verifier?: UserRecord;
+    verified?: UserRecord;
   };
 }

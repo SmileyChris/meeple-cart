@@ -61,11 +61,23 @@ export const load: PageLoad = async ({ params }) => {
       completedDate: trade.completed_date || trade.updated,
     }));
 
+    // Calculate average rating
+    const averageRating =
+      reviews.length > 0
+        ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+        : null;
+
+    // Calculate vouched trades count (unique trades that resulted in vouches)
+    // A vouched trade is when THIS user received a vouch from a trading partner
+    const vouchedTradesCount = vouches.length; // Each vouch represents a vouched trade
+
     return {
       profile,
       listings,
       vouches,
       reviews,
+      averageRating,
+      vouchedTradesCount,
     };
   } catch (err) {
     console.error(`Failed to load user profile ${id}`, err);

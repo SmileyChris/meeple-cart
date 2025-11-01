@@ -132,11 +132,6 @@
             <span>{listing.location}</span>
           {/if}
         </div>
-        <span
-          class="rounded-full border border-subtle bg-surface-card-alt px-3 py-1 text-xs font-medium text-muted transition-colors"
-        >
-          {listing.ownerId ? 'Verified member' : 'New listing'}
-        </span>
       </div>
     </div>
   </article>
