@@ -87,3 +87,12 @@ export interface DiscussionReplyRecord extends RecordModel {
     author?: UserRecord;
   };
 }
+
+export interface DiscussionSubscriptionRecord extends RecordModel {
+  user: string;
+  thread: string;
+  expand?: {
+    user?: UserRecord;
+    thread?: DiscussionThreadRecord;
+  };
+}
