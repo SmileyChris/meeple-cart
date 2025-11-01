@@ -9,7 +9,9 @@ migrate(
         name: 'preferred_regions',
         type: 'json',
         required: false,
-        options: {},
+        options: {
+          maxSize: 2000000, // 2MB max size for JSON data
+        },
       })
     );
 

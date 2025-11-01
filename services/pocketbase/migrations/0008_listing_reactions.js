@@ -29,7 +29,7 @@ migrate(
           type: 'relation',
           required: true,
           options: {
-            collectionId: 'u0l5t5dn4gwl0sb', // listings collection
+            collectionId: 'w3c43ufqz9ejshk', // listings collection (was wrong - was games collection)
             cascadeDelete: true,
             minSelect: 1,
             maxSelect: 1,

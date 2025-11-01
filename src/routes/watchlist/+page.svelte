@@ -1,10 +1,21 @@
 <script lang="ts">
   import type { PageData } from './$types';
-  import { enhance } from '$app/forms';
+  import { pb } from '$lib/pocketbase';
 
   let { data }: { data: PageData } = $props();
 
-  let watchedListings = $derived(data.watchedListings);
+  let watchedListings = $state(data.watchedListings);
+
+  async function removeReaction(reactionId: string) {
+    try {
+      await pb.collection('reactions').delete(reactionId);
+      // Remove from local state
+      watchedListings = watchedListings.filter((item) => item.watchlistId !== reactionId);
+    } catch (error) {
+      console.error('Failed to remove reaction:', error);
+      alert('Failed to remove reaction. Please try again.');
+    }
+  }
 
   const typeLabels: Record<string, string> = {
     trade: 'Trade',
@@ -44,7 +55,7 @@
     <!-- Header -->
     <div class="space-y-2">
       <h1 class="text-3xl font-bold text-primary">Watchlist</h1>
-      <p class="text-muted">Listings you're watching. You'll be notified when prices drop.</p>
+      <p class="text-muted">Listings you've reacted to. React to any listing to add it to your watchlist.</p>
     </div>
 
     <!-- Listings -->
@@ -52,13 +63,13 @@
       <div
         class="rounded-2xl border-2 border-dashed border-subtle bg-surface-card p-12 text-center transition-colors"
       >
-        <div class="mb-4 text-6xl opacity-20">⭐</div>
-        <h2 class="text-xl font-semibold text-secondary">No watched listings yet</h2>
+        <div class="mb-4 text-6xl opacity-20">😍</div>
+        <h2 class="text-xl font-semibold text-secondary">No reactions yet</h2>
         <p class="mt-2 text-muted">
-          Browse listings and click the star icon to add them to your watchlist.
+          React to listings to add them to your watchlist and keep track of what interests you.
         </p>
         <!-- eslint-disable svelte/no-navigation-without-resolve -->
-        <a href="/" class="btn-primary mt-6 inline-block px-6 py-2 font-medium">
+        <a href="/browse" class="btn-primary mt-6 inline-block px-6 py-2 font-medium">
           Browse listings
         </a>
         <!-- eslint-enable svelte/no-navigation-without-resolve -->
@@ -116,9 +127,10 @@
                 {/if}
               </div>
 
-              <!-- Watched date -->
-              <div class="mt-2 text-xs text-muted">
-                Watching since {formatRelativeTime(item.watchedAt)}
+              <!-- Reaction info -->
+              <div class="mt-2 flex items-center gap-1.5 text-xs text-muted">
+                <span class="text-base">{item.reactionEmoji}</span>
+                <span>{formatRelativeTime(item.watchedAt)}</span>
               </div>
 
               <!-- Actions -->
@@ -130,16 +142,13 @@
                   View listing
                 </a>
                 <!-- eslint-enable svelte/no-navigation-without-resolve -->
-                <form method="POST" action="?/remove" use:enhance class="flex-shrink-0">
-                  <input type="hidden" name="watchlist_id" value={item.watchlistId} />
-                  <button
-                    type="submit"
-                    class="btn-ghost px-3 py-2 text-sm hover:border-rose-500 hover:text-rose-300"
-                    title="Remove from watchlist"
-                  >
-                    ✕
-                  </button>
-                </form>
+                <button
+                  onclick={() => removeReaction(item.watchlistId)}
+                  class="btn-ghost px-3 py-2 text-sm hover:border-rose-500 hover:text-rose-300"
+                  title="Remove reaction"
+                >
+                  ✕
+                </button>
               </div>
             </div>
           </div>

@@ -642,22 +642,27 @@ const clearAllListings = async (): Promise<void> => {
 
   console.log('Clearing all listings...');
 
-  // Delete all games first (cascades should handle this, but be explicit)
+  // Get counts before deleting
   const games = await pb.collection('games').getFullList();
-  for (const game of games) {
-    await pb.collection('games').delete(game.id);
-  }
-
-  // Delete all listings
   const listings = await pb.collection('listings').getFullList();
-  for (const listing of listings) {
-    await pb.collection('listings').delete(listing.id);
+  const reactions = await pb.collection('reactions').getFullList();
+
+  // Delete reactions first (they reference listings)
+  for (const reaction of reactions) {
+    try {
+      await pb.collection('reactions').delete(reaction.id);
+    } catch (err) {
+      // Ignore if already deleted
+    }
   }
 
-  // Delete all reactions
-  const reactions = await pb.collection('reactions').getFullList();
-  for (const reaction of reactions) {
-    await pb.collection('reactions').delete(reaction.id);
+  // Delete listings (this will cascade delete games)
+  for (const listing of listings) {
+    try {
+      await pb.collection('listings').delete(listing.id);
+    } catch (err) {
+      // Ignore if already deleted
+    }
   }
 
   console.log(`Deleted ${listings.length} listings, ${games.length} games, and ${reactions.length} reactions.`);
