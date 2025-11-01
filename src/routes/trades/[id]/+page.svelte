@@ -36,13 +36,15 @@
     confirmed: 'Confirmed',
     completed: 'Completed',
     disputed: 'Disputed',
+    cancelled: 'Cancelled',
   };
 
   const statusColors: Record<string, string> = {
-    initiated: 'border-amber-500/80 bg-amber-500/10 text-amber-200',
-    confirmed: 'border-sky-500/80 bg-sky-500/10 text-sky-200',
-    completed: 'border-emerald-500/80 bg-emerald-500/10 text-emerald-200',
-    disputed: 'border-rose-500/80 bg-rose-500/10 text-rose-200',
+    initiated: 'border-amber-500/80 bg-amber-500/10 text-badge-amber',
+    confirmed: 'border-sky-500/80 bg-sky-500/10 text-badge-sky',
+    completed: 'border-emerald-500/80 bg-emerald-500/10 text-badge-emerald',
+    disputed: 'border-rose-500/80 bg-rose-500/10 text-badge-rose',
+    cancelled: 'border-slate-500/80 bg-slate-500/10 text-slate-400',
   };
 
   async function updateTradeStatus(newStatus: string) {
@@ -86,15 +88,25 @@
         $currentUser!.id
       );
 
-      // Update all games in listing to sold
-      const games = await pb.collection('games').getFullList({
-        filter: `listing = "${listing.id}"`,
-      });
-
-      for (const game of games) {
-        await pb.collection('games').update(game.id, {
-          status: 'sold',
+      // Update only selected games to sold (or all if no games specified)
+      if (trade.games && trade.games.length > 0) {
+        // Mark only selected games as sold
+        for (const gameId of trade.games) {
+          await pb.collection('games').update(gameId, {
+            status: 'sold',
+          });
+        }
+      } else {
+        // Legacy: mark all games as sold if no specific games selected
+        const games = await pb.collection('games').getFullList({
+          filter: `listing = "${listing.id}"`,
         });
+
+        for (const game of games) {
+          await pb.collection('games').update(game.id, {
+            status: 'sold',
+          });
+        }
       }
 
       // Increment trade counts for both users
@@ -144,6 +156,54 @@
 
   function handleDisputeTrade() {
     updateTradeStatus('disputed');
+  }
+
+  async function handleCancelTrade() {
+    if (!confirm('Are you sure you want to cancel this trade? This action cannot be undone.')) {
+      return;
+    }
+
+    actionError = null;
+    processing = true;
+
+    try {
+      // Update trade status to cancelled
+      const updatedTrade = await pb.collection('trades').update<TradeRecord>(trade.id, {
+        status: 'cancelled',
+      });
+
+      // Revert listing status back to active
+      await pb.collection('listings').update(listing.id, {
+        status: 'active',
+      });
+
+      // Log status change
+      await logStatusChange(
+        listing.id,
+        listing.status,
+        'active',
+        'Trade cancelled - listing reopened',
+        $currentUser!.id
+      );
+
+      // Send notification to other party
+      await pb.collection('notifications').create({
+        user: otherParty.id,
+        type: 'new_message',
+        title: 'Trade cancelled',
+        message: `${$currentUser?.display_name} cancelled the trade for "${listing.title}"`,
+        link: `/listings/${listing.id}`,
+        read: false,
+      });
+
+      trade = updatedTrade;
+      await invalidate('app:trade');
+    } catch (err) {
+      console.error('Failed to cancel trade', err);
+      actionError = 'Failed to cancel trade. Please try again.';
+    } finally {
+      processing = false;
+    }
   }
 
   async function handleSubmitFeedback(e: Event) {
@@ -340,6 +400,62 @@
       </div>
     </section>
 
+    <!-- Trade Details -->
+    <section class="rounded-xl border border-subtle bg-surface-card transition-colors p-6 space-y-4">
+      <h2 class="text-xl font-semibold text-primary">Trade Details</h2>
+
+      <!-- Shipping Method -->
+      {#if trade.shipping_method}
+        <div>
+          <h3 class="text-sm font-semibold text-secondary mb-2">Delivery Method</h3>
+          <div class="flex items-center gap-2 text-sm text-secondary">
+            {#if trade.shipping_method === 'in_person'}
+              <span class="rounded-full bg-emerald-500/20 px-3 py-1 font-medium text-badge-emerald">
+                📍 In-person meetup
+              </span>
+            {:else if trade.shipping_method === 'shipped'}
+              <span class="rounded-full bg-blue-500/20 px-3 py-1 font-medium text-badge-blue">
+                📦 Shipping
+              </span>
+            {/if}
+          </div>
+        </div>
+      {/if}
+
+      <!-- Selected Games -->
+      {#if trade.games && trade.games.length > 0}
+        <div>
+          <h3 class="text-sm font-semibold text-secondary mb-2">
+            Games in this trade ({trade.games.length})
+          </h3>
+          <div class="space-y-2">
+            {#if trade.expand?.games}
+              {#each trade.expand.games as game}
+                <div class="rounded-lg border border-subtle bg-surface-body p-3 text-sm">
+                  <div class="font-medium text-primary">{game.title}</div>
+                  <div class="mt-1 text-xs text-muted">
+                    {game.condition}
+                    {#if game.price}
+                      · ${game.price}
+                    {:else if game.trade_value}
+                      · Value: ${game.trade_value}
+                    {/if}
+                  </div>
+                </div>
+              {/each}
+            {:else}
+              <p class="text-sm text-muted">{trade.games.length} game(s) selected</p>
+            {/if}
+          </div>
+        </div>
+      {:else}
+        <div>
+          <h3 class="text-sm font-semibold text-secondary mb-2">Games</h3>
+          <p class="text-sm text-muted">All games in the listing</p>
+        </div>
+      {/if}
+    </section>
+
     <!-- Action Buttons -->
     <section
       class="rounded-xl border border-subtle bg-surface-card transition-colors p-6 space-y-4"
@@ -383,13 +499,23 @@
           </button>
         {/if}
 
-        {#if trade.status !== 'completed' && trade.status !== 'disputed'}
+        {#if trade.status !== 'completed' && trade.status !== 'disputed' && trade.status !== 'cancelled'}
           <button
             onclick={handleDisputeTrade}
             disabled={processing}
             class="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {processing ? 'Processing...' : 'Report Issue'}
+          </button>
+        {/if}
+
+        {#if trade.status !== 'completed' && trade.status !== 'cancelled'}
+          <button
+            onclick={handleCancelTrade}
+            disabled={processing}
+            class="rounded-lg border border-slate-500 bg-slate-500/10 px-4 py-2 font-semibold text-slate-300 transition hover:bg-slate-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {processing ? 'Processing...' : 'Cancel Trade'}
           </button>
         {/if}
       </div>

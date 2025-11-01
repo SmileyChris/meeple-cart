@@ -110,6 +110,17 @@ export const load: PageLoad = async ({ params }) => {
     // User is "watching" if they have any reaction on this listing
     const isWatching = userReaction !== null;
 
+    // Check for existing trade (exclude cancelled trades)
+    let existingTrade = null;
+    if (user) {
+      const existingTrades = await pb.collection('trades').getList(1, 1, {
+        filter: `listing = "${id}" && buyer = "${user.id}" && status != "cancelled"`,
+      });
+      if (existingTrades.items.length > 0) {
+        existingTrade = existingTrades.items[0];
+      }
+    }
+
     return {
       listing: normalizedListing,
       owner: owner || null,
@@ -118,6 +129,7 @@ export const load: PageLoad = async ({ params }) => {
       isWatching,
       reactionCounts,
       userReaction,
+      existingTrade,
     };
   } catch (err) {
     console.error(`Failed to load listing ${id}`, err);

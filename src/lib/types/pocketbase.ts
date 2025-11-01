@@ -27,7 +27,9 @@ export interface TradeRecord extends RecordModel {
   listing: string;
   buyer: string;
   seller: string;
-  status: 'initiated' | 'confirmed' | 'completed' | 'disputed';
+  games?: string[]; // Selected game IDs for this trade
+  shipping_method?: 'in_person' | 'shipped';
+  status: 'initiated' | 'confirmed' | 'completed' | 'disputed' | 'cancelled';
   rating?: number;
   review?: string;
   completed_date?: string;
@@ -35,6 +37,7 @@ export interface TradeRecord extends RecordModel {
     listing?: RecordModel;
     buyer?: UserRecord;
     seller?: UserRecord;
+    games?: RecordModel[];
   };
 }
 

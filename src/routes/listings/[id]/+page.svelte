@@ -17,6 +17,9 @@
   let sendingMessage = $state(false);
   let initiatingTrade = $state(false);
   let tradeError = $state<string | null>(null);
+  let showTradeForm = $state(false);
+  let selectedGameIds = $state<string[]>([]);
+  let shippingMethod = $state<'in_person' | 'shipped'>('in_person');
 
   let listing = $derived(data.listing);
   let owner = $derived(data.owner);
@@ -171,7 +174,8 @@
     }
   }
 
-  async function handleInitiateTrade() {
+  async function handleInitiateTrade(e?: Event) {
+    e?.preventDefault();
     if (!owner || !$currentUser) return;
 
     tradeError = null;
@@ -182,11 +186,17 @@
       return;
     }
 
+    // Validate game selection if games exist
+    if (games.length > 0 && selectedGameIds.length === 0) {
+      tradeError = 'Please select at least one game you want to trade for';
+      return;
+    }
+
     initiatingTrade = true;
     try {
       // Check for duplicate trades
       const existingTrades = await pb.collection('trades').getList(1, 1, {
-        filter: `listing = "${listing.id}" && buyer = "${$currentUser.id}"`,
+        filter: `listing = "${listing.id}" && buyer = "${$currentUser.id}" && status != "cancelled"`,
       });
 
       if (existingTrades.items.length > 0) {
@@ -195,12 +205,14 @@
         return;
       }
 
-      // Create trade record
+      // Create trade record with selected games and shipping method
       const trade = await pb.collection('trades').create({
         listing: listing.id,
         buyer: $currentUser.id,
         seller: owner.id,
         status: 'initiated',
+        games: selectedGameIds.length > 0 ? selectedGameIds : undefined,
+        shipping_method: shippingMethod,
       });
 
       // Update listing status to pending
@@ -530,13 +542,6 @@
       >
         <h3 class="text-base font-semibold text-primary">Contact trader</h3>
 
-        <!-- Watchlist button (show for all logged-in users) -->
-        {#if $currentUser}
-          <div class="pb-4">
-            <WatchlistButton listingId={listing.id} isWatching={data.isWatching} />
-          </div>
-        {/if}
-
         {#if !$currentUser}
           <div class="space-y-4">
             <p class="text-sm text-muted">Sign in to send a message to this trader.</p>
@@ -569,20 +574,160 @@
           </div>
         {:else if owner}
           <div class="space-y-3">
-            <!-- Initiate Trade Button -->
-            <button
-              type="button"
-              onclick={handleInitiateTrade}
-              disabled={initiatingTrade}
-              class="w-full rounded-lg border border-emerald-500 bg-emerald-500 px-4 py-2 font-semibold text-[var(--accent-contrast)] shadow-[0_10px_25px_rgba(16,185,129,0.25)] transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {initiatingTrade ? 'Initiating...' : '🤝 Propose Trade'}
-            </button>
+            <!-- Show View Trade button if user has existing trade, otherwise Propose Trade -->
+            {#if data.existingTrade}
+              <!-- eslint-disable svelte/no-navigation-without-resolve -->
+              <a
+                href="/trades/{data.existingTrade.id}"
+                class="block w-full rounded-lg border border-emerald-500 bg-emerald-500 px-4 py-2 text-center font-semibold text-[var(--accent-contrast)] shadow-[0_10px_25px_rgba(16,185,129,0.25)] transition hover:bg-emerald-400"
+              >
+                👁️ View Trade
+              </a>
+              <!-- eslint-enable svelte/no-navigation-without-resolve -->
+              <p class="text-xs text-center text-muted">
+                You have an active trade for this listing
+              </p>
+            {:else}
+              <!-- Propose Trade Form -->
+              {#if !showTradeForm}
+                <button
+                  type="button"
+                  onclick={() => {
+                    showTradeForm = true;
+                    // Pre-select all available games
+                    selectedGameIds = games.filter(g => g.status === 'available').map(g => g.id);
+                  }}
+                  class="w-full rounded-lg border border-emerald-500 bg-emerald-500 px-4 py-2 font-semibold text-[var(--accent-contrast)] shadow-[0_10px_25px_rgba(16,185,129,0.25)] transition hover:bg-emerald-400"
+                >
+                  🤝 Propose Trade
+                </button>
+              {:else}
+                <form onsubmit={handleInitiateTrade} class="space-y-4 rounded-lg border border-subtle bg-surface-card p-4">
+                  <h4 class="font-semibold text-primary">Trade Proposal</h4>
 
-            {#if tradeError}
-              <div class="rounded-lg bg-rose-500/10 px-3 py-2 text-sm text-rose-400">
-                {tradeError}
-              </div>
+                  {#if tradeError}
+                    <div class="rounded-lg bg-rose-500/10 px-3 py-2 text-sm text-rose-400">
+                      {tradeError}
+                    </div>
+                  {/if}
+
+                  {#if games.length > 0}
+                    <!-- Game Selection -->
+                    <div class="space-y-2">
+                      <label class="block text-sm font-medium text-secondary">
+                        Select games you want ({selectedGameIds.length} selected)
+                      </label>
+                      <div class="max-h-64 space-y-2 overflow-y-auto rounded-lg border border-subtle bg-surface-body p-3">
+                        {#each games as game (game.id)}
+                          <label
+                            class="flex cursor-pointer items-start gap-3 rounded-lg p-2 transition hover:bg-surface-ghost {game.status !== 'available' ? 'opacity-50' : ''}"
+                          >
+                            <input
+                              type="checkbox"
+                              value={game.id}
+                              checked={selectedGameIds.includes(game.id)}
+                              disabled={game.status !== 'available'}
+                              onchange={(e) => {
+                                const checked = e.currentTarget.checked;
+                                if (checked) {
+                                  selectedGameIds = [...selectedGameIds, game.id];
+                                } else {
+                                  selectedGameIds = selectedGameIds.filter(id => id !== game.id);
+                                }
+                              }}
+                              class="mt-1 h-4 w-4 rounded border-subtle bg-surface-body text-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-0"
+                            />
+                            <div class="flex-1">
+                              <div class="font-medium text-primary">{game.title}</div>
+                              <div class="text-xs text-muted">
+                                {conditionBadges[game.condition]}
+                                {#if game.price}
+                                  · {toCurrency(game.price)}
+                                {:else if game.tradeValue}
+                                  · Value: {toCurrency(game.tradeValue)}
+                                {/if}
+                                {#if game.status !== 'available'}
+                                  · {game.status}
+                                {/if}
+                              </div>
+                            </div>
+                          </label>
+                        {/each}
+                      </div>
+                    </div>
+                  {/if}
+
+                  <!-- Shipping Method Selection -->
+                  <div class="space-y-2">
+                    <label class="block text-sm font-medium text-secondary">
+                      Preferred method
+                    </label>
+                    <div class="space-y-2">
+                      <label
+                        class="flex cursor-pointer items-center gap-3 rounded-lg border border-subtle bg-surface-body p-3 transition hover:bg-surface-ghost {shippingMethod === 'in_person' ? 'border-emerald-500 bg-emerald-500/10' : ''}"
+                      >
+                        <input
+                          type="radio"
+                          name="shipping_method"
+                          value="in_person"
+                          checked={shippingMethod === 'in_person'}
+                          onchange={() => shippingMethod = 'in_person'}
+                          class="h-4 w-4 border-subtle bg-surface-body text-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-0"
+                        />
+                        <div class="flex-1">
+                          <div class="font-medium text-primary">In-person meetup</div>
+                          <div class="text-xs text-muted">Arrange to meet locally</div>
+                        </div>
+                      </label>
+                      <label
+                        class="flex cursor-pointer items-center gap-3 rounded-lg border border-subtle bg-surface-body p-3 transition hover:bg-surface-ghost {shippingMethod === 'shipped' ? 'border-emerald-500 bg-emerald-500/10' : ''}"
+                      >
+                        <input
+                          type="radio"
+                          name="shipping_method"
+                          value="shipped"
+                          checked={shippingMethod === 'shipped'}
+                          onchange={() => shippingMethod = 'shipped'}
+                          disabled={!listing.shipping_available}
+                          class="h-4 w-4 border-subtle bg-surface-body text-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-0"
+                        />
+                        <div class="flex-1">
+                          <div class="font-medium text-primary">
+                            Shipping
+                            {#if !listing.shipping_available}
+                              <span class="text-xs text-muted">(not available)</span>
+                            {/if}
+                          </div>
+                          <div class="text-xs text-muted">Seller ships to you</div>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+
+                  <!-- Action Buttons -->
+                  <div class="flex gap-2">
+                    <button
+                      type="submit"
+                      disabled={initiatingTrade || selectedGameIds.length === 0}
+                      class="flex-1 rounded-lg border border-emerald-500 bg-emerald-500 px-4 py-2 font-semibold text-[var(--accent-contrast)] shadow-[0_10px_25px_rgba(16,185,129,0.25)] transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {initiatingTrade ? 'Initiating...' : 'Confirm Trade Proposal'}
+                    </button>
+                    <button
+                      type="button"
+                      onclick={() => {
+                        showTradeForm = false;
+                        selectedGameIds = [];
+                        tradeError = null;
+                      }}
+                      disabled={initiatingTrade}
+                      class="rounded-lg border border-subtle px-4 py-2 font-semibold text-secondary transition hover:bg-surface-ghost disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              {/if}
             {/if}
 
             <!-- Send Message Button -->
