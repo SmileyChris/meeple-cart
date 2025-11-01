@@ -9,8 +9,13 @@ export const load: PageLoad = async ({ url }) => {
 
   // Redirect to login if not authenticated
   if (!user) {
-    throw redirect(307, '/login');
+    redirectToLogin(url.pathname);
   }
 
-  return {};
+  return {
+    defaults: {
+      listing_type: 'trade',
+      condition: 'excellent',
+    },
+  };
 };
