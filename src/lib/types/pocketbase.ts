@@ -66,6 +66,7 @@ export interface DiscussionThreadRecord extends RecordModel {
   title: string;
   content: string;
   author: string;
+  listing?: string; // Optional - links discussion to a specific listing
   pinned?: boolean;
   locked?: boolean;
   view_count: number;
@@ -73,6 +74,7 @@ export interface DiscussionThreadRecord extends RecordModel {
   last_reply_at?: string;
   expand?: {
     author?: UserRecord;
+    listing?: RecordModel;
   };
 }
 
