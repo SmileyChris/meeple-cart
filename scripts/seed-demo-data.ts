@@ -64,56 +64,57 @@ type SeedListing = {
   games: SeedGame[];
 };
 
+type SeedVouch = {
+  voucherEmail: string;
+  voucheeEmail: string;
+  message: string;
+  daysAgo: number;
+};
+
+type SeedDiscussionThread = {
+  authorEmail: string;
+  title: string;
+  content: string;
+  daysAgo: number;
+  listingTitle?: string; // If present, link to this listing
+  pinned?: boolean;
+  replies: SeedDiscussionReply[];
+};
+
+type SeedDiscussionReply = {
+  authorEmail: string;
+  content: string;
+  hoursAfterThread: number; // Hours after thread creation
+};
+
 const demoUsers: SeedUser[] = [
-  {
-    email: 'demo-alex@meeplecart.test',
-    password: 'TradeDemo2024!',
-    displayName: 'Alex Thompson',
-    location: 'Wellington',
-    joinedDaysAgo: 547,
-    tradeCount: 12,
-    vouchCount: 5,
-    preferredContact: 'platform',
-    bio: 'Co-op enthusiast with a soft spot for crunchy euros. Happy to meetup in the CBD.',
-    phone: '+64 21 555 1234',
-    preferredRegions: ['wellington'],
-  },
-  {
-    email: 'demo-bella@meeplecart.test',
-    password: 'TradeDemo2024!',
-    displayName: 'Bella Ngata',
-    location: 'Auckland',
-    joinedDaysAgo: 284,
-    tradeCount: 7,
-    vouchCount: 3,
-    preferredContact: 'email',
-    bio: 'Collecting narrative-heavy games and teaching them at our local community hub.',
-    preferredRegions: ['auckland'],
-  },
+  // Pillar of Trust - 10+ vouches, 20+ trades
   {
     email: 'demo-kiran@meeplecart.test',
     password: 'TradeDemo2024!',
     displayName: 'Kiran Patel',
     location: 'Christchurch',
     joinedDaysAgo: 730,
-    tradeCount: 21,
-    vouchCount: 11,
+    tradeCount: 24,
+    vouchCount: 12,
     preferredContact: 'phone',
     bio: 'Runs monthly swap nights. Looking to rehome well-loved strategy titles.',
     phone: '+64 27 777 8899',
     preferredRegions: ['canterbury'],
   },
+  // Established Trader - 6-9 vouches, 10+ trades
   {
-    email: 'demo-sarah@meeplecart.test',
+    email: 'demo-alex@meeplecart.test',
     password: 'TradeDemo2024!',
-    displayName: 'Sarah Mitchell',
-    location: 'Hamilton',
-    joinedDaysAgo: 156,
-    tradeCount: 4,
-    vouchCount: 2,
+    displayName: 'Alex Thompson',
+    location: 'Wellington',
+    joinedDaysAgo: 547,
+    tradeCount: 16,
+    vouchCount: 8,
     preferredContact: 'platform',
-    bio: 'Party game collector. Always looking for quick-to-teach crowd pleasers!',
-    preferredRegions: ['waikato'],
+    bio: 'Co-op enthusiast with a soft spot for crunchy euros. Happy to meetup in the CBD.',
+    phone: '+64 21 555 1234',
+    preferredRegions: ['wellington'],
   },
   {
     email: 'demo-james@meeplecart.test',
@@ -121,24 +122,25 @@ const demoUsers: SeedUser[] = [
     displayName: 'James Chen',
     location: 'Dunedin',
     joinedDaysAgo: 421,
-    tradeCount: 15,
-    vouchCount: 8,
+    tradeCount: 18,
+    vouchCount: 7,
     preferredContact: 'email',
     bio: '18XX fanatic. Also into deck builders and engine builders.',
     phone: '+64 22 444 5566',
     preferredRegions: ['otago'],
   },
+  // Trusted Member - 3-5 vouches, 5+ trades
   {
-    email: 'demo-maya@meeplecart.test',
+    email: 'demo-bella@meeplecart.test',
     password: 'TradeDemo2024!',
-    displayName: 'Maya Rodriguez',
-    location: 'Tauranga',
-    joinedDaysAgo: 92,
-    tradeCount: 3,
-    vouchCount: 1,
-    preferredContact: 'platform',
-    bio: 'New to the hobby! Looking for gateway games and friendly trades.',
-    preferredRegions: ['bay_of_plenty'],
+    displayName: 'Bella Ngata',
+    location: 'Auckland',
+    joinedDaysAgo: 284,
+    tradeCount: 9,
+    vouchCount: 5,
+    preferredContact: 'email',
+    bio: 'Collecting narrative-heavy games and teaching them at our local community hub.',
+    preferredRegions: ['auckland'],
   },
   {
     email: 'demo-tom@meeplecart.test',
@@ -146,11 +148,36 @@ const demoUsers: SeedUser[] = [
     displayName: 'Tom Harrison',
     location: 'Nelson',
     joinedDaysAgo: 245,
-    tradeCount: 9,
+    tradeCount: 11,
     vouchCount: 4,
     preferredContact: 'email',
     bio: 'War games and miniatures. Open to trades or sales with shipping.',
     preferredRegions: ['nelson', 'tasman'],
+  },
+  {
+    email: 'demo-sarah@meeplecart.test',
+    password: 'TradeDemo2024!',
+    displayName: 'Sarah Mitchell',
+    location: 'Hamilton',
+    joinedDaysAgo: 156,
+    tradeCount: 7,
+    vouchCount: 3,
+    preferredContact: 'platform',
+    bio: 'Party game collector. Always looking for quick-to-teach crowd pleasers!',
+    preferredRegions: ['waikato'],
+  },
+  // Newcomer - 0-2 vouches, <5 trades
+  {
+    email: 'demo-maya@meeplecart.test',
+    password: 'TradeDemo2024!',
+    displayName: 'Maya Rodriguez',
+    location: 'Tauranga',
+    joinedDaysAgo: 92,
+    tradeCount: 4,
+    vouchCount: 2,
+    preferredContact: 'platform',
+    bio: 'New to the hobby! Looking for gateway games and friendly trades.',
+    preferredRegions: ['bay_of_plenty'],
   },
   {
     email: 'demo-lisa@meeplecart.test',
@@ -882,6 +909,443 @@ const demoListings: SeedListing[] = [
   },
 ];
 
+const demoVouches: SeedVouch[] = [
+  // Kiran (Pillar) receives vouches from many people
+  {
+    voucherEmail: 'demo-alex@meeplecart.test',
+    voucheeEmail: 'demo-kiran@meeplecart.test',
+    message: 'Super reliable trader! Met up twice and both times were smooth. Highly recommend.',
+    daysAgo: 45,
+  },
+  {
+    voucherEmail: 'demo-bella@meeplecart.test',
+    voucheeEmail: 'demo-kiran@meeplecart.test',
+    message: 'Kiran runs amazing game nights and is always fair in trades. A+',
+    daysAgo: 67,
+  },
+  {
+    voucherEmail: 'demo-james@meeplecart.test',
+    voucheeEmail: 'demo-kiran@meeplecart.test',
+    message: 'Completed a large trade with Kiran. Games were exactly as described. Trustworthy!',
+    daysAgo: 120,
+  },
+  {
+    voucherEmail: 'demo-tom@meeplecart.test',
+    voucheeEmail: 'demo-kiran@meeplecart.test',
+    message: 'Great communication and honest about condition. Would trade again!',
+    daysAgo: 156,
+  },
+  {
+    voucherEmail: 'demo-sarah@meeplecart.test',
+    voucheeEmail: 'demo-kiran@meeplecart.test',
+    message: 'Kiran helped me get started in the hobby. Generous and patient!',
+    daysAgo: 89,
+  },
+  {
+    voucherEmail: 'demo-maya@meeplecart.test',
+    voucheeEmail: 'demo-kiran@meeplecart.test',
+    message: 'First trade and Kiran made it super easy. Thank you!',
+    daysAgo: 23,
+  },
+
+  // Alex (Established) receives vouches
+  {
+    voucherEmail: 'demo-kiran@meeplecart.test',
+    voucheeEmail: 'demo-alex@meeplecart.test',
+    message: 'Alex is a great trader with excellent taste in euros. Smooth transaction!',
+    daysAgo: 50,
+  },
+  {
+    voucherEmail: 'demo-james@meeplecart.test',
+    voucheeEmail: 'demo-alex@meeplecart.test',
+    message: 'Quick responses, fair deals. Would definitely trade again.',
+    daysAgo: 78,
+  },
+  {
+    voucherEmail: 'demo-bella@meeplecart.test',
+    voucheeEmail: 'demo-alex@meeplecart.test',
+    message: 'Met up in Wellington. Alex is friendly and honest. Recommended!',
+    daysAgo: 102,
+  },
+  {
+    voucherEmail: 'demo-sarah@meeplecart.test',
+    voucheeEmail: 'demo-alex@meeplecart.test',
+    message: 'Great experience trading with Alex!',
+    daysAgo: 145,
+  },
+
+  // James (Established) receives vouches
+  {
+    voucherEmail: 'demo-kiran@meeplecart.test',
+    voucheeEmail: 'demo-james@meeplecart.test',
+    message: 'Fellow heavy gamer! James always packs games well for shipping.',
+    daysAgo: 134,
+  },
+  {
+    voucherEmail: 'demo-alex@meeplecart.test',
+    voucheeEmail: 'demo-james@meeplecart.test',
+    message: 'Traded some heavy euros. All in perfect condition as described.',
+    daysAgo: 92,
+  },
+  {
+    voucherEmail: 'demo-tom@meeplecart.test',
+    voucheeEmail: 'demo-james@meeplecart.test',
+    message: 'Great knowledge and fair prices. Pleasure to trade with!',
+    daysAgo: 67,
+  },
+
+  // Bella (Trusted) receives vouches
+  {
+    voucherEmail: 'demo-kiran@meeplecart.test',
+    voucheeEmail: 'demo-bella@meeplecart.test',
+    message: 'Bella is wonderful to work with. Games arrived perfectly packed!',
+    daysAgo: 76,
+  },
+  {
+    voucherEmail: 'demo-alex@meeplecart.test',
+    voucheeEmail: 'demo-bella@meeplecart.test',
+    message: 'Smooth trade! Bella is trustworthy and communicative.',
+    daysAgo: 112,
+  },
+  {
+    voucherEmail: 'demo-sarah@meeplecart.test',
+    voucheeEmail: 'demo-bella@meeplecart.test',
+    message: 'Great selection of family games. Thanks Bella!',
+    daysAgo: 45,
+  },
+
+  // Tom (Trusted) receives vouches
+  {
+    voucherEmail: 'demo-james@meeplecart.test',
+    voucheeEmail: 'demo-tom@meeplecart.test',
+    message: 'Tom knows war games inside and out. Fair trades every time.',
+    daysAgo: 88,
+  },
+  {
+    voucherEmail: 'demo-kiran@meeplecart.test',
+    voucheeEmail: 'demo-tom@meeplecart.test',
+    message: 'Reliable and responsive. Would trade again!',
+    daysAgo: 134,
+  },
+
+  // Sarah (Trusted) receives vouches
+  {
+    voucherEmail: 'demo-bella@meeplecart.test',
+    voucheeEmail: 'demo-sarah@meeplecart.test',
+    message: 'Sarah has the best party games! Great trader.',
+    daysAgo: 56,
+  },
+  {
+    voucherEmail: 'demo-maya@meeplecart.test',
+    voucheeEmail: 'demo-sarah@meeplecart.test',
+    message: 'Helped me find games for game night. Super helpful!',
+    daysAgo: 34,
+  },
+
+  // Maya (Newcomer) receives vouches
+  {
+    voucherEmail: 'demo-kiran@meeplecart.test',
+    voucheeEmail: 'demo-maya@meeplecart.test',
+    message: 'Great first trade with Maya. Looking forward to more!',
+    daysAgo: 29,
+  },
+  {
+    voucherEmail: 'demo-sarah@meeplecart.test',
+    voucheeEmail: 'demo-maya@meeplecart.test',
+    message: 'Maya is enthusiastic and reliable. Welcome to the community!',
+    daysAgo: 18,
+  },
+
+  // Additional vouches to match counts
+  // More for Kiran (needs 6 more)
+  {
+    voucherEmail: 'demo-lisa@meeplecart.test',
+    voucheeEmail: 'demo-kiran@meeplecart.test',
+    message: 'Kiran was so helpful for my first trade! Patient and kind.',
+    daysAgo: 200,
+  },
+  {
+    voucherEmail: 'demo-maya@meeplecart.test',
+    voucheeEmail: 'demo-kiran@meeplecart.test',
+    message: 'Second trade with Kiran, just as smooth!',
+    daysAgo: 180,
+  },
+  {
+    voucherEmail: 'demo-tom@meeplecart.test',
+    voucheeEmail: 'demo-kiran@meeplecart.test',
+    message: 'Always fair and honest. Top trader!',
+    daysAgo: 220,
+  },
+  {
+    voucherEmail: 'demo-sarah@meeplecart.test',
+    voucheeEmail: 'demo-kiran@meeplecart.test',
+    message: 'Second vouch - Kiran is consistently excellent!',
+    daysAgo: 165,
+  },
+  {
+    voucherEmail: 'demo-james@meeplecart.test',
+    voucheeEmail: 'demo-kiran@meeplecart.test',
+    message: 'Another great trade! Kiran is the best.',
+    daysAgo: 190,
+  },
+  {
+    voucherEmail: 'demo-bella@meeplecart.test',
+    voucheeEmail: 'demo-kiran@meeplecart.test',
+    message: 'Multiple trades, all perfect. Highly recommend!',
+    daysAgo: 175,
+  },
+
+  // More for Alex (needs 4 more)
+  {
+    voucherEmail: 'demo-tom@meeplecart.test',
+    voucheeEmail: 'demo-alex@meeplecart.test',
+    message: 'Good communication and fair deals!',
+    daysAgo: 234,
+  },
+  {
+    voucherEmail: 'demo-lisa@meeplecart.test',
+    voucheeEmail: 'demo-alex@meeplecart.test',
+    message: 'Alex helped me understand game values. Great trader!',
+    daysAgo: 198,
+  },
+  {
+    voucherEmail: 'demo-maya@meeplecart.test',
+    voucheeEmail: 'demo-alex@meeplecart.test',
+    message: 'Smooth trade, would recommend!',
+    daysAgo: 167,
+  },
+  {
+    voucherEmail: 'demo-kiran@meeplecart.test',
+    voucheeEmail: 'demo-alex@meeplecart.test',
+    message: 'Another successful trade with Alex!',
+    daysAgo: 143,
+  },
+
+  // More for James (needs 4 more)
+  {
+    voucherEmail: 'demo-bella@meeplecart.test',
+    voucheeEmail: 'demo-james@meeplecart.test',
+    message: 'Traded some heavy games. James knows his stuff!',
+    daysAgo: 189,
+  },
+  {
+    voucherEmail: 'demo-sarah@meeplecart.test',
+    voucheeEmail: 'demo-james@meeplecart.test',
+    message: 'Great trader, very knowledgeable!',
+    daysAgo: 156,
+  },
+  {
+    voucherEmail: 'demo-lisa@meeplecart.test',
+    voucheeEmail: 'demo-james@meeplecart.test',
+    message: 'James was patient with my questions. Thanks!',
+    daysAgo: 201,
+  },
+  {
+    voucherEmail: 'demo-maya@meeplecart.test',
+    voucheeEmail: 'demo-james@meeplecart.test',
+    message: 'Good experience trading with James!',
+    daysAgo: 178,
+  },
+
+  // More for Bella (needs 2 more)
+  {
+    voucherEmail: 'demo-james@meeplecart.test',
+    voucheeEmail: 'demo-bella@meeplecart.test',
+    message: 'Bella has great games and is easy to work with!',
+    daysAgo: 167,
+  },
+  {
+    voucherEmail: 'demo-tom@meeplecart.test',
+    voucheeEmail: 'demo-bella@meeplecart.test',
+    message: 'Reliable and friendly. Would trade again!',
+    daysAgo: 145,
+  },
+
+  // More for Tom (needs 2 more)
+  {
+    voucherEmail: 'demo-bella@meeplecart.test',
+    voucheeEmail: 'demo-tom@meeplecart.test',
+    message: 'Tom shipped quickly and safely. Great trader!',
+    daysAgo: 198,
+  },
+  {
+    voucherEmail: 'demo-alex@meeplecart.test',
+    voucheeEmail: 'demo-tom@meeplecart.test',
+    message: 'Smooth trade with Tom. Recommended!',
+    daysAgo: 167,
+  },
+
+  // More for Sarah (needs 1 more)
+  {
+    voucherEmail: 'demo-alex@meeplecart.test',
+    voucheeEmail: 'demo-sarah@meeplecart.test',
+    message: 'Great party games collection! Thanks Sarah.',
+    daysAgo: 123,
+  },
+];
+
+const demoDiscussions: SeedDiscussionThread[] = [
+  // General discussions
+  {
+    authorEmail: 'demo-kiran@meeplecart.test',
+    title: 'Welcome to Meeple Cart!',
+    content:
+      "Kia ora everyone! 👋\n\nWelcome to the Meeple Cart discussion forums. This is a space for our trading community to chat about board games, organize meetups, and help each other out.\n\n**Some guidelines:**\n- Be respectful and friendly\n- Keep discussions relevant to board gaming and trading\n- Use listing-specific discussions for questions about particular items\n- Have fun and share your passion for games!\n\nFeel free to introduce yourself below. What got you into board gaming?",
+    daysAgo: 30,
+    pinned: true,
+    replies: [
+      {
+        authorEmail: 'demo-lisa@meeplecart.test',
+        content:
+          "Hi everyone! I'm Lisa and I just joined last month. Got into board games during lockdown and now I'm hooked! Mainly love co-op games.",
+        hoursAfterThread: 2,
+      },
+      {
+        authorEmail: 'demo-maya@meeplecart.test',
+        content:
+          "Hello! Maya here from Tauranga. Started with Catan and now branching out. This community seems amazing!",
+        hoursAfterThread: 5,
+      },
+      {
+        authorEmail: 'demo-alex@meeplecart.test',
+        content:
+          "Been in the hobby for years. Found Meeple Cart through a friend and it's been great for trading games I don't play anymore. Welcome to all the newcomers!",
+        hoursAfterThread: 8,
+      },
+    ],
+  },
+  {
+    authorEmail: 'demo-james@meeplecart.test',
+    title: 'Heavy Euro Enthusiasts - Auckland Meetup?',
+    content:
+      "Anyone in the Auckland area interested in a heavy euro game day? I'm thinking we could meet at a cafe or game store and play some meaty games.\n\nI can bring:\n- Brass: Birmingham\n- Gaia Project\n- Food Chain Magnate\n- A Feast for Odin\n\nLooking for 3-4 people who enjoy 3+ hour games. Maybe a Saturday in December?",
+    daysAgo: 7,
+    replies: [
+      {
+        authorEmail: 'demo-bella@meeplecart.test',
+        content:
+          "I'm in Auckland! I love heavy euros. Brass: Birmingham is one of my favorites. I could host if needed - have a big dining table.",
+        hoursAfterThread: 3,
+      },
+      {
+        authorEmail: 'demo-alex@meeplecart.test',
+        content:
+          "Not in Auckland but just want to say Food Chain Magnate is amazing. You all are in for a treat!",
+        hoursAfterThread: 6,
+      },
+      {
+        authorEmail: 'demo-james@meeplecart.test',
+        content:
+          "@Bella that would be fantastic! I'll DM you to coordinate. Anyone else interested?",
+        hoursAfterThread: 12,
+      },
+    ],
+  },
+  {
+    authorEmail: 'demo-sarah@meeplecart.test',
+    title: 'Best gateway games to introduce new players?',
+    content:
+      "I'm hosting a game night next week with some friends who have never played modern board games. Looking for recommendations!\n\nWhat are your go-to games for introducing people to the hobby? I'm thinking Ticket to Ride and Splendor, but would love more ideas.",
+    daysAgo: 3,
+    replies: [
+      {
+        authorEmail: 'demo-kiran@meeplecart.test',
+        content:
+          "Great choices! I'd also recommend:\n- Azul (beautiful and simple)\n- Carcassonne (tile laying is intuitive)\n- Sushi Go (quick card game)\n- Codenames (great for larger groups)\n\nThe key is keeping rules simple and game time under 45 mins for the first game.",
+        hoursAfterThread: 1,
+      },
+      {
+        authorEmail: 'demo-bella@meeplecart.test',
+        content:
+          "I second Azul! It's gorgeous and people get it immediately. Also, Pandemic is great if they like co-op - you can help them without it feeling bad.",
+        hoursAfterThread: 4,
+      },
+      {
+        authorEmail: 'demo-maya@meeplecart.test',
+        content:
+          "Just went through this myself! Ticket to Ride was perfect for my group. Also King of Tokyo was a hit - simple but exciting.",
+        hoursAfterThread: 7,
+      },
+      {
+        authorEmail: 'demo-sarah@meeplecart.test',
+        content:
+          "Thanks everyone! I'll grab Azul and maybe Pandemic. Have both in my collection already.",
+        hoursAfterThread: 24,
+      },
+    ],
+  },
+  {
+    authorEmail: 'demo-tom@meeplecart.test',
+    title: 'Trading etiquette question',
+    content:
+      "Quick question for the community - what's the proper etiquette if you change your mind about a trade before confirming?\n\nI proposed a trade yesterday but realized I actually want to keep the game. Haven't heard back from the other person yet. Should I wait or cancel now?",
+    daysAgo: 1,
+    replies: [
+      {
+        authorEmail: 'demo-kiran@meeplecart.test',
+        content:
+          "It's totally fine to change your mind before confirmation! Just send them a polite message explaining. We've all been there - sometimes you realize you still want to play a game.\n\nOnce confirmed is different - then you should honor it unless there's a real problem.",
+        hoursAfterThread: 0.5,
+      },
+      {
+        authorEmail: 'demo-alex@meeplecart.test',
+        content:
+          "Agreed with Kiran. Better to cancel early than to regret it later. Just be honest and apologize for any inconvenience.",
+        hoursAfterThread: 2,
+      },
+      {
+        authorEmail: 'demo-tom@meeplecart.test',
+        content: 'Thanks! That makes me feel better. Will message them now.',
+        hoursAfterThread: 3,
+      },
+    ],
+  },
+
+  // Listing-specific discussions
+  {
+    authorEmail: 'demo-maya@meeplecart.test',
+    title: 'Question about Carcassonne',
+    content:
+      "Hi Bella! I'm interested in the Carcassonne in your family games listing. You mentioned it includes Inns & Cathedrals - does it have the big meeple too? Thanks!",
+    daysAgo: 4,
+    listingTitle: 'Auckland family night sale - Big collection clearout',
+    replies: [
+      {
+        authorEmail: 'demo-bella@meeplecart.test',
+        content: 'Yes it does! All expansion components are included. Happy to send photos if helpful.',
+        hoursAfterThread: 2,
+      },
+      {
+        authorEmail: 'demo-maya@meeplecart.test',
+        content: "That's perfect! I'll send you a message to work out details.",
+        hoursAfterThread: 3,
+      },
+    ],
+  },
+  {
+    authorEmail: 'demo-alex@meeplecart.test',
+    title: 'Bundle trade possibility?',
+    content:
+      "Hey Kiran! I'm really interested in Sleeping Gods and Destinies from your want list. I have both! Would you be interested in trading some of your strategy collection for them? Let me know what you think would be fair.",
+    daysAgo: 6,
+    listingTitle: 'Christchurch wishlist - narrative co-ops wanted',
+    replies: [
+      {
+        authorEmail: 'demo-kiran@meeplecart.test',
+        content:
+          "Oh wow, that would be amazing! I'd definitely be interested. Those are high on my list. Let me DM you and we can work out the details. Which games of mine caught your eye?",
+        hoursAfterThread: 1,
+      },
+      {
+        authorEmail: 'demo-alex@meeplecart.test',
+        content:
+          "I was thinking maybe Brass: Birmingham or Food Chain Magnate? I know those are valuable so happy to discuss what's fair. DMing you now!",
+        hoursAfterThread: 2,
+      },
+    ],
+  },
+];
+
 const escapeFilterValue = (value: string): string => {
   return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 };
@@ -1055,6 +1519,151 @@ const addRandomReactions = async (listingId: string, userRecords: Map<string, Re
   }
 };
 
+const createVouch = async (
+  seed: SeedVouch,
+  userRecords: Map<string, RecordModel>,
+  userPassword: string
+): Promise<RecordModel | null> => {
+  const pb = new PocketBase(baseUrl);
+  const voucherRecord = userRecords.get(seed.voucherEmail);
+  const voucheeRecord = userRecords.get(seed.voucheeEmail);
+
+  if (!voucherRecord || !voucheeRecord) {
+    console.warn(`⚠ Skipping vouch: missing user(s)`);
+    return null;
+  }
+
+  const createdDate = new Date();
+  createdDate.setDate(createdDate.getDate() - seed.daysAgo);
+
+  try {
+    // Authenticate as the voucher (required by createRule)
+    await pb.collection('users').authWithPassword(seed.voucherEmail, userPassword);
+
+    const vouch = await pb.collection('vouches').create({
+      voucher: voucherRecord.id,
+      vouchee: voucheeRecord.id,
+      message: seed.message,
+      created: createdDate.toISOString(),
+    });
+
+    pb.authStore.clear();
+    return vouch;
+  } catch (error: any) {
+    pb.authStore.clear();
+    console.warn(`⚠ Failed to create vouch: ${error}`);
+    if (error.response?.data) {
+      console.warn(`  Details: ${JSON.stringify(error.response.data)}`);
+    }
+    return null;
+  }
+};
+
+const createDiscussionThread = async (
+  seed: SeedDiscussionThread,
+  userRecords: Map<string, RecordModel>,
+  listingRecords: RecordModel[],
+  userPassword: string
+): Promise<RecordModel | null> => {
+  const pb = new PocketBase(baseUrl);
+  const authorRecord = userRecords.get(seed.authorEmail);
+
+  if (!authorRecord) {
+    console.warn(`⚠ Skipping discussion: missing author ${seed.authorEmail}`);
+    return null;
+  }
+
+  const threadDate = new Date();
+  threadDate.setDate(threadDate.getDate() - seed.daysAgo);
+
+  // Find listing if specified
+  let listingId: string | null = null;
+  if (seed.listingTitle) {
+    const listing = listingRecords.find((l) => l.title === seed.listingTitle);
+    if (listing) {
+      listingId = listing.id;
+    } else {
+      console.warn(`⚠ Could not find listing: ${seed.listingTitle}`);
+    }
+  }
+
+  try {
+    // Authenticate as the author (required by createRule)
+    await pb.collection('users').authWithPassword(seed.authorEmail, userPassword);
+
+    const thread = await pb.collection('discussion_threads').create({
+      author: authorRecord.id,
+      title: seed.title,
+      content: seed.content,
+      listing: listingId,
+      pinned: seed.pinned ?? false,
+      locked: false,
+      view_count: Math.floor(Math.random() * 50) + 5,
+      reply_count: seed.replies.length,
+      last_reply_at: seed.replies.length > 0 ? null : threadDate.toISOString(),
+    });
+
+    try {
+      // Update created timestamp
+      await pb.collection('discussion_threads').update(thread.id, {
+        created: threadDate.toISOString(),
+      });
+    } catch (updateError: any) {
+      console.warn(`    ⚠ Could not update created timestamp: ${updateError}`);
+      // Continue anyway - not critical
+    }
+
+    // Create replies
+    let lastReplyDate = threadDate;
+    for (const replySeed of seed.replies) {
+      const replyAuthorRecord = userRecords.get(replySeed.authorEmail);
+      if (!replyAuthorRecord) {
+        console.warn(`⚠ Skipping reply: missing author ${replySeed.authorEmail}`);
+        continue;
+      }
+
+      const replyDate = new Date(threadDate.getTime() + replySeed.hoursAfterThread * 60 * 60 * 1000);
+      lastReplyDate = replyDate;
+
+      // Authenticate as reply author
+      await pb.collection('users').authWithPassword(replySeed.authorEmail, userPassword);
+
+      const reply = await pb.collection('discussion_replies').create({
+        thread: thread.id,
+        author: replyAuthorRecord.id,
+        content: replySeed.content,
+      });
+
+      try {
+        // Update created timestamp
+        await pb.collection('discussion_replies').update(reply.id, {
+          created: replyDate.toISOString(),
+        });
+      } catch (updateError: any) {
+        console.warn(`    ⚠ Could not update reply created timestamp: ${updateError}`);
+        // Continue anyway
+      }
+    }
+
+    // Update last_reply_at if there were replies
+    if (seed.replies.length > 0) {
+      await pb.collection('discussion_threads').update(thread.id, {
+        last_reply_at: lastReplyDate.toISOString(),
+      });
+    }
+
+    pb.authStore.clear();
+    return thread;
+  } catch (error: any) {
+    pb.authStore.clear();
+    console.warn(`⚠ Failed to create discussion: ${error}`);
+    if (error.response?.data) {
+      console.warn(`  Details: ${JSON.stringify(error.response.data)}`);
+    }
+    return null;
+  }
+};
+
 const clearAllListings = async (): Promise<void> => {
   const pb = new PocketBase(baseUrl);
 
@@ -1131,9 +1740,40 @@ const seedDemoData = async (): Promise<void> => {
     await addRandomReactions(record.id, userRecords, demoUsers.map((u) => u.email));
   }
 
+  console.log('\n=== Creating Vouches ===\n');
+  const vouchRecords: RecordModel[] = [];
+  const demoPassword = 'TradeDemo2024!'; // All demo users use the same password
+  for (const vouch of demoVouches) {
+    const record = await createVouch(vouch, userRecords, demoPassword);
+    if (record) {
+      vouchRecords.push(record);
+      const voucherName = userRecords.get(vouch.voucherEmail)?.display_name;
+      const voucheeName = userRecords.get(vouch.voucheeEmail)?.display_name;
+      console.log(`✓ ${voucherName} vouched for ${voucheeName} (${vouch.daysAgo} days ago)`);
+    }
+  }
+
+  console.log('\n=== Creating Discussions ===\n');
+  const discussionRecords: RecordModel[] = [];
+  for (const discussion of demoDiscussions) {
+    const record = await createDiscussionThread(discussion, userRecords, listingRecords, demoPassword);
+    if (record) {
+      discussionRecords.push(record);
+      const authorName = userRecords.get(discussion.authorEmail)?.display_name;
+      const typeLabel = discussion.listingTitle ? 'listing discussion' : 'general discussion';
+      console.log(
+        `✓ "${discussion.title}" by ${authorName} (${typeLabel}, ${discussion.replies.length} replies)`
+      );
+    } else {
+      console.log(`✗ Failed to create: "${discussion.title}"`);
+    }
+  }
+
   console.log('\n=== Summary ===\n');
   console.log(`✓ ${userRecords.size} demo users ensured`);
   console.log(`✓ ${listingRecords.length} listings created`);
+  console.log(`✓ ${vouchRecords.length} vouches created`);
+  console.log(`✓ ${discussionRecords.length} discussion threads created`);
   console.log(`✓ Activities spread across the last ${Math.max(...demoListings.map(l => l.daysAgo))} days`);
   console.log('\n✨ Demo data seeded successfully!\n');
 };
