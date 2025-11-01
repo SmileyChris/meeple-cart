@@ -61,3 +61,27 @@ export interface ReactionCounts {
   '🎉': number;
   '😍': number;
 }
+
+export interface DiscussionThreadRecord extends RecordModel {
+  title: string;
+  content: string;
+  author: string;
+  pinned?: boolean;
+  locked?: boolean;
+  view_count: number;
+  reply_count: number;
+  last_reply_at?: string;
+  expand?: {
+    author?: UserRecord;
+  };
+}
+
+export interface DiscussionReplyRecord extends RecordModel {
+  thread: string;
+  content: string;
+  author: string;
+  expand?: {
+    thread?: DiscussionThreadRecord;
+    author?: UserRecord;
+  };
+}
