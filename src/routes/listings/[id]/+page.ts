@@ -82,17 +82,8 @@ export const load: PageLoad = async ({ params }) => {
       listing_type: normalizeListingType(String(listing.listing_type)),
     } satisfies ListingRecord;
 
-    // Check if user is watching this listing
-    let isWatching = false;
-    const user = get(currentUser);
-    if (user) {
-      const watchlist = await pb.collection('watchlist').getFullList({
-        filter: `user = "${user.id}" && listing = "${id}"`,
-      });
-      isWatching = watchlist.length > 0;
-    }
-
     // Fetch reaction counts and user's reaction
+    const user = get(currentUser);
     const reactions = await pb.collection('reactions').getFullList<ReactionRecord>({
       filter: `listing = "${id}"`,
     });
@@ -115,6 +106,9 @@ export const load: PageLoad = async ({ params }) => {
         userReaction = emoji;
       }
     });
+
+    // User is "watching" if they have any reaction on this listing
+    const isWatching = userReaction !== null;
 
     return {
       listing: normalizedListing,
