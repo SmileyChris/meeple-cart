@@ -121,6 +121,20 @@ export const load: PageLoad = async ({ params }) => {
       }
     }
 
+    // Load listing-specific discussion threads
+    let discussions = [];
+    try {
+      const threads = await pb.collection('discussion_threads').getList(1, 10, {
+        filter: `listing = "${id}"`,
+        sort: '-created',
+        expand: 'author',
+      });
+      discussions = threads.items;
+    } catch (err) {
+      console.error('Failed to load discussions:', err);
+      // Don't fail the whole page if discussions fail to load
+    }
+
     return {
       listing: normalizedListing,
       owner: owner || null,
@@ -130,6 +144,7 @@ export const load: PageLoad = async ({ params }) => {
       reactionCounts,
       userReaction,
       existingTrade,
+      discussions,
     };
   } catch (err) {
     console.error(`Failed to load listing ${id}`, err);

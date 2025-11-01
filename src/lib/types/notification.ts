@@ -5,7 +5,13 @@ import type { UserRecord } from './pocketbase';
 /**
  * Notification types
  */
-export type NotificationType = 'new_listing' | 'new_message' | 'price_drop' | 'listing_update';
+export type NotificationType =
+  | 'new_listing'
+  | 'new_message'
+  | 'price_drop'
+  | 'listing_update'
+  | 'discussion_reply'
+  | 'discussion_mention';
 
 /**
  * Base notification record from PocketBase
@@ -95,6 +101,8 @@ export const NOTIFICATION_ICONS: Record<NotificationType, string> = {
   new_message: '💬',
   price_drop: '📉',
   listing_update: '🔔',
+  discussion_reply: '💭',
+  discussion_mention: '📢',
 };
 
 /**
@@ -123,5 +131,15 @@ export const NOTIFICATION_COLORS: Record<
     bg: 'bg-amber-500/10',
     border: 'border-amber-600',
     text: 'text-amber-200',
+  },
+  discussion_reply: {
+    bg: 'bg-cyan-500/10',
+    border: 'border-cyan-600',
+    text: 'text-cyan-200',
+  },
+  discussion_mention: {
+    bg: 'bg-rose-500/10',
+    border: 'border-rose-600',
+    text: 'text-rose-200',
   },
 };

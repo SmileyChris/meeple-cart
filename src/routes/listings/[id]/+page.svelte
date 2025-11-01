@@ -25,6 +25,7 @@
   let owner = $derived(data.owner);
   let games = $derived(data.games);
   let photos = $derived(data.photos ?? []);
+  let discussions = $derived(data.discussions ?? []);
   let activePhotoIndex = $state(0);
 
   // Photo region state
@@ -788,6 +789,79 @@
           </p>
         {/if}
       </aside>
+    </section>
+
+    <!-- Discussion Section -->
+    <section class="mt-12">
+      <div class="mb-6 flex items-center justify-between">
+        <h2 class="text-2xl font-bold text-primary">Discussion</h2>
+        <a
+          href="/discussions/new?listing={listing.id}"
+          class="rounded-lg border border-subtle bg-surface-body px-4 py-2 text-sm font-medium text-secondary transition hover:border-accent hover:text-primary"
+        >
+          Start a Discussion
+        </a>
+      </div>
+
+      {#if discussions.length === 0}
+        <div class="rounded-lg border border-subtle bg-surface-card p-8 text-center">
+          <p class="text-secondary">No discussions yet</p>
+          <p class="mt-2 text-sm text-muted">
+            Be the first to start a conversation about this listing!
+          </p>
+          <a
+            href="/discussions/new?listing={listing.id}"
+            class="mt-4 inline-block rounded-lg border border-emerald-500 bg-emerald-500 px-6 py-2 font-semibold text-surface-body transition hover:bg-emerald-600"
+          >
+            Start Discussion
+          </a>
+        </div>
+      {:else}
+        <div class="space-y-3">
+          {#each discussions as thread}
+            <a
+              href="/discussions/{thread.id}"
+              class="block rounded-lg border border-subtle bg-surface-card p-4 transition hover:border-accent"
+            >
+              <div class="mb-2 flex items-start justify-between gap-4">
+                <h3 class="font-semibold text-primary hover:text-accent">
+                  {thread.title}
+                </h3>
+                {#if thread.pinned}
+                  <span
+                    class="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-semibold text-emerald-200"
+                  >
+                    📌 Pinned
+                  </span>
+                {/if}
+              </div>
+
+              <div class="flex items-center gap-3 text-xs text-muted">
+                <span class="font-medium text-secondary">
+                  {thread.expand?.author?.display_name ?? 'Unknown'}
+                </span>
+                <span>·</span>
+                <span>
+                  {new Date(thread.created).toLocaleDateString('en-NZ', {
+                    month: 'short',
+                    day: 'numeric',
+                  })}
+                </span>
+                <span>·</span>
+                <span>💬 {thread.reply_count} replies</span>
+              </div>
+            </a>
+          {/each}
+        </div>
+
+        {#if discussions.length >= 10}
+          <div class="mt-4 text-center">
+            <a href="/discussions" class="text-sm text-accent hover:underline">
+              View all discussions →
+            </a>
+          </div>
+        {/if}
+      {/if}
     </section>
   </div>
 </main>
