@@ -1,18 +1,43 @@
 import PocketBase, { ClientResponseError, RecordModel } from 'pocketbase';
+import { REACTION_EMOJIS } from '../src/lib/types/pocketbase';
 
 const baseUrl = (process.env.POCKETBASE_URL ?? 'http://127.0.0.1:8090').replace(/\/$/, '');
+
+// Parse command line arguments
+const args = process.argv.slice(2);
+const clearListings = args.includes('--clear-listings');
+const help = args.includes('--help') || args.includes('-h');
+
+if (help) {
+  console.log(`
+Demo Data Seeder for Meeple Cart
+
+Usage:
+  npm run seed:demo [options]
+
+Options:
+  --clear-listings    Delete all existing listings before creating new ones
+  --help, -h         Show this help message
+
+Examples:
+  npm run seed:demo                    # Create demo data (keeps existing listings)
+  npm run seed:demo --clear-listings   # Clear all listings and recreate
+`);
+  process.exit(0);
+}
 
 type SeedUser = {
   email: string;
   password: string;
   displayName: string;
   location: string;
-  joinedDate: string;
+  joinedDaysAgo: number;
   tradeCount: number;
   vouchCount: number;
   preferredContact: 'platform' | 'email' | 'phone';
   bio?: string;
   phone?: string;
+  preferredRegions?: string[];
 };
 
 type SeedGame = {
@@ -27,7 +52,6 @@ type SeedGame = {
 };
 
 type SeedListing = {
-  key: string;
   ownerEmail: string;
   title: string;
   summary: string;
@@ -36,18 +60,8 @@ type SeedListing = {
   shippingAvailable: boolean;
   preferBundle: boolean;
   bundleDiscount?: number;
-  views: number;
+  daysAgo: number;
   games: SeedGame[];
-};
-
-type SeedTrade = {
-  listingKey: string;
-  buyerEmail: string;
-  sellerEmail: string;
-  status: 'initiated' | 'confirmed' | 'completed' | 'disputed';
-  rating?: number;
-  review?: string;
-  completedDate?: string;
 };
 
 const demoUsers: SeedUser[] = [
@@ -55,52 +69,114 @@ const demoUsers: SeedUser[] = [
     email: 'demo-alex@meeplecart.test',
     password: 'TradeDemo2024!',
     displayName: 'Alex Thompson',
-    location: 'Wellington, NZ',
-    joinedDate: '2023-06-12T09:00:00.000Z',
+    location: 'Wellington',
+    joinedDaysAgo: 547,
     tradeCount: 12,
     vouchCount: 5,
     preferredContact: 'platform',
     bio: 'Co-op enthusiast with a soft spot for crunchy euros. Happy to meetup in the CBD.',
     phone: '+64 21 555 1234',
+    preferredRegions: ['wellington'],
   },
   {
     email: 'demo-bella@meeplecart.test',
     password: 'TradeDemo2024!',
     displayName: 'Bella Ngata',
-    location: 'Auckland, NZ',
-    joinedDate: '2024-01-20T10:30:00.000Z',
+    location: 'Auckland',
+    joinedDaysAgo: 284,
     tradeCount: 7,
     vouchCount: 3,
     preferredContact: 'email',
     bio: 'Collecting narrative-heavy games and teaching them at our local community hub.',
+    preferredRegions: ['auckland'],
   },
   {
     email: 'demo-kiran@meeplecart.test',
     password: 'TradeDemo2024!',
     displayName: 'Kiran Patel',
-    location: 'Christchurch, NZ',
-    joinedDate: '2022-11-05T08:45:00.000Z',
+    location: 'Christchurch',
+    joinedDaysAgo: 730,
     tradeCount: 21,
     vouchCount: 11,
     preferredContact: 'phone',
     bio: 'Runs monthly swap nights. Looking to rehome well-loved strategy titles.',
     phone: '+64 27 777 8899',
+    preferredRegions: ['canterbury'],
+  },
+  {
+    email: 'demo-sarah@meeplecart.test',
+    password: 'TradeDemo2024!',
+    displayName: 'Sarah Mitchell',
+    location: 'Hamilton',
+    joinedDaysAgo: 156,
+    tradeCount: 4,
+    vouchCount: 2,
+    preferredContact: 'platform',
+    bio: 'Party game collector. Always looking for quick-to-teach crowd pleasers!',
+    preferredRegions: ['waikato'],
+  },
+  {
+    email: 'demo-james@meeplecart.test',
+    password: 'TradeDemo2024!',
+    displayName: 'James Chen',
+    location: 'Dunedin',
+    joinedDaysAgo: 421,
+    tradeCount: 15,
+    vouchCount: 8,
+    preferredContact: 'email',
+    bio: '18XX fanatic. Also into deck builders and engine builders.',
+    phone: '+64 22 444 5566',
+    preferredRegions: ['otago'],
+  },
+  {
+    email: 'demo-maya@meeplecart.test',
+    password: 'TradeDemo2024!',
+    displayName: 'Maya Rodriguez',
+    location: 'Tauranga',
+    joinedDaysAgo: 92,
+    tradeCount: 3,
+    vouchCount: 1,
+    preferredContact: 'platform',
+    bio: 'New to the hobby! Looking for gateway games and friendly trades.',
+    preferredRegions: ['bay_of_plenty'],
+  },
+  {
+    email: 'demo-tom@meeplecart.test',
+    password: 'TradeDemo2024!',
+    displayName: 'Tom Harrison',
+    location: 'Nelson',
+    joinedDaysAgo: 245,
+    tradeCount: 9,
+    vouchCount: 4,
+    preferredContact: 'email',
+    bio: 'War games and miniatures. Open to trades or sales with shipping.',
+    preferredRegions: ['nelson', 'tasman'],
+  },
+  {
+    email: 'demo-lisa@meeplecart.test',
+    password: 'TradeDemo2024!',
+    displayName: 'Lisa Wang',
+    location: 'Palmerston North',
+    joinedDaysAgo: 33,
+    tradeCount: 1,
+    vouchCount: 0,
+    preferredContact: 'platform',
+    bio: 'Just joined! Love cooperative games and anything with a good theme.',
+    preferredRegions: ['manawatu_whanganui'],
   },
 ];
 
 const demoListings: SeedListing[] = [
   {
-    key: 'alex-trade-bundle',
     ownerEmail: 'demo-alex@meeplecart.test',
-    title: '[Demo] Wellington euro trade bundle',
-    summary:
-      'Mix of medium-heavy euros ready for the next table. Prefer bundle swaps but open to offers.',
+    title: 'Wellington euro trade bundle',
+    summary: 'Mix of medium-heavy euros ready for the next table. Prefer bundle swaps but open to offers.',
     listingType: 'trade',
     location: 'Wellington',
     shippingAvailable: true,
     preferBundle: true,
     bundleDiscount: 15,
-    views: 128,
+    daysAgo: 2,
     games: [
       {
         title: 'Everdell',
@@ -108,7 +184,7 @@ const demoListings: SeedListing[] = [
         year: 2018,
         condition: 'excellent',
         tradeValue: 95,
-        notes: 'Collector’s Edition with metal coins and wooden berries.',
+        notes: "Collector's Edition with metal coins and wooden berries.",
       },
       {
         title: 'Great Western Trail (2nd ed.)',
@@ -121,15 +197,14 @@ const demoListings: SeedListing[] = [
     ],
   },
   {
-    key: 'bella-sell-family',
     ownerEmail: 'demo-bella@meeplecart.test',
-    title: '[Demo] Auckland family night sale',
+    title: 'Auckland family night sale',
     summary: 'Family-friendly lineup that we have outgrown. Priced to move, can post nationwide.',
     listingType: 'sell',
     location: 'Auckland',
     shippingAvailable: true,
     preferBundle: false,
-    views: 86,
+    daysAgo: 5,
     games: [
       {
         title: 'Ticket to Ride: Europe',
@@ -158,15 +233,14 @@ const demoListings: SeedListing[] = [
     ],
   },
   {
-    key: 'kiran-want-to-buy',
     ownerEmail: 'demo-kiran@meeplecart.test',
-    title: '[Demo] Christchurch wishlist',
+    title: 'Christchurch wishlist - narrative co-ops wanted',
     summary: 'Looking to buy or trade for narrative co-ops with strong solo support.',
     listingType: 'want',
     location: 'Christchurch',
     shippingAvailable: false,
     preferBundle: false,
-    views: 44,
+    daysAgo: 8,
     games: [
       {
         title: 'Sleeping Gods',
@@ -184,25 +258,209 @@ const demoListings: SeedListing[] = [
       },
     ],
   },
-];
-
-const demoTrades: SeedTrade[] = [
   {
-    listingKey: 'alex-trade-bundle',
-    buyerEmail: 'demo-bella@meeplecart.test',
-    sellerEmail: 'demo-alex@meeplecart.test',
-    status: 'completed',
-    rating: 5,
-    review: 'Smooth swap at Wellycon — games in top condition and great communication.',
-    completedDate: '2024-05-18T01:30:00.000Z',
+    ownerEmail: 'demo-sarah@meeplecart.test',
+    title: 'Party games - Hamilton pickup preferred',
+    summary: 'Great for game nights! Selling to make room for new arrivals.',
+    listingType: 'sell',
+    location: 'Hamilton',
+    shippingAvailable: true,
+    preferBundle: true,
+    bundleDiscount: 20,
+    daysAgo: 1,
+    games: [
+      {
+        title: 'Wavelength',
+        bggId: 262543,
+        year: 2019,
+        condition: 'excellent',
+        price: 35,
+        notes: 'Perfect party icebreaker. All components present.',
+      },
+      {
+        title: 'Just One',
+        bggId: 254640,
+        year: 2018,
+        condition: 'good',
+        price: 25,
+        notes: 'Spiel des Jahres winner. Minor wear on cards.',
+      },
+      {
+        title: 'Decrypto',
+        bggId: 225694,
+        year: 2018,
+        condition: 'mint',
+        price: 30,
+        notes: 'Unopened/unplayed. Received as duplicate gift.',
+      },
+    ],
   },
   {
-    listingKey: 'bella-sell-family',
-    buyerEmail: 'demo-kiran@meeplecart.test',
-    sellerEmail: 'demo-bella@meeplecart.test',
-    status: 'confirmed',
-    rating: 4,
-    review: 'Awaiting courier pickup but Bella shared tracking immediately.',
+    ownerEmail: 'demo-james@meeplecart.test',
+    title: 'Strategy heavyweights - Dunedin',
+    summary: 'Premium titles for experienced gamers. All well-maintained.',
+    listingType: 'trade',
+    location: 'Dunedin',
+    shippingAvailable: true,
+    preferBundle: false,
+    daysAgo: 12,
+    games: [
+      {
+        title: 'Brass: Birmingham',
+        bggId: 224517,
+        year: 2018,
+        condition: 'excellent',
+        tradeValue: 110,
+        notes: 'Deluxe edition with poker chips. In pristine condition.',
+      },
+      {
+        title: 'Wingspan',
+        bggId: 266192,
+        year: 2019,
+        condition: 'good',
+        tradeValue: 65,
+        notes: 'Base game + European expansion. Cards sleeved.',
+      },
+    ],
+  },
+  {
+    ownerEmail: 'demo-maya@meeplecart.test',
+    title: 'Looking for beginner-friendly games',
+    summary: 'New collector wanting gateway games to build my collection!',
+    listingType: 'want',
+    location: 'Tauranga',
+    shippingAvailable: true,
+    preferBundle: false,
+    daysAgo: 3,
+    games: [
+      {
+        title: 'Carcassonne',
+        bggId: 822,
+        condition: 'good',
+        notes: 'Base game or with expansions - happy either way!',
+      },
+      {
+        title: 'Splendor',
+        bggId: 148228,
+        condition: 'good',
+        notes: 'Looking for a good price on this classic.',
+      },
+    ],
+  },
+  {
+    ownerEmail: 'demo-tom@meeplecart.test',
+    title: 'War game collection - Nelson',
+    summary: 'Downsizing my war game collection. Shipping available nationwide.',
+    listingType: 'sell',
+    location: 'Nelson',
+    shippingAvailable: true,
+    preferBundle: true,
+    bundleDiscount: 10,
+    daysAgo: 18,
+    games: [
+      {
+        title: 'Twilight Struggle',
+        bggId: 12333,
+        year: 2005,
+        condition: 'excellent',
+        price: 70,
+        notes: 'Deluxe edition. All cards sleeved.',
+      },
+      {
+        title: 'Root',
+        bggId: 237182,
+        year: 2018,
+        condition: 'good',
+        price: 85,
+        notes: 'Base game + Riverfolk expansion. Minor box wear.',
+      },
+    ],
+  },
+  {
+    ownerEmail: 'demo-lisa@meeplecart.test',
+    title: 'Cooperative games for trade',
+    summary: 'Looking to trade my co-ops for other co-ops or party games!',
+    listingType: 'trade',
+    location: 'Palmerston North',
+    shippingAvailable: true,
+    preferBundle: false,
+    daysAgo: 7,
+    games: [
+      {
+        title: 'Pandemic Legacy: Season 1',
+        bggId: 161936,
+        year: 2015,
+        condition: 'good',
+        tradeValue: 50,
+        notes: 'Partially played (month 5). Great condition.',
+      },
+      {
+        title: 'Spirit Island',
+        bggId: 162886,
+        year: 2017,
+        condition: 'excellent',
+        tradeValue: 90,
+        notes: 'Includes Branch & Claw expansion. All components organized.',
+      },
+    ],
+  },
+  {
+    ownerEmail: 'demo-alex@meeplecart.test',
+    title: 'Quick sell - Moving overseas',
+    summary: 'Need to sell quickly before my move. Great prices!',
+    listingType: 'sell',
+    location: 'Wellington',
+    shippingAvailable: true,
+    preferBundle: true,
+    bundleDiscount: 25,
+    daysAgo: 25,
+    games: [
+      {
+        title: '7 Wonders Duel',
+        bggId: 173346,
+        year: 2015,
+        condition: 'excellent',
+        price: 40,
+        notes: 'Two-player classic. Perfect condition.',
+      },
+      {
+        title: 'Agricola',
+        bggId: 31260,
+        year: 2007,
+        condition: 'good',
+        price: 55,
+        notes: 'Revised edition. All components present.',
+      },
+    ],
+  },
+  {
+    ownerEmail: 'demo-bella@meeplecart.test',
+    title: 'Modern classics bundle',
+    summary: 'Award-winning games in excellent condition.',
+    listingType: 'trade',
+    location: 'Auckland',
+    shippingAvailable: true,
+    preferBundle: true,
+    bundleDiscount: 15,
+    daysAgo: 14,
+    games: [
+      {
+        title: 'Cascadia',
+        bggId: 295947,
+        year: 2021,
+        condition: 'mint',
+        tradeValue: 55,
+        notes: 'Spiel des Jahres 2022 winner. Unplayed.',
+      },
+      {
+        title: 'Lost Ruins of Arnak',
+        bggId: 312484,
+        year: 2020,
+        condition: 'excellent',
+        tradeValue: 70,
+        notes: 'Includes expedition leaders expansion.',
+      },
+    ],
   },
 ];
 
@@ -221,21 +479,24 @@ const findRecord = async (
     if (error instanceof ClientResponseError && error.status === 404) {
       return null;
     }
-
     throw error;
   }
 };
 
 const ensureUser = async (seed: SeedUser): Promise<RecordModel | null> => {
+  const joinedDate = new Date();
+  joinedDate.setDate(joinedDate.getDate() - seed.joinedDaysAgo);
+
   const updatePayload = {
     display_name: seed.displayName,
     location: seed.location,
     phone: seed.phone ?? null,
     trade_count: seed.tradeCount,
     vouch_count: seed.vouchCount,
-    joined_date: seed.joinedDate,
+    joined_date: joinedDate.toISOString(),
     bio: seed.bio ?? '',
     preferred_contact: seed.preferredContact,
+    preferred_regions: seed.preferredRegions ?? [],
     cascades_seeded: 0,
     cascades_received: 0,
     cascades_passed: 0,
@@ -259,7 +520,6 @@ const ensureUser = async (seed: SeedUser): Promise<RecordModel | null> => {
   }
 
   authClient.authStore.clear();
-
   const createClient = new PocketBase(baseUrl);
 
   try {
@@ -273,13 +533,11 @@ const ensureUser = async (seed: SeedUser): Promise<RecordModel | null> => {
     return created;
   } catch (error) {
     createClient.authStore.clear();
-
     if (error instanceof ClientResponseError && error.status === 400) {
       const details = JSON.stringify(error.response?.data ?? {});
       console.warn(`Skipping demo user ${seed.email}: ${error.message} ${details}`);
       return null;
     }
-
     throw error;
   }
 };
@@ -292,12 +550,9 @@ const recreateListing = async (
   const userPb = new PocketBase(baseUrl);
   await userPb.collection('users').authWithPassword(seed.ownerEmail, userPassword);
 
-  const filter = `title = "${escapeFilterValue(seed.title)}" && owner = "${escapeFilterValue(ownerRecord.id)}"`;
-  const existing = await findRecord(userPb, 'listings', filter);
-
-  if (existing) {
-    await userPb.collection('listings').delete(existing.id);
-  }
+  // Calculate created timestamp based on daysAgo
+  const createdDate = new Date();
+  createdDate.setDate(createdDate.getDate() - seed.daysAgo);
 
   const payload: Record<string, unknown> = {
     owner: ownerRecord.id,
@@ -309,10 +564,13 @@ const recreateListing = async (
     shipping_available: seed.shippingAvailable,
     prefer_bundle: seed.preferBundle,
     bundle_discount: seed.bundleDiscount ?? null,
-    views: seed.views,
+    views: Math.floor(Math.random() * 150) + 10,
   };
 
   const listing = await userPb.collection('listings').create(payload);
+
+  // Update created timestamp to backdate the listing
+  await userPb.collection('listings').update(listing.id, { created: createdDate.toISOString() });
 
   for (const game of seed.games) {
     const gamePayload: Record<string, unknown> = {
@@ -342,54 +600,75 @@ const recreateListing = async (
       gamePayload.notes = game.notes;
     }
 
-    await userPb.collection('games').create(gamePayload);
+    const gameRecord = await userPb.collection('games').create(gamePayload);
+
+    // Backdate game creation
+    await userPb.collection('games').update(gameRecord.id, { created: createdDate.toISOString() });
   }
 
   userPb.authStore.clear();
   return listing;
 };
 
-const recreateTrade = async (
-  seed: SeedTrade,
-  listing: RecordModel,
-  buyer: RecordModel,
-  seller: RecordModel,
-  buyerPassword: string
-): Promise<void> => {
-  const buyerPb = new PocketBase(baseUrl);
-  await buyerPb.collection('users').authWithPassword(seed.buyerEmail, buyerPassword);
+const addRandomReactions = async (listingId: string, userRecords: Map<string, RecordModel>, userEmails: string[]): Promise<void> => {
+  const pb = new PocketBase(baseUrl);
 
-  const filter = `listing = "${escapeFilterValue(listing.id)}" && buyer = "${escapeFilterValue(buyer.id)}" && seller = "${escapeFilterValue(seller.id)}"`;
-  const existing = await findRecord(buyerPb, 'trades', filter);
+  // Random number of reactions (0-4 users will react)
+  const numReactions = Math.floor(Math.random() * 5);
+  const shuffledUsers = [...userEmails].sort(() => Math.random() - 0.5);
 
-  if (existing) {
-    await buyerPb.collection('trades').delete(existing.id);
+  for (let i = 0; i < numReactions; i++) {
+    const userEmail = shuffledUsers[i];
+    const userRecord = userRecords.get(userEmail);
+    if (!userRecord) continue;
+
+    // Pick random emoji
+    const randomEmoji = REACTION_EMOJIS[Math.floor(Math.random() * REACTION_EMOJIS.length)];
+
+    try {
+      await pb.collection('reactions').create({
+        user: userRecord.id,
+        listing: listingId,
+        emoji: randomEmoji,
+      });
+    } catch (error) {
+      // Ignore duplicate errors (unique constraint)
+    }
+  }
+};
+
+const clearAllListings = async (): Promise<void> => {
+  const pb = new PocketBase(baseUrl);
+
+  console.log('Clearing all listings...');
+
+  // Delete all games first (cascades should handle this, but be explicit)
+  const games = await pb.collection('games').getFullList();
+  for (const game of games) {
+    await pb.collection('games').delete(game.id);
   }
 
-  const payload: Record<string, unknown> = {
-    listing: listing.id,
-    buyer: buyer.id,
-    seller: seller.id,
-    status: seed.status,
-  };
-
-  if (typeof seed.rating === 'number') {
-    payload.rating = seed.rating;
+  // Delete all listings
+  const listings = await pb.collection('listings').getFullList();
+  for (const listing of listings) {
+    await pb.collection('listings').delete(listing.id);
   }
 
-  if (seed.review) {
-    payload.review = seed.review;
+  // Delete all reactions
+  const reactions = await pb.collection('reactions').getFullList();
+  for (const reaction of reactions) {
+    await pb.collection('reactions').delete(reaction.id);
   }
 
-  if (seed.completedDate) {
-    payload.completed_date = seed.completedDate;
-  }
-
-  await buyerPb.collection('trades').create(payload);
-  buyerPb.authStore.clear();
+  console.log(`Deleted ${listings.length} listings, ${games.length} games, and ${reactions.length} reactions.`);
 };
 
 const seedDemoData = async (): Promise<void> => {
+  if (clearListings) {
+    await clearAllListings();
+  }
+
+  console.log('\n=== Creating Demo Users ===\n');
   const userRecords = new Map<string, RecordModel>();
 
   for (const user of demoUsers) {
@@ -400,67 +679,47 @@ const seedDemoData = async (): Promise<void> => {
     }
 
     userRecords.set(user.email, record);
-    console.log(`Ensured demo user: ${record.display_name ?? user.displayName}`);
+    console.log(`✓ ${record.display_name} (joined ${user.joinedDaysAgo} days ago)`);
   }
 
-  const listingRecords = new Map<string, RecordModel>();
+  console.log('\n=== Creating Demo Listings ===\n');
+  const listingRecords: RecordModel[] = [];
 
   for (const listing of demoListings) {
     const ownerRecord = userRecords.get(listing.ownerEmail);
 
     if (!ownerRecord) {
-      console.warn(`Skipping listing for missing owner: ${listing.ownerEmail}`);
+      console.warn(`⚠ Skipping listing for missing owner: ${listing.ownerEmail}`);
       continue;
     }
 
     const ownerSeed = demoUsers.find((user) => user.email === listing.ownerEmail);
 
     if (!ownerSeed) {
-      console.warn(`Skipping listing; missing seed credentials for ${listing.ownerEmail}`);
+      console.warn(`⚠ Skipping listing; missing seed credentials for ${listing.ownerEmail}`);
       continue;
     }
 
     const record = await recreateListing(listing, ownerRecord, ownerSeed.password);
-    listingRecords.set(listing.key, record);
-    console.log(`Rebuilt demo listing: ${listing.title}`);
+    listingRecords.push(record);
+    console.log(`✓ "${listing.title}" (${listing.daysAgo} days ago, ${listing.games.length} games)`);
+
+    // Add random reactions to this listing
+    await addRandomReactions(record.id, userRecords, demoUsers.map((u) => u.email));
   }
 
-  for (const trade of demoTrades) {
-    const listingRecord = listingRecords.get(trade.listingKey);
-
-    if (!listingRecord) {
-      console.warn(`Skipping trade for missing listing: ${trade.listingKey}`);
-      continue;
-    }
-
-    const buyerRecord = userRecords.get(trade.buyerEmail);
-    const sellerRecord = userRecords.get(trade.sellerEmail);
-
-    if (!buyerRecord || !sellerRecord) {
-      console.warn(`Skipping trade with missing participants: ${trade.listingKey}`);
-      continue;
-    }
-
-    const buyerSeed = demoUsers.find((user) => user.email === trade.buyerEmail);
-
-    if (!buyerSeed) {
-      console.warn(`Skipping trade; missing buyer credentials for ${trade.buyerEmail}`);
-      continue;
-    }
-
-    await recreateTrade(trade, listingRecord, buyerRecord, sellerRecord, buyerSeed.password);
-    console.log(
-      `Recorded demo trade on ${listingRecord.title} between ${buyerRecord.display_name} and ${sellerRecord.display_name}`
-    );
-  }
+  console.log('\n=== Summary ===\n');
+  console.log(`✓ ${userRecords.size} demo users ensured`);
+  console.log(`✓ ${listingRecords.length} listings created`);
+  console.log(`✓ Activities spread across the last ${Math.max(...demoListings.map(l => l.daysAgo))} days`);
+  console.log('\n✨ Demo data seeded successfully!\n');
 };
 
 seedDemoData()
   .then(() => {
-    console.log('Demo data seed complete.');
     process.exit(0);
   })
   .catch((error) => {
-    console.error('Failed to seed demo data:\n', error);
+    console.error('\n❌ Failed to seed demo data:\n', error);
     process.exit(1);
   });
