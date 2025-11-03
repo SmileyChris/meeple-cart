@@ -144,7 +144,7 @@
 	<!-- Form -->
 	<div class="rounded-lg border border-subtle bg-surface-card p-6">
 		{#if error}
-			<div class="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-red-200">
+			<div class="alert alert-error mb-4">
 				{error}
 			</div>
 		{/if}
@@ -212,5 +212,11 @@
 			<li>• No spam, self-promotion, or duplicate posts</li>
 			<li>• Report any inappropriate content to moderators</li>
 		</ul>
+		<a
+			href="/guidelines"
+			class="mt-3 inline-block text-xs text-accent hover:underline"
+		>
+			Read full community guidelines →
+		</a>
 	</div>
 </div>

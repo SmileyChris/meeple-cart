@@ -34,6 +34,20 @@
     --badge-sky: #7dd3fc;
     --badge-blue: #93c5fd;
     --badge-purple: #d8b4fe;
+
+    /* Alert/notification colors */
+    --alert-error-bg: rgba(239, 68, 68, 0.1);
+    --alert-error-border: rgba(239, 68, 68, 0.3);
+    --alert-error-text: #fca5a5;
+    --alert-success-bg: rgba(52, 211, 153, 0.1);
+    --alert-success-border: rgba(52, 211, 153, 0.3);
+    --alert-success-text: #6ee7b7;
+    --alert-warning-bg: rgba(251, 191, 36, 0.1);
+    --alert-warning-border: rgba(251, 191, 36, 0.3);
+    --alert-warning-text: #fcd34d;
+    --alert-info-bg: rgba(96, 165, 250, 0.1);
+    --alert-info-border: rgba(96, 165, 250, 0.3);
+    --alert-info-text: #93c5fd;
   }
 
   [data-theme='light'] {
@@ -64,6 +78,20 @@
     --badge-sky: #0369a1;
     --badge-blue: #1d4ed8;
     --badge-purple: #7e22ce;
+
+    /* Alert/notification colors for light mode */
+    --alert-error-bg: rgba(239, 68, 68, 0.08);
+    --alert-error-border: rgba(220, 38, 38, 0.25);
+    --alert-error-text: #dc2626;
+    --alert-success-bg: rgba(5, 150, 105, 0.08);
+    --alert-success-border: rgba(5, 150, 105, 0.25);
+    --alert-success-text: #059669;
+    --alert-warning-bg: rgba(245, 158, 11, 0.08);
+    --alert-warning-border: rgba(217, 119, 6, 0.25);
+    --alert-warning-text: #d97706;
+    --alert-info-bg: rgba(37, 99, 235, 0.08);
+    --alert-info-border: rgba(37, 99, 235, 0.25);
+    --alert-info-text: #2563eb;
   }
 
   body {
@@ -194,5 +222,194 @@
     border-color: var(--accent);
     color: var(--accent-strong);
     background-color: var(--surface-ghost);
+  }
+
+  /* Alert components */
+  .alert {
+    @apply rounded-lg border p-3 text-sm;
+  }
+
+  .alert-error {
+    background-color: var(--alert-error-bg);
+    border-color: var(--alert-error-border);
+    color: var(--alert-error-text);
+  }
+
+  .alert-success {
+    background-color: var(--alert-success-bg);
+    border-color: var(--alert-success-border);
+    color: var(--alert-success-text);
+  }
+
+  .alert-warning {
+    background-color: var(--alert-warning-bg);
+    border-color: var(--alert-warning-border);
+    color: var(--alert-warning-text);
+  }
+
+  .alert-info {
+    background-color: var(--alert-info-bg);
+    border-color: var(--alert-info-border);
+    color: var(--alert-info-text);
+  }
+
+  /* Markdown prose styling */
+  .prose {
+    @apply text-base leading-7;
+    max-width: none;
+  }
+
+  .prose h1 {
+    @apply mt-6 mb-4 text-3xl font-bold;
+    color: var(--text-primary);
+  }
+
+  .prose h2 {
+    @apply mt-5 mb-3 text-2xl font-bold;
+    color: var(--text-primary);
+  }
+
+  .prose h3 {
+    @apply mt-4 mb-2 text-xl font-semibold;
+    color: var(--text-primary);
+  }
+
+  .prose h4 {
+    @apply mt-3 mb-2 text-lg font-semibold;
+    color: var(--text-primary);
+  }
+
+  .prose h5 {
+    @apply mt-2 mb-1 text-base font-semibold;
+    color: var(--text-primary);
+  }
+
+  .prose h6 {
+    @apply mt-2 mb-1 text-sm font-semibold;
+    color: var(--text-primary);
+  }
+
+  .prose p {
+    @apply my-3;
+    color: var(--text-secondary);
+  }
+
+  .prose p:first-child {
+    @apply mt-0;
+  }
+
+  .prose p:last-child {
+    @apply mb-0;
+  }
+
+  .prose a {
+    @apply font-medium underline decoration-1 underline-offset-2 transition;
+    color: var(--accent);
+  }
+
+  .prose a:hover {
+    color: var(--accent-strong);
+    @apply decoration-2;
+  }
+
+  .prose strong {
+    @apply font-semibold;
+    color: var(--text-primary);
+  }
+
+  .prose em {
+    @apply italic;
+  }
+
+  .prose code {
+    @apply rounded px-1.5 py-0.5 text-sm font-mono;
+    background-color: var(--surface-card-alt);
+    color: var(--text-primary);
+  }
+
+  .prose pre {
+    @apply my-4 overflow-x-auto rounded-lg p-4;
+    background-color: var(--surface-card-alt);
+  }
+
+  .prose pre code {
+    @apply p-0;
+    background-color: transparent;
+  }
+
+  .prose ul {
+    @apply my-4 list-disc space-y-2 pl-6;
+  }
+
+  .prose ol {
+    @apply my-4 list-decimal space-y-2 pl-6;
+  }
+
+  .prose li {
+    color: var(--text-secondary);
+  }
+
+  .prose li > p {
+    @apply my-1;
+  }
+
+  .prose ul ul,
+  .prose ul ol,
+  .prose ol ul,
+  .prose ol ol {
+    @apply my-2;
+  }
+
+  .prose blockquote {
+    @apply my-4 border-l-4 pl-4 italic;
+    border-color: var(--accent);
+    color: var(--text-secondary);
+  }
+
+  .prose hr {
+    @apply my-6 border-t;
+    border-color: var(--border-subtle);
+  }
+
+  .prose table {
+    @apply my-4 w-full border-collapse;
+  }
+
+  .prose th {
+    @apply border px-3 py-2 text-left font-semibold;
+    border-color: var(--border-subtle);
+    background-color: var(--surface-card-alt);
+    color: var(--text-primary);
+  }
+
+  .prose td {
+    @apply border px-3 py-2;
+    border-color: var(--border-subtle);
+    color: var(--text-secondary);
+  }
+
+  .prose img {
+    @apply my-4 rounded-lg;
+  }
+
+  .prose-sm {
+    @apply text-sm leading-6;
+  }
+
+  .prose-sm h1 {
+    @apply text-2xl;
+  }
+
+  .prose-sm h2 {
+    @apply text-xl;
+  }
+
+  .prose-sm h3 {
+    @apply text-lg;
+  }
+
+  /* Modifier for paragraph spacing */
+  .prose-p\:my-2 p {
+    @apply my-2;
   }
 }

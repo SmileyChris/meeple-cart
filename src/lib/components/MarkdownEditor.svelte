@@ -62,7 +62,7 @@
     ></textarea>
   {:else}
     <div
-      class="prose prose-invert min-h-[150px] w-full rounded-lg border border-subtle bg-surface-body px-3 py-2 text-sm text-primary"
+      class="prose min-h-[150px] w-full rounded-lg border border-subtle bg-surface-body px-3 py-2 text-sm"
     >
       {#if value.trim()}
         {@html renderedMarkdown}
@@ -83,56 +83,3 @@
     <span>{value.length}/{maxlength}</span>
   </div>
 </div>
-
-<style>
-  :global(.prose) {
-    max-width: none;
-  }
-
-  :global(.prose h1),
-  :global(.prose h2),
-  :global(.prose h3) {
-    color: var(--text-primary);
-    font-weight: 600;
-  }
-
-  :global(.prose a) {
-    color: var(--accent);
-    text-decoration: none;
-  }
-
-  :global(.prose a:hover) {
-    text-decoration: underline;
-  }
-
-  :global(.prose code) {
-    background: var(--surface-card-alt);
-    padding: 0.125rem 0.25rem;
-    border-radius: 0.25rem;
-    font-size: 0.875em;
-  }
-
-  :global(.prose pre) {
-    background: var(--surface-card-alt);
-    padding: 1rem;
-    border-radius: 0.5rem;
-    overflow-x: auto;
-  }
-
-  :global(.prose pre code) {
-    background: none;
-    padding: 0;
-  }
-
-  :global(.prose ul),
-  :global(.prose ol) {
-    padding-left: 1.5rem;
-  }
-
-  :global(.prose blockquote) {
-    border-left: 4px solid var(--accent);
-    padding-left: 1rem;
-    font-style: italic;
-    color: var(--text-secondary);
-  }
-</style>

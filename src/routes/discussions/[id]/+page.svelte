@@ -221,7 +221,7 @@
 		{/if}
 
 		<!-- Thread content -->
-		<div class="prose prose-invert max-w-none">
+		<div class="prose max-w-none">
 			{@html marked.parse(thread.content)}
 		</div>
 	</div>
@@ -250,7 +250,7 @@
 							</div>
 						</div>
 
-						<div class="prose prose-invert max-w-none prose-p:my-2">
+						<div class="prose max-w-none prose-p:my-2">
 							{@html marked.parse(reply.content)}
 						</div>
 					</div>
