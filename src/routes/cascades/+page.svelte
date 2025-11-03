@@ -2,7 +2,7 @@
   import type { PageData } from './$types';
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
-  import { NZ_REGIONS, REGION_LABELS } from '$lib/constants/regions';
+  import { NORTH_ISLAND_REGIONS, SOUTH_ISLAND_REGIONS, REGION_LABELS } from '$lib/constants/regions';
 
   let { data }: { data: PageData } = $props();
 
@@ -95,14 +95,23 @@
         <label for="region-filter" class="text-sm font-medium text-secondary">Region:</label>
         <select
           id="region-filter"
-          value={filters.region ?? ''}
+          value={filters.region ?? 'nz'}
           onchange={(e) => updateFilter('region', e.currentTarget.value)}
           class="rounded border border-subtle bg-surface-card px-3 py-1.5 text-sm text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
         >
-          <option value="">All Regions</option>
-          {#each NZ_REGIONS.filter((r) => r.value !== '') as region}
-            <option value={region.value}>{region.label}</option>
-          {/each}
+          <option value="nz">All of NZ</option>
+          <option value="north_island">All North Island</option>
+          <option value="south_island">All South Island</option>
+          <optgroup label="North Island Regions">
+            {#each NORTH_ISLAND_REGIONS as region}
+              <option value={region.value}>{region.label}</option>
+            {/each}
+          </optgroup>
+          <optgroup label="South Island Regions">
+            {#each SOUTH_ISLAND_REGIONS as region}
+              <option value={region.value}>{region.label}</option>
+            {/each}
+          </optgroup>
         </select>
       </div>
 

@@ -1,4 +1,11 @@
-<footer class="border-t border-subtle bg-surface-panel transition-colors">
+<script>
+  import WaddlingMeeple from './WaddlingMeeple.svelte';
+</script>
+
+<footer class="relative border-t border-subtle bg-surface-panel transition-colors">
+  <!-- Waddling Kiwi Meeple -->
+  <WaddlingMeeple />
+
   <div class="mx-auto max-w-5xl px-6 py-12 sm:px-8">
     <div class="grid gap-8 md:grid-cols-3">
       <!-- About -->
