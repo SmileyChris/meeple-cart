@@ -106,9 +106,8 @@
     }
   }
 
-  function resendVerification() {
-    // TODO: Implement resend verification email
-    alert('Resend verification email functionality coming soon!');
+  function goToVerification() {
+    goto('/profile/verify');
   }
 </script>
 
@@ -117,7 +116,7 @@
   <meta name="description" content="Manage your Meeple Cart account settings and preferences" />
 </svelte:head>
 
-<main class="min-h-screen bg-surface-body px-6 py-12">
+<main class="bg-surface-body px-6 py-12">
   <div class="mx-auto max-w-3xl space-y-8">
     <!-- Header -->
     <div>
@@ -142,9 +141,9 @@
             <button
               type="button"
               class="mt-2 rounded-md bg-amber-500/20 px-3 py-1.5 text-sm font-medium text-amber-100 transition-colors hover:bg-amber-500/30"
-              onclick={resendVerification}
+              onclick={goToVerification}
             >
-              Resend verification email
+              Verify Email
             </button>
           </div>
         </div>

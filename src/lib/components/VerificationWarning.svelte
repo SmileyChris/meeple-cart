@@ -35,21 +35,17 @@
         </p>
         <div class="mt-3 flex flex-wrap gap-2">
           <a
-            href="/settings"
+            href="/profile/verify"
             class="rounded-md bg-amber-500/20 px-3 py-1.5 text-sm font-medium text-amber-100 transition-colors hover:bg-amber-500/30"
+          >
+            Verify Email
+          </a>
+          <a
+            href="/settings"
+            class="rounded-md px-3 py-1.5 text-sm font-medium text-amber-200/60 transition-colors hover:text-amber-100"
           >
             Go to Settings
           </a>
-          <button
-            type="button"
-            class="rounded-md px-3 py-1.5 text-sm font-medium text-amber-200/60 transition-colors hover:text-amber-100"
-            onclick={() => {
-              // TODO: Implement resend verification email
-              alert('Resend verification email functionality coming soon!');
-            }}
-          >
-            Resend verification email
-          </button>
         </div>
       </div>
     </div>
