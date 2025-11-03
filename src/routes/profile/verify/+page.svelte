@@ -2,6 +2,7 @@
   import type { PageData } from './$types';
   import { pb, currentUser } from '$lib/pocketbase';
   import { onMount } from 'svelte';
+  import { goto } from '$app/navigation';
 
   let { data }: { data: PageData } = $props();
 
@@ -18,7 +19,7 @@
     }
   });
 
-  async function requestVerification() {
+  async function requestEmailVerification() {
     if (!user?.email) return;
 
     loading = true;
@@ -63,12 +64,13 @@
 </script>
 
 <svelte:head>
-  <title>Email Verification · Meeple Cart</title>
-  <meta name="description" content="Verify your email address to unlock all features" />
+  <title>Verification · Meeple Cart</title>
+  <meta name="description" content="Verify your email and phone to unlock all features" />
 </svelte:head>
 
 <main class="bg-surface-body px-6 py-12">
-  <div class="mx-auto max-w-2xl">
+  <div class="mx-auto max-w-2xl space-y-6">
+    <!-- Email Verification -->
     <div class="rounded-xl border border-subtle bg-surface-card p-8 shadow-elevated">
       <!-- Header -->
       <div class="text-center">
@@ -82,17 +84,17 @@
             />
           </svg>
         </div>
-        <h1 class="mt-6 text-3xl font-bold text-primary">Email Verification</h1>
-        <p class="mt-2 text-muted">Verify your email to unlock all features</p>
+        <h1 class="mt-6 text-2xl font-bold text-primary">Email Verification</h1>
+        <p class="mt-2 text-sm text-muted">Verify your email to unlock vouching and other features</p>
       </div>
 
       <!-- Current Status -->
       <div class="mt-8">
         {#if user?.verified}
           <div
-            class="flex items-center gap-3 rounded-lg border border-emerald-500/80 bg-emerald-500/10 p-4"
+            class="flex items-center gap-3 rounded-lg border border-subtle bg-surface-body p-4"
           >
-            <svg class="h-6 w-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="h-6 w-6 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -101,18 +103,9 @@
               />
             </svg>
             <div class="flex-1">
-              <p class="font-medium text-emerald-200">Email Verified</p>
-              <p class="text-sm text-emerald-200/80">{user.email}</p>
+              <p class="font-medium text-secondary">Email Verified</p>
+              <p class="text-sm text-muted">{user.email}</p>
             </div>
-          </div>
-
-          <div class="mt-6 text-center">
-            <a
-              href="/profile"
-              class="inline-flex items-center gap-2 rounded-lg bg-accent px-6 py-3 font-medium text-white transition-colors hover:bg-accent/90"
-            >
-              Go to Profile
-            </a>
           </div>
         {:else}
           <div
@@ -187,7 +180,7 @@
           <div class="mt-6">
             <button
               type="button"
-              onclick={requestVerification}
+              onclick={requestEmailVerification}
               disabled={loading || verificationSent}
               class="w-full rounded-lg bg-accent px-6 py-3 font-medium text-white transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-50"
             >
@@ -218,16 +211,105 @@
 
       <!-- Success/Error Messages -->
       {#if success}
-        <div class="mt-6 rounded-lg border border-emerald-500/80 bg-emerald-500/10 p-4">
-          <p class="text-sm text-emerald-200">{success}</p>
+        <div class="mt-6 rounded-lg border border-subtle bg-surface-body p-4">
+          <p class="text-sm text-secondary">{success}</p>
         </div>
       {/if}
 
       {#if error}
-        <div class="mt-6 rounded-lg border border-rose-500/80 bg-rose-500/10 p-4">
-          <p class="text-sm text-rose-200">{error}</p>
+        <div class="mt-6 rounded-lg border border-subtle bg-surface-body p-4">
+          <p class="text-sm text-secondary">{error}</p>
         </div>
       {/if}
+    </div>
+
+    <!-- Phone Verification -->
+    <div class="rounded-xl border border-subtle bg-surface-card p-8 shadow-elevated">
+      <div class="text-center">
+        <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-accent/10">
+          <svg class="h-8 w-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+            />
+          </svg>
+        </div>
+        <h2 class="mt-6 text-2xl font-bold text-primary">Phone Verification</h2>
+        <p class="mt-2 text-sm text-muted">
+          Verify your phone number through a trusted community member
+        </p>
+      </div>
+
+      <div class="mt-8">
+        {#if user?.phone_verified}
+          <div
+            class="flex items-center gap-3 rounded-lg border border-subtle bg-surface-body p-4"
+          >
+            <svg class="h-6 w-6 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <div class="flex-1">
+              <p class="font-medium text-secondary">Phone Verified</p>
+              <p class="text-sm text-muted">Your phone number has been verified</p>
+            </div>
+          </div>
+        {:else}
+          <div class="space-y-6">
+            <div
+              class="flex items-center gap-3 rounded-lg border border-subtle bg-surface-body p-4"
+            >
+              <svg class="h-6 w-6 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                />
+              </svg>
+              <div class="flex-1">
+                <p class="font-medium text-secondary">Phone Not Verified</p>
+                <p class="text-sm text-muted">Add and verify your phone number in settings</p>
+              </div>
+            </div>
+
+            <div class="rounded-lg border border-subtle bg-surface-body p-6">
+              <h3 class="font-semibold text-primary">How phone verification works:</h3>
+              <ol class="mt-4 space-y-3 text-sm text-muted">
+                <li class="flex gap-3">
+                  <span class="font-semibold text-secondary">1.</span>
+                  <span>Add your phone number in Settings</span>
+                </li>
+                <li class="flex gap-3">
+                  <span class="font-semibold text-secondary">2.</span>
+                  <span>Request verification from a trusted community member</span>
+                </li>
+                <li class="flex gap-3">
+                  <span class="font-semibold text-secondary">3.</span>
+                  <span>They'll send you a verification link via SMS</span>
+                </li>
+                <li class="flex gap-3">
+                  <span class="font-semibold text-secondary">4.</span>
+                  <span>Click the link to verify your phone number</span>
+                </li>
+              </ol>
+            </div>
+
+            <a
+              href="/settings"
+              class="block w-full rounded-lg bg-accent px-6 py-3 text-center font-medium text-white transition-colors hover:bg-accent/90"
+            >
+              Go to Settings
+            </a>
+          </div>
+        {/if}
+      </div>
     </div>
   </div>
 </main>

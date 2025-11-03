@@ -132,8 +132,7 @@
     <div class="flex flex-wrap gap-2">
       {#if profile.verified}
         <span
-          class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium"
-          style="border-color: var(--accent); color: var(--accent); background-color: rgba(52, 211, 153, 0.1)"
+          class="inline-flex items-center gap-1.5 rounded-full border border-subtle bg-surface-card px-2.5 py-0.5 text-xs font-medium text-secondary"
         >
           <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
@@ -148,7 +147,7 @@
       {:else}
         <a
           href="/profile/verify"
-          class="inline-flex items-center gap-1.5 rounded-full border border-amber-500 bg-amber-500/10 px-2.5 py-0.5 text-xs font-medium text-amber-400 transition-colors hover:bg-amber-500/20"
+          class="inline-flex items-center gap-1.5 rounded-full border border-subtle bg-surface-card px-2.5 py-0.5 text-xs font-medium text-muted transition-colors hover:border-accent/50 hover:bg-accent/5"
         >
           <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
@@ -164,8 +163,7 @@
 
       {#if profile.phone_verified}
         <span
-          class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium"
-          style="border-color: var(--accent); color: var(--accent); background-color: rgba(52, 211, 153, 0.1)"
+          class="inline-flex items-center gap-1.5 rounded-full border border-subtle bg-surface-card px-2.5 py-0.5 text-xs font-medium text-secondary"
         >
           <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
@@ -179,7 +177,7 @@
         </span>
       {:else}
         <a
-          href="/settings"
+          href="/profile/verify"
           class="inline-flex items-center gap-1.5 rounded-full border border-subtle bg-surface-card px-2.5 py-0.5 text-xs font-medium text-muted transition-colors hover:border-accent/50 hover:bg-accent/5"
         >
           <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
