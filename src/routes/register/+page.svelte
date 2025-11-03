@@ -3,12 +3,12 @@
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
 
-  let displayName = '';
-  let email = '';
-  let password = '';
-  let passwordConfirm = '';
-  let error: string | null = null;
-  let loading = false;
+  let displayName = $state('');
+  let email = $state('');
+  let password = $state('');
+  let passwordConfirm = $state('');
+  let error = $state<string | null>(null);
+  let loading = $state(false);
 
   const DEFAULT_NOTIFICATION_PREFS = {
     messages: true,

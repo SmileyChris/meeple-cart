@@ -4,10 +4,10 @@
   import { page } from '$app/stores';
   import { onMount } from 'svelte';
 
-  let email = '';
-  let password = '';
-  let error: string | null = null;
-  let loading = false;
+  let email = $state('');
+  let password = $state('');
+  let error = $state<string | null>(null);
+  let loading = $state(false);
 
   // Get the redirect destination from URL parameter
   let nextUrl = $derived($page.url.searchParams.get('next') || '/profile');
