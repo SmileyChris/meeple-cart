@@ -6,7 +6,7 @@
   />
 </svelte:head>
 
-<main class="min-h-screen bg-surface-body px-6 py-16 text-primary transition-colors sm:px-8">
+<main class="bg-surface-body px-6 py-16 text-primary transition-colors sm:px-8">
   <div class="mx-auto max-w-4xl space-y-8">
     <div class="space-y-4 text-center">
       <h1 class="text-4xl font-semibold tracking-tight sm:text-5xl">🛒 Group Buys</h1>

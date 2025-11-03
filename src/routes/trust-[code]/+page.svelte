@@ -123,7 +123,7 @@
   <meta name="robots" content="noindex, nofollow" />
 </svelte:head>
 
-<main class="min-h-screen bg-surface-body px-6 py-12">
+<main class="bg-surface-body px-6 py-12">
   <div class="mx-auto max-w-lg">
     <!-- Meeple Cart Logo/Header -->
     <div class="text-center">

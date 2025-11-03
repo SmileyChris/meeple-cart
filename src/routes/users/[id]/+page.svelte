@@ -47,7 +47,7 @@
   />
 </svelte:head>
 
-<main class="min-h-screen bg-surface-body transition-colors px-6 py-12">
+<main class="bg-surface-body transition-colors px-6 py-12">
   <div class="mx-auto max-w-5xl space-y-8">
     <!-- Verification Warning (only for own profile if unverified) -->
     {#if isOwnProfile && !profile.verified}

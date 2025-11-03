@@ -35,7 +35,7 @@
   <meta name="description" content="Your notifications from Meeple Cart" />
 </svelte:head>
 
-<main class="min-h-screen bg-surface-body px-6 py-12 text-primary transition-colors">
+<main class="bg-surface-body px-6 py-12 text-primary transition-colors">
   <div class="mx-auto max-w-4xl space-y-6">
     <!-- Header -->
     <div class="flex items-center justify-between">

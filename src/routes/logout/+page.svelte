@@ -21,7 +21,7 @@
   <meta name="description" content="Log out of your Meeple Cart account" />
 </svelte:head>
 
-<main class="min-h-screen bg-surface-body px-6 py-16 text-primary transition-colors sm:px-8">
+<main class="bg-surface-body px-6 py-16 text-primary transition-colors sm:px-8">
   <div class="mx-auto max-w-md space-y-8">
     <div
       class="rounded-xl border border-subtle bg-surface-card p-8 text-center transition-colors space-y-6"

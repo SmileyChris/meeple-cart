@@ -139,7 +139,7 @@
   <meta name="description" content="Help verify new members and earn karma" />
 </svelte:head>
 
-<main class="min-h-screen bg-surface-body px-6 py-12">
+<main class="bg-surface-body px-6 py-12">
   <div class="mx-auto max-w-5xl space-y-8">
     <!-- Header -->
     <div>

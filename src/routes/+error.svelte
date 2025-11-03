@@ -26,7 +26,7 @@
   <title>{status} - {title} · Meeple Cart</title>
 </svelte:head>
 
-<main class="flex min-h-screen items-center justify-center bg-surface-body px-6 py-12 transition-colors">
+<main class="flex items-center justify-center bg-surface-body px-6 py-12 transition-colors">
   <div class="mx-auto max-w-2xl text-center">
     <!-- Decorative Logo -->
     <div class="mb-8 flex justify-center">

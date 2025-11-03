@@ -82,7 +82,7 @@
   />
 </svelte:head>
 
-<main class="min-h-screen bg-surface-body px-6 py-16 text-primary transition-colors sm:px-8">
+<main class="bg-surface-body px-6 py-16 text-primary transition-colors sm:px-8">
   <div class="mx-auto max-w-5xl space-y-8">
     <!-- Filter Buttons -->
     <div class="flex flex-wrap justify-center gap-3">

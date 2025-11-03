@@ -101,7 +101,7 @@
   />
 </svelte:head>
 
-<main class="min-h-screen bg-surface-body px-6 py-12">
+<main class="bg-surface-body px-6 py-12">
   <div class="mx-auto max-w-2xl">
     {#if user?.phone_verified}
       <!-- Already Verified -->
