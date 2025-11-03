@@ -7,14 +7,14 @@
   let showAddForm = $state(false);
   let editingGameId = $state<string | null>(null);
 
-  const addFormValues = {
+  let addFormValues = $state({
     title: '',
     condition: 'excellent',
     price: '',
     trade_value: '',
     notes: '',
     bgg_id: '',
-  };
+  });
 
   const toggleAddForm = () => {
     showAddForm = !showAddForm;
