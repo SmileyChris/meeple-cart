@@ -289,7 +289,7 @@
     </nav>
   </header>
 
-  <div class="flex-1">
+  <div class="flex-1 pb-12">
     <slot />
   </div>
 
