@@ -22,11 +22,23 @@ function createAuthStore() {
     subscribe,
     set,
     // Initialize auth from localStorage
-    init: () => {
+    init: async () => {
       if (browser) {
-        // PocketBase automatically loads from localStorage, so just sync the store
-        const user = pb.authStore.isValid ? (pb.authStore.model as UserRecord) : null;
-        set(user);
+        // If we have auth data, validate it's still valid by refreshing
+        if (pb.authStore.isValid) {
+          try {
+            // Try to refresh the auth token - this will fail if user doesn't exist
+            await pb.collection('users').authRefresh();
+            set(pb.authStore.model as UserRecord);
+          } catch (err) {
+            // Auth is invalid (user deleted, database reset, etc.) - clear it
+            console.warn('Stored auth is invalid, clearing:', err);
+            pb.authStore.clear();
+            set(null);
+          }
+        } else {
+          set(null);
+        }
 
         // Listen to auth changes and sync to our Svelte store
         pb.authStore.onChange(() => {
@@ -66,5 +78,8 @@ export const currentUser = createAuthStore();
 
 // Initialize on browser
 if (browser) {
-  currentUser.init();
+  // Validate and initialize auth from localStorage
+  currentUser.init().catch((err) => {
+    console.error('Failed to initialize auth:', err);
+  });
 }
