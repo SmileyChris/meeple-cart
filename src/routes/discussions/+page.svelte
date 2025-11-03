@@ -108,14 +108,14 @@
 									</h2>
 									{#if thread.pinned}
 										<span
-											class="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-semibold text-emerald-200"
+											class="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-semibold text-badge-emerald"
 										>
 											📌 Pinned
 										</span>
 									{/if}
 									{#if thread.locked}
 										<span
-											class="rounded-full bg-amber-500/20 px-2 py-0.5 text-xs font-semibold text-amber-200"
+											class="rounded-full bg-amber-500/20 px-2 py-0.5 text-xs font-semibold text-badge-amber"
 										>
 											🔒 Locked
 										</span>

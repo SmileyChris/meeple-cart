@@ -2,6 +2,7 @@
   import '../app.css';
   import NotificationBell from '$lib/components/NotificationBell.svelte';
   import ThemeToggle from '$lib/components/ThemeToggle.svelte';
+  import Footer from '$lib/components/Footer.svelte';
   import { currentUser, pb } from '$lib/pocketbase';
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
@@ -53,7 +54,7 @@
   }
 </script>
 
-<div class="min-h-screen bg-surface-body text-primary transition-colors">
+<div class="flex min-h-screen flex-col bg-surface-body text-primary transition-colors">
   <header
     class="border-b border-subtle bg-[color:var(--surface-header)] backdrop-blur transition-colors"
   >
@@ -237,11 +238,11 @@
 
               <a
                 href="/discussions"
-                class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition whitespace-nowrap opacity-40 cursor-default {currentPath.startsWith(
+                class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition whitespace-nowrap {currentPath.startsWith(
                   '/discussions'
                 )
                   ? 'text-secondary'
-                  : 'text-muted'}"
+                  : 'text-muted hover:text-secondary'}"
                 style={currentPath.startsWith('/discussions')
                   ? 'background-color: var(--accent-soft); color: var(--accent-strong)'
                   : ''}
@@ -288,5 +289,9 @@
     </nav>
   </header>
 
-  <slot />
+  <div class="flex-1">
+    <slot />
+  </div>
+
+  <Footer />
 </div>

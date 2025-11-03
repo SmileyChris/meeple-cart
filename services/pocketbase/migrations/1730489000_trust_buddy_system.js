@@ -10,7 +10,7 @@ migrate(
     // ============================================
 
     const dao = new Dao(db);
-    const usersCollection = dao.findCollectionByNameOrId('jfoh35oho6kltto'); // users collection
+    const usersCollection = dao.findCollectionByNameOrId('fhggsowykv3hz86'); // users collection
 
     // Add phone_verified boolean field
     usersCollection.schema.addField(
@@ -62,7 +62,7 @@ migrate(
           required: true,
           unique: false,
           options: {
-            collectionId: 'jfoh35oho6kltto', // users
+            collectionId: 'fhggsowykv3hz86', // users
             cascadeDelete: true,
             minSelect: null,
             maxSelect: 1,
@@ -207,7 +207,7 @@ migrate(
           required: true,
           unique: false,
           options: {
-            collectionId: 'jfoh35oho6kltto', // users
+            collectionId: 'fhggsowykv3hz86', // users
             cascadeDelete: false,
             minSelect: null,
             maxSelect: 1,
@@ -299,7 +299,7 @@ migrate(
           required: true,
           unique: true,
           options: {
-            collectionId: 'jfoh35oho6kltto', // users
+            collectionId: 'fhggsowykv3hz86', // users
             cascadeDelete: true,
             minSelect: null,
             maxSelect: 1,
@@ -402,7 +402,7 @@ migrate(
           required: true,
           unique: false,
           options: {
-            collectionId: 'jfoh35oho6kltto', // users
+            collectionId: 'fhggsowykv3hz86', // users
             cascadeDelete: true,
             minSelect: null,
             maxSelect: 1,
@@ -417,7 +417,7 @@ migrate(
           required: true,
           unique: false,
           options: {
-            collectionId: 'jfoh35oho6kltto', // users
+            collectionId: 'fhggsowykv3hz86', // users
             cascadeDelete: true,
             minSelect: null,
             maxSelect: 1,
@@ -454,7 +454,7 @@ migrate(
     const dao = new Dao(db);
 
     // Remove phone_verified and phone_hash from users
-    const usersCollection = dao.findCollectionByNameOrId('jfoh35oho6kltto');
+    const usersCollection = dao.findCollectionByNameOrId('fhggsowykv3hz86');
     usersCollection.schema.removeField('phone_verified');
     usersCollection.schema.removeField('phone_hash');
     dao.saveCollection(usersCollection);

@@ -49,8 +49,9 @@
   <meta name="description" content="Browse gift cascades - win free games and pay it forward" />
 </svelte:head>
 
-<main class="min-h-screen bg-surface-body px-6 py-12 text-primary transition-colors">
-  <div class="mx-auto max-w-7xl space-y-6">
+<main class="space-y-10 bg-surface-body pb-16 transition-colors">
+  <section class="px-6 pt-16 sm:px-8">
+    <div class="mx-auto max-w-5xl space-y-6">
     <!-- Header -->
     <div class="space-y-3">
       <h1 class="text-4xl font-bold text-primary">Gift Cascades</h1>
@@ -167,7 +168,7 @@
               {#if cascade.generation > 0}
                 <div class="mb-2">
                   <span
-                    class="inline-block rounded-full border border-purple-600 bg-purple-500/10 px-2 py-0.5 text-xs font-medium text-purple-200"
+                    class="inline-block rounded-full border border-purple-600 bg-purple-500/10 px-2 py-0.5 text-xs font-medium text-badge-purple"
                   >
                     Gen {cascade.generation}
                   </span>
@@ -377,8 +378,8 @@
         <div class="flex items-start gap-3">
           <div class="text-2xl">🎭</div>
           <div class="flex-1">
-            <h3 class="font-semibold text-purple-200">Want to give anonymously?</h3>
-            <p class="mt-1 text-sm text-purple-200/80">
+            <h3 class="font-semibold text-badge-purple">Want to give anonymously?</h3>
+            <p class="mt-1 text-sm text-badge-purple opacity-90">
               Just leave the cascade name blank when creating. Recipients will see "Anonymous" as
               the giver. Perfect for pure generosity with zero recognition.
             </p>
@@ -386,5 +387,6 @@
         </div>
       </div>
     </div>
-  </div>
+    </div>
+  </section>
 </main>
