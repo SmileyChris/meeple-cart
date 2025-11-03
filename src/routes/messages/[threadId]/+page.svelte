@@ -2,17 +2,20 @@
   import type { PageData } from './$types';
   import MessageThread from '$lib/components/MessageThread.svelte';
   import MessageInput from '$lib/components/MessageInput.svelte';
+  import Alert from '$lib/components/Alert.svelte';
   import { pb, currentUser } from '$lib/pocketbase';
 
   let { data }: { data: PageData } = $props();
 
   let sending = $state(false);
   let messages = $state(data.messages);
+  let error = $state<string | null>(null);
 
   async function handleSend(event: CustomEvent<{ content: string }>) {
     if (!data.otherUser || !data.listing) return;
 
     sending = true;
+    error = null;
 
     try {
       // Create the message
@@ -52,8 +55,9 @@
         link: `/messages/${data.threadId}`,
         read: false,
       });
-    } catch (error) {
-      console.error('Failed to send message', error);
+    } catch (err) {
+      console.error('Failed to send message', err);
+      error = 'Failed to send message. Please try again.';
     } finally {
       sending = false;
     }
@@ -129,9 +133,9 @@
     class="flex-shrink-0 border-t border-subtle bg-surface-panel transition-colors backdrop-blur"
   >
     <div class="mx-auto max-w-4xl px-4 py-4">
-      {#if form?.error}
-        <div class="mb-3 rounded-lg bg-rose-500/10 px-4 py-2 text-sm text-rose-400">
-          {form.error}
+      {#if error}
+        <div class="mb-3">
+          <Alert type="error">{error}</Alert>
         </div>
       {/if}
       <MessageInput onsend={handleSend} disabled={sending} />

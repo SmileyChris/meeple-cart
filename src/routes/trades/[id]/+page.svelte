@@ -5,6 +5,7 @@
   import type { TradeRecord, UserRecord } from '$lib/types/pocketbase';
   import type { ListingRecord } from '$lib/types/listing';
   import { logStatusChange } from '$lib/utils/listing-status';
+  import Alert from '$lib/components/Alert.svelte';
 
   let { data }: { data: PageData } = $props();
 
@@ -463,9 +464,7 @@
       <h2 class="text-xl font-semibold text-primary">Actions</h2>
 
       {#if actionError}
-        <div class="rounded-lg bg-rose-500/10 px-4 py-3 text-sm text-rose-400">
-          {actionError}
-        </div>
+        <Alert type="error">{actionError}</Alert>
       {/if}
 
       <div class="flex flex-wrap gap-3">
@@ -620,9 +619,7 @@
             </div>
 
             {#if feedbackError}
-              <div class="rounded-lg bg-rose-500/10 px-4 py-3 text-sm text-rose-400">
-                {feedbackError}
-              </div>
+              <Alert type="error">{feedbackError}</Alert>
             {/if}
 
             <div class="flex gap-3">
@@ -711,9 +708,7 @@
             </div>
 
             {#if vouchError}
-              <div class="rounded-lg bg-rose-500/10 px-4 py-3 text-sm text-rose-400">
-                {vouchError}
-              </div>
+              <Alert type="error">{vouchError}</Alert>
             {/if}
 
             <div class="flex gap-3">

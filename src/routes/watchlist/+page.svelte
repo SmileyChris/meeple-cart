@@ -1,19 +1,22 @@
 <script lang="ts">
   import type { PageData } from './$types';
   import { pb } from '$lib/pocketbase';
+  import Alert from '$lib/components/Alert.svelte';
 
   let { data }: { data: PageData } = $props();
 
   let watchedListings = $state(data.watchedListings);
+  let error = $state<string | null>(null);
 
   async function removeReaction(reactionId: string) {
+    error = null;
     try {
       await pb.collection('reactions').delete(reactionId);
       // Remove from local state
       watchedListings = watchedListings.filter((item) => item.watchlistId !== reactionId);
-    } catch (error) {
-      console.error('Failed to remove reaction:', error);
-      alert('Failed to remove reaction. Please try again.');
+    } catch (err) {
+      console.error('Failed to remove reaction:', err);
+      error = 'Failed to remove reaction. Please try again.';
     }
   }
 
@@ -57,6 +60,11 @@
       <h1 class="text-3xl font-bold text-primary">Watchlist</h1>
       <p class="text-muted">Listings you've reacted to. React to any listing to add it to your watchlist.</p>
     </div>
+
+    <!-- Error Alert -->
+    {#if error}
+      <Alert type="error">{error}</Alert>
+    {/if}
 
     <!-- Listings -->
     {#if watchedListings.length === 0}

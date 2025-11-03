@@ -4,6 +4,7 @@
   import { pb } from '$lib/pocketbase';
   import { goto } from '$app/navigation';
   import PhotoRegionSelector from '$lib/components/PhotoRegionSelector.svelte';
+  import Alert from '$lib/components/Alert.svelte';
 
   let { data }: { data: PageData } = $props();
 
@@ -15,6 +16,7 @@
   let uploadError = $state<string | null>(null);
   let deleting = $state<string | null>(null);
   let saving = $state(false);
+  let error = $state<string | null>(null);
 
   // Region editor state
   let editingPhotoFilename = $state<string | null>(null);
@@ -110,6 +112,7 @@
     if (!confirmed) return;
 
     deleting = photoFilename;
+    error = null;
 
     try {
       // Remove photo from array
@@ -134,7 +137,7 @@
         : [];
     } catch (err) {
       console.error('Error deleting photo:', err);
-      alert('Failed to delete photo. Please try again.');
+      error = 'Failed to delete photo. Please try again.';
     } finally {
       deleting = null;
     }
@@ -175,6 +178,7 @@
 
     // Save to server
     saving = true;
+    error = null;
 
     try {
       const formData = new FormData();
@@ -185,9 +189,9 @@
       await pb.collection('listings').update(listing.id, formData);
     } catch (err) {
       console.error('Error saving photo order:', err);
-      alert('Failed to save photo order. Please try again.');
+      error = 'Failed to save photo order. Reloading page...';
       // Reload to get correct order
-      window.location.reload();
+      setTimeout(() => window.location.reload(), 2000);
     } finally {
       saving = false;
     }
@@ -257,6 +261,11 @@
         {/if}
       </div>
     </header>
+
+    <!-- Error Alert -->
+    {#if error}
+      <Alert type="error">{error}</Alert>
+    {/if}
 
     <!-- Upload Section -->
     <section

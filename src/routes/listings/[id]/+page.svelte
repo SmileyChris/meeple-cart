@@ -8,6 +8,7 @@
   import { goto } from '$app/navigation';
   import { generateThreadId } from '$lib/types/message';
   import { logStatusChange } from '$lib/utils/listing-status';
+  import Alert from '$lib/components/Alert.svelte';
 
   let { data }: { data: PageData } = $props();
 
@@ -607,9 +608,7 @@
                   <h4 class="font-semibold text-primary">Trade Proposal</h4>
 
                   {#if tradeError}
-                    <div class="rounded-lg bg-rose-500/10 px-3 py-2 text-sm text-rose-400">
-                      {tradeError}
-                    </div>
+                    <Alert type="error">{tradeError}</Alert>
                   {/if}
 
                   {#if games.length > 0}
@@ -743,9 +742,7 @@
             {:else}
               <form onsubmit={handleSendMessage} class="space-y-3">
                 {#if messageError}
-                  <div class="rounded-lg bg-rose-500/10 px-3 py-2 text-sm text-rose-400">
-                    {messageError}
-                  </div>
+                  <Alert type="error">{messageError}</Alert>
                 {/if}
 
                 <textarea

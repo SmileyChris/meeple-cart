@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { PageData, ActionData } from './$types';
   import { enhance } from '$app/forms';
+  import Alert from '$lib/components/Alert.svelte';
 
   let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -41,15 +42,11 @@
 
     <!-- Success/Error Messages -->
     {#if form?.success}
-      <div class="rounded-lg bg-emerald-500/10 px-4 py-3 text-emerald-300">
-        ✓ {form.message || 'Prices updated successfully'}
-      </div>
+      <Alert type="success">✓ {form.message || 'Prices updated successfully'}</Alert>
     {/if}
 
     {#if form?.error}
-      <div class="rounded-lg bg-rose-500/10 px-4 py-3 text-rose-400">
-        {form.error}
-      </div>
+      <Alert type="error">{form.error}</Alert>
     {/if}
 
     <!-- Edit Form -->
