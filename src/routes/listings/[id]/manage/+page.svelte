@@ -14,6 +14,7 @@
     trade_value: '',
     notes: '',
     bgg_id: '',
+    can_post: false,
   });
 
   const toggleAddForm = () => {
@@ -26,6 +27,7 @@
         trade_value: '',
         notes: '',
         bgg_id: '',
+        can_post: false,
       });
     }
   };
@@ -196,6 +198,18 @@
                   bind:value={addFormValues.notes}
                 ></textarea>
               </div>
+
+              <div class="sm:col-span-2">
+                <label class="flex items-center gap-2 text-sm text-secondary">
+                  <input
+                    class="h-4 w-4 rounded border border-subtle bg-surface-body transition-colors"
+                    type="checkbox"
+                    name="can_post"
+                    bind:checked={addFormValues.can_post}
+                  />
+                  📮 Can post (available for courier/postal delivery)
+                </label>
+              </div>
             </div>
 
             <div class="flex justify-end gap-3">
@@ -290,6 +304,18 @@
                       >{game.notes ?? ''}</textarea
                     >
                   </div>
+
+                  <div class="sm:col-span-2">
+                    <label class="flex items-center gap-2 text-sm text-secondary">
+                      <input
+                        class="h-4 w-4 rounded border border-subtle bg-surface-body transition-colors"
+                        type="checkbox"
+                        name="can_post"
+                        checked={game.can_post ?? false}
+                      />
+                      📮 Can post (available for courier/postal delivery)
+                    </label>
+                  </div>
                 </div>
 
                 <div class="flex justify-end gap-3">
@@ -330,6 +356,9 @@
                       {/if}
                       {#if game.bgg_id}
                         <span>• BGG ID: {game.bgg_id}</span>
+                      {/if}
+                      {#if game.can_post}
+                        <span>• 📮 Can post</span>
                       {/if}
                     </div>
                     {#if game.notes}

@@ -49,6 +49,7 @@ type SeedGame = {
   tradeValue?: number;
   notes?: string;
   status?: 'available' | 'pending' | 'sold' | 'bundled';
+  canPost?: boolean;
 };
 
 type SeedListing = {
@@ -57,7 +58,7 @@ type SeedListing = {
   summary: string;
   listingType: 'trade' | 'sell' | 'want';
   location: string;
-  shippingAvailable: boolean;
+  regions: string[];
   preferBundle: boolean;
   bundleDiscount?: number;
   daysAgo: number;
@@ -199,8 +200,8 @@ const demoListings: SeedListing[] = [
     title: 'Wellington euro trade bundle - Large collection',
     summary: 'Mix of medium-heavy euros ready for the next table. Prefer bundle swaps but open to offers. Moving to smaller space, need to downsize!',
     listingType: 'trade',
-    location: 'Wellington',
-    shippingAvailable: true,
+    location: 'CBD or Newtown',
+    regions: ['wellington'],
     preferBundle: true,
     bundleDiscount: 15,
     daysAgo: 2,
@@ -212,6 +213,7 @@ const demoListings: SeedListing[] = [
         condition: 'excellent',
         tradeValue: 95,
         notes: "Collector's Edition with metal coins and wooden berries.",
+        canPost: true,
       },
       {
         title: 'Great Western Trail (2nd ed.)',
@@ -292,8 +294,8 @@ const demoListings: SeedListing[] = [
     title: 'Auckland family night sale - Big collection clearout',
     summary: 'Family-friendly lineup that we have outgrown. Priced to move, can post nationwide. Some already sold!',
     listingType: 'sell',
-    location: 'Auckland',
-    shippingAvailable: true,
+    location: 'North Shore area',
+    regions: ['auckland'],
     preferBundle: false,
     daysAgo: 5,
     games: [
@@ -305,6 +307,7 @@ const demoListings: SeedListing[] = [
         price: 55,
         notes: 'Includes 1912 expansion routes laminated for durability.',
         status: 'available',
+        canPost: true,
       },
       {
         title: 'Azul',
@@ -394,8 +397,8 @@ const demoListings: SeedListing[] = [
     title: 'Christchurch wishlist - narrative co-ops wanted',
     summary: 'Looking to buy or trade for narrative co-ops with strong solo support.',
     listingType: 'want',
-    location: 'Christchurch',
-    shippingAvailable: false,
+    location: 'Riccarton area',
+    regions: ['canterbury'],
     preferBundle: false,
     daysAgo: 8,
     games: [
@@ -420,8 +423,8 @@ const demoListings: SeedListing[] = [
     title: 'Party games collection - Hamilton pickup preferred',
     summary: 'Great for game nights! Selling to make room for new arrivals. Buy the bundle and save!',
     listingType: 'sell',
-    location: 'Hamilton',
-    shippingAvailable: true,
+    location: 'Hamilton East',
+    regions: ['waikato'],
     preferBundle: true,
     bundleDiscount: 20,
     daysAgo: 1,
@@ -523,8 +526,8 @@ const demoListings: SeedListing[] = [
     title: 'Strategy heavyweights collection - Dunedin',
     summary: 'Premium titles for experienced gamers. All well-maintained. Looking for other heavy euros or 18XX games.',
     listingType: 'trade',
-    location: 'Dunedin',
-    shippingAvailable: true,
+    location: 'North Dunedin',
+    regions: ['otago'],
     preferBundle: false,
     daysAgo: 12,
     games: [
@@ -625,8 +628,8 @@ const demoListings: SeedListing[] = [
     title: 'Looking for beginner-friendly games',
     summary: 'New collector wanting gateway games to build my collection!',
     listingType: 'want',
-    location: 'Tauranga',
-    shippingAvailable: true,
+    location: 'Mount Maunganui',
+    regions: ['bay_of_plenty'],
     preferBundle: false,
     daysAgo: 3,
     games: [
@@ -647,10 +650,10 @@ const demoListings: SeedListing[] = [
   {
     ownerEmail: 'demo-tom@meeplecart.test',
     title: 'War game & miniatures collection - Nelson',
-    summary: 'Downsizing my war game collection. Shipping available nationwide. Bundle discount available!',
+    summary: 'Downsizing my war game collection. Can post nationwide. Bundle discount available!',
     listingType: 'sell',
-    location: 'Nelson',
-    shippingAvailable: true,
+    location: 'Nelson CBD',
+    regions: ['nelson', 'tasman'],
     preferBundle: true,
     bundleDiscount: 10,
     daysAgo: 18,
@@ -752,8 +755,8 @@ const demoListings: SeedListing[] = [
     title: 'Cooperative games collection for trade',
     summary: 'Looking to trade my co-ops for other co-ops or party games! Love thematic games with good narratives.',
     listingType: 'trade',
-    location: 'Palmerston North',
-    shippingAvailable: true,
+    location: 'Palmerston North CBD',
+    regions: ['manawatu_whanganui'],
     preferBundle: false,
     daysAgo: 7,
     games: [
@@ -855,7 +858,7 @@ const demoListings: SeedListing[] = [
     summary: 'Need to sell quickly before my move. Great prices!',
     listingType: 'sell',
     location: 'Wellington',
-    shippingAvailable: true,
+    regions: ['wellington'], // TODO: Update region
     preferBundle: true,
     bundleDiscount: 25,
     daysAgo: 25,
@@ -883,8 +886,8 @@ const demoListings: SeedListing[] = [
     title: 'Modern classics bundle',
     summary: 'Award-winning games in excellent condition.',
     listingType: 'trade',
-    location: 'Auckland',
-    shippingAvailable: true,
+    location: 'Auckland Central',
+    regions: ['auckland'],
     preferBundle: true,
     bundleDiscount: 15,
     daysAgo: 14,
@@ -1443,7 +1446,7 @@ const recreateListing = async (
     listing_type: seed.listingType,
     status: 'active',
     location: seed.location,
-    shipping_available: seed.shippingAvailable,
+    regions: seed.regions,
     prefer_bundle: seed.preferBundle,
     bundle_discount: seed.bundleDiscount ?? null,
     views: Math.floor(Math.random() * 150) + 10,
@@ -1480,6 +1483,10 @@ const recreateListing = async (
 
     if (game.notes) {
       gamePayload.notes = game.notes;
+    }
+
+    if (typeof game.canPost === 'boolean') {
+      gamePayload.can_post = game.canPost;
     }
 
     const gameRecord = await userPb.collection('games').create(gamePayload);

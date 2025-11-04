@@ -1,6 +1,11 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
   import type { ActionData, PageData } from './$types';
+  import {
+    NORTH_ISLAND_REGIONS,
+    SOUTH_ISLAND_REGIONS,
+    getIslandRegions,
+  } from '$lib/constants/regions';
 
   let { data, form }: { data: PageData; form?: ActionData } = $props();
 
@@ -11,6 +16,7 @@
     trade_value: string;
     notes: string;
     bgg_id: string;
+    can_post: boolean;
   }
 
   let listingValues = $derived(
@@ -19,11 +25,42 @@
       listing_type: data.defaults.listing_type,
       summary: '',
       location: '',
-      shipping_available: false,
       prefer_bundle: false,
       bundle_discount: '',
     }
   );
+
+  let selectedRegions = $state<string[]>(form?.regions ?? []);
+
+  // Island selection logic
+  let northIslandChecked = $derived(
+    NORTH_ISLAND_REGIONS.every((r) => selectedRegions.includes(r.value))
+  );
+  let southIslandChecked = $derived(
+    SOUTH_ISLAND_REGIONS.every((r) => selectedRegions.includes(r.value))
+  );
+
+  function toggleIsland(island: 'north_island' | 'south_island') {
+    const islandRegionValues = getIslandRegions(island);
+    const allSelected = island === 'north_island' ? northIslandChecked : southIslandChecked;
+
+    if (allSelected) {
+      // Deselect all regions in this island
+      selectedRegions = selectedRegions.filter((r) => !islandRegionValues.includes(r));
+    } else {
+      // Select all regions in this island
+      const newRegions = islandRegionValues.filter((r) => !selectedRegions.includes(r));
+      selectedRegions = [...selectedRegions, ...newRegions];
+    }
+  }
+
+  function toggleRegion(regionValue: string) {
+    if (selectedRegions.includes(regionValue)) {
+      selectedRegions = selectedRegions.filter((r) => r !== regionValue);
+    } else {
+      selectedRegions = [...selectedRegions, regionValue];
+    }
+  }
 
   let games = $state<GameEntry[]>(
     form?.games ??
@@ -35,6 +72,7 @@
           trade_value: '',
           notes: '',
           bgg_id: '',
+          can_post: false,
         },
       ] as GameEntry[])
   );
@@ -86,6 +124,7 @@
         trade_value: '',
         notes: '',
         bgg_id: '',
+        can_post: false,
       },
     ];
   };
@@ -172,16 +211,85 @@
             {/if}
           </div>
 
-          <div>
-            <label class="block text-sm font-medium text-secondary" for="location">Location</label>
+          <div class="sm:col-span-2">
+            <label class="block text-sm font-medium text-secondary">Pickup regions</label>
+            <p class="mt-1 text-xs text-muted">
+              Select regions where you can meet for pickup (postage options set per-game below)
+            </p>
+            <div class="mt-3 space-y-4">
+              <!-- North Island -->
+              <div class="space-y-2">
+                <label class="flex items-center gap-2 text-sm font-medium text-primary">
+                  <input
+                    type="checkbox"
+                    class="h-4 w-4 rounded border border-subtle bg-surface-body transition-colors"
+                    checked={northIslandChecked}
+                    onchange={() => toggleIsland('north_island')}
+                  />
+                  North Island
+                </label>
+                <div class="ml-6 grid gap-2 sm:grid-cols-2">
+                  {#each NORTH_ISLAND_REGIONS as region (region.value)}
+                    <label class="flex items-center gap-2 text-sm text-secondary">
+                      <input
+                        type="checkbox"
+                        class="h-4 w-4 rounded border border-subtle bg-surface-body transition-colors"
+                        name="regions"
+                        value={region.value}
+                        checked={selectedRegions.includes(region.value)}
+                        onchange={() => toggleRegion(region.value)}
+                      />
+                      {region.label}
+                    </label>
+                  {/each}
+                </div>
+              </div>
+
+              <!-- South Island -->
+              <div class="space-y-2">
+                <label class="flex items-center gap-2 text-sm font-medium text-primary">
+                  <input
+                    type="checkbox"
+                    class="h-4 w-4 rounded border border-subtle bg-surface-body transition-colors"
+                    checked={southIslandChecked}
+                    onchange={() => toggleIsland('south_island')}
+                  />
+                  South Island
+                </label>
+                <div class="ml-6 grid gap-2 sm:grid-cols-2">
+                  {#each SOUTH_ISLAND_REGIONS as region (region.value)}
+                    <label class="flex items-center gap-2 text-sm text-secondary">
+                      <input
+                        type="checkbox"
+                        class="h-4 w-4 rounded border border-subtle bg-surface-body transition-colors"
+                        name="regions"
+                        value={region.value}
+                        checked={selectedRegions.includes(region.value)}
+                        onchange={() => toggleRegion(region.value)}
+                      />
+                      {region.label}
+                    </label>
+                  {/each}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sm:col-span-2">
+            <label class="block text-sm font-medium text-secondary" for="location"
+              >Additional location details (optional)</label
+            >
             <input
               class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
               id="location"
               name="location"
-              placeholder="City or suburb"
+              placeholder="Eg: Auckland CBD near Britomart, or West Auckland (Henderson)"
               maxlength="120"
               value={listingValues.location}
             />
+            <p class="mt-1 text-xs text-muted">
+              Add more specific pickup details within your selected regions
+            </p>
           </div>
 
           <div class="sm:col-span-2">
@@ -198,15 +306,6 @@
         </div>
 
         <div class="grid gap-4 sm:grid-cols-2">
-          <label class="flex items-center gap-2 text-sm text-secondary">
-            <input
-              class="h-4 w-4 rounded border border-subtle bg-surface-body transition-colors"
-              name="shipping_available"
-              type="checkbox"
-              checked={listingValues.shipping_available}
-            />
-            Shipping available
-          </label>
           <label class="flex items-center gap-2 text-sm text-secondary">
             <input
               class="h-4 w-4 rounded border border-subtle bg-surface-body transition-colors"
@@ -426,6 +525,18 @@
                   placeholder="Mention wear, missing components, or house-rule kits."
                   bind:value={game.notes}
                 />
+              </div>
+
+              <div class="sm:col-span-2">
+                <label class="flex items-center gap-2 text-sm text-secondary">
+                  <input
+                    class="h-4 w-4 rounded border border-subtle bg-surface-body transition-colors"
+                    type="checkbox"
+                    name="game_{index}_can_post"
+                    bind:checked={game.can_post}
+                  />
+                  📮 Can post (available for courier/postal delivery)
+                </label>
               </div>
             </div>
           </section>

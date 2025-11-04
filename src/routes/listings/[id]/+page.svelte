@@ -9,6 +9,7 @@
   import { generateThreadId } from '$lib/types/message';
   import { logStatusChange } from '$lib/utils/listing-status';
   import Alert from '$lib/components/Alert.svelte';
+  import { REGION_LABELS } from '$lib/constants/regions';
 
   let { data }: { data: PageData } = $props();
 
@@ -28,6 +29,12 @@
   let photos = $derived(data.photos ?? []);
   let discussions = $derived(data.discussions ?? []);
   let activePhotoIndex = $state(0);
+
+  // Check if any selected games can be posted
+  let canPostSelectedGames = $derived(
+    selectedGameIds.length > 0 &&
+    games.filter(g => selectedGameIds.includes(g.id)).some(g => g.can_post === true)
+  );
 
   // Photo region state
   let photoRegions = $derived(listing.photo_region_map ?? []);
@@ -290,17 +297,31 @@
                 ? 'Sell'
                 : 'Trade'}
           </span>
-          {#if listing.location}
-            <span class="rounded-full border border-subtle px-3 py-1">{listing.location}</span>
-          {/if}
           <span class="rounded-full border border-subtle px-3 py-1">Added {listingCreated}</span>
-          {#if listing.shipping_available}
-            <span class="rounded-full border border-subtle px-3 py-1">Shipping available</span>
-          {/if}
           {#if listing.prefer_bundle}
             <span class="rounded-full border border-subtle px-3 py-1">Prefers bundle</span>
           {/if}
         </div>
+
+        <!-- Pickup Regions -->
+        {#if listing.regions && listing.regions.length > 0}
+          <div class="flex flex-wrap gap-2">
+            <span class="text-sm font-medium text-secondary">Pickup regions:</span>
+            {#each listing.regions as regionValue (regionValue)}
+              <span class="rounded-full border border-subtle bg-surface-card-alt px-3 py-1 text-sm text-secondary">
+                {REGION_LABELS[regionValue] || regionValue}
+              </span>
+            {/each}
+          </div>
+        {/if}
+
+        <!-- Additional location details -->
+        {#if listing.location}
+          <div class="flex gap-2 text-sm">
+            <span class="font-medium text-secondary">Location details:</span>
+            <span class="text-muted">{listing.location}</span>
+          </div>
+        {/if}
         {#if listing.summary}
           <p class="max-w-2xl text-base text-secondary">{listing.summary}</p>
         {/if}
@@ -454,6 +475,13 @@
                         class="inline-flex items-center rounded-full border border-subtle bg-surface-card-alt px-2 py-1 text-secondary"
                       >
                         Published {game.year}
+                      </span>
+                    {/if}
+                    {#if game.can_post}
+                      <span
+                        class="inline-flex items-center rounded-full border border-subtle bg-surface-card-alt px-2 py-1 text-secondary"
+                      >
+                        📮 Can post
                       </span>
                     {/if}
                   </div>
@@ -646,6 +674,9 @@
                                 {:else if game.tradeValue}
                                   · Value: {toCurrency(game.tradeValue)}
                                 {/if}
+                                {#if game.can_post}
+                                  · 📮 Can post
+                                {/if}
                                 {#if game.status !== 'available'}
                                   · {game.status}
                                 {/if}
@@ -688,17 +719,17 @@
                           value="shipped"
                           checked={shippingMethod === 'shipped'}
                           onchange={() => shippingMethod = 'shipped'}
-                          disabled={!listing.shipping_available}
+                          disabled={!canPostSelectedGames}
                           class="h-4 w-4 border-subtle bg-surface-body text-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-0"
                         />
                         <div class="flex-1">
                           <div class="font-medium text-primary">
-                            Shipping
-                            {#if !listing.shipping_available}
-                              <span class="text-xs text-muted">(not available)</span>
+                            📮 Can post
+                            {#if !canPostSelectedGames}
+                              <span class="text-xs text-muted">(not available for selected games)</span>
                             {/if}
                           </div>
-                          <div class="text-xs text-muted">Seller ships to you</div>
+                          <div class="text-xs text-muted">Seller posts to you</div>
                         </div>
                       </label>
                     </div>

@@ -1,14 +1,27 @@
 <script lang="ts">
   import type { ListingPreview } from '$lib/types/listing';
   import MeepleIcon from './MeepleIcon.svelte';
+  import { REGION_LABELS } from '$lib/constants/regions';
 
-  let { listing }: { listing: ListingPreview } = $props();
+  let { listing, userPreferredRegions }: { listing: ListingPreview; userPreferredRegions?: string[] } = $props();
 
   const typeLabels: Record<ListingPreview['listingType'], string> = {
     trade: 'Trade',
     sell: 'Sell',
     want: 'Want to Buy',
   };
+
+  // Check if any listing region matches user's preferred regions
+  let isPreferredRegion = $derived(
+    userPreferredRegions &&
+    listing.regions &&
+    listing.regions.some(r => userPreferredRegions.includes(r))
+  );
+
+  // Check if any game can be posted
+  let canPost = $derived(
+    listing.games.some(game => game.canPost)
+  );
 
   let createdLabel = $derived(
     new Intl.DateTimeFormat('en-NZ', {
@@ -53,7 +66,11 @@
   }}
 >
   <article
-    class="flex flex-col overflow-hidden rounded-xl border border-subtle bg-surface-card shadow-elevated transition-colors group-hover:border-[var(--accent)] group-hover:shadow-lg"
+    class={`flex flex-col overflow-hidden rounded-xl bg-surface-card shadow-elevated transition-colors group-hover:shadow-lg ${
+      isPreferredRegion
+        ? 'border-2 border-[var(--accent)]'
+        : 'border border-subtle group-hover:border-[var(--accent)]'
+    }`}
   >
     {#if listing.coverImage}
       <img
@@ -111,10 +128,9 @@
         </div>
       {/if}
 
-      <div
-        class="mt-auto flex items-center justify-between text-sm text-secondary transition-colors"
-      >
-        <div class="flex flex-col">
+      <div class="mt-auto space-y-2">
+        <!-- Owner info -->
+        <div class="text-sm">
           {#if listing.ownerId && listing.ownerName}
             <a
               href={`/users/${listing.ownerId}`}
@@ -128,10 +144,43 @@
           {:else}
             <span class="font-medium text-primary">Meeple Cart trader</span>
           {/if}
-          {#if listing.location}
-            <span>{listing.location}</span>
-          {/if}
         </div>
+
+        <!-- Region badges -->
+        {#if listing.regions && listing.regions.length > 0}
+          <div class="flex flex-wrap gap-1.5">
+            {#each listing.regions.slice(0, 3) as regionValue (regionValue)}
+              <span
+                class={`rounded-full px-2 py-0.5 text-xs font-medium transition-colors ${
+                  isPreferredRegion && userPreferredRegions?.includes(regionValue)
+                    ? 'bg-[var(--accent)] text-[var(--accent-contrast)]'
+                    : 'border border-subtle bg-surface-card-alt text-secondary'
+                }`}
+              >
+                {REGION_LABELS[regionValue] || regionValue}
+              </span>
+            {/each}
+            {#if listing.regions.length > 3}
+              <span
+                class="rounded-full border border-dashed border-subtle bg-surface-card-alt px-2 py-0.5 text-xs font-medium text-muted transition-colors"
+              >
+                +{listing.regions.length - 3}
+              </span>
+            {/if}
+          </div>
+        {/if}
+
+        <!-- Additional location details -->
+        {#if listing.location}
+          <span class="text-xs text-muted">{listing.location}</span>
+        {/if}
+
+        <!-- Can post badge -->
+        {#if canPost}
+          <div class="flex items-center gap-1 text-xs text-secondary">
+            <span>📮 Can post</span>
+          </div>
+        {/if}
       </div>
     </div>
   </article>

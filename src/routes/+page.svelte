@@ -66,6 +66,18 @@
     goto(url, { replaceState: true });
   }
 
+  function toggleCanPost() {
+    const url = new URL($page.url);
+    if (data.canPostFilter) {
+      url.searchParams.delete('canPost');
+    } else {
+      url.searchParams.set('canPost', 'true');
+    }
+    url.searchParams.delete('page'); // Reset to page 1 when filtering
+    // eslint-disable-next-line svelte/no-navigation-without-resolve
+    goto(url, { replaceState: true });
+  }
+
   function loadMore() {
     const url = new URL($page.url);
     url.searchParams.set('page', String(data.currentPage + 1));
@@ -85,16 +97,27 @@
 <main class="bg-surface-body px-6 py-16 text-primary transition-colors sm:px-8">
   <div class="mx-auto max-w-5xl space-y-8">
     <!-- Filter Buttons -->
-    <div class="flex flex-wrap justify-center gap-3">
-      {#each filters as filter (filter.label)}
-        <button
-          onclick={() => setFilter(filter.value)}
-          class={`btn-ghost px-4 py-2 text-sm font-medium ${data.currentFilter === filter.value ? 'border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent-strong)]' : ''}`}
-        >
-          <span class="mr-1.5">{filter.icon}</span>
-          {filter.label}
-        </button>
-      {/each}
+    <div class="flex flex-col items-center gap-4">
+      <div class="flex flex-wrap justify-center gap-3">
+        {#each filters as filter (filter.label)}
+          <button
+            onclick={() => setFilter(filter.value)}
+            class={`btn-ghost px-4 py-2 text-sm font-medium ${data.currentFilter === filter.value ? 'border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent-strong)]' : ''}`}
+          >
+            <span class="mr-1.5">{filter.icon}</span>
+            {filter.label}
+          </button>
+        {/each}
+      </div>
+
+      <!-- Can Post Filter -->
+      <button
+        onclick={toggleCanPost}
+        class={`btn-ghost px-4 py-2 text-sm font-medium ${data.canPostFilter ? 'border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent-strong)]' : ''}`}
+      >
+        <span class="mr-1.5">📮</span>
+        Or can post
+      </button>
     </div>
 
     <!-- Timeline View -->
@@ -131,7 +154,7 @@
             <!-- Listings grid -->
             <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {#each groupedListings[group] as listing (listing.id)}
-                <ListingCard {listing} />
+                <ListingCard {listing} userPreferredRegions={data.userPreferredRegions} />
               {/each}
             </div>
           </div>

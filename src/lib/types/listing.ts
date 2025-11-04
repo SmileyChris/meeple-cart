@@ -30,6 +30,7 @@ export interface GameRecord extends RecordModel {
   trade_value?: number;
   notes?: string;
   status: 'available' | 'pending' | 'sold' | 'bundled';
+  can_post?: boolean;
   photo_regions?: Record<string, unknown>;
   price_history?: PriceHistoryEntry[];
 }
@@ -41,7 +42,7 @@ export interface ListingRecord extends RecordModel {
   status: 'active' | 'pending' | 'completed' | 'cancelled';
   summary?: string;
   location?: string;
-  shipping_available?: boolean;
+  regions?: string[];
   prefer_bundle?: boolean;
   bundle_discount?: number;
   views: number;
@@ -74,6 +75,7 @@ export interface ListingGameSummary {
   bggUrl: string | null;
   price: number | null;
   tradeValue: number | null;
+  canPost: boolean;
 }
 
 export interface ListingGameDetail extends ListingGameSummary {
@@ -83,6 +85,7 @@ export interface ListingGameDetail extends ListingGameSummary {
   previousTradeValue: number | null;
   listingCreated: string;
   priceHistory?: PriceHistoryEntry[];
+  canPost: boolean;
 }
 
 export interface ListingPreview {
@@ -91,6 +94,7 @@ export interface ListingPreview {
   listingType: ListingType;
   summary: string;
   location: string | null;
+  regions: string[] | null;
   created: string;
   ownerName: string | null;
   ownerId: string | null;

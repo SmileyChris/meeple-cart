@@ -34,17 +34,24 @@ const buildFileUrl = (
 
 export const prerender = false;
 
-export const load: PageLoad = async ({ fetch, url }) => {
+export const load: PageLoad = async ({ fetch, url, parent }) => {
   const baseUrl = (PUBLIC_POCKETBASE_URL || FALLBACK_BASE_URL).replace(/\/$/, '');
 
   const page = url.searchParams.get('page') || '1';
   const typeFilter = url.searchParams.get('type');
+  const canPostFilter = url.searchParams.get('canPost') === 'true';
+
+  // Get current user from parent layout
+  const { currentUser } = await parent();
 
   // Build filter - always include active status
   const filters = ['status = "active"'];
   if (typeFilter && ['trade', 'sell', 'want'].includes(typeFilter)) {
     filters.push(`listing_type = "${typeFilter}"`);
   }
+
+  // Note: can_post filter requires checking games, which is complex in PocketBase
+  // We'll filter on the client side after loading
 
   const activityParams = new URLSearchParams({
     page,
@@ -70,7 +77,7 @@ export const load: PageLoad = async ({ fetch, url }) => {
 
     const result = (await response.json()) as PocketBaseListResponse<ListingRecord>;
 
-    const listings: ListingPreview[] = result.items.map((item) => {
+    let listings: ListingPreview[] = result.items.map((item) => {
       const owner = item.expand?.owner as UserRecord | undefined;
       const games = Array.isArray(item.expand?.['games(listing)'])
         ? (item.expand?.['games(listing)'] as GameRecord[]).map((game) => {
@@ -84,6 +91,7 @@ export const load: PageLoad = async ({ fetch, url }) => {
               bggUrl: bggId ? `https://boardgamegeek.com/boardgame/${bggId}` : null,
               price: typeof game.price === 'number' ? game.price : null,
               tradeValue: typeof game.trade_value === 'number' ? game.trade_value : null,
+              canPost: game.can_post === true,
             };
           })
         : [];
@@ -98,6 +106,7 @@ export const load: PageLoad = async ({ fetch, url }) => {
         listingType: normalizeListingType(String(item.listing_type)),
         summary: item.summary ?? '',
         location: item.location ?? null,
+        regions: Array.isArray(item.regions) ? item.regions : null,
         created: item.created,
         ownerName: owner?.display_name ?? null,
         ownerId: owner?.id ?? null,
@@ -107,6 +116,13 @@ export const load: PageLoad = async ({ fetch, url }) => {
       };
     });
 
+    // Client-side filter for can_post (since PocketBase can't easily filter on related games)
+    if (canPostFilter) {
+      listings = listings.filter((listing) =>
+        listing.games.some((game) => game.canPost)
+      );
+    }
+
     return {
       listings,
       loadError: false as const,
@@ -114,6 +130,8 @@ export const load: PageLoad = async ({ fetch, url }) => {
       totalPages: result.totalPages,
       hasMore: result.page < result.totalPages,
       currentFilter: typeFilter || null,
+      canPostFilter,
+      userPreferredRegions: currentUser?.preferred_regions || null,
     };
   } catch (error) {
     console.error('Failed to load activity', error);
