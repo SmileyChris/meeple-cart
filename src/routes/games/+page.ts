@@ -52,28 +52,39 @@ type ExpandedGameRecord = GameRecord & {
 
 export const prerender = false;
 
-export const load: PageLoad = async ({ fetch, url }) => {
+export const load: PageLoad = async ({ fetch, url, depends }) => {
+  depends('app:games');
+
   const pageParam = Number.parseInt(url.searchParams.get('page') ?? '1', 10);
   const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
 
-  const rawType = (url.searchParams.get('type') ?? '').toLowerCase();
-  let type: ListingType | '' = '';
+  // Get current user's preferred regions
+  const user = get(currentUser);
 
-  if (rawType === 'bundle') {
-    type = 'sell';
-  } else if (LISTING_TYPES.includes(rawType as ListingType)) {
-    type = rawType as ListingType;
+  // Get types filter - check individual params, default to all three
+  const allTypes = ['sell', 'trade', 'want'];
+  const selectedTypes = allTypes.filter(type => url.searchParams.get(type) !== 'false');
+
+  // Get regions from URL params (changed from 'regions' to 'region')
+  const urlRegions = url.searchParams.getAll('region');
+  const myRegionsFilter = urlRegions.length > 0;
+  const canPostFilter = url.searchParams.get('canPost') === 'true';
+
+  // Get guest regions from localStorage if not logged in
+  let guestRegions: string[] = [];
+  if (typeof window !== 'undefined' && !user) {
+    const stored = localStorage.getItem('guestPreferredRegions');
+    if (stored) {
+      try {
+        guestRegions = JSON.parse(stored);
+      } catch {
+        guestRegions = [];
+      }
+    }
   }
 
-  // Get regions from URL params (can be multiple)
-  const urlRegions = url.searchParams.getAll('regions');
-
-  // Get current user's preferred regions as defaults if no URL regions specified
-  const user = get(currentUser);
-  const defaultRegions = user?.preferred_regions || [];
-
-  // Use URL regions if provided, otherwise use user's preferred regions
-  const regions = urlRegions.length > 0 ? urlRegions : defaultRegions;
+  // Use URL regions if provided
+  const regions = urlRegions;
 
   const searchParam = url.searchParams.get('search')?.trim() ?? '';
   const search = searchParam.slice(0, 200);
@@ -91,14 +102,22 @@ export const load: PageLoad = async ({ fetch, url }) => {
   // Build filters for games collection
   const filters: string[] = ['listing.status = "active"'];
 
-  if (type) {
-    filters.push(`listing.listing_type = "${type}"`);
+  // Filter by selected listing types
+  if (selectedTypes.length > 0 && selectedTypes.length < 3) {
+    const typeConditions = selectedTypes
+      .filter((t) => ['trade', 'sell', 'want'].includes(t))
+      .map((t) => `listing.listing_type = "${t}"`);
+    if (typeConditions.length > 0) {
+      filters.push(`(${typeConditions.join(' || ')})`);
+    }
   }
 
   // Filter by regions if any are selected
-  if (regions.length > 0) {
+  // Note: can_post filtering is done client-side because it's a game property
+  // and we need to filter based on listings that have games with can_post=true
+  if (regions.length > 0 && !canPostFilter) {
     const regionFilters = regions
-      .map((region) => `listing.location ~ "${sanitizeForFilter(region)}"`)
+      .map((region) => `listing.regions ~ "${sanitizeForFilter(region)}"`)
       .join(' || ');
     filters.push(`(${regionFilters})`);
   }
@@ -110,7 +129,19 @@ export const load: PageLoad = async ({ fetch, url }) => {
 
   // Filter by game condition
   if (condition) {
-    filters.push(`condition = "${condition}"`);
+    if (condition === 'mint') {
+      // "Only mint" - exact match
+      filters.push(`condition = "mint"`);
+    } else {
+      // "At least X" - include this condition and better ones
+      const conditionOrder = ['poor', 'fair', 'good', 'excellent', 'mint'];
+      const minIndex = conditionOrder.indexOf(condition);
+      if (minIndex >= 0) {
+        const allowedConditions = conditionOrder.slice(minIndex);
+        const conditionFilters = allowedConditions.map(c => `condition = "${c}"`).join(' || ');
+        filters.push(`(${conditionFilters})`);
+      }
+    }
   }
 
   // Filter by price range
@@ -129,7 +160,7 @@ export const load: PageLoad = async ({ fetch, url }) => {
   }
 
   const filtersState: ListingFilters = {
-    type,
+    type: selectedTypes.length === 1 ? selectedTypes[0] as ListingType : '',
     regions: regions.length > 0 ? regions : undefined,
     search: search || undefined,
     condition: condition || undefined,
@@ -167,7 +198,7 @@ export const load: PageLoad = async ({ fetch, url }) => {
 
     const result = (await gamesResponse.json()) as PocketBaseListResponse<ExpandedGameRecord>;
 
-    const activities: ActivityItem[] = result.items
+    let activities: ActivityItem[] = result.items
       .filter((game) => {
         return game.expand?.listing && game.expand.listing.status === 'active';
       })
@@ -196,8 +227,23 @@ export const load: PageLoad = async ({ fetch, url }) => {
           userLocation: listing.location ?? null,
           listingHref: `/listings/${listing.id}`,
           thumbnail,
+          listingRegions: Array.isArray(listing.regions) ? listing.regions : [],
+          canPost: game.can_post === true,
         };
       });
+
+    // Client-side filters for regions with can_post
+    if (myRegionsFilter && regions.length > 0) {
+      activities = activities.filter((activity) => {
+        // Match if listing is in filtered regions
+        const matchesRegion = activity.listingRegions.some((region) => regions.includes(region));
+
+        // OR if "can post" is enabled and game has can_post=true
+        const matchesCanPost = canPostFilter && activity.canPost;
+
+        return matchesRegion || matchesCanPost;
+      });
+    }
 
     return {
       activities,
@@ -208,6 +254,10 @@ export const load: PageLoad = async ({ fetch, url }) => {
         totalItems: result.totalItems,
       },
       loadError: false as const,
+      selectedTypes,
+      myRegionsFilter,
+      canPostFilter,
+      hasPreferredRegions: Boolean(user?.preferred_regions?.length || guestRegions.length > 0),
     };
   } catch (error) {
     console.error('Failed to load games', error);
@@ -221,6 +271,10 @@ export const load: PageLoad = async ({ fetch, url }) => {
         totalItems: 0,
       },
       loadError: true as const,
+      selectedTypes: ['sell', 'trade', 'want'],
+      myRegionsFilter: false,
+      canPostFilter: false,
+      hasPreferredRegions: false,
     };
   }
 };

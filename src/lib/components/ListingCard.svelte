@@ -92,7 +92,7 @@
         <span
           class="rounded-full border border-[var(--accent)] bg-[var(--accent-soft)] px-3 py-1 font-semibold text-[var(--accent-strong)]"
         >
-          {typeLabels[listing.listingType]}
+          {#if isPreferredRegion}<span class="mr-1">📍</span>{/if}{typeLabels[listing.listingType]}
         </span>
         <span>{createdLabel}</span>
       </div>

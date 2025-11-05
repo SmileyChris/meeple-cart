@@ -1,10 +1,6 @@
 import { PUBLIC_POCKETBASE_URL } from '$env/static/public';
 import type { PageLoad } from './$types';
-import type {
-  GameRecord,
-  ListingPreview,
-  ListingRecord,
-} from '$lib/types/listing';
+import type { GameRecord, ListingPreview, ListingRecord } from '$lib/types/listing';
 import type { UserRecord } from '$lib/types/pocketbase';
 import { normalizeListingType } from '$lib/types/listing';
 
@@ -34,20 +30,49 @@ const buildFileUrl = (
 
 export const prerender = false;
 
-export const load: PageLoad = async ({ fetch, url, parent }) => {
+export const load: PageLoad = async ({ fetch, url, parent, depends }) => {
+  depends('app:listings');
   const baseUrl = (PUBLIC_POCKETBASE_URL || FALLBACK_BASE_URL).replace(/\/$/, '');
 
   const page = url.searchParams.get('page') || '1';
-  const typeFilter = url.searchParams.get('type');
+
+  // Get current user from parent layout (need this early)
+  const { currentUser } = await parent();
+
+  // Get types filter - check individual params, default to all three
+  const allTypes = ['sell', 'trade', 'want'];
+  const selectedTypes = allTypes.filter(type => url.searchParams.get(type) !== 'false');
+
   const canPostFilter = url.searchParams.get('canPost') === 'true';
 
-  // Get current user from parent layout
-  const { currentUser } = await parent();
+  // Get regions from URL params
+  const urlRegions = url.searchParams.getAll('region');
+  const myRegionsFilter = urlRegions.length > 0;
+
+  // Get guest regions from localStorage if not logged in
+  let guestRegions: string[] = [];
+  if (typeof window !== 'undefined' && !currentUser) {
+    const stored = localStorage.getItem('guestPreferredRegions');
+    if (stored) {
+      try {
+        guestRegions = JSON.parse(stored);
+      } catch {
+        guestRegions = [];
+      }
+    }
+  }
 
   // Build filter - always include active status
   const filters = ['status = "active"'];
-  if (typeFilter && ['trade', 'sell', 'want'].includes(typeFilter)) {
-    filters.push(`listing_type = "${typeFilter}"`);
+
+  // Filter by selected listing types
+  if (selectedTypes.length > 0 && selectedTypes.length < 3) {
+    const typeConditions = selectedTypes
+      .filter((t) => ['trade', 'sell', 'want'].includes(t))
+      .map((t) => `listing_type = "${t}"`);
+    if (typeConditions.length > 0) {
+      filters.push(`(${typeConditions.join(' || ')})`);
+    }
   }
 
   // Note: can_post filter requires checking games, which is complex in PocketBase
@@ -116,11 +141,18 @@ export const load: PageLoad = async ({ fetch, url, parent }) => {
       };
     });
 
-    // Client-side filter for can_post (since PocketBase can't easily filter on related games)
-    if (canPostFilter) {
-      listings = listings.filter((listing) =>
-        listing.games.some((game) => game.canPost)
-      );
+    // Client-side filters
+    if (myRegionsFilter && urlRegions.length > 0) {
+      listings = listings.filter((listing) => {
+        // Match if listing is in filtered regions
+        const matchesRegion =
+          listing.regions && listing.regions.some((region) => urlRegions.includes(region));
+
+        // OR if "can post" is enabled and listing has games that can be posted
+        const matchesCanPost = canPostFilter && listing.games.some((game) => game.canPost);
+
+        return matchesRegion || matchesCanPost;
+      });
     }
 
     return {
@@ -129,9 +161,11 @@ export const load: PageLoad = async ({ fetch, url, parent }) => {
       currentPage: result.page,
       totalPages: result.totalPages,
       hasMore: result.page < result.totalPages,
-      currentFilter: typeFilter || null,
+      selectedTypes,
       canPostFilter,
-      userPreferredRegions: currentUser?.preferred_regions || null,
+      myRegionsFilter,
+      userPreferredRegions: currentUser?.preferred_regions || guestRegions.length > 0 ? guestRegions : null,
+      hasPreferredRegions: Boolean(currentUser?.preferred_regions?.length || guestRegions.length > 0),
     };
   } catch (error) {
     console.error('Failed to load activity', error);
@@ -142,7 +176,11 @@ export const load: PageLoad = async ({ fetch, url, parent }) => {
       currentPage: 1,
       totalPages: 1,
       hasMore: false,
-      currentFilter: null,
+      selectedTypes: ['sell', 'trade', 'want'],
+      canPostFilter: false,
+      myRegionsFilter: false,
+      userPreferredRegions: null,
+      hasPreferredRegions: false,
     };
   }
 };

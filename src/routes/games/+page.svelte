@@ -1,551 +1,902 @@
 <script lang="ts">
   import type { PageData } from './$types';
   import GameCard from '$lib/components/GameCard.svelte';
-  import {
-    NZ_REGIONS,
-    NORTH_ISLAND_REGIONS,
-    SOUTH_ISLAND_REGIONS,
-    REGION_LABELS,
-    getIslandRegions,
-  } from '$lib/constants/regions';
+  import RegionSelector from '$lib/components/RegionSelector.svelte';
+  import { NORTH_ISLAND_REGIONS, SOUTH_ISLAND_REGIONS, REGION_LABELS } from '$lib/constants/regions';
+  import { goto, invalidate } from '$app/navigation';
+  import { page } from '$app/stores';
+  import { currentUser } from '$lib/pocketbase';
+  import { browser } from '$app/environment';
 
   let { data }: { data: PageData } = $props();
 
-  let filtersExpanded = $state(false);
-  let selectedRegions = $state<string[]>(data.filters.regions ?? []);
+  // Apply saved preferences on mount if no params in URL
+  $effect(() => {
+    if (!browser) return;
 
-  const listingTypeOptions = [
-    { label: 'All listing types', value: '' },
-    { label: 'Trade', value: 'trade' },
-    { label: 'Sell', value: 'sell' },
-    { label: 'Want to Buy', value: 'want' },
+    const currentUrl = new URL($page.url);
+    const hasAnyParams = currentUrl.searchParams.has('sell') ||
+                         currentUrl.searchParams.has('trade') ||
+                         currentUrl.searchParams.has('want') ||
+                         currentUrl.searchParams.has('region') ||
+                         currentUrl.searchParams.has('page');
+
+    if (!hasAnyParams) {
+      const newUrl = new URL(currentUrl);
+      let needsRedirect = false;
+
+      // Apply saved listing types
+      const savedTypes = localStorage.getItem('preferredListingTypes');
+      if (savedTypes) {
+        try {
+          const types = JSON.parse(savedTypes);
+          if (Array.isArray(types) && types.length > 0 && types.length < 3) {
+            ['sell', 'trade', 'want'].forEach((t) => {
+              if (!types.includes(t)) {
+                newUrl.searchParams.set(t, 'false');
+              }
+            });
+            needsRedirect = true;
+          }
+        } catch {
+          // Ignore invalid data
+        }
+      }
+
+      // Apply saved region filter
+      const savedRegionFilter = localStorage.getItem('preferredRegionFilter');
+      const savedCanPost = localStorage.getItem('preferredCanPost');
+
+      if (savedRegionFilter === 'true') {
+        let regionsToApply: string[] = [];
+
+        if ($currentUser?.preferred_regions) {
+          regionsToApply = $currentUser.preferred_regions;
+        } else {
+          const savedRegions = localStorage.getItem('guestPreferredRegions');
+          if (savedRegions) {
+            try {
+              regionsToApply = JSON.parse(savedRegions);
+            } catch {
+              // Ignore
+            }
+          }
+        }
+
+        if (regionsToApply.length > 0) {
+          regionsToApply.forEach(region => {
+            newUrl.searchParams.append('region', region);
+          });
+          needsRedirect = true;
+
+          if (savedCanPost === 'true') {
+            newUrl.searchParams.set('canPost', 'true');
+          }
+        }
+      }
+
+      if (needsRedirect) {
+        goto(newUrl, { replaceState: true });
+      }
+    }
+  });
+
+  // Load preferred regions from localStorage for non-logged-in users
+  let guestRegions = $state<string[]>([]);
+  let showRegionSelector = $state(false);
+  let regionSelectorRef: HTMLDivElement | null = $state(null);
+
+  if (browser) {
+    const stored = localStorage.getItem('guestPreferredRegions');
+    if (stored) {
+      try {
+        guestRegions = JSON.parse(stored);
+      } catch {
+        guestRegions = [];
+      }
+    }
+  }
+
+  // Close dropdown when clicking outside
+  $effect(() => {
+    if (!browser || !showRegionSelector) return;
+
+    function handleClickOutside(event: MouseEvent) {
+      if (regionSelectorRef && !regionSelectorRef.contains(event.target as Node)) {
+        showRegionSelector = false;
+
+        // If closing with no regions selected, turn off the filter
+        if (guestRegions.length === 0 && data.myRegionsFilter) {
+          toggleMyRegions();
+        }
+      }
+    }
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  });
+
+  const listingTypes = [
+    { value: 'sell', label: 'Sell', icon: '💰' },
+    { value: 'trade', label: 'Trade', icon: '🔄' },
+    { value: 'want', label: 'Want', icon: '🔍' },
   ];
 
   const conditionOptions = [
-    { label: 'Any condition', value: '' },
-    { label: 'Mint', value: 'mint' },
-    { label: 'Excellent', value: 'excellent' },
-    { label: 'Good', value: 'good' },
-    { label: 'Fair', value: 'fair' },
-    { label: 'Poor', value: 'poor' },
+    { value: 'mint', label: 'Mint', level: 4 },
+    { value: 'excellent', label: 'Excellent', level: 3 },
+    { value: 'good', label: 'Good', level: 2 },
+    { value: 'fair', label: 'Fair', level: 1 },
+    { value: 'poor', label: 'Well loved', level: 0 },
   ];
 
-  const hasFilters = Boolean(
-    (data.filters.regions && data.filters.regions.length > 0) ||
-      data.filters.type ||
-      data.filters.search ||
-      data.filters.condition ||
-      data.filters.minPrice ||
-      data.filters.maxPrice
-  );
+  // Find the current condition level from URL
+  const currentConditionValue = data.filters.condition || '';
+  const currentConditionIndex = conditionOptions.findIndex(c => c.value === currentConditionValue);
 
-  // Island selection logic
-  let northIslandChecked = $derived(
-    NORTH_ISLAND_REGIONS.every((r) => selectedRegions.includes(r.value))
-  );
-  let southIslandChecked = $derived(
-    SOUTH_ISLAND_REGIONS.every((r) => selectedRegions.includes(r.value))
-  );
+  // Load last used values from localStorage for defaults (non-reactive)
+  let lastCondition = 4;
+  let lastMinPrice = '';
+  let lastMaxPrice = '50';
 
-  function toggleIsland(island: 'north_island' | 'south_island') {
-    const islandRegionValues = getIslandRegions(island);
-    const allSelected =
-      island === 'north_island' ? northIslandChecked : southIslandChecked;
+  if (browser) {
+    const storedCondition = localStorage.getItem('lastCondition');
+    if (storedCondition) {
+      const idx = conditionOptions.findIndex(c => c.value === storedCondition);
+      if (idx >= 0) lastCondition = idx;
+    }
 
-    if (allSelected) {
-      // Deselect all regions in this island
-      selectedRegions = selectedRegions.filter((r) => !islandRegionValues.includes(r));
+    const storedPriceRange = localStorage.getItem('lastPriceRange');
+    if (storedPriceRange) {
+      try {
+        const { minPrice: savedMin, maxPrice: savedMax } = JSON.parse(storedPriceRange);
+        if (savedMin) lastMinPrice = savedMin;
+        if (savedMax) lastMaxPrice = savedMax;
+      } catch {
+        // Ignore invalid data
+      }
+    }
+  }
+
+  let minConditionLevel = $state(currentConditionIndex >= 0 ? currentConditionIndex : 4); // Default to "any" (well loved)
+  let tempConditionLevel = $state(minConditionLevel); // Temporary value for slider
+  let showConditionFilter = $state(false);
+  let showPriceFilter = $state(false);
+  let minPrice = $state(data.filters.minPrice || '');
+  let maxPrice = $state(data.filters.maxPrice || '');
+  let tempMinPrice = $state(minPrice);
+  let tempMaxPrice = $state(maxPrice);
+  let conditionFilterRef: HTMLDivElement | null = $state(null);
+  let priceFilterRef: HTMLDivElement | null = $state(null);
+  let searchValue = $state(data.filters.search ?? '');
+  let searchTimeout: ReturnType<typeof setTimeout> | null = $state(null);
+
+  // Close condition filter dropdown when clicking outside
+  $effect(() => {
+    if (!browser || !showConditionFilter) return;
+
+    function handleClickOutside(event: MouseEvent) {
+      if (conditionFilterRef && !conditionFilterRef.contains(event.target as Node)) {
+        showConditionFilter = false;
+      }
+    }
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  });
+
+  // Close price filter dropdown when clicking outside
+  $effect(() => {
+    if (!browser || !showPriceFilter) return;
+
+    function handleClickOutside(event: MouseEvent) {
+      if (priceFilterRef && !priceFilterRef.contains(event.target as Node)) {
+        showPriceFilter = false;
+      }
+    }
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  });
+
+  function toggleListingType(type: string) {
+    const url = new URL($page.url);
+    const currentTypes = data.selectedTypes;
+
+    let newTypes: string[];
+    if (currentTypes.includes(type)) {
+      newTypes = currentTypes.filter((t) => t !== type);
     } else {
-      // Select all regions in this island
-      const newRegions = islandRegionValues.filter((r) => !selectedRegions.includes(r));
-      selectedRegions = [...selectedRegions, ...newRegions];
+      newTypes = [...currentTypes, type];
     }
-  }
 
-  function toggleRegion(region: string) {
-    if (selectedRegions.includes(region)) {
-      selectedRegions = selectedRegions.filter((r) => r !== region);
+    // If deselecting the last one, select all three instead
+    if (newTypes.length === 0 || newTypes.length === 3) {
+      // All selected - remove all type params
+      url.searchParams.delete('sell');
+      url.searchParams.delete('trade');
+      url.searchParams.delete('want');
+
+      // Remove from localStorage (default state)
+      if (browser) {
+        localStorage.removeItem('preferredListingTypes');
+      }
     } else {
-      selectedRegions = [...selectedRegions, region];
-    }
-  }
-
-  function clearFilters() {
-    window.location.href = '/games';
-  }
-
-  function removeFilter(filterType: string, value?: string) {
-    const params = new URLSearchParams(window.location.search);
-
-    if (filterType === 'region' && value) {
-      // Remove specific region
-      const regions = params.getAll('regions').filter((r) => r !== value);
-      params.delete('regions');
-      regions.forEach((r) => params.append('regions', r));
-    } else if (filterType === 'search') {
-      params.delete('search');
-    } else if (filterType === 'type') {
-      params.delete('type');
-    } else if (filterType === 'condition') {
-      params.delete('condition');
-    } else if (filterType === 'minPrice') {
-      params.delete('minPrice');
-    } else if (filterType === 'maxPrice') {
-      params.delete('maxPrice');
-    }
-
-    const query = params.toString();
-    window.location.href = query ? `/games?${query}` : '/games';
-  }
-
-  const buildPageLink = (pageNumber: number): string => {
-    // eslint-disable-next-line svelte/prefer-svelte-reactivity
-    const params = new URLSearchParams();
-
-    if (data.filters.search) {
-      params.set('search', data.filters.search);
-    }
-
-    if (data.filters.type) {
-      params.set('type', data.filters.type);
-    }
-
-    if (data.filters.regions && data.filters.regions.length > 0) {
-      data.filters.regions.forEach((region) => {
-        params.append('regions', region);
+      // Set individual params for disabled types
+      ['sell', 'trade', 'want'].forEach((t) => {
+        if (newTypes.includes(t)) {
+          url.searchParams.delete(t);
+        } else {
+          url.searchParams.set(t, 'false');
+        }
       });
+
+      // Save to localStorage
+      if (browser) {
+        localStorage.setItem('preferredListingTypes', JSON.stringify(newTypes));
+      }
     }
 
-    if (data.filters.condition) {
-      params.set('condition', data.filters.condition);
+    url.searchParams.delete('page'); // Reset to page 1 when filtering
+    // eslint-disable-next-line svelte/no-navigation-without-resolve
+    goto(url);
+  }
+
+  function toggleMyRegions() {
+    const url = new URL($page.url);
+    const regionsToUse = $currentUser?.preferred_regions || guestRegions;
+
+    if (data.myRegionsFilter) {
+      // Remove all region params
+      url.searchParams.delete('region');
+      // Save to localStorage
+      if (browser) {
+        localStorage.setItem('preferredRegionFilter', 'false');
+      }
+    } else {
+      // Add region params for each preferred region
+      url.searchParams.delete('region');
+      regionsToUse.forEach(region => {
+        url.searchParams.append('region', region);
+      });
+      // Save to localStorage
+      if (browser) {
+        localStorage.setItem('preferredRegionFilter', 'true');
+      }
+    }
+    url.searchParams.delete('page');
+    // eslint-disable-next-line svelte/no-navigation-without-resolve
+    goto(url, { replaceState: true });
+  }
+
+  async function toggleGuestRegion(regionValue: string) {
+    const wasEmpty = guestRegions.length === 0;
+    const allRegions = [...NORTH_ISLAND_REGIONS, ...SOUTH_ISLAND_REGIONS].map(r => r.value);
+
+    if (guestRegions.includes(regionValue)) {
+      guestRegions = guestRegions.filter((r) => r !== regionValue);
+    } else {
+      guestRegions = [...guestRegions, regionValue];
     }
 
-    if (data.filters.minPrice) {
-      params.set('minPrice', data.filters.minPrice);
+    // If all regions are selected, clear them all
+    if (guestRegions.length === allRegions.length) {
+      guestRegions = [];
     }
 
-    if (data.filters.maxPrice) {
-      params.set('maxPrice', data.filters.maxPrice);
+    // Save to localStorage
+    if (browser) {
+      if (guestRegions.length > 0) {
+        localStorage.setItem('guestPreferredRegions', JSON.stringify(guestRegions));
+      } else {
+        localStorage.removeItem('guestPreferredRegions');
+      }
     }
 
-    if (pageNumber > 1) {
-      params.set('page', String(pageNumber));
+    // If regions are now empty, turn off the filter
+    if (guestRegions.length === 0 && data.myRegionsFilter) {
+      toggleMyRegions();
+      return;
     }
 
-    const query = params.toString();
-    return query ? `?${query}` : '';
-  };
+    // If this was the first region selected, close dropdown and enable filter
+    if (wasEmpty && guestRegions.length === 1) {
+      showRegionSelector = false;
+      // Enable the filter for the first region
+      if (!data.myRegionsFilter) {
+        toggleMyRegions();
+      } else {
+        // Filter already on, just invalidate to reload data
+        await invalidate('app:games');
+      }
+    } else {
+      // Invalidate to recalculate with new regions
+      await invalidate('app:games');
+    }
+  }
 
-  const previousHref = data.pagination.page > 1 ? buildPageLink(data.pagination.page - 1) : null;
-  const nextHref =
-    data.pagination.page < data.pagination.totalPages
-      ? buildPageLink(data.pagination.page + 1)
-      : null;
+  function clearGuestRegions() {
+    guestRegions = [];
+    if (browser) {
+      localStorage.removeItem('guestPreferredRegions');
+    }
+
+    // Turn off the filter if it's on
+    if (data.myRegionsFilter) {
+      toggleMyRegions();
+    }
+  }
+
+  function updateConditionFilter(level: number) {
+    const url = new URL($page.url);
+    const condition = conditionOptions[level];
+
+    if (level === 4) {
+      // "Any condition" - remove filter
+      url.searchParams.delete('condition');
+      if (browser) {
+        localStorage.removeItem('preferredCondition');
+      }
+    } else {
+      url.searchParams.set('condition', condition.value);
+      if (browser) {
+        localStorage.setItem('preferredCondition', condition.value);
+      }
+    }
+
+    url.searchParams.delete('page');
+    // eslint-disable-next-line svelte/no-navigation-without-resolve
+    goto(url);
+  }
+
+  function applyPriceFilter() {
+    const url = new URL($page.url);
+
+    if (minPrice) {
+      url.searchParams.set('minPrice', minPrice);
+    } else {
+      url.searchParams.delete('minPrice');
+    }
+
+    if (maxPrice) {
+      url.searchParams.set('maxPrice', maxPrice);
+    } else {
+      url.searchParams.delete('maxPrice');
+    }
+
+    // Save to localStorage
+    if (browser) {
+      if (minPrice || maxPrice) {
+        localStorage.setItem('preferredPriceRange', JSON.stringify({ minPrice, maxPrice }));
+      } else {
+        localStorage.removeItem('preferredPriceRange');
+      }
+    }
+
+    url.searchParams.delete('page');
+    showPriceFilter = false;
+    // eslint-disable-next-line svelte/no-navigation-without-resolve
+    goto(url);
+  }
+
+  function clearPriceFilter() {
+    minPrice = '';
+    maxPrice = '';
+    const url = new URL($page.url);
+    url.searchParams.delete('minPrice');
+    url.searchParams.delete('maxPrice');
+
+    if (browser) {
+      localStorage.removeItem('preferredPriceRange');
+    }
+
+    url.searchParams.delete('page');
+    showPriceFilter = false;
+    // eslint-disable-next-line svelte/no-navigation-without-resolve
+    goto(url);
+  }
+
+  function loadMore() {
+    const url = new URL($page.url);
+    url.searchParams.set('page', String(data.pagination.page + 1));
+    // eslint-disable-next-line svelte/no-navigation-without-resolve
+    goto(url, { keepFocus: true });
+  }
+
+  function handleSearchInput(event: Event) {
+    const target = event.target as HTMLInputElement;
+    searchValue = target.value;
+
+    // Clear existing timeout
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+
+    // Set new timeout for debounced search
+    searchTimeout = setTimeout(() => {
+      const url = new URL($page.url);
+
+      if (searchValue.trim()) {
+        url.searchParams.set('search', searchValue.trim());
+      } else {
+        url.searchParams.delete('search');
+      }
+
+      url.searchParams.delete('page'); // Reset to page 1 when searching
+      // eslint-disable-next-line svelte/no-navigation-without-resolve
+      goto(url);
+    }, 500); // 500ms debounce
+  }
+
+  function toggleCanPost() {
+    const url = new URL($page.url);
+    if (data.canPostFilter) {
+      url.searchParams.delete('canPost');
+      // Save to localStorage
+      if (browser) {
+        localStorage.setItem('preferredCanPost', 'false');
+      }
+    } else {
+      url.searchParams.set('canPost', 'true');
+      // Save to localStorage
+      if (browser) {
+        localStorage.setItem('preferredCanPost', 'true');
+      }
+    }
+    url.searchParams.delete('page');
+    // eslint-disable-next-line svelte/no-navigation-without-resolve
+    goto(url, { replaceState: true });
+  }
 </script>
 
 <svelte:head>
   <title>Games · Meeple Cart</title>
   <meta
     name="description"
-    content="Browse active board game listings from Meeple Cart members across New Zealand. Filter by region, condition, price, and more."
+    content="Browse active board game listings from Meeple Cart members across New Zealand."
   />
 </svelte:head>
 
-<main class="space-y-10 bg-surface-body pb-16 transition-colors">
-  <!-- eslint-disable svelte/no-navigation-without-resolve -->
-  <section class="px-6 pt-16 text-primary sm:px-8">
-    <div class="mx-auto max-w-5xl space-y-6">
-      <div class="space-y-4">
-        <h1 class="text-4xl font-semibold tracking-tight sm:text-5xl">Games</h1>
-        <p class="max-w-2xl text-base text-secondary sm:text-lg">
-          Search and filter through active listings from Meeple Cart members across New Zealand.
-        </p>
+<main class="bg-surface-body px-6 py-16 text-primary transition-colors sm:px-8">
+  <div class="mx-auto max-w-5xl space-y-8">
+    <div class="space-y-4">
+      <h1 class="text-4xl font-semibold tracking-tight sm:text-5xl">Games</h1>
+      <p class="max-w-2xl text-base text-secondary sm:text-lg">
+        Search and filter through active listings from Meeple Cart members across New Zealand.
+      </p>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="space-y-6">
+      <div class="relative">
+        <input
+          class="w-full rounded-xl border border-subtle bg-surface-card px-4 py-3.5 pl-11 text-base text-primary shadow-sm transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+          id="search"
+          type="text"
+          placeholder="Search for a game..."
+          value={searchValue}
+          oninput={handleSearchInput}
+          maxlength="200"
+        />
+        <svg
+          class="absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-muted"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+          />
+        </svg>
       </div>
 
-      <!-- Search Bar (Prominent) -->
-      <form method="GET" class="space-y-4">
-        <div class="relative">
-          <input
-            class="w-full rounded-xl border border-subtle bg-surface-card px-4 py-3.5 pl-11 text-base text-primary shadow-sm transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
-            id="search"
-            name="search"
-            placeholder="Search for a game..."
-            value={data.filters.search ?? ''}
-            maxlength="200"
-          />
-          <svg
-            class="absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-muted"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
+      <!-- Filter Controls -->
+      <div class="flex flex-wrap items-center justify-center gap-8">
+        <!-- Listing Type Checkboxes -->
+        <div class="flex flex-wrap justify-center gap-4">
+          {#each listingTypes as type (type.value)}
+            <label
+              class={`btn-ghost flex items-center gap-2 px-4 py-2 text-sm font-medium transition-all ${data.selectedTypes.includes(type.value) ? 'border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent-strong)]' : ''}`}
+              onclick={(e) => {
+                e.preventDefault();
+                toggleListingType(type.value);
+              }}
+              role="button"
+              tabindex="0"
+            >
+              <input
+                type="checkbox"
+                checked={data.selectedTypes.includes(type.value)}
+                readonly
+                class="pointer-events-none h-4 w-4 rounded border-subtle accent-[var(--accent)]"
+              />
+              <span>{type.icon}</span>
+              <span>{type.label}</span>
+            </label>
+          {/each}
         </div>
 
-        <!-- Active Filters Display -->
-        {#if hasFilters}
-          <div class="flex flex-wrap items-center gap-2">
-            <span class="text-sm text-muted">Active filters:</span>
-            {#if data.filters.search}
-              <button
-                type="button"
-                onclick={() => removeFilter('search')}
-                class="inline-flex items-center gap-1.5 rounded-full border border-subtle bg-surface-card px-3 py-1 text-sm text-secondary transition hover:bg-surface-panel"
+        <!-- Region Filters -->
+        <div class="flex flex-wrap items-center justify-center gap-3 text-sm">
+          {#if $currentUser}
+            <!-- Logged-in user: My Regions filter -->
+            {#if data.hasPreferredRegions}
+              <label
+                class={`btn-ghost flex cursor-pointer items-center gap-2 px-4 py-2 font-medium transition-all ${data.myRegionsFilter ? 'border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent-strong)]' : ''}`}
               >
-                <span>Search: "{data.filters.search}"</span>
-                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            {/if}
-            {#if data.filters.type}
-              <button
-                type="button"
-                onclick={() => removeFilter('type')}
-                class="inline-flex items-center gap-1.5 rounded-full border border-subtle bg-surface-card px-3 py-1 text-sm text-secondary transition hover:bg-surface-panel"
+                <input
+                  type="checkbox"
+                  checked={data.myRegionsFilter}
+                  onchange={toggleMyRegions}
+                  class="h-4 w-4 rounded border-subtle accent-[var(--accent)]"
+                />
+                <span>📍</span>
+                <span>My Region(s)</span>
+              </label>
+            {:else}
+              <a
+                href="/profile"
+                class="btn-ghost px-4 py-2 text-sm font-medium text-muted hover:text-primary"
               >
-                <span
-                  >{listingTypeOptions.find((o) => o.value === data.filters.type)?.label}</span
-                >
-                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
+                📍 Configure my regions
+              </a>
             {/if}
-            {#if data.filters.condition}
-              <button
-                type="button"
-                onclick={() => removeFilter('condition')}
-                class="inline-flex items-center gap-1.5 rounded-full border border-subtle bg-surface-card px-3 py-1 text-sm text-secondary transition hover:bg-surface-panel"
+          {:else}
+            <!-- Non-logged-in user: Region selector with checkbox and dropdown -->
+            <div class="relative flex items-center gap-2" bind:this={regionSelectorRef}>
+              <span class="text-lg">📍</span>
+              <div
+                class={`btn-ghost flex items-center overflow-hidden px-4 py-2 text-sm transition-all ${data.myRegionsFilter || showRegionSelector ? 'border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent-strong)]' : ''}`}
               >
-                <span
-                  >{conditionOptions.find((o) => o.value === data.filters.condition)?.label}</span
-                >
-                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            {/if}
-            {#if data.filters.regions && data.filters.regions.length > 0}
-              {#each data.filters.regions as region (region)}
-                <button
-                  type="button"
-                  onclick={() => removeFilter('region', region)}
-                  class="inline-flex items-center gap-1.5 rounded-full border border-subtle bg-surface-card px-3 py-1 text-sm text-secondary transition hover:bg-surface-panel"
-                >
-                  <span>{REGION_LABELS[region] ?? region}</span>
-                  <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M6 18L18 6M6 6l12 12"
+                {#if guestRegions.length > 0}
+                  <label class="flex cursor-pointer items-center gap-2 font-medium">
+                    <input
+                      type="checkbox"
+                      checked={data.myRegionsFilter}
+                      onchange={toggleMyRegions}
+                      class="h-4 w-4 rounded border-subtle accent-[var(--accent)]"
                     />
-                  </svg>
-                </button>
-              {/each}
-            {/if}
-            {#if data.filters.minPrice}
-              <button
-                type="button"
-                onclick={() => removeFilter('minPrice')}
-                class="inline-flex items-center gap-1.5 rounded-full border border-subtle bg-surface-card px-3 py-1 text-sm text-secondary transition hover:bg-surface-panel"
-              >
-                <span>Min: ${data.filters.minPrice}</span>
-                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            {/if}
-            {#if data.filters.maxPrice}
-              <button
-                type="button"
-                onclick={() => removeFilter('maxPrice')}
-                class="inline-flex items-center gap-1.5 rounded-full border border-subtle bg-surface-card px-3 py-1 text-sm text-secondary transition hover:bg-surface-panel"
-              >
-                <span>Max: ${data.filters.maxPrice}</span>
-                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            {/if}
-            <button
-              type="button"
-              onclick={clearFilters}
-              class="text-sm text-[var(--accent)] hover:underline"
-            >
-              Clear all
-            </button>
-          </div>
-        {/if}
-
-        <!-- Expandable Filters Section -->
-        <div class="rounded-xl border border-subtle bg-surface-panel transition-colors">
-          <button
-            type="button"
-            onclick={() => (filtersExpanded = !filtersExpanded)}
-            class="flex w-full items-center justify-between px-4 py-3 text-left transition hover:bg-surface-card"
-          >
-            <span class="text-sm font-medium text-secondary">
-              {filtersExpanded ? 'Hide filters' : 'Show filters'}
-            </span>
-            <svg
-              class="h-5 w-5 text-muted transition-transform {filtersExpanded ? 'rotate-180' : ''}"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-          </button>
-
-          {#if filtersExpanded}
-            <div class="space-y-6 border-t border-subtle p-4">
-              <!-- Regions -->
-              <div>
-                <label class="block text-sm font-medium text-secondary">Regions</label>
-                <div class="mt-3 space-y-4">
-                  <!-- North Island -->
-                  <div class="space-y-2">
-                    <label class="flex items-center gap-2 text-sm font-medium text-primary">
-                      <input
-                        type="checkbox"
-                        class="h-4 w-4 rounded border border-subtle bg-surface-card transition-colors"
-                        checked={northIslandChecked}
-                        onchange={() => toggleIsland('north_island')}
-                      />
-                      North Island
-                    </label>
-                    <div class="ml-6 grid gap-2 sm:grid-cols-2">
-                      {#each NORTH_ISLAND_REGIONS as region (region.value)}
-                        <label class="flex items-center gap-2 text-sm text-secondary">
-                          <input
-                            type="checkbox"
-                            name="regions"
-                            value={region.value}
-                            class="h-4 w-4 rounded border border-subtle bg-surface-card transition-colors"
-                            checked={selectedRegions.includes(region.value)}
-                            onchange={() => toggleRegion(region.value)}
-                          />
-                          {region.label}
-                        </label>
-                      {/each}
-                    </div>
-                  </div>
-
-                  <!-- South Island -->
-                  <div class="space-y-2">
-                    <label class="flex items-center gap-2 text-sm font-medium text-primary">
-                      <input
-                        type="checkbox"
-                        class="h-4 w-4 rounded border border-subtle bg-surface-card transition-colors"
-                        checked={southIslandChecked}
-                        onchange={() => toggleIsland('south_island')}
-                      />
-                      South Island
-                    </label>
-                    <div class="ml-6 grid gap-2 sm:grid-cols-2">
-                      {#each SOUTH_ISLAND_REGIONS as region (region.value)}
-                        <label class="flex items-center gap-2 text-sm text-secondary">
-                          <input
-                            type="checkbox"
-                            name="regions"
-                            value={region.value}
-                            class="h-4 w-4 rounded border border-subtle bg-surface-card transition-colors"
-                            checked={selectedRegions.includes(region.value)}
-                            onchange={() => toggleRegion(region.value)}
-                          />
-                          {region.label}
-                        </label>
-                      {/each}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Other Filters -->
-              <div class="grid gap-4 sm:grid-cols-2">
-                <!-- Listing Type -->
-                <div>
-                  <label class="block text-sm font-medium text-secondary" for="type"
-                    >Listing type</label
-                  >
-                  <select
-                    class="mt-2 w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
-                    id="type"
-                    name="type"
-                    value={data.filters.type}
-                  >
-                    {#each listingTypeOptions as option (option.value)}
-                      <option value={option.value}>{option.label}</option>
-                    {/each}
-                  </select>
-                </div>
-
-                <!-- Condition -->
-                <div>
-                  <label class="block text-sm font-medium text-secondary" for="condition"
-                    >Condition</label
-                  >
-                  <select
-                    class="mt-2 w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
-                    id="condition"
-                    name="condition"
-                    value={data.filters.condition ?? ''}
-                  >
-                    {#each conditionOptions as option (option.value)}
-                      <option value={option.value}>{option.label}</option>
-                    {/each}
-                  </select>
-                </div>
-              </div>
-
-              <!-- Price Range -->
-              <div class="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label class="block text-sm font-medium text-secondary" for="minPrice">
-                    Min price (NZD)
+                    <span
+                      >in {guestRegions.length === 1
+                        ? NORTH_ISLAND_REGIONS.find((r) => r.value === guestRegions[0])?.label ||
+                          SOUTH_ISLAND_REGIONS.find((r) => r.value === guestRegions[0])?.label
+                        : `${guestRegions.length} regions`}</span
+                    >
                   </label>
-                  <input
-                    class="mt-2 w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
-                    id="minPrice"
-                    name="minPrice"
-                    type="number"
-                    min="0"
-                    step="1"
-                    placeholder="No minimum"
-                    value={data.filters.minPrice ?? ''}
-                  />
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-secondary" for="maxPrice">
-                    Max price (NZD)
-                  </label>
-                  <input
-                    class="mt-2 w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
-                    id="maxPrice"
-                    name="maxPrice"
-                    type="number"
-                    min="0"
-                    step="1"
-                    placeholder="No maximum"
-                    value={data.filters.maxPrice ?? ''}
-                  />
-                </div>
-              </div>
-
-              <!-- Actions -->
-              <div class="flex flex-wrap gap-3">
-                <button class="btn-primary" type="submit"> Apply filters </button>
-                {#if hasFilters}
-                  <button type="button" onclick={clearFilters} class="btn-ghost">
-                    Clear filters
-                  </button>
+                  <div class="mx-3 h-4 w-px bg-subtle"></div>
                 {/if}
+
+                <button
+                  onclick={() => (showRegionSelector = !showRegionSelector)}
+                  class="group font-medium"
+                >
+                  {#if guestRegions.length > 0}
+                    <span
+                      class={`inline-block transition-transform ${showRegionSelector ? 'scale-125 rotate-45' : ''} group-hover:scale-125 group-hover:rotate-45`}
+                      >⚙️</span
+                    >
+                  {:else}
+                    <span>Filter by region</span>
+                  {/if}
+                </button>
               </div>
+
+              <RegionSelector
+                bind:guestRegions
+                bind:showRegionSelector
+                onToggleRegion={toggleGuestRegion}
+                onClear={clearGuestRegions}
+              />
             </div>
           {/if}
+
+          <!-- Can Post filter (only show when regions are selected) -->
+          {#if ($currentUser && data.hasPreferredRegions) || (!$currentUser && guestRegions.length > 0)}
+            <label
+              class={`btn-ghost flex items-center gap-2 px-4 py-2 text-sm font-medium transition-all ${data.canPostFilter && data.myRegionsFilter ? 'border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent-strong)]' : ''} ${!data.myRegionsFilter ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
+            >
+              <input
+                type="checkbox"
+                checked={data.canPostFilter}
+                disabled={!data.myRegionsFilter}
+                onchange={toggleCanPost}
+                class="h-4 w-4 rounded border-subtle accent-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-50"
+              />
+              <span>Or Can Post</span>
+            </label>
+          {/if}
         </div>
-      </form>
+
+        <!-- Condition Filter -->
+        <div class="flex flex-wrap items-center justify-center gap-3 text-sm">
+          <div class="relative flex items-center gap-2" bind:this={conditionFilterRef}>
+            <span class="text-lg">⭐</span>
+            {#if minConditionLevel < 4}
+              <button
+                type="button"
+                onclick={() => {
+                  tempConditionLevel = minConditionLevel;
+                  showConditionFilter = !showConditionFilter;
+                }}
+                class={`btn-ghost flex cursor-pointer items-center gap-2 px-4 py-2 font-medium transition-all border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent-strong)]`}
+              >
+                <input
+                  type="checkbox"
+                  checked={true}
+                  readonly
+                  class="pointer-events-none h-4 w-4 rounded border-subtle accent-[var(--accent)]"
+                />
+                <span>
+                  {#if minConditionLevel === 0}
+                    Only mint condition
+                  {:else}
+                    At least {conditionOptions[minConditionLevel].label.toLowerCase()} condition
+                  {/if}
+                </span>
+              </button>
+            {:else}
+              <button
+                type="button"
+                onclick={() => {
+                  // Use last selected condition as default when opening
+                  tempConditionLevel = minConditionLevel < 4 ? minConditionLevel : lastCondition;
+                  showConditionFilter = !showConditionFilter;
+                }}
+                class="btn-ghost px-4 py-2 font-medium"
+              >
+                Any condition
+              </button>
+            {/if}
+
+            {#if showConditionFilter}
+              <div
+                class="absolute left-0 top-full z-10 mt-2 w-80 rounded-lg border border-subtle bg-surface-card p-4 shadow-lg"
+              >
+                <div class="mb-3 flex items-center justify-between">
+                  <h3 class="text-sm font-semibold text-primary">Minimum condition</h3>
+                  {#if tempConditionLevel < 4}
+                    <button
+                      type="button"
+                      onclick={(e) => {
+                        e.stopPropagation();
+                        tempConditionLevel = 4;
+                        minConditionLevel = 4;
+                        updateConditionFilter(4);
+                        showConditionFilter = false;
+                      }}
+                      class="text-xs text-muted hover:text-accent"
+                    >
+                      Clear
+                    </button>
+                  {/if}
+                </div>
+
+                <div class="space-y-4">
+                  <div class="text-center">
+                    <span class="text-lg font-semibold text-primary">
+                      {#if tempConditionLevel === 0}
+                        Only mint condition
+                      {:else if tempConditionLevel === 4}
+                        Any condition
+                      {:else}
+                        At least {conditionOptions[tempConditionLevel].label.toLowerCase()} condition
+                      {/if}
+                    </span>
+                  </div>
+
+                  <input
+                    type="range"
+                    min="0"
+                    max="4"
+                    step="1"
+                    bind:value={tempConditionLevel}
+                    class="h-2 w-full cursor-pointer appearance-none rounded-lg accent-[var(--accent)]"
+                    style="background: linear-gradient(to right, var(--accent) 0%, var(--accent) {tempConditionLevel * 25}%, var(--surface-card-alt) {tempConditionLevel * 25}%, var(--surface-card-alt) 100%);"
+                  />
+
+                  <button
+                    type="button"
+                    onclick={() => {
+                      minConditionLevel = tempConditionLevel;
+                      updateConditionFilter(tempConditionLevel);
+                      showConditionFilter = false;
+
+                      // Save last used condition to localStorage
+                      if (browser && tempConditionLevel < 4) {
+                        localStorage.setItem('lastCondition', conditionOptions[tempConditionLevel].value);
+                      }
+                    }}
+                    class="btn-primary w-full px-4 py-2 text-sm font-medium"
+                  >
+                    {tempConditionLevel === 4 ? 'Clear' : 'Apply'}
+                  </button>
+                </div>
+              </div>
+            {/if}
+          </div>
+        </div>
+
+        <!-- Price Filter -->
+        <div class="flex flex-wrap items-center justify-center gap-3 text-sm">
+          <div class="relative flex items-center gap-2" bind:this={priceFilterRef}>
+            <span class="text-lg">💵</span>
+            {#if minPrice || maxPrice}
+              <button
+                type="button"
+                onclick={() => {
+                  tempMinPrice = minPrice;
+                  tempMaxPrice = maxPrice;
+                  showPriceFilter = !showPriceFilter;
+                }}
+                class={`btn-ghost flex cursor-pointer items-center gap-2 px-4 py-2 font-medium transition-all border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent-strong)]`}
+              >
+                <input
+                  type="checkbox"
+                  checked={true}
+                  readonly
+                  class="pointer-events-none h-4 w-4 rounded border-subtle accent-[var(--accent)]"
+                />
+                <span>
+                  {#if minPrice && maxPrice}
+                    ${minPrice} - ${maxPrice}
+                  {:else if minPrice}
+                    From ${minPrice}
+                  {:else}
+                    Up to ${maxPrice}
+                  {/if}
+                </span>
+              </button>
+            {:else}
+              <button
+                type="button"
+                onclick={() => {
+                  // Use last selected prices as defaults when opening
+                  tempMinPrice = minPrice || lastMinPrice;
+                  tempMaxPrice = maxPrice || lastMaxPrice;
+                  showPriceFilter = !showPriceFilter;
+                }}
+                class="btn-ghost px-4 py-2 font-medium"
+              >
+                Any price
+              </button>
+            {/if}
+
+            {#if showPriceFilter}
+              <div
+                class="absolute left-0 top-full z-10 mt-2 w-72 rounded-lg border border-subtle bg-surface-card p-4 shadow-lg"
+              >
+                <div class="mb-3 flex items-center justify-between">
+                  <h3 class="text-sm font-semibold text-primary">Set price range</h3>
+                  {#if tempMinPrice || tempMaxPrice}
+                    <button
+                      type="button"
+                      onclick={(e) => {
+                        e.stopPropagation();
+                        tempMinPrice = '';
+                        tempMaxPrice = '';
+                        minPrice = '';
+                        maxPrice = '';
+                        clearPriceFilter();
+                      }}
+                      class="text-xs text-muted hover:text-accent"
+                    >
+                      Clear
+                    </button>
+                  {/if}
+                </div>
+
+                <div class="space-y-3">
+                  <div class="grid grid-cols-2 gap-3">
+                    <div>
+                      <label class="block text-xs font-medium text-secondary mb-1" for="minPrice">
+                        Minimum
+                      </label>
+                      <input
+                        id="minPrice"
+                        type="number"
+                        min="0"
+                        step="1"
+                        placeholder="Min"
+                        bind:value={tempMinPrice}
+                        oninput={(e) => {
+                          const val = (e.target as HTMLInputElement).value;
+                          if (val && tempMaxPrice && parseFloat(val) > parseFloat(tempMaxPrice)) {
+                            tempMaxPrice = val;
+                          }
+                        }}
+                        class="w-full rounded-lg border border-subtle bg-surface-card-alt px-3 py-2 text-sm text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+                      />
+                    </div>
+                    <div>
+                      <label class="block text-xs font-medium text-secondary mb-1" for="maxPrice">
+                        Maximum
+                      </label>
+                      <input
+                        id="maxPrice"
+                        type="number"
+                        min={tempMinPrice || "0"}
+                        step="1"
+                        placeholder="Max"
+                        bind:value={tempMaxPrice}
+                        class="w-full rounded-lg border border-subtle bg-surface-card-alt px-3 py-2 text-sm text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+                      />
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onclick={() => {
+                      minPrice = tempMinPrice;
+                      maxPrice = tempMaxPrice;
+                      applyPriceFilter();
+
+                      // Save last used prices to localStorage
+                      if (browser && (tempMinPrice || tempMaxPrice)) {
+                        localStorage.setItem('lastPriceRange', JSON.stringify({
+                          minPrice: tempMinPrice,
+                          maxPrice: tempMaxPrice
+                        }));
+                      }
+                    }}
+                    class="btn-primary w-full px-4 py-2 text-sm font-medium"
+                  >
+                    Apply
+                  </button>
+                </div>
+              </div>
+            {/if}
+          </div>
+        </div>
+      </div>
+
     </div>
-  </section>
 
-  <section class="px-6 sm:px-8">
-    <div class="mx-auto max-w-5xl space-y-8">
-
-      <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>
+    <!-- Results -->
+    {#if data.activities.length === 0}
+      <div
+        class="mx-auto max-w-md rounded-2xl border-2 border-dashed border-subtle bg-surface-card p-12 text-center transition-colors"
+      >
+        <div class="mb-4 text-6xl opacity-20">📭</div>
+        <p class="text-lg text-muted">
+          {#if data.loadError}
+            We couldn't reach the games service. Try refreshing once PocketBase is running.
+          {:else}
+            No games match your filters yet. Check back soon!
+          {/if}
+        </p>
+      </div>
+    {:else}
+      <div>
+        <div class="mb-6">
           <h2 class="text-2xl font-semibold text-primary">Available games</h2>
           <p class="text-sm text-muted">
             {data.activities.length}
             {data.activities.length === 1 ? 'game' : 'games'}
           </p>
         </div>
-        <p class="text-sm text-muted">
-          Browse individual games from all listings. Use filters to narrow your search.
-        </p>
-      </div>
 
-      {#if data.activities.length > 0}
         <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {#each data.activities as game (game.id)}
             <GameCard {game} />
           {/each}
         </div>
-      {:else}
-        <div
-          class="rounded-xl border border-dashed border-subtle bg-surface-card p-10 text-center text-muted transition-colors"
-        >
-          {#if data.loadError}
-            <p>
-              We couldn't reach the games service. Try refreshing once PocketBase is running.
-            </p>
-          {:else}
-            <p>
-              No games match your filters yet. Check back soon or create the first listing.
-            </p>
-          {/if}
-        </div>
-      {/if}
+      </div>
+    {/if}
 
-      {#if data.pagination.totalPages > 1}
-        <nav
-          class="flex items-center justify-between rounded-xl border border-subtle bg-surface-panel px-4 py-3 text-sm text-secondary transition-colors"
-        >
-          <div>
-            Page {data.pagination.page} of {data.pagination.totalPages}
-          </div>
-          <div class="flex items-center gap-3">
-            {#if previousHref}
-              <a class="btn-ghost" href={previousHref}> Previous </a>
-            {:else}
-              <span class="rounded-full border border-subtle px-3 py-1.5 text-muted">Previous</span>
-            {/if}
-            {#if nextHref}
-              <a class="btn-ghost" href={nextHref}> Next </a>
-            {:else}
-              <span class="rounded-full border border-subtle px-3 py-1.5 text-muted">Next</span>
-            {/if}
-          </div>
-        </nav>
-      {/if}
-    </div>
-  </section>
-  <!-- eslint-enable svelte/no-navigation-without-resolve -->
+    <!-- Load More Button -->
+    {#if data.pagination.page < data.pagination.totalPages}
+      <div class="flex justify-center pt-8">
+        <button onclick={loadMore} class="btn-primary px-6 py-3 font-medium"> Load More </button>
+      </div>
+    {/if}
+
+    <!-- Pagination Info -->
+    {#if data.activities.length > 0}
+      <p class="text-center text-sm text-muted">
+        Page {data.pagination.page} of {data.pagination.totalPages}
+      </p>
+    {/if}
+  </div>
 </main>

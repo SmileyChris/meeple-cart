@@ -1,16 +1,126 @@
 <script lang="ts">
   import type { PageData } from './$types';
   import ListingCard from '$lib/components/ListingCard.svelte';
-  import { goto } from '$app/navigation';
+  import RegionSelector from '$lib/components/RegionSelector.svelte';
+  import { goto, invalidate } from '$app/navigation';
   import { page } from '$app/stores';
   import { getTimeGroup } from '$lib/utils/time';
+  import { currentUser } from '$lib/pocketbase';
+  import { NORTH_ISLAND_REGIONS, SOUTH_ISLAND_REGIONS } from '$lib/constants/regions';
+  import { browser } from '$app/environment';
 
   let { data }: { data: PageData } = $props();
 
-  const filters = [
-    { value: null, label: 'All', icon: '🎲' },
-    { value: 'trade', label: 'Trade', icon: '🔄' },
+  // Apply saved preferences on mount if no params in URL
+  $effect(() => {
+    if (!browser) return;
+
+    const currentUrl = new URL($page.url);
+    const hasAnyParams = currentUrl.searchParams.has('sell') ||
+                         currentUrl.searchParams.has('trade') ||
+                         currentUrl.searchParams.has('want') ||
+                         currentUrl.searchParams.has('region') ||
+                         currentUrl.searchParams.has('canPost') ||
+                         currentUrl.searchParams.has('page');
+
+    if (!hasAnyParams) {
+      const newUrl = new URL(currentUrl);
+      let needsRedirect = false;
+
+      // Apply saved listing types
+      const savedTypes = localStorage.getItem('preferredListingTypes');
+      if (savedTypes) {
+        try {
+          const types = JSON.parse(savedTypes);
+          if (Array.isArray(types) && types.length > 0 && types.length < 3) {
+            ['sell', 'trade', 'want'].forEach((t) => {
+              if (!types.includes(t)) {
+                newUrl.searchParams.set(t, 'false');
+              }
+            });
+            needsRedirect = true;
+          }
+        } catch {
+          // Ignore invalid data
+        }
+      }
+
+      // Apply saved region filter
+      const savedRegionFilter = localStorage.getItem('preferredRegionFilter');
+      const savedCanPost = localStorage.getItem('preferredCanPost');
+
+      if (savedRegionFilter === 'true') {
+        let regionsToApply: string[] = [];
+
+        if ($currentUser?.preferred_regions) {
+          regionsToApply = $currentUser.preferred_regions;
+        } else {
+          const savedRegions = localStorage.getItem('guestPreferredRegions');
+          if (savedRegions) {
+            try {
+              regionsToApply = JSON.parse(savedRegions);
+            } catch {
+              // Ignore
+            }
+          }
+        }
+
+        if (regionsToApply.length > 0) {
+          regionsToApply.forEach(region => {
+            newUrl.searchParams.append('region', region);
+          });
+          needsRedirect = true;
+
+          if (savedCanPost === 'true') {
+            newUrl.searchParams.set('canPost', 'true');
+          }
+        }
+      }
+
+      if (needsRedirect) {
+        goto(newUrl, { replaceState: true });
+      }
+    }
+  });
+
+  // Load preferred regions from localStorage for non-logged-in users
+  let guestRegions = $state<string[]>([]);
+  let showRegionSelector = $state(false);
+  let regionSelectorRef: HTMLDivElement | null = $state(null);
+
+  if (browser) {
+    const stored = localStorage.getItem('guestPreferredRegions');
+    if (stored) {
+      try {
+        guestRegions = JSON.parse(stored);
+      } catch {
+        guestRegions = [];
+      }
+    }
+  }
+
+  // Close dropdown when clicking outside
+  $effect(() => {
+    if (!browser || !showRegionSelector) return;
+
+    function handleClickOutside(event: MouseEvent) {
+      if (regionSelectorRef && !regionSelectorRef.contains(event.target as Node)) {
+        showRegionSelector = false;
+
+        // If closing with no regions selected, turn off the filter
+        if (guestRegions.length === 0 && data.myRegionsFilter) {
+          toggleMyRegions();
+        }
+      }
+    }
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  });
+
+  const listingTypes = [
     { value: 'sell', label: 'Sell', icon: '💰' },
+    { value: 'trade', label: 'Trade', icon: '🔄' },
     { value: 'want', label: 'Want', icon: '🔍' },
   ];
 
@@ -54,26 +164,92 @@
     )
   );
 
-  function setFilter(type: string | null) {
+  function toggleListingType(type: string) {
     const url = new URL($page.url);
-    if (type) {
-      url.searchParams.set('type', type);
+    const currentTypes = data.selectedTypes;
+
+    let newTypes: string[];
+    if (currentTypes.includes(type)) {
+      newTypes = currentTypes.filter((t) => t !== type);
     } else {
-      url.searchParams.delete('type');
+      newTypes = [...currentTypes, type];
     }
+
+    // If deselecting the last one, select all three instead
+    if (newTypes.length === 0 || newTypes.length === 3) {
+      // All selected - remove all type params
+      url.searchParams.delete('sell');
+      url.searchParams.delete('trade');
+      url.searchParams.delete('want');
+
+      // Remove from localStorage (default state)
+      if (browser) {
+        localStorage.removeItem('preferredListingTypes');
+      }
+    } else {
+      // Set individual params for disabled types
+      ['sell', 'trade', 'want'].forEach((t) => {
+        if (newTypes.includes(t)) {
+          url.searchParams.delete(t);
+        } else {
+          url.searchParams.set(t, 'false');
+        }
+      });
+
+      // Save to localStorage
+      if (browser) {
+        localStorage.setItem('preferredListingTypes', JSON.stringify(newTypes));
+      }
+    }
+
     url.searchParams.delete('page'); // Reset to page 1 when filtering
     // eslint-disable-next-line svelte/no-navigation-without-resolve
-    goto(url, { replaceState: true });
+    goto(url);
   }
 
   function toggleCanPost() {
     const url = new URL($page.url);
     if (data.canPostFilter) {
       url.searchParams.delete('canPost');
+      // Save to localStorage
+      if (browser) {
+        localStorage.setItem('preferredCanPost', 'false');
+      }
     } else {
       url.searchParams.set('canPost', 'true');
+      // Save to localStorage
+      if (browser) {
+        localStorage.setItem('preferredCanPost', 'true');
+      }
     }
-    url.searchParams.delete('page'); // Reset to page 1 when filtering
+    url.searchParams.delete('page');
+    // eslint-disable-next-line svelte/no-navigation-without-resolve
+    goto(url, { replaceState: true });
+  }
+
+  function toggleMyRegions() {
+    const url = new URL($page.url);
+    const regionsToUse = $currentUser?.preferred_regions || guestRegions;
+
+    if (data.myRegionsFilter) {
+      // Remove all region params
+      url.searchParams.delete('region');
+      // Save to localStorage
+      if (browser) {
+        localStorage.setItem('preferredRegionFilter', 'false');
+      }
+    } else {
+      // Add region params for each preferred region
+      url.searchParams.delete('region');
+      regionsToUse.forEach(region => {
+        url.searchParams.append('region', region);
+      });
+      // Save to localStorage
+      if (browser) {
+        localStorage.setItem('preferredRegionFilter', 'true');
+      }
+    }
+    url.searchParams.delete('page');
     // eslint-disable-next-line svelte/no-navigation-without-resolve
     goto(url, { replaceState: true });
   }
@@ -83,6 +259,64 @@
     url.searchParams.set('page', String(data.currentPage + 1));
     // eslint-disable-next-line svelte/no-navigation-without-resolve
     goto(url, { keepFocus: true });
+  }
+
+  async function toggleGuestRegion(regionValue: string) {
+    const wasEmpty = guestRegions.length === 0;
+    const allRegions = [...NORTH_ISLAND_REGIONS, ...SOUTH_ISLAND_REGIONS].map(r => r.value);
+
+    if (guestRegions.includes(regionValue)) {
+      guestRegions = guestRegions.filter((r) => r !== regionValue);
+    } else {
+      guestRegions = [...guestRegions, regionValue];
+    }
+
+    // If all regions are selected, clear them all
+    if (guestRegions.length === allRegions.length) {
+      guestRegions = [];
+    }
+
+    // Save to localStorage
+    if (browser) {
+      if (guestRegions.length > 0) {
+        localStorage.setItem('guestPreferredRegions', JSON.stringify(guestRegions));
+      } else {
+        localStorage.removeItem('guestPreferredRegions');
+      }
+    }
+
+    // If regions are now empty, turn off the filter
+    if (guestRegions.length === 0 && data.myRegionsFilter) {
+      toggleMyRegions();
+      return;
+    }
+
+    // If this was the first region selected, close dropdown and enable filter
+    if (wasEmpty && guestRegions.length === 1) {
+      showRegionSelector = false;
+      // Enable the filter for the first region
+      if (!data.myRegionsFilter) {
+        toggleMyRegions();
+      } else {
+        // Filter already on, just invalidate to reload data
+        await invalidate('app:listings');
+      }
+    } else {
+      // Invalidate to recalculate with new regions
+      await invalidate('app:listings');
+    }
+  }
+
+  function clearGuestRegions() {
+    guestRegions = [];
+    if (browser) {
+      localStorage.removeItem('guestPreferredRegions');
+    }
+
+    // Turn off the filter if it's on
+    if (data.myRegionsFilter) {
+      toggleMyRegions();
+    }
   }
 </script>
 
@@ -96,28 +330,122 @@
 
 <main class="bg-surface-body px-6 py-16 text-primary transition-colors sm:px-8">
   <div class="mx-auto max-w-5xl space-y-8">
-    <!-- Filter Buttons -->
-    <div class="flex flex-col items-center gap-4">
-      <div class="flex flex-wrap justify-center gap-3">
-        {#each filters as filter (filter.label)}
-          <button
-            onclick={() => setFilter(filter.value)}
-            class={`btn-ghost px-4 py-2 text-sm font-medium ${data.currentFilter === filter.value ? 'border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent-strong)]' : ''}`}
+    <!-- Filter Controls -->
+    <div class="flex flex-wrap items-center justify-center gap-8">
+      <!-- Listing Type Checkboxes -->
+      <div class="flex flex-wrap justify-center gap-4">
+        {#each listingTypes as type (type.value)}
+          <label
+            class={`btn-ghost flex items-center gap-2 px-4 py-2 text-sm font-medium transition-all ${data.selectedTypes.includes(type.value) ? 'border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent-strong)]' : ''}`}
+            onclick={(e) => {
+              e.preventDefault();
+              toggleListingType(type.value);
+            }}
+            role="button"
+            tabindex="0"
           >
-            <span class="mr-1.5">{filter.icon}</span>
-            {filter.label}
-          </button>
+            <input
+              type="checkbox"
+              checked={data.selectedTypes.includes(type.value)}
+              readonly
+              class="pointer-events-none h-4 w-4 rounded border-subtle accent-[var(--accent)]"
+            />
+            <span>{type.icon}</span>
+            <span>{type.label}</span>
+          </label>
         {/each}
       </div>
 
-      <!-- Can Post Filter -->
-      <button
-        onclick={toggleCanPost}
-        class={`btn-ghost px-4 py-2 text-sm font-medium ${data.canPostFilter ? 'border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent-strong)]' : ''}`}
-      >
-        <span class="mr-1.5">📮</span>
-        Or can post
-      </button>
+      <!-- Region Filters -->
+      <div class="flex flex-wrap items-center justify-center gap-3 text-sm">
+        {#if $currentUser}
+          <!-- Logged-in user: My Regions filter -->
+          {#if data.hasPreferredRegions}
+            <label
+              class={`btn-ghost flex cursor-pointer items-center gap-2 px-4 py-2 font-medium transition-all ${data.myRegionsFilter ? 'border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent-strong)]' : ''}`}
+            >
+              <input
+                type="checkbox"
+                checked={data.myRegionsFilter}
+                onchange={toggleMyRegions}
+                class="h-4 w-4 rounded border-subtle accent-[var(--accent)]"
+              />
+              <span>📍</span>
+              <span>My Region(s)</span>
+            </label>
+          {:else}
+            <a
+              href="/profile"
+              class="btn-ghost px-4 py-2 text-sm font-medium text-muted hover:text-primary"
+            >
+              📍 Configure my regions
+            </a>
+          {/if}
+        {:else}
+          <!-- Non-logged-in user: Region selector with checkbox and dropdown -->
+          <div class="relative flex items-center gap-2" bind:this={regionSelectorRef}>
+            <span class="text-lg">📍</span>
+            <div
+              class={`btn-ghost flex items-center overflow-hidden px-4 py-2 text-sm transition-all ${data.myRegionsFilter || showRegionSelector ? 'border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent-strong)]' : ''}`}
+            >
+              {#if guestRegions.length > 0}
+                <label class="flex cursor-pointer items-center gap-2 font-medium">
+                  <input
+                    type="checkbox"
+                    checked={data.myRegionsFilter}
+                    onchange={toggleMyRegions}
+                    class="h-4 w-4 rounded border-subtle accent-[var(--accent)]"
+                  />
+                  <span
+                    >in {guestRegions.length === 1
+                      ? NORTH_ISLAND_REGIONS.find((r) => r.value === guestRegions[0])?.label ||
+                        SOUTH_ISLAND_REGIONS.find((r) => r.value === guestRegions[0])?.label
+                      : `${guestRegions.length} regions`}</span
+                  >
+                </label>
+                <div class="mx-3 h-4 w-px bg-subtle"></div>
+              {/if}
+
+              <button
+                onclick={() => (showRegionSelector = !showRegionSelector)}
+                class="group font-medium"
+              >
+                {#if guestRegions.length > 0}
+                  <span
+                    class={`inline-block transition-transform ${showRegionSelector ? 'scale-125 rotate-45' : ''} group-hover:scale-125 group-hover:rotate-45`}
+                    >⚙️</span
+                  >
+                {:else}
+                  <span>Filter by region</span>
+                {/if}
+              </button>
+            </div>
+
+            <RegionSelector
+              bind:guestRegions
+              bind:showRegionSelector
+              onToggleRegion={toggleGuestRegion}
+              onClear={clearGuestRegions}
+            />
+          </div>
+        {/if}
+
+        <!-- Can Post filter (only show when regions are selected) -->
+        {#if ($currentUser && data.hasPreferredRegions) || (!$currentUser && guestRegions.length > 0)}
+          <label
+            class={`btn-ghost flex items-center gap-2 px-4 py-2 text-sm font-medium transition-all ${data.canPostFilter && data.myRegionsFilter ? 'border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent-strong)]' : ''} ${!data.myRegionsFilter ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
+          >
+            <input
+              type="checkbox"
+              checked={data.canPostFilter}
+              disabled={!data.myRegionsFilter}
+              onchange={toggleCanPost}
+              class="h-4 w-4 rounded border-subtle accent-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-50"
+            />
+            <span>Or Can Post</span>
+          </label>
+        {/if}
+      </div>
     </div>
 
     <!-- Timeline View -->
