@@ -7,6 +7,20 @@
   import { page } from '$app/stores';
   import { currentUser } from '$lib/pocketbase';
   import { browser } from '$app/environment';
+  import {
+    applyStoredFilters,
+    saveListingTypePreferences,
+    saveRegionFilterState,
+    saveCanPostState,
+    saveGuestRegions,
+    getGuestRegions,
+    saveConditionPreference,
+    saveLastCondition,
+    getLastCondition,
+    savePriceRangePreference,
+    saveLastPriceRange,
+    getLastPriceRange,
+  } from '$lib/utils/filters';
 
   let { data }: { data: PageData } = $props();
 
@@ -14,88 +28,16 @@
   $effect(() => {
     if (!browser) return;
 
-    const currentUrl = new URL($page.url);
-    const hasAnyParams = currentUrl.searchParams.has('sell') ||
-                         currentUrl.searchParams.has('trade') ||
-                         currentUrl.searchParams.has('want') ||
-                         currentUrl.searchParams.has('region') ||
-                         currentUrl.searchParams.has('page');
-
-    if (!hasAnyParams) {
-      const newUrl = new URL(currentUrl);
-      let needsRedirect = false;
-
-      // Apply saved listing types
-      const savedTypes = localStorage.getItem('preferredListingTypes');
-      if (savedTypes) {
-        try {
-          const types = JSON.parse(savedTypes);
-          if (Array.isArray(types) && types.length > 0 && types.length < 3) {
-            ['sell', 'trade', 'want'].forEach((t) => {
-              if (!types.includes(t)) {
-                newUrl.searchParams.set(t, 'false');
-              }
-            });
-            needsRedirect = true;
-          }
-        } catch {
-          // Ignore invalid data
-        }
-      }
-
-      // Apply saved region filter
-      const savedRegionFilter = localStorage.getItem('preferredRegionFilter');
-      const savedCanPost = localStorage.getItem('preferredCanPost');
-
-      if (savedRegionFilter === 'true') {
-        let regionsToApply: string[] = [];
-
-        if ($currentUser?.preferred_regions) {
-          regionsToApply = $currentUser.preferred_regions;
-        } else {
-          const savedRegions = localStorage.getItem('guestPreferredRegions');
-          if (savedRegions) {
-            try {
-              regionsToApply = JSON.parse(savedRegions);
-            } catch {
-              // Ignore
-            }
-          }
-        }
-
-        if (regionsToApply.length > 0) {
-          regionsToApply.forEach(region => {
-            newUrl.searchParams.append('region', region);
-          });
-          needsRedirect = true;
-
-          if (savedCanPost === 'true') {
-            newUrl.searchParams.set('canPost', 'true');
-          }
-        }
-      }
-
-      if (needsRedirect) {
-        goto(newUrl, { replaceState: true });
-      }
+    const newUrl = applyStoredFilters($page.url, $currentUser);
+    if (newUrl) {
+      goto(newUrl, { replaceState: true });
     }
   });
 
   // Load preferred regions from localStorage for non-logged-in users
-  let guestRegions = $state<string[]>([]);
+  let guestRegions = $state<string[]>(browser ? getGuestRegions() : []);
   let showRegionSelector = $state(false);
   let regionSelectorRef: HTMLDivElement | null = $state(null);
-
-  if (browser) {
-    const stored = localStorage.getItem('guestPreferredRegions');
-    if (stored) {
-      try {
-        guestRegions = JSON.parse(stored);
-      } catch {
-        guestRegions = [];
-      }
-    }
-  }
 
   // Close dropdown when clicking outside
   $effect(() => {
@@ -140,22 +82,15 @@
   let lastMaxPrice = '50';
 
   if (browser) {
-    const storedCondition = localStorage.getItem('lastCondition');
+    const storedCondition = getLastCondition();
     if (storedCondition) {
       const idx = conditionOptions.findIndex(c => c.value === storedCondition);
       if (idx >= 0) lastCondition = idx;
     }
 
-    const storedPriceRange = localStorage.getItem('lastPriceRange');
-    if (storedPriceRange) {
-      try {
-        const { minPrice: savedMin, maxPrice: savedMax } = JSON.parse(storedPriceRange);
-        if (savedMin) lastMinPrice = savedMin;
-        if (savedMax) lastMaxPrice = savedMax;
-      } catch {
-        // Ignore invalid data
-      }
-    }
+    const storedPriceRange = getLastPriceRange();
+    lastMinPrice = storedPriceRange.minPrice;
+    lastMaxPrice = storedPriceRange.maxPrice;
   }
 
   let minConditionLevel = $state(currentConditionIndex >= 0 ? currentConditionIndex : 4); // Default to "any" (well loved)
@@ -219,7 +154,7 @@
 
       // Remove from localStorage (default state)
       if (browser) {
-        localStorage.removeItem('preferredListingTypes');
+        saveListingTypePreferences([]);
       }
     } else {
       // Set individual params for disabled types
@@ -233,7 +168,7 @@
 
       // Save to localStorage
       if (browser) {
-        localStorage.setItem('preferredListingTypes', JSON.stringify(newTypes));
+        saveListingTypePreferences(newTypes);
       }
     }
 
@@ -249,9 +184,8 @@
     if (data.myRegionsFilter) {
       // Remove all region params
       url.searchParams.delete('region');
-      // Save to localStorage
       if (browser) {
-        localStorage.setItem('preferredRegionFilter', 'false');
+        saveRegionFilterState(false);
       }
     } else {
       // Add region params for each preferred region
@@ -259,9 +193,8 @@
       regionsToUse.forEach(region => {
         url.searchParams.append('region', region);
       });
-      // Save to localStorage
       if (browser) {
-        localStorage.setItem('preferredRegionFilter', 'true');
+        saveRegionFilterState(true);
       }
     }
     url.searchParams.delete('page');
@@ -286,11 +219,7 @@
 
     // Save to localStorage
     if (browser) {
-      if (guestRegions.length > 0) {
-        localStorage.setItem('guestPreferredRegions', JSON.stringify(guestRegions));
-      } else {
-        localStorage.removeItem('guestPreferredRegions');
-      }
+      saveGuestRegions(guestRegions);
     }
 
     // If regions are now empty, turn off the filter
@@ -318,7 +247,7 @@
   function clearGuestRegions() {
     guestRegions = [];
     if (browser) {
-      localStorage.removeItem('guestPreferredRegions');
+      saveGuestRegions([]);
     }
 
     // Turn off the filter if it's on
@@ -335,12 +264,12 @@
       // "Any condition" - remove filter
       url.searchParams.delete('condition');
       if (browser) {
-        localStorage.removeItem('preferredCondition');
+        saveConditionPreference(null);
       }
     } else {
       url.searchParams.set('condition', condition.value);
       if (browser) {
-        localStorage.setItem('preferredCondition', condition.value);
+        saveConditionPreference(condition.value);
       }
     }
 
@@ -366,11 +295,7 @@
 
     // Save to localStorage
     if (browser) {
-      if (minPrice || maxPrice) {
-        localStorage.setItem('preferredPriceRange', JSON.stringify({ minPrice, maxPrice }));
-      } else {
-        localStorage.removeItem('preferredPriceRange');
-      }
+      savePriceRangePreference(minPrice, maxPrice);
     }
 
     url.searchParams.delete('page');
@@ -387,7 +312,7 @@
     url.searchParams.delete('maxPrice');
 
     if (browser) {
-      localStorage.removeItem('preferredPriceRange');
+      savePriceRangePreference('', '');
     }
 
     url.searchParams.delete('page');
@@ -432,15 +357,13 @@
     const url = new URL($page.url);
     if (data.canPostFilter) {
       url.searchParams.delete('canPost');
-      // Save to localStorage
       if (browser) {
-        localStorage.setItem('preferredCanPost', 'false');
+        saveCanPostState(false);
       }
     } else {
       url.searchParams.set('canPost', 'true');
-      // Save to localStorage
       if (browser) {
-        localStorage.setItem('preferredCanPost', 'true');
+        saveCanPostState(true);
       }
     }
     url.searchParams.delete('page');
@@ -706,7 +629,7 @@
 
                       // Save last used condition to localStorage
                       if (browser && tempConditionLevel < 4) {
-                        localStorage.setItem('lastCondition', conditionOptions[tempConditionLevel].value);
+                        saveLastCondition(conditionOptions[tempConditionLevel].value);
                       }
                     }}
                     class="btn-primary w-full px-4 py-2 text-sm font-medium"
@@ -834,10 +757,7 @@
 
                       // Save last used prices to localStorage
                       if (browser && (tempMinPrice || tempMaxPrice)) {
-                        localStorage.setItem('lastPriceRange', JSON.stringify({
-                          minPrice: tempMinPrice,
-                          maxPrice: tempMaxPrice
-                        }));
+                        saveLastPriceRange(tempMinPrice, tempMaxPrice);
                       }
                     }}
                     class="btn-primary w-full px-4 py-2 text-sm font-medium"

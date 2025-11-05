@@ -8,6 +8,14 @@
   import { currentUser } from '$lib/pocketbase';
   import { NORTH_ISLAND_REGIONS, SOUTH_ISLAND_REGIONS } from '$lib/constants/regions';
   import { browser } from '$app/environment';
+  import {
+    applyStoredFilters,
+    saveListingTypePreferences,
+    saveRegionFilterState,
+    saveCanPostState,
+    saveGuestRegions,
+    getGuestRegions,
+  } from '$lib/utils/filters';
 
   let { data }: { data: PageData } = $props();
 
@@ -15,89 +23,16 @@
   $effect(() => {
     if (!browser) return;
 
-    const currentUrl = new URL($page.url);
-    const hasAnyParams = currentUrl.searchParams.has('sell') ||
-                         currentUrl.searchParams.has('trade') ||
-                         currentUrl.searchParams.has('want') ||
-                         currentUrl.searchParams.has('region') ||
-                         currentUrl.searchParams.has('canPost') ||
-                         currentUrl.searchParams.has('page');
-
-    if (!hasAnyParams) {
-      const newUrl = new URL(currentUrl);
-      let needsRedirect = false;
-
-      // Apply saved listing types
-      const savedTypes = localStorage.getItem('preferredListingTypes');
-      if (savedTypes) {
-        try {
-          const types = JSON.parse(savedTypes);
-          if (Array.isArray(types) && types.length > 0 && types.length < 3) {
-            ['sell', 'trade', 'want'].forEach((t) => {
-              if (!types.includes(t)) {
-                newUrl.searchParams.set(t, 'false');
-              }
-            });
-            needsRedirect = true;
-          }
-        } catch {
-          // Ignore invalid data
-        }
-      }
-
-      // Apply saved region filter
-      const savedRegionFilter = localStorage.getItem('preferredRegionFilter');
-      const savedCanPost = localStorage.getItem('preferredCanPost');
-
-      if (savedRegionFilter === 'true') {
-        let regionsToApply: string[] = [];
-
-        if ($currentUser?.preferred_regions) {
-          regionsToApply = $currentUser.preferred_regions;
-        } else {
-          const savedRegions = localStorage.getItem('guestPreferredRegions');
-          if (savedRegions) {
-            try {
-              regionsToApply = JSON.parse(savedRegions);
-            } catch {
-              // Ignore
-            }
-          }
-        }
-
-        if (regionsToApply.length > 0) {
-          regionsToApply.forEach(region => {
-            newUrl.searchParams.append('region', region);
-          });
-          needsRedirect = true;
-
-          if (savedCanPost === 'true') {
-            newUrl.searchParams.set('canPost', 'true');
-          }
-        }
-      }
-
-      if (needsRedirect) {
-        goto(newUrl, { replaceState: true });
-      }
+    const newUrl = applyStoredFilters($page.url, $currentUser);
+    if (newUrl) {
+      goto(newUrl, { replaceState: true });
     }
   });
 
   // Load preferred regions from localStorage for non-logged-in users
-  let guestRegions = $state<string[]>([]);
+  let guestRegions = $state<string[]>(browser ? getGuestRegions() : []);
   let showRegionSelector = $state(false);
   let regionSelectorRef: HTMLDivElement | null = $state(null);
-
-  if (browser) {
-    const stored = localStorage.getItem('guestPreferredRegions');
-    if (stored) {
-      try {
-        guestRegions = JSON.parse(stored);
-      } catch {
-        guestRegions = [];
-      }
-    }
-  }
 
   // Close dropdown when clicking outside
   $effect(() => {
@@ -184,7 +119,7 @@
 
       // Remove from localStorage (default state)
       if (browser) {
-        localStorage.removeItem('preferredListingTypes');
+        saveListingTypePreferences([]);
       }
     } else {
       // Set individual params for disabled types
@@ -198,7 +133,7 @@
 
       // Save to localStorage
       if (browser) {
-        localStorage.setItem('preferredListingTypes', JSON.stringify(newTypes));
+        saveListingTypePreferences(newTypes);
       }
     }
 
@@ -211,15 +146,13 @@
     const url = new URL($page.url);
     if (data.canPostFilter) {
       url.searchParams.delete('canPost');
-      // Save to localStorage
       if (browser) {
-        localStorage.setItem('preferredCanPost', 'false');
+        saveCanPostState(false);
       }
     } else {
       url.searchParams.set('canPost', 'true');
-      // Save to localStorage
       if (browser) {
-        localStorage.setItem('preferredCanPost', 'true');
+        saveCanPostState(true);
       }
     }
     url.searchParams.delete('page');
@@ -234,9 +167,8 @@
     if (data.myRegionsFilter) {
       // Remove all region params
       url.searchParams.delete('region');
-      // Save to localStorage
       if (browser) {
-        localStorage.setItem('preferredRegionFilter', 'false');
+        saveRegionFilterState(false);
       }
     } else {
       // Add region params for each preferred region
@@ -244,9 +176,8 @@
       regionsToUse.forEach(region => {
         url.searchParams.append('region', region);
       });
-      // Save to localStorage
       if (browser) {
-        localStorage.setItem('preferredRegionFilter', 'true');
+        saveRegionFilterState(true);
       }
     }
     url.searchParams.delete('page');
@@ -278,11 +209,7 @@
 
     // Save to localStorage
     if (browser) {
-      if (guestRegions.length > 0) {
-        localStorage.setItem('guestPreferredRegions', JSON.stringify(guestRegions));
-      } else {
-        localStorage.removeItem('guestPreferredRegions');
-      }
+      saveGuestRegions(guestRegions);
     }
 
     // If regions are now empty, turn off the filter
@@ -310,7 +237,7 @@
   function clearGuestRegions() {
     guestRegions = [];
     if (browser) {
-      localStorage.removeItem('guestPreferredRegions');
+      saveGuestRegions([]);
     }
 
     // Turn off the filter if it's on
