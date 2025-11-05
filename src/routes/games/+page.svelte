@@ -94,13 +94,13 @@
   }
 
   let minConditionLevel = $state(currentConditionIndex >= 0 ? currentConditionIndex : 4); // Default to "any" (well loved)
-  let tempConditionLevel = $state(minConditionLevel); // Temporary value for slider
+  let tempConditionLevel = $state(currentConditionIndex >= 0 ? currentConditionIndex : 4); // Temporary value for slider
   let showConditionFilter = $state(false);
   let showPriceFilter = $state(false);
   let minPrice = $state(data.filters.minPrice || '');
   let maxPrice = $state(data.filters.maxPrice || '');
-  let tempMinPrice = $state(minPrice);
-  let tempMaxPrice = $state(maxPrice);
+  let tempMinPrice = $state(data.filters.minPrice || '');
+  let tempMaxPrice = $state(data.filters.maxPrice || '');
   let conditionFilterRef: HTMLDivElement | null = $state(null);
   let priceFilterRef: HTMLDivElement | null = $state(null);
   let searchValue = $state(data.filters.search ?? '');
@@ -421,14 +421,10 @@
         <!-- Listing Type Checkboxes -->
         <div class="flex flex-wrap justify-center gap-4">
           {#each listingTypes as type (type.value)}
-            <label
+            <button
+              type="button"
               class={`btn-ghost flex items-center gap-2 px-4 py-2 text-sm font-medium transition-all ${data.selectedTypes.includes(type.value) ? 'border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent-strong)]' : ''}`}
-              onclick={(e) => {
-                e.preventDefault();
-                toggleListingType(type.value);
-              }}
-              role="button"
-              tabindex="0"
+              onclick={() => toggleListingType(type.value)}
             >
               <input
                 type="checkbox"
@@ -438,7 +434,7 @@
               />
               <span>{type.icon}</span>
               <span>{type.label}</span>
-            </label>
+            </button>
           {/each}
         </div>
 

@@ -7,6 +7,8 @@
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
 
+  let { children } = $props();
+
   let unreadNotifications = $state(0);
   let currentPath = $derived($page.url.pathname);
 
@@ -290,7 +292,7 @@
   </header>
 
   <div class="flex-1 pb-12">
-    <slot />
+    {@render children()}
   </div>
 
   <Footer />

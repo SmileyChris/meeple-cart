@@ -262,14 +262,10 @@
       <!-- Listing Type Checkboxes -->
       <div class="flex flex-wrap justify-center gap-4">
         {#each listingTypes as type (type.value)}
-          <label
+          <button
+            type="button"
             class={`btn-ghost flex items-center gap-2 px-4 py-2 text-sm font-medium transition-all ${data.selectedTypes.includes(type.value) ? 'border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent-strong)]' : ''}`}
-            onclick={(e) => {
-              e.preventDefault();
-              toggleListingType(type.value);
-            }}
-            role="button"
-            tabindex="0"
+            onclick={() => toggleListingType(type.value)}
           >
             <input
               type="checkbox"
@@ -279,7 +275,7 @@
             />
             <span>{type.icon}</span>
             <span>{type.label}</span>
-          </label>
+          </button>
         {/each}
       </div>
 
