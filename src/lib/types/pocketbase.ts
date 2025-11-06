@@ -1,5 +1,8 @@
 import type { RecordModel } from 'pocketbase';
 
+// Re-export BGG types
+export type { BggInfoRecord } from './bgg';
+
 export interface UserRecord extends RecordModel {
   display_name: string;
   location?: string;
@@ -29,7 +32,7 @@ export interface TradeRecord extends RecordModel {
   listing: string;
   buyer: string;
   seller: string;
-  games?: string[]; // Selected game IDs for this trade
+  items?: string[]; // Selected item IDs for this trade
   shipping_method?: 'in_person' | 'shipped';
   status: 'initiated' | 'confirmed' | 'completed' | 'disputed' | 'cancelled';
   rating?: number;
@@ -39,7 +42,7 @@ export interface TradeRecord extends RecordModel {
     listing?: RecordModel;
     buyer?: UserRecord;
     seller?: UserRecord;
-    games?: RecordModel[];
+    items?: RecordModel[];
   };
 }
 

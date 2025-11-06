@@ -164,7 +164,7 @@
       <div class="space-y-2">
         <h4 class="text-xs font-semibold uppercase tracking-wide text-muted">
           {listing.games.length}
-          {listing.games.length === 1 ? 'game' : 'games'} included
+          {listing.games.length === 1 ? 'item' : 'items'} included
         </h4>
         <div class="flex flex-wrap gap-2">
           {#each listing.games.slice(0, showAllGames ? listing.games.length : 3) as game (game.id)}

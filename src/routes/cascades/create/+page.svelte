@@ -52,7 +52,7 @@
       });
 
       // Update game status to cascaded
-      await pb.collection('games').update(selectedGameId, {
+      await pb.collection('items').update(selectedGameId, {
         status: 'cascaded',
       });
 

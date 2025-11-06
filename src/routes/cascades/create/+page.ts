@@ -1,7 +1,7 @@
 
 import type { PageLoad } from './$types';
 import { redirectToLogin } from '$lib/utils/auth-redirect';
-import type { GameRecord } from '$lib/types/listing';
+import type { ItemRecord } from '$lib/types/listing';
 import { pb, currentUser } from '$lib/pocketbase';
 import { get } from 'svelte/store';
 
@@ -28,7 +28,7 @@ export const load: PageLoad = async ({ url }) => {
     const listingIds = listings.map((l) => l.id);
     const listingFilter = listingIds.map((id) => `listing = "${id}"`).join(' || ');
 
-    const games = await pb.collection('games').getFullList<GameRecord>({
+    const items = await pb.collection('items').getFullList<ItemRecord>({
       filter: `(${listingFilter}) && status = "available"`,
       expand: 'listing',
       sort: 'title',
@@ -42,13 +42,13 @@ export const load: PageLoad = async ({ url }) => {
 
     const cascadeGameIds = new Set(cascades.map((c: any) => c.current_game));
 
-    const availableGames = games
-      .filter((game) => !cascadeGameIds.has(game.id))
-      .map((game) => ({
-        id: game.id,
-        title: game.title,
-        condition: game.condition,
-        listingTitle: game.expand?.listing?.title || 'Unknown Listing',
+    const availableGames = items
+      .filter((item) => !cascadeGameIds.has(item.id))
+      .map((item) => ({
+        id: item.id,
+        title: item.title,
+        condition: item.condition,
+        listingTitle: item.expand?.listing?.title || 'Unknown Listing',
       }));
 
     return {

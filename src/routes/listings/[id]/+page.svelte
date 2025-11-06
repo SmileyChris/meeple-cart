@@ -260,7 +260,7 @@ View full details: ${shareUrl}`;
 
     // Validate game selection if games exist
     if (games.length > 0 && selectedGameIds.length === 0) {
-      tradeError = 'Please select at least one game you want to trade for';
+      tradeError = 'Please select at least one item you want to trade for';
       return;
     }
 
@@ -517,9 +517,9 @@ View full details: ${shareUrl}`;
     >
       <div class="space-y-6">
         <div>
-          <h2 class="text-2xl font-semibold text-primary">Games in this listing</h2>
+          <h2 class="text-2xl font-semibold text-primary">Items in this listing</h2>
           <p class="text-sm text-muted">
-            Condition, pricing, and trade preferences for each game included.
+            Condition, pricing, and trade preferences for each item included.
           </p>
         </div>
 
@@ -649,7 +649,7 @@ View full details: ${shareUrl}`;
           <div
             class="rounded-lg border border-dashed border-subtle bg-surface-body transition-colors/50 p-6 text-sm text-muted"
           >
-            The trader has not added individual game details yet.
+            The seller has not added individual item details yet.
           </div>
         {/if}
       </div>

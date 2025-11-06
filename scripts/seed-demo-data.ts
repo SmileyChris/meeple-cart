@@ -1489,10 +1489,10 @@ const recreateListing = async (
       gamePayload.can_post = game.canPost;
     }
 
-    const gameRecord = await userPb.collection('games').create(gamePayload);
+    const itemRecord = await userPb.collection('items').create(gamePayload);
 
-    // Backdate game creation
-    await userPb.collection('games').update(gameRecord.id, { created: createdDate.toISOString() });
+    // Backdate item creation
+    await userPb.collection('items').update(itemRecord.id, { created: createdDate.toISOString() });
   }
 
   userPb.authStore.clear();
@@ -1677,7 +1677,7 @@ const clearAllListings = async (): Promise<void> => {
   console.log('Clearing all listings...');
 
   // Get counts before deleting
-  const games = await pb.collection('games').getFullList();
+  const items = await pb.collection('items').getFullList();
   const listings = await pb.collection('listings').getFullList();
   const reactions = await pb.collection('reactions').getFullList();
 
@@ -1699,7 +1699,7 @@ const clearAllListings = async (): Promise<void> => {
     }
   }
 
-  console.log(`Deleted ${listings.length} listings, ${games.length} games, and ${reactions.length} reactions.`);
+  console.log(`Deleted ${listings.length} listings, ${items.length} items, and ${reactions.length} reactions.`);
 };
 
 const seedDemoData = async (): Promise<void> => {

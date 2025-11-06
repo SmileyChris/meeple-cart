@@ -147,7 +147,7 @@
     <header class="space-y-3">
       <h1 class="text-3xl font-semibold tracking-tight">Create a new listing</h1>
       <p class="text-sm text-muted">
-        Share the details of the game you want to trade or sell. Listings publish immediately and
+        Share the details of the items you want to trade or sell. Listings publish immediately and
         can be edited from your profile afterwards.
       </p>
     </header>
@@ -214,7 +214,7 @@
           <div class="sm:col-span-2">
             <label class="block text-sm font-medium text-secondary">Pickup regions</label>
             <p class="mt-1 text-xs text-muted">
-              Select regions where you can meet for pickup (postage options set per-game below)
+              Select regions where you can meet for pickup (postage options set per-item below)
             </p>
             <div class="mt-3 space-y-4">
               <!-- North Island -->
@@ -396,7 +396,7 @@
             type="button"
             onclick={addGame}
           >
-            + Add game
+            + Add item
           </button>
         </div>
 

@@ -3,7 +3,7 @@ import type { PageLoad } from './$types';
 import type { CascadeRecord, CascadeRegion, CascadeStatus } from '$lib/types/cascade';
 import { NZ_REGIONS } from '$lib/constants/regions';
 import type { UserRecord } from '$lib/types/pocketbase';
-import type { GameRecord } from '$lib/types/listing';
+import type { ItemRecord } from '$lib/types/listing';
 
 const PAGE_LIMIT = 24;
 const FALLBACK_BASE_URL = 'http://127.0.0.1:8090';

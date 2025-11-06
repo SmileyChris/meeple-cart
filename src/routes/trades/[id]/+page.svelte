@@ -93,18 +93,18 @@
       if (trade.games && trade.games.length > 0) {
         // Mark only selected games as sold
         for (const gameId of trade.games) {
-          await pb.collection('games').update(gameId, {
+          await pb.collection('items').update(gameId, {
             status: 'sold',
           });
         }
       } else {
         // Legacy: mark all games as sold if no specific games selected
-        const games = await pb.collection('games').getFullList({
+        const games = await pb.collection('items').getFullList({
           filter: `listing = "${listing.id}"`,
         });
 
         for (const game of games) {
-          await pb.collection('games').update(game.id, {
+          await pb.collection('items').update(game.id, {
             status: 'sold',
           });
         }
@@ -451,8 +451,8 @@
         </div>
       {:else}
         <div>
-          <h3 class="text-sm font-semibold text-secondary mb-2">Games</h3>
-          <p class="text-sm text-muted">All games in the listing</p>
+          <h3 class="text-sm font-semibold text-secondary mb-2">Items</h3>
+          <p class="text-sm text-muted">All items in the listing</p>
         </div>
       {/if}
     </section>

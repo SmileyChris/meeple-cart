@@ -1,7 +1,7 @@
 import { PUBLIC_POCKETBASE_URL } from '$env/static/public';
 import type { PageLoad } from './$types';
 import type {
-  GameRecord,
+  ItemRecord,
   ListingFilters,
   ListingRecord,
   ListingType,
@@ -40,7 +40,7 @@ const buildFileUrl = (
   return thumb ? `${fileUrl}?thumb=${encodeURIComponent(thumb)}` : fileUrl;
 };
 
-type ExpandedGameRecord = GameRecord & {
+type ExpandedItemRecord = ItemRecord & {
   expand?: {
     listing?: ListingRecord & {
       expand?: {
@@ -181,8 +181,8 @@ export const load: PageLoad = async ({ fetch, url, depends }) => {
   }
 
   try {
-    const gamesResponse = await fetch(
-      `${baseUrl}/api/collections/games/records?${searchParams.toString()}`,
+    const itemsResponse = await fetch(
+      `${baseUrl}/api/collections/items/records?${searchParams.toString()}`,
       {
         headers: {
           accept: 'application/json',
@@ -190,13 +190,13 @@ export const load: PageLoad = async ({ fetch, url, depends }) => {
       }
     );
 
-    if (!gamesResponse.ok) {
+    if (!itemsResponse.ok) {
       throw new Error(
-        `Failed to fetch games: ${gamesResponse.status} ${gamesResponse.statusText}`
+        `Failed to fetch items: ${itemsResponse.status} ${itemsResponse.statusText}`
       );
     }
 
-    const result = (await gamesResponse.json()) as PocketBaseListResponse<ExpandedGameRecord>;
+    const result = (await itemsResponse.json()) as PocketBaseListResponse<ExpandedItemRecord>;
 
     let activities: ActivityItem[] = result.items
       .filter((game) => {

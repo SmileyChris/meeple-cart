@@ -22,8 +22,8 @@ export const load: PageLoad = async ({ params }) => {
       throw error(403, 'Only the listing owner can manage photos');
     }
 
-    // Load games for this listing (needed for region mapping)
-    const games = await pb.collection('games').getFullList({
+    // Load items for this listing (needed for region mapping)
+    const games = await pb.collection('items').getFullList({
       filter: `listing = "${params.id}"`,
       sort: 'created',
     });

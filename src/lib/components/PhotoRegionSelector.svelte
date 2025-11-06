@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { PhotoRegion } from '$lib/types/photo-region';
-  import type { GameRecord, ListingRecord } from '$lib/types/listing';
+  import type { ItemRecord, ListingRecord } from '$lib/types/listing';
   import { createRectangleRegion, createPolygonRegion, isRectangleCoordinates, isPolygonCoordinates } from '$lib/types/photo-region';
   import {
     rectanglePixelsToPercent,
@@ -14,7 +14,7 @@
     photoUrl: string;
     photoFilename: string;
     listing: ListingRecord;
-    games: GameRecord[];
+    games: ItemRecord[];
     existingRegions?: PhotoRegion[];
     onClose: () => void;
     onSave: (regions: PhotoRegion[]) => Promise<void>;

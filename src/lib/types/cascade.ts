@@ -1,7 +1,7 @@
 import type { RecordModel } from 'pocketbase';
 import type { CascadeRegionValue } from '$lib/constants/regions';
 import type { UserRecord } from './pocketbase';
-import type { GameRecord } from './listing';
+import type { ItemRecord } from './listing';
 
 export type CascadeStatus =
   | 'accepting_entries'
@@ -49,7 +49,7 @@ export interface CascadeRecord extends RecordModel {
   view_count: number;
   // Expanded relations (added by PocketBase when using expand)
   expand?: {
-    current_game?: GameRecord;
+    current_game?: ItemRecord;
     current_holder?: UserRecord;
     winner?: UserRecord;
     origin_cascade?: CascadeRecord;
@@ -86,7 +86,7 @@ export interface CascadeHistoryRecord extends RecordModel {
     cascade?: CascadeRecord;
     actor?: UserRecord;
     related_user?: UserRecord;
-    game?: GameRecord;
+    game?: ItemRecord;
   };
 }
 
@@ -113,7 +113,7 @@ export interface CascadeLineageNode {
   cascade: CascadeRecord;
   generation: number;
   holder: UserRecord;
-  game: GameRecord;
+  game: ItemRecord;
   children: CascadeLineageNode[];
 }
 

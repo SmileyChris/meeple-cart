@@ -1,4 +1,4 @@
-import type { PriceHistoryEntry, GameRecord } from '$lib/types/listing';
+import type { PriceHistoryEntry, ItemRecord } from '$lib/types/listing';
 
 /**
  * Get the lowest historical price from entries that are:
@@ -50,14 +50,14 @@ export function getLowestHistoricalPrice(
  * @deprecated Use getLowestHistoricalPrice for anti-gaming protection
  */
 export function getMostRecentPrice(
-  game: GameRecord
+  item: ItemRecord
 ): { price?: number; tradeValue?: number } | null {
-  if (!game.price_history || game.price_history.length === 0) {
+  if (!item.price_history || item.price_history.length === 0) {
     return null;
   }
 
   // Price history is ordered, so last entry is most recent before current
-  const history = game.price_history;
+  const history = item.price_history;
   if (history.length < 2) {
     return null; // Need at least 2 entries to show "was" price
   }

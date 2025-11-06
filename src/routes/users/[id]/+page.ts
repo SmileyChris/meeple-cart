@@ -10,31 +10,31 @@ export const load: PageLoad = async ({ params }) => {
     // Fetch user profile
     const profile = await pb.collection('users').getOne(id);
 
-    // Fetch active listings with games data
+    // Fetch active listings with items data
     const listingsResult = await pb.collection('listings').getList(1, 50, {
       filter: `owner = "${id}" && status = "active"`,
       expand: 'owner',
       sort: '-created',
     });
 
-    // Fetch games for each listing
+    // Fetch items for each listing
     const listingsWithGames = await Promise.all(
       listingsResult.items.map(async (listing: any) => {
-        const gamesResult = await pb.collection('games').getList(1, 50, {
+        const itemsResult = await pb.collection('items').getList(1, 50, {
           filter: `listing = "${listing.id}"`,
           sort: 'created',
         });
 
-        const games = gamesResult.items.map((game: any) => ({
-          id: game.id,
-          title: game.title,
-          condition: game.condition,
-          status: game.status,
-          bggId: game.bgg_id,
-          bggUrl: game.bgg_id ? `https://boardgamegeek.com/boardgame/${game.bgg_id}` : null,
-          price: game.price,
-          tradeValue: game.trade_value,
-          canPost: game.can_post || false,
+        const games = itemsResult.items.map((item: any) => ({
+          id: item.id,
+          title: item.title,
+          condition: item.condition,
+          status: item.status,
+          bggId: item.bgg_id,
+          bggUrl: item.bgg_id ? `https://boardgamegeek.com/boardgame/${item.bgg_id}` : null,
+          price: item.price,
+          tradeValue: item.trade_value,
+          canPost: item.can_post || false,
         }));
 
         return {

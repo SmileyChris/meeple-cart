@@ -20,9 +20,14 @@ export interface PriceHistoryEntry {
   timestamp: string;
 }
 
-export interface GameRecord extends RecordModel {
+/**
+ * ItemRecord represents an item in a listing.
+ * Can be a board game (with optional bgg_id) or non-game item
+ * (furniture, accessories, boxes, etc.)
+ */
+export interface ItemRecord extends RecordModel {
   listing: string;
-  bgg_id?: number;
+  bgg_id?: number; // Optional: links to BGG metadata for board games
   title: string;
   year?: number;
   condition: 'mint' | 'excellent' | 'good' | 'fair' | 'poor';
@@ -62,15 +67,15 @@ export interface ListingRecord extends RecordModel {
   price?: number;
   expand?: {
     owner?: UserRecord;
-    'games(listing)'?: GameRecord[];
+    'items(listing)'?: ItemRecord[];
   };
 }
 
 export interface ListingGameSummary {
   id: string;
   title: string;
-  condition: GameRecord['condition'];
-  status: GameRecord['status'];
+  condition: ItemRecord['condition'];
+  status: ItemRecord['status'];
   bggId: number | null;
   bggUrl: string | null;
   price: number | null;

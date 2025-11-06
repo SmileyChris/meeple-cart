@@ -1,24 +1,24 @@
 import { error } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
-import type { GameRecord, ListingGameDetail, ListingRecord } from '$lib/types/listing';
+import type { ItemRecord, ListingGameDetail, ListingRecord } from '$lib/types/listing';
 import type { UserRecord, ReactionCounts, ReactionEmoji, ReactionRecord } from '$lib/types/pocketbase';
 import { normalizeListingType } from '$lib/types/listing';
 import { getLowestHistoricalPrice } from '$lib/utils/price-history';
 import { pb, currentUser } from '$lib/pocketbase';
 import { get } from 'svelte/store';
 
-const GAMES_EXPAND_KEY = 'games(listing)';
+const ITEMS_EXPAND_KEY = 'items(listing)';
 
 export const load: PageLoad = async ({ params }) => {
   const { id } = params;
 
   try {
     const listing = await pb.collection('listings').getOne<ListingRecord>(id, {
-      expand: 'owner,games(listing)',
+      expand: 'owner,items(listing)',
     });
 
     const owner = listing.expand?.owner as UserRecord | undefined;
-    const games = (listing.expand?.[GAMES_EXPAND_KEY] as GameRecord[] | undefined) ?? [];
+    const games = (listing.expand?.[ITEMS_EXPAND_KEY] as ItemRecord[] | undefined) ?? [];
     const formattedGames: ListingGameDetail[] = games.map((game) => {
       const bggId = typeof game.bgg_id === 'number' ? game.bgg_id : null;
 

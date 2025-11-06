@@ -35,8 +35,8 @@ export const load: PageLoad = async () => {
             ? pb.files.getUrl(listing, listing.photos[0], { thumb: '800x600' }).toString()
             : null;
 
-        // Count games for this listing
-        const gameCount = listing.expand?.['games(listing)']?.length ?? 0;
+        // Count items for this listing
+        const gameCount = listing.expand?.['items(listing)']?.length ?? 0;
 
         return {
           watchlistId: reaction.id, // Use reaction ID

@@ -33,9 +33,9 @@
         <span>Edit Prices</span>
         <!-- eslint-enable svelte/no-navigation-without-resolve -->
       </nav>
-      <h1 class="text-3xl font-semibold tracking-tight">Edit Game Prices</h1>
+      <h1 class="text-3xl font-semibold tracking-tight">Edit Item Prices</h1>
       <p class="text-sm text-muted">
-        Update prices for games in this listing. Price drops will notify users watching this
+        Update prices for items in this listing. Price drops will notify users watching this
         listing.
       </p>
     </header>
@@ -64,10 +64,10 @@
     >
       <!-- Games List -->
       <div class="space-y-4">
-        <h2 class="text-xl font-semibold text-primary">Games in this listing</h2>
+        <h2 class="text-xl font-semibold text-primary">Items in this listing</h2>
 
         {#if games.length === 0}
-          <p class="text-muted">No games found in this listing.</p>
+          <p class="text-muted">No items found in this listing.</p>
         {:else}
           <div class="space-y-4">
             {#each games as game (game.id)}

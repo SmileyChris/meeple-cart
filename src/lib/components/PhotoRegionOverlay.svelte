@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { PhotoRegion } from '$lib/types/photo-region';
-  import type { GameRecord } from '$lib/types/listing';
+  import type { ItemRecord } from '$lib/types/listing';
   import {
     rectanglePercentToPixels,
     polygonPercentToPixels,
@@ -14,7 +14,7 @@
   interface Props {
     regions: PhotoRegion[];
     photoId: string;
-    games: GameRecord[];
+    games: ItemRecord[];
     imageWidth: number;
     imageHeight: number;
     onRegionClick?: (gameId: string) => void;
@@ -26,7 +26,7 @@
   const photoRegions = $derived(getRegionsForPhoto(regions, photoId));
 
   // Get game status for a region
-  function getGameStatus(gameId: string | null): GameRecord['status'] | undefined {
+  function getGameStatus(gameId: string | null): ItemRecord['status'] | undefined {
     if (!gameId) return undefined;
     return games.find((g) => g.id === gameId)?.status;
   }

@@ -1,5 +1,5 @@
 import type PocketBase from 'pocketbase';
-import type { GameRecord, PriceHistoryEntry } from '$lib/types/listing';
+import type { ItemRecord, PriceHistoryEntry } from '$lib/types/listing';
 import type { WatchlistRecord } from '$lib/types/watchlist';
 import { createNotification } from './notifications';
 
@@ -12,7 +12,7 @@ export { getLowestHistoricalPrice, getMostRecentPrice } from '$lib/utils/price-h
 export async function handleGamePriceUpdate(
   pb: PocketBase,
   gameId: string,
-  oldGame: GameRecord,
+  oldGame: ItemRecord,
   newPrice?: number,
   newTradeValue?: number
 ): Promise<void> {
@@ -36,8 +36,8 @@ export async function handleGamePriceUpdate(
   };
   priceHistory.push(newEntry);
 
-  // Update game with new price history
-  await pb.collection('games').update(gameId, {
+  // Update item with new price history
+  await pb.collection('items').update(gameId, {
     price_history: priceHistory,
   });
 
@@ -60,8 +60,8 @@ export async function handleGamePriceUpdate(
   }
 
   // Get the listing to find watchers
-  const game = await pb.collection('games').getOne<GameRecord>(gameId);
-  const listingId = game.listing;
+  const item = await pb.collection('items').getOne<ItemRecord>(gameId);
+  const listingId = item.listing;
 
   // Find all users watching this listing
   const watchers = await pb.collection('watchlist').getFullList<WatchlistRecord>({
@@ -87,7 +87,7 @@ export async function handleGamePriceUpdate(
       message = `Trade value dropped from $${oldTradeValue} to $${newTradeValue}`;
     }
 
-    await createNotification(pb, user, 'price_drop', `Price drop: ${game.title}`, {
+    await createNotification(pb, user, 'price_drop', `Price drop: ${item.title}`, {
       message,
       link: `/listings/${listingId}`,
       listingId,

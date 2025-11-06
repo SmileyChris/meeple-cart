@@ -2,10 +2,10 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/svelte';
 import PhotoRegionOverlay from './PhotoRegionOverlay.svelte';
 import { createRectangleRegion, createPolygonRegion } from '$lib/types/photo-region';
-import type { GameRecord } from '$lib/types/listing';
+import type { ItemRecord } from '$lib/types/listing';
 
 describe('PhotoRegionOverlay', () => {
-  const mockGames: GameRecord[] = [
+  const mockGames: ItemRecord[] = [
     {
       id: 'game1',
       listing: 'listing1',
@@ -14,7 +14,7 @@ describe('PhotoRegionOverlay', () => {
       status: 'available',
       created: '2024-01-01',
       updated: '2024-01-01',
-    } as GameRecord,
+    } as ItemRecord,
     {
       id: 'game2',
       listing: 'listing1',
@@ -23,7 +23,7 @@ describe('PhotoRegionOverlay', () => {
       status: 'sold',
       created: '2024-01-01',
       updated: '2024-01-01',
-    } as GameRecord,
+    } as ItemRecord,
   ];
 
   it('renders nothing when no regions for photo', () => {

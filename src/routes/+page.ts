@@ -1,6 +1,6 @@
 import { PUBLIC_POCKETBASE_URL } from '$env/static/public';
 import type { PageLoad } from './$types';
-import type { GameRecord, ListingPreview, ListingRecord } from '$lib/types/listing';
+import type { ItemRecord, ListingPreview, ListingRecord } from '$lib/types/listing';
 import type { UserRecord } from '$lib/types/pocketbase';
 import { normalizeListingType } from '$lib/types/listing';
 
@@ -82,7 +82,7 @@ export const load: PageLoad = async ({ fetch, url, parent, depends }) => {
     page,
     perPage: String(ACTIVITY_LIMIT),
     sort: '-created',
-    expand: 'owner,games(listing)',
+    expand: 'owner,items(listing)',
     filter: filters.join(' && '),
   });
 
@@ -104,19 +104,19 @@ export const load: PageLoad = async ({ fetch, url, parent, depends }) => {
 
     let listings: ListingPreview[] = result.items.map((item) => {
       const owner = item.expand?.owner as UserRecord | undefined;
-      const games = Array.isArray(item.expand?.['games(listing)'])
-        ? (item.expand?.['games(listing)'] as GameRecord[]).map((game) => {
-            const bggId = typeof game.bgg_id === 'number' ? game.bgg_id : null;
+      const games = Array.isArray(item.expand?.['items(listing)'])
+        ? (item.expand?.['items(listing)'] as ItemRecord[]).map((gameItem) => {
+            const bggId = typeof gameItem.bgg_id === 'number' ? gameItem.bgg_id : null;
             return {
-              id: game.id,
-              title: game.title,
-              condition: game.condition,
-              status: game.status,
+              id: gameItem.id,
+              title: gameItem.title,
+              condition: gameItem.condition,
+              status: gameItem.status,
               bggId,
               bggUrl: bggId ? `https://boardgamegeek.com/boardgame/${bggId}` : null,
-              price: typeof game.price === 'number' ? game.price : null,
-              tradeValue: typeof game.trade_value === 'number' ? game.trade_value : null,
-              canPost: game.can_post === true,
+              price: typeof gameItem.price === 'number' ? gameItem.price : null,
+              tradeValue: typeof gameItem.trade_value === 'number' ? gameItem.trade_value : null,
+              canPost: gameItem.can_post === true,
             };
           })
         : [];
