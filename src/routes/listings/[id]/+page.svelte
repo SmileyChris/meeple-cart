@@ -22,6 +22,9 @@
   let showTradeForm = $state(false);
   let selectedGameIds = $state<string[]>([]);
   let shippingMethod = $state<'in_person' | 'shipped'>('in_person');
+  let showShareModal = $state(false);
+  let shareLinkCopied = $state(false);
+  let shareTextCopied = $state(false);
 
   let listing = $derived(data.listing);
   let owner = $derived(data.owner);
@@ -33,7 +36,7 @@
   // Check if any selected games can be posted
   let canPostSelectedGames = $derived(
     selectedGameIds.length > 0 &&
-    games.filter(g => selectedGameIds.includes(g.id)).some(g => g.can_post === true)
+      games.filter((g) => selectedGameIds.includes(g.id)).some((g) => g.can_post === true)
   );
 
   // Photo region state
@@ -183,6 +186,65 @@
     }
   }
 
+  // Generate shareable link
+  let shareUrl = $derived.by(() => {
+    if (typeof window === 'undefined') return '';
+    return `${window.location.origin}/listings/${listing.id}`;
+  });
+
+  // Generate formatted text for Facebook posting
+  let shareText = $derived.by(() => {
+    const gamesList =
+      games.length > 0
+        ? games
+            .map((g) => {
+              const parts = [`• ${g.title}`];
+              if (g.condition) parts.push(`- ${conditionBadges[g.condition]}`);
+              if (listing.listing_type === 'sell' && g.price) {
+                parts.push(`- ${toCurrency(g.price)}`);
+              } else if (listing.listing_type === 'trade' && g.tradeValue) {
+                parts.push(`- Trade value: ${toCurrency(g.tradeValue)}`);
+              }
+              if (g.can_post) parts.push('- 📮 Can post');
+              return parts.join(' ');
+            })
+            .join('\n')
+        : '';
+
+    const type =
+      listing.listing_type === 'want'
+        ? 'WANTED'
+        : listing.listing_type === 'sell'
+          ? 'FOR SALE'
+          : 'FOR TRADE';
+
+    const regionText =
+      listing.regions && listing.regions.length > 0
+        ? `\n📍 ${listing.regions.map((r) => REGION_LABELS[r] || r).join(', ')}`
+        : '';
+
+    return `${type}: ${listing.title}${regionText}
+
+${gamesList ? `Games:\n${gamesList}\n` : ''}
+${listing.summary ? `\n${listing.summary}\n` : ''}
+View full details: ${shareUrl}`;
+  });
+
+  async function copyToClipboard(text: string, type: 'link' | 'text') {
+    try {
+      await navigator.clipboard.writeText(text);
+      if (type === 'link') {
+        shareLinkCopied = true;
+        setTimeout(() => (shareLinkCopied = false), 2000);
+      } else {
+        shareTextCopied = true;
+        setTimeout(() => (shareTextCopied = false), 2000);
+      }
+    } catch (err) {
+      console.error('Failed to copy to clipboard', err);
+    }
+  }
+
   async function handleInitiateTrade(e?: Event) {
     e?.preventDefault();
     if (!owner || !$currentUser) return;
@@ -231,13 +293,7 @@
       });
 
       // Log status change
-      await logStatusChange(
-        listing.id,
-        oldStatus,
-        'pending',
-        'Trade initiated',
-        $currentUser.id
-      );
+      await logStatusChange(listing.id, oldStatus, 'pending', 'Trade initiated', $currentUser.id);
 
       // Send notification to seller
       await pb.collection('notifications').create({
@@ -263,8 +319,34 @@
   <title>{listing.title} · Meeple Cart</title>
   <meta
     name="description"
-    content={`View full details for ${listing.title} listed on Meeple Cart.`}
+    content={`${listing.listing_type === 'want' ? 'Wanted: ' : listing.listing_type === 'sell' ? 'For Sale: ' : 'For Trade: '}${listing.title}${listing.summary ? ` - ${listing.summary}` : ''}`}
   />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={shareUrl} />
+  <meta property="og:title" content={`${listing.title} · Meeple Cart`} />
+  <meta
+    property="og:description"
+    content={`${listing.listing_type === 'want' ? 'Wanted: ' : listing.listing_type === 'sell' ? 'For Sale: ' : 'For Trade: '}${listing.title}${listing.summary ? ` - ${listing.summary}` : ''}`}
+  />
+  {#if photos.length > 0}
+    <meta property="og:image" content={photos[0].full} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+  {/if}
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content={shareUrl} />
+  <meta name="twitter:title" content={`${listing.title} · Meeple Cart`} />
+  <meta
+    name="twitter:description"
+    content={`${listing.listing_type === 'want' ? 'Wanted: ' : listing.listing_type === 'sell' ? 'For Sale: ' : 'For Trade: '}${listing.title}${listing.summary ? ` - ${listing.summary}` : ''}`}
+  />
+  {#if photos.length > 0}
+    <meta name="twitter:image" content={photos[0].full} />
+  {/if}
 </svelte:head>
 
 <main class="bg-surface-body transition-colors px-6 py-12 text-primary sm:px-8">
@@ -308,7 +390,9 @@
           <div class="flex flex-wrap gap-2">
             <span class="text-sm font-medium text-secondary">Pickup regions:</span>
             {#each listing.regions as regionValue (regionValue)}
-              <span class="rounded-full border border-subtle bg-surface-card-alt px-3 py-1 text-sm text-secondary">
+              <span
+                class="rounded-full border border-subtle bg-surface-card-alt px-3 py-1 text-sm text-secondary"
+              >
                 {REGION_LABELS[regionValue] || regionValue}
               </span>
             {/each}
@@ -625,14 +709,19 @@
                   onclick={() => {
                     showTradeForm = true;
                     // Pre-select all available games
-                    selectedGameIds = games.filter(g => g.status === 'available').map(g => g.id);
+                    selectedGameIds = games
+                      .filter((g) => g.status === 'available')
+                      .map((g) => g.id);
                   }}
                   class="w-full rounded-lg border border-emerald-500 bg-emerald-500 px-4 py-2 font-semibold text-[var(--accent-contrast)] shadow-[0_10px_25px_rgba(16,185,129,0.25)] transition hover:bg-emerald-400"
                 >
                   🤝 Propose Trade
                 </button>
               {:else}
-                <form onsubmit={handleInitiateTrade} class="space-y-4 rounded-lg border border-subtle bg-surface-card p-4">
+                <form
+                  onsubmit={handleInitiateTrade}
+                  class="space-y-4 rounded-lg border border-subtle bg-surface-card p-4"
+                >
                   <h4 class="font-semibold text-primary">Trade Proposal</h4>
 
                   {#if tradeError}
@@ -645,10 +734,15 @@
                       <label class="block text-sm font-medium text-secondary">
                         Select games you want ({selectedGameIds.length} selected)
                       </label>
-                      <div class="max-h-64 space-y-2 overflow-y-auto rounded-lg border border-subtle bg-surface-body p-3">
+                      <div
+                        class="max-h-64 space-y-2 overflow-y-auto rounded-lg border border-subtle bg-surface-body p-3"
+                      >
                         {#each games as game (game.id)}
                           <label
-                            class="flex cursor-pointer items-start gap-3 rounded-lg p-2 transition hover:bg-surface-ghost {game.status !== 'available' ? 'opacity-50' : ''}"
+                            class="flex cursor-pointer items-start gap-3 rounded-lg p-2 transition hover:bg-surface-ghost {game.status !==
+                            'available'
+                              ? 'opacity-50'
+                              : ''}"
                           >
                             <input
                               type="checkbox"
@@ -660,7 +754,7 @@
                                 if (checked) {
                                   selectedGameIds = [...selectedGameIds, game.id];
                                 } else {
-                                  selectedGameIds = selectedGameIds.filter(id => id !== game.id);
+                                  selectedGameIds = selectedGameIds.filter((id) => id !== game.id);
                                 }
                               }}
                               class="mt-1 h-4 w-4 rounded border-subtle bg-surface-body text-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-0"
@@ -695,14 +789,17 @@
                     </label>
                     <div class="space-y-2">
                       <label
-                        class="flex cursor-pointer items-center gap-3 rounded-lg border border-subtle bg-surface-body p-3 transition hover:bg-surface-ghost {shippingMethod === 'in_person' ? 'border-emerald-500 bg-emerald-500/10' : ''}"
+                        class="flex cursor-pointer items-center gap-3 rounded-lg border border-subtle bg-surface-body p-3 transition hover:bg-surface-ghost {shippingMethod ===
+                        'in_person'
+                          ? 'border-emerald-500 bg-emerald-500/10'
+                          : ''}"
                       >
                         <input
                           type="radio"
                           name="shipping_method"
                           value="in_person"
                           checked={shippingMethod === 'in_person'}
-                          onchange={() => shippingMethod = 'in_person'}
+                          onchange={() => (shippingMethod = 'in_person')}
                           class="h-4 w-4 border-subtle bg-surface-body text-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-0"
                         />
                         <div class="flex-1">
@@ -711,14 +808,17 @@
                         </div>
                       </label>
                       <label
-                        class="flex cursor-pointer items-center gap-3 rounded-lg border border-subtle bg-surface-body p-3 transition hover:bg-surface-ghost {shippingMethod === 'shipped' ? 'border-emerald-500 bg-emerald-500/10' : ''}"
+                        class="flex cursor-pointer items-center gap-3 rounded-lg border border-subtle bg-surface-body p-3 transition hover:bg-surface-ghost {shippingMethod ===
+                        'shipped'
+                          ? 'border-emerald-500 bg-emerald-500/10'
+                          : ''}"
                       >
                         <input
                           type="radio"
                           name="shipping_method"
                           value="shipped"
                           checked={shippingMethod === 'shipped'}
-                          onchange={() => shippingMethod = 'shipped'}
+                          onchange={() => (shippingMethod = 'shipped')}
                           disabled={!canPostSelectedGames}
                           class="h-4 w-4 border-subtle bg-surface-body text-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-0"
                         />
@@ -726,7 +826,9 @@
                           <div class="font-medium text-primary">
                             📮 Can post
                             {#if !canPostSelectedGames}
-                              <span class="text-xs text-muted">(not available for selected games)</span>
+                              <span class="text-xs text-muted"
+                                >(not available for selected games)</span
+                              >
                             {/if}
                           </div>
                           <div class="text-xs text-muted">Seller posts to you</div>

@@ -15,6 +15,10 @@
   let updated = $state(false);
   let error = $state<string | null>(null);
   let saving = $state(false);
+  let showShareModal = $state(false);
+  let selectedListingForShare = $state<any>(null);
+  let shareLinkCopied = $state(false);
+  let shareTextCopied = $state(false);
 
   // Form fields
   let displayName = $state(profile.display_name);
@@ -103,14 +107,52 @@
 
   const formatDate = (iso: string) =>
     new Intl.DateTimeFormat('en-NZ', { dateStyle: 'medium' }).format(new Date(iso));
+
+  function openShareModal(listing: any) {
+    selectedListingForShare = listing;
+    showShareModal = true;
+    shareLinkCopied = false;
+    shareTextCopied = false;
+  }
+
+  function generateShareUrl(listingId: string) {
+    if (typeof window === 'undefined') return '';
+    return `${window.location.origin}/listings/${listingId}`;
+  }
+
+  function generateShareText(listing: any) {
+    const type =
+      listing.listingType === 'want'
+        ? 'WANTED'
+        : listing.listingType === 'sell'
+          ? 'FOR SALE'
+          : 'FOR TRADE';
+
+    return `${type}: ${listing.title}
+
+View full details: ${generateShareUrl(listing.id)}`;
+  }
+
+  async function copyToClipboard(text: string, type: 'link' | 'text') {
+    try {
+      await navigator.clipboard.writeText(text);
+      if (type === 'link') {
+        shareLinkCopied = true;
+        setTimeout(() => (shareLinkCopied = false), 2000);
+      } else {
+        shareTextCopied = true;
+        setTimeout(() => (shareTextCopied = false), 2000);
+      }
+    } catch (err) {
+      console.error('Failed to copy to clipboard', err);
+    }
+  }
 </script>
 
 <section
   class="mx-auto mt-12 max-w-3xl rounded-xl border border-subtle bg-surface-panel p-8 shadow-elevated transition-colors"
 >
-  <header
-    class="flex flex-col gap-3 border-b border-subtle pb-4"
-  >
+  <header class="flex flex-col gap-3 border-b border-subtle pb-4">
     <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
       <div>
         <h1 class="text-2xl font-semibold text-primary">{profile.display_name}</h1>
@@ -234,6 +276,9 @@
               <a class="btn-ghost" href={`/listings/${listing.id}`}> View </a>
               <a class="btn-ghost" href={`/listings/${listing.id}/manage`}> Manage games </a>
               <a class="btn-ghost" href={`/listings/${listing.id}/edit`}> Edit prices </a>
+              <button type="button" class="btn-ghost" onclick={() => openShareModal(listing)}>
+                🔗 Share
+              </button>
               <!-- eslint-enable svelte/no-navigation-without-resolve -->
             </div>
           </li>
@@ -314,7 +359,8 @@
     <div class="sm:col-span-2">
       <label class="block text-sm font-medium text-secondary">Preferred regions</label>
       <p class="mt-1 text-xs text-muted">
-        Select your favorite regions to automatically filter listings when you visit the browse page.
+        Select your favorite regions to automatically filter listings when you visit the browse
+        page.
       </p>
       <div class="mt-3 space-y-4">
         <!-- North Island -->
@@ -389,3 +435,92 @@
     </div>
   </form>
 </section>
+
+<!-- Share Modal -->
+{#if showShareModal && selectedListingForShare}
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+    onclick={() => (showShareModal = false)}
+  >
+    <div
+      class="max-w-lg w-full rounded-xl border border-subtle bg-surface-panel p-6 shadow-elevated"
+      onclick={(e) => e.stopPropagation()}
+    >
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-semibold text-primary">Share Listing</h2>
+        <button
+          type="button"
+          onclick={() => (showShareModal = false)}
+          class="text-muted hover:text-primary transition"
+        >
+          <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <p class="text-sm text-secondary mb-6">
+        Share this listing to the NZ board game trading Facebook group or anywhere else!
+      </p>
+
+      <!-- Share Link -->
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-secondary mb-2">Share Link</label>
+          <div class="flex gap-2">
+            <input
+              type="text"
+              readonly
+              value={generateShareUrl(selectedListingForShare.id)}
+              class="flex-1 rounded-lg border border-subtle bg-surface-card px-3 py-2 text-sm text-primary"
+              onclick={(e) => e.currentTarget.select()}
+            />
+            <button
+              type="button"
+              onclick={() => copyToClipboard(generateShareUrl(selectedListingForShare.id), 'link')}
+              class="rounded-lg border border-subtle bg-surface-card px-4 py-2 text-sm font-medium text-secondary transition hover:border-emerald-500 hover:text-emerald-200"
+            >
+              {shareLinkCopied ? '✓ Copied!' : 'Copy'}
+            </button>
+          </div>
+        </div>
+
+        <!-- Share Text -->
+        <div>
+          <label class="block text-sm font-medium text-secondary mb-2">
+            Formatted Text for Facebook
+          </label>
+          <textarea
+            readonly
+            value={generateShareText(selectedListingForShare)}
+            rows="6"
+            class="w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-sm text-primary font-mono"
+            onclick={(e) => e.currentTarget.select()}
+          ></textarea>
+          <button
+            type="button"
+            onclick={() => copyToClipboard(generateShareText(selectedListingForShare), 'text')}
+            class="mt-2 w-full rounded-lg border border-emerald-500 bg-emerald-500 px-4 py-2 font-semibold text-[var(--accent-contrast)] shadow-[0_10px_25px_rgba(16,185,129,0.25)] transition hover:bg-emerald-400"
+          >
+            {shareTextCopied ? '✓ Copied to Clipboard!' : 'Copy Text for Facebook'}
+          </button>
+        </div>
+
+        <div class="rounded-lg border border-subtle bg-surface-card p-4 text-xs text-muted">
+          <p class="font-semibold text-secondary mb-1">How to share:</p>
+          <ol class="list-decimal list-inside space-y-1">
+            <li>Click "Copy Text for Facebook" above</li>
+            <li>Go to your NZ board game trading Facebook group</li>
+            <li>Create a new post and paste the text</li>
+            <li>Add photos if you'd like, then post!</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+{/if}
