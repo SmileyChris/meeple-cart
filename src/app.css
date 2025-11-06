@@ -224,6 +224,33 @@
     background-color: var(--surface-ghost);
   }
 
+  .btn-filter {
+    @apply inline-flex items-center justify-center rounded-full px-3 py-1.5 text-sm font-medium transition-[background-color,color,border-color,box-shadow];
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    background-color: transparent;
+    box-shadow: none;
+  }
+
+  .btn-filter:hover {
+    border-color: var(--border-subtle);
+    background-color: var(--accent-soft);
+  }
+
+  .btn-filter.active {
+    border-color: var(--accent);
+    color: var(--accent-strong);
+  }
+
+  .btn-filter.active:hover {
+    border-color: var(--accent);
+    background-color: var(--accent-soft);
+  }
+
+  .btn-filter.open {
+    background-color: var(--accent-soft);
+  }
+
   /* Alert components */
   .alert {
     @apply rounded-lg border p-3 text-sm;

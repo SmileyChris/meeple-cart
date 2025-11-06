@@ -1,7 +1,13 @@
 <script lang="ts">
   import type { ActivityItem } from '$lib/types/activity';
   import type { ListingType } from '$lib/types/listing';
-  import MeepleIcon from './MeepleIcon.svelte';
+  import BaseCard from './BaseCard.svelte';
+  import {
+    getAccountAgeDays,
+    getTrustTier,
+    getTrustTierInfo,
+    getTooltipText,
+  } from '$lib/utils/trust-tiers';
 
   let { game }: { game: ActivityItem } = $props();
 
@@ -18,18 +24,18 @@
       text: 'text-badge-emerald',
     },
     sell: {
+      border: 'border-emerald-600',
+      bg: 'bg-emerald-500/10',
+      text: 'text-badge-emerald',
+    },
+    want: {
       border: 'border-blue-600',
       bg: 'bg-blue-500/10',
       text: 'text-badge-blue',
     },
-    want: {
-      border: 'border-purple-600',
-      bg: 'bg-purple-500/10',
-      text: 'text-badge-purple',
-    },
   };
 
-  const conditionLabels: Record<ActivityItem['condition'], string> = {
+  const conditionLabels: Record<string, string> = {
     mint: 'Mint',
     excellent: 'Excellent',
     good: 'Good',
@@ -37,7 +43,7 @@
     poor: 'Well loved',
   };
 
-  let colors = $derived(typeColors[game.type]);
+  let colors = $derived(game.activityType === 'listing' ? typeColors[game.type] : undefined);
 
   const currencyFormatter = new Intl.NumberFormat('en-NZ', {
     style: 'currency',
@@ -46,51 +52,20 @@
     minimumFractionDigits: 0,
   });
 
-  let bggUrl = $derived(game.bggId ? `https://boardgamegeek.com/boardgame/${game.bggId}` : null);
-
-  // Extract listing name from the href (you might want to pass this as a separate prop)
-  // For now, we'll use the userName and location as context
-  let listingContext = $derived(
-    [game.userName, game.userLocation].filter(Boolean).join(' · ')
+  // Add game ID to URL so listing page can scroll to it (only for listing activities)
+  let gameUrl = $derived(
+    game.activityType === 'listing' ? `${game.listingHref}?game=${game.id}` : '#'
   );
-
-  // Add game ID to URL so listing page can scroll to it
-  let gameUrl = $derived(`${game.listingHref}?game=${game.id}`);
 </script>
 
-<!-- eslint-disable svelte/no-navigation-without-resolve -->
-<div
-  class="group block cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-body)]"
-  role="link"
-  tabindex="0"
-  onclick={() => (window.location.href = gameUrl)}
-  onkeydown={(e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      window.location.href = gameUrl;
-    }
-  }}
+<BaseCard
+  href={gameUrl}
+  imageUrl={game.activityType === 'listing' ? game.thumbnail : null}
+  imageAlt={game.activityType === 'listing' ? game.gameTitle : 'Activity'}
+  borderClass={colors ? `border-2 ${colors.border}` : 'border border-subtle'}
 >
-  <article
-    class="flex flex-col overflow-hidden rounded-xl border-2 {colors.border} bg-surface-card shadow-elevated transition-all group-hover:scale-[1.02] group-hover:shadow-lg"
-  >
-    {#if game.thumbnail}
-      <img
-        alt={game.gameTitle}
-        class="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-105"
-        src={game.thumbnail}
-        loading="lazy"
-      />
-    {:else}
-      <div
-        class="flex h-48 w-full flex-col items-center justify-center gap-3 bg-surface-card-alt text-muted transition-colors"
-      >
-        <MeepleIcon size={64} className="opacity-50" seed={game.id} />
-        <span class="text-xs font-medium uppercase tracking-wider opacity-40">No image yet</span>
-      </div>
-    {/if}
-
-    <div class="flex flex-1 flex-col gap-3 p-5">
+  {#snippet header()}
+    {#if game.activityType === 'listing' && colors}
       <!-- Type badge -->
       <div class="flex items-center justify-between">
         <span
@@ -106,20 +81,46 @@
           {game.listingTitle}
         </p>
       {/if}
+    {/if}
+  {/snippet}
 
+  {#snippet content()}
+    {#if game.activityType === 'listing'}
       <!-- Game title -->
       <div class="space-y-2">
         <h3 class="text-xl font-bold text-primary transition-colors">{game.gameTitle}</h3>
-        {#if bggUrl}
+      </div>
+
+      <!-- User info (moved up, before details) -->
+      <div class="flex items-center gap-1.5 text-sm">
+        {#if game.userId && game.userName}
+          {#if game.userJoinedDate}
+            {@const tier = getTrustTier(
+              getAccountAgeDays(game.userJoinedDate),
+              game.userVouchedTrades
+            )}
+            {@const tierInfo = getTrustTierInfo(tier)}
+            {@const tooltipText = getTooltipText(tier)}
+            <span
+              class="text-base leading-none"
+              title={tooltipText}
+              role="img"
+              aria-label="Trust tier: {tierInfo.label}"
+            >
+              {tierInfo.icon}
+            </span>
+          {/if}
           <a
-            class="inline-flex items-center gap-1 text-xs font-medium text-[var(--accent)] transition hover:text-[var(--accent-strong)]"
-            href={bggUrl}
-            target="_blank"
-            rel="external noopener"
+            href={`/users/${game.userId}`}
+            class="font-medium text-primary transition hover:text-[var(--accent)]"
             onclick={(e) => e.stopPropagation()}
           >
-            View on BGG →
+            {game.userName}
           </a>
+        {:else if game.userName}
+          <span class="font-medium text-primary">{game.userName}</span>
+        {:else}
+          <span class="font-medium text-primary">Meeple Cart member</span>
         {/if}
       </div>
 
@@ -153,19 +154,15 @@
           </div>
         {/if}
       </div>
+    {/if}
+  {/snippet}
 
-      <!-- User info -->
-      <div class="mt-auto flex flex-col gap-1 border-t border-subtle pt-3 text-sm text-secondary">
-        {#if game.userName}
-          <span class="font-semibold text-primary">{game.userName}</span>
-        {:else}
-          <span class="font-semibold text-primary">Meeple Cart member</span>
-        {/if}
-        {#if game.userLocation}
-          <span class="text-xs text-muted">📍 {game.userLocation}</span>
-        {/if}
+  {#snippet footer()}
+    <!-- Location info -->
+    {#if game.activityType === 'listing' && game.userLocation}
+      <div class="border-t border-subtle pt-3 text-sm">
+        <span class="text-xs text-muted">📍 {game.userLocation}</span>
       </div>
-    </div>
-  </article>
-</div>
-<!-- eslint-enable svelte/no-navigation-without-resolve -->
+    {/if}
+  {/snippet}
+</BaseCard>

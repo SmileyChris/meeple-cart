@@ -54,8 +54,8 @@
     <div class="mx-auto max-w-5xl space-y-6">
     <!-- Header -->
     <div class="space-y-3">
-      <h1 class="text-4xl font-bold text-primary">Gift Cascades</h1>
-      <p class="text-lg text-secondary">
+      <h1 class="text-4xl font-semibold tracking-tight text-primary sm:text-5xl">🎁 Gift Cascades</h1>
+      <p class="text-base text-secondary sm:text-lg">
         Receive free games, then pass on the generosity. Each gift cascade creates a lineage of
         giving.
       </p>

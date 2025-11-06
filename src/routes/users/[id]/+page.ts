@@ -10,24 +10,51 @@ export const load: PageLoad = async ({ params }) => {
     // Fetch user profile
     const profile = await pb.collection('users').getOne(id);
 
-    // Fetch active listings
+    // Fetch active listings with games data
     const listingsResult = await pb.collection('listings').getList(1, 50, {
       filter: `owner = "${id}" && status = "active"`,
+      expand: 'owner',
       sort: '-created',
     });
 
-    const listings = listingsResult.items.map((listing: any) => ({
-      id: listing.id,
-      title: listing.title,
-      listingType: listing.listing_type,
-      status: listing.status,
-      created: listing.created,
-      location: listing.location,
-      gameCount: listing.game_count || 0,
-      coverImage: listing.photos?.[0]
-        ? pb.files.getUrl(listing, listing.photos[0], { thumb: '400x300' })
-        : null,
-    }));
+    // Fetch games for each listing
+    const listingsWithGames = await Promise.all(
+      listingsResult.items.map(async (listing: any) => {
+        const gamesResult = await pb.collection('games').getList(1, 50, {
+          filter: `listing = "${listing.id}"`,
+          sort: 'created',
+        });
+
+        const games = gamesResult.items.map((game: any) => ({
+          id: game.id,
+          title: game.title,
+          condition: game.condition,
+          status: game.status,
+          bggId: game.bgg_id,
+          bggUrl: game.bgg_id ? `https://boardgamegeek.com/boardgame/${game.bgg_id}` : null,
+          price: game.price,
+          tradeValue: game.trade_value,
+          canPost: game.can_post || false,
+        }));
+
+        return {
+          id: listing.id,
+          title: listing.title,
+          listingType: listing.listing_type,
+          summary: listing.summary || '',
+          location: listing.location,
+          regions: listing.regions || null,
+          created: listing.created,
+          ownerName: listing.expand?.owner?.display_name || null,
+          ownerId: listing.owner,
+          coverImage: listing.photos?.[0]
+            ? pb.files.getUrl(listing, listing.photos[0], { thumb: '400x300' })
+            : null,
+          href: `/listings/${listing.id}`,
+          games,
+        };
+      })
+    );
 
     // Fetch vouches received
     const vouchesResult = await pb.collection('vouches').getList(1, 10, {
@@ -73,7 +100,7 @@ export const load: PageLoad = async ({ params }) => {
 
     return {
       profile,
-      listings,
+      listings: listingsWithGames,
       vouches,
       reviews,
       averageRating,

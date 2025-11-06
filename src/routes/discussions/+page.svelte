@@ -49,7 +49,7 @@
 </svelte:head>
 
 <main class="bg-surface-body px-6 py-16 text-primary transition-colors sm:px-8">
-	<div class="mx-auto max-w-4xl space-y-8">
+	<div class="mx-auto max-w-5xl space-y-8">
 		<!-- Header -->
 		<div class="space-y-4">
 			<div class="flex items-center justify-between">

@@ -264,7 +264,7 @@
         {#each listingTypes as type (type.value)}
           <button
             type="button"
-            class={`btn-ghost flex items-center gap-2 px-4 py-2 text-sm font-medium transition-all ${data.selectedTypes.includes(type.value) ? 'border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent-strong)]' : ''}`}
+            class={`btn-filter flex items-center gap-2 px-4 py-2 text-sm font-medium ${data.selectedTypes.includes(type.value) ? 'active' : ''}`}
             onclick={() => toggleListingType(type.value)}
           >
             <input
@@ -285,7 +285,7 @@
           <!-- Logged-in user: My Regions filter -->
           {#if data.hasPreferredRegions}
             <label
-              class={`btn-ghost flex cursor-pointer items-center gap-2 px-4 py-2 font-medium transition-all ${data.myRegionsFilter ? 'border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent-strong)]' : ''}`}
+              class={`btn-filter flex cursor-pointer items-center gap-2 px-4 py-2 font-medium ${data.myRegionsFilter ? 'active' : ''}`}
             >
               <input
                 type="checkbox"
@@ -309,7 +309,7 @@
           <div class="relative flex items-center gap-2" bind:this={regionSelectorRef}>
             <span class="text-lg">📍</span>
             <div
-              class={`btn-ghost flex items-center overflow-hidden px-4 py-2 text-sm transition-all ${data.myRegionsFilter || showRegionSelector ? 'border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent-strong)]' : ''}`}
+              class={`btn-filter flex items-center overflow-hidden px-4 py-2 text-sm ${showRegionSelector ? 'open' : data.myRegionsFilter ? 'active' : ''}`}
             >
               {#if guestRegions.length > 0}
                 <label class="flex cursor-pointer items-center gap-2 font-medium">

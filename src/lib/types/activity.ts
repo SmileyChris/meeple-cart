@@ -26,6 +26,12 @@ export interface ListingActivity {
   timestamp: string;
   /** User who created the listing */
   userName: string | null;
+  /** User ID */
+  userId: string | null;
+  /** User's joined date (for trust tier calculation) */
+  userJoinedDate: string | null;
+  /** User's vouched trades count (for trust tier calculation) */
+  userVouchedTrades: number;
   /** User's location */
   userLocation: string | null;
   /** Link to the parent listing */

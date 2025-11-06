@@ -3,6 +3,7 @@
   import { currentUser } from '$lib/pocketbase';
   import TrustBadge from '$lib/components/TrustBadge.svelte';
   import VerificationWarning from '$lib/components/VerificationWarning.svelte';
+  import ListingCard from '$lib/components/ListingCard.svelte';
 
   let { data }: { data: PageData } = $props();
 
@@ -15,12 +16,6 @@
 
   // Check if this is the current user's own profile
   let isOwnProfile = $derived($currentUser?.id === profile.id);
-
-  const typeLabels: Record<string, string> = {
-    trade: 'Trade',
-    sell: 'Sell',
-    want: 'Want to Buy',
-  };
 
   const formatDate = (iso: string) =>
     new Intl.DateTimeFormat('en-NZ', { dateStyle: 'medium' }).format(new Date(iso));
@@ -122,47 +117,7 @@
       {:else}
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {#each listings as listing (listing.id)}
-            <!-- eslint-disable svelte/no-navigation-without-resolve -->
-            <a
-              href={`/listings/${listing.id}`}
-              class="group block overflow-hidden rounded-xl border border-subtle bg-surface-card transition-colors transition hover:border-emerald-500/80 hover:shadow-lg"
-            >
-              {#if listing.coverImage}
-                <img
-                  alt={listing.title}
-                  class="h-40 w-full object-cover"
-                  src={listing.coverImage}
-                />
-              {:else}
-                <div
-                  class="flex h-40 items-center justify-center bg-surface-card-alt text-5xl opacity-20"
-                >
-                  🎲
-                </div>
-              {/if}
-
-              <div class="p-4">
-                <h3 class="font-semibold text-primary transition group-hover:text-emerald-300">
-                  {listing.title}
-                </h3>
-                <div class="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted">
-                  <span
-                    class="rounded-full border border-emerald-600 px-2 py-0.5 uppercase text-emerald-200"
-                  >
-                    {typeLabels[listing.listingType] ?? listing.listingType}
-                  </span>
-                  {#if listing.location}
-                    <span>{listing.location}</span>
-                  {/if}
-                </div>
-                <p class="mt-2 text-sm text-muted">
-                  {listing.gameCount}
-                  {listing.gameCount === 1 ? 'game' : 'games'}
-                  · {formatRelativeTime(listing.created)}
-                </p>
-              </div>
-            </a>
-            <!-- eslint-enable svelte/no-navigation-without-resolve -->
+            <ListingCard {listing} hideOwner={true} />
           {/each}
         </div>
       {/if}
