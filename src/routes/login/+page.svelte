@@ -49,11 +49,19 @@
   }
 </script>
 
-<section
-  class="mx-auto mt-16 max-w-md rounded-xl border border-subtle bg-surface-panel p-8 shadow-elevated transition-colors"
->
-  <h1 class="text-2xl font-semibold text-primary">Log in</h1>
-  <p class="mt-2 text-sm text-muted">Use the email and password you registered with.</p>
+<div class="mx-auto max-w-5xl px-6 py-16 sm:px-8">
+  <!-- Header outside the card -->
+  <div class="mb-8 space-y-4 text-center">
+    <h1 class="text-4xl font-semibold tracking-tight text-primary sm:text-5xl">Log in</h1>
+    <p class="mx-auto max-w-2xl text-base text-secondary sm:text-lg">
+      Use the email and password you registered with.
+    </p>
+  </div>
+
+  <!-- Form card -->
+  <section
+    class="mx-auto max-w-md rounded-xl border border-subtle bg-surface-panel p-8 shadow-elevated transition-colors"
+  >
 
   <form class="mt-6 space-y-4" onsubmit={handleSubmit}>
     <div class="space-y-2">
@@ -92,12 +100,12 @@
       {loading ? 'Logging in...' : 'Continue'}
     </button>
   </form>
+  </section>
 
-  <p class="mt-6 text-sm text-muted">
-    Need an account?
+  <!-- Register link outside the card -->
+  <div class="mt-6 text-center">
+    <p class="mb-3 text-sm text-muted">Need an account?</p>
     <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-    <a class="transition-colors hover:underline" style="color: var(--accent)" href="/register"
-      >Create one</a
-    >.
-  </p>
-</section>
+    <a class="btn-secondary inline-block" href="/register">Create one</a>
+  </div>
+</div>

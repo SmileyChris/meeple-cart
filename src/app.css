@@ -3,6 +3,10 @@
 @theme {
   --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-heading: 'Momo Trust Display', 'Inter', system-ui, sans-serif;
+
+  --color-listing-trade: light-dark(#059669, #10b981);
+  --color-listing-sell: light-dark(#2563eb, #3b82f6);
+  --color-listing-want: light-dark(#2563eb, #3b82f6);
 }
 
 @layer base {
@@ -34,6 +38,13 @@
     --badge-sky: #7dd3fc;
     --badge-blue: #93c5fd;
     --badge-purple: #d8b4fe;
+    --badge-lime: #bef264;
+    --badge-violet: #d8b4fe;
+
+    /* Listing type border colors */
+    --border-listing-trade: #10b981;
+    --border-listing-sell: #10b981;
+    --border-listing-want: #3b82f6;
 
     /* Alert/notification colors */
     --alert-error-bg: rgba(239, 68, 68, 0.1);
@@ -78,6 +89,13 @@
     --badge-sky: #0369a1;
     --badge-blue: #1d4ed8;
     --badge-purple: #7e22ce;
+    --badge-lime: #4d7c0f;
+    --badge-violet: #6b21a8;
+
+    /* Listing type border colors */
+    --border-listing-trade: #059669;
+    --border-listing-sell: #059669;
+    --border-listing-want: #2563eb;
 
     /* Alert/notification colors for light mode */
     --alert-error-bg: rgba(239, 68, 68, 0.08);
@@ -180,6 +198,14 @@
 
   .text-badge-purple {
     color: var(--badge-purple);
+  }
+
+  .text-badge-lime {
+    color: var(--badge-lime);
+  }
+
+  .text-badge-violet {
+    color: var(--badge-violet);
   }
 }
 

@@ -75,7 +75,7 @@ export function getTrustTierInfo(tier: TrustTier): TrustTierInfo {
       styles: {
         border: 'border-amber-500/80',
         background: 'bg-amber-500/10',
-        text: 'text-amber-200',
+        text: 'text-badge-amber',
       },
     },
     seedling: {
@@ -86,7 +86,7 @@ export function getTrustTierInfo(tier: TrustTier): TrustTierInfo {
       styles: {
         border: 'border-lime-500/80',
         background: 'bg-lime-500/10',
-        text: 'text-lime-200',
+        text: 'text-badge-lime',
       },
     },
     growing: {
@@ -97,7 +97,7 @@ export function getTrustTierInfo(tier: TrustTier): TrustTierInfo {
       styles: {
         border: 'border-sky-500/80',
         background: 'bg-sky-500/10',
-        text: 'text-sky-200',
+        text: 'text-badge-sky',
       },
     },
     established: {
@@ -108,7 +108,7 @@ export function getTrustTierInfo(tier: TrustTier): TrustTierInfo {
       styles: {
         border: 'border-emerald-500/80',
         background: 'bg-emerald-500/10',
-        text: 'text-emerald-200',
+        text: 'text-badge-emerald',
       },
     },
     trusted: {
@@ -119,7 +119,7 @@ export function getTrustTierInfo(tier: TrustTier): TrustTierInfo {
       styles: {
         border: 'border-violet-500/80',
         background: 'bg-violet-500/10',
-        text: 'text-violet-200',
+        text: 'text-badge-violet',
       },
     },
   };

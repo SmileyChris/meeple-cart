@@ -42,35 +42,41 @@
   />
 </svelte:head>
 
-<main class="bg-surface-body transition-colors px-6 py-12">
+<main class="bg-surface-body transition-colors px-6 py-16 sm:px-8">
   <div class="mx-auto max-w-5xl space-y-8">
     <!-- Verification Warning (only for own profile if unverified) -->
     {#if isOwnProfile && !profile.verified}
       <VerificationWarning emailVerified={profile.verified} />
     {/if}
 
-    <!-- Profile Header -->
+    <!-- Page Header -->
+    <div class="space-y-4">
+      <div class="flex items-center justify-center gap-3 sm:justify-start">
+        <h1 class="text-4xl font-semibold tracking-tight text-primary sm:text-5xl">
+          {profile.display_name}
+        </h1>
+        <!-- Trust Badge -->
+        <TrustBadge
+          joinedDate={profile.joined_date}
+          vouchedTrades={vouchedTradesCount}
+          size="large"
+        />
+      </div>
+      <p class="text-center text-base text-secondary sm:text-left sm:text-lg">
+        Member since {formatDate(profile.joined_date)}
+      </p>
+    </div>
+
+    <!-- Profile Card -->
     <div class="rounded-xl border border-subtle bg-surface-card transition-colors p-8">
       <div class="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
         <div class="space-y-3">
-          <h1 class="text-3xl font-bold text-primary">{profile.display_name}</h1>
-
-          <!-- Trust Badge -->
-          <TrustBadge
-            joinedDate={profile.joined_date}
-            vouchedTrades={vouchedTradesCount}
-            size="large"
-          />
-
           {#if profile.location}
             <p class="flex items-center gap-2 text-secondary">
               <span class="text-lg">📍</span>
               <span>{profile.location}</span>
             </p>
           {/if}
-          <p class="text-sm text-muted">
-            Member since {formatDate(profile.joined_date)}
-          </p>
         </div>
 
         <!-- Stats -->

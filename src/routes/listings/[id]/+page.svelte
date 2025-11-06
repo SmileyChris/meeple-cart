@@ -4,6 +4,7 @@
   import WatchlistButton from '$lib/components/WatchlistButton.svelte';
   import PhotoRegionOverlay from '$lib/components/PhotoRegionOverlay.svelte';
   import ListingReactions from '$lib/components/ListingReactions.svelte';
+  import TrustBadge from '$lib/components/TrustBadge.svelte';
   import { pb, currentUser } from '$lib/pocketbase';
   import { goto } from '$app/navigation';
   import { generateThreadId } from '$lib/types/message';
@@ -349,19 +350,12 @@ View full details: ${shareUrl}`;
   {/if}
 </svelte:head>
 
-<main class="bg-surface-body transition-colors px-6 py-12 text-primary sm:px-8">
+<main class="bg-surface-body transition-colors px-6 py-16 text-primary sm:px-8">
   <div class="mx-auto flex max-w-5xl flex-col gap-8">
-    <nav class="flex items-center text-sm text-muted">
-      <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-      <a class="hover:text-emerald-300" href="/">Home</a>
-      <span class="px-2">/</span>
-      <span>{listing.title}</span>
-    </nav>
+    <h1 class="text-4xl font-semibold tracking-tight text-primary sm:text-5xl">{listing.title}</h1>
 
     <header class="flex flex-col gap-6 lg:flex-row">
       <div class="flex-1 space-y-4">
-        <h1 class="text-4xl font-semibold tracking-tight text-primary">{listing.title}</h1>
-
         <!-- Reactions -->
         <ListingReactions
           listingId={listing.id}
@@ -416,14 +410,23 @@ View full details: ${shareUrl}`;
       >
         <h2 class="text-base font-semibold text-primary">Trader details</h2>
         {#if owner}
-          <!-- eslint-disable svelte/no-navigation-without-resolve -->
-          <a
-            href={`/users/${owner.id}`}
-            class="mt-2 inline-block text-lg font-semibold text-emerald-300 transition hover:text-emerald-200"
-          >
-            {owner.display_name}
-          </a>
-          <!-- eslint-enable svelte/no-navigation-without-resolve -->
+          <div class="mt-2 flex items-center gap-2">
+            <!-- eslint-disable svelte/no-navigation-without-resolve -->
+            <a
+              href={`/users/${owner.id}`}
+              class="text-lg font-semibold text-emerald-300 transition hover:text-emerald-200"
+            >
+              {owner.display_name}
+            </a>
+            <!-- eslint-enable svelte/no-navigation-without-resolve -->
+            {#if owner.joined_date}
+              <TrustBadge
+                joinedDate={owner.joined_date}
+                vouchedTrades={owner.vouch_count}
+                size="small"
+              />
+            {/if}
+          </div>
           {#if owner.location}
             <p class="text-sm text-muted">Based in {owner.location}</p>
           {/if}
@@ -505,12 +508,12 @@ View full details: ${shareUrl}`;
       <section
         class="rounded-xl border border-dashed border-subtle bg-surface-card transition-colors p-6 text-center text-sm text-muted"
       >
-        This listing does not have photos yet.
+        This listing has no photos
       </section>
     {/if}
 
     <section
-      class="grid gap-8 rounded-xl border border-subtle bg-surface-card transition-colors p-6 lg:grid-cols-[2fr_1fr]"
+      class="grid gap-8 lg:grid-cols-[2fr_1fr]"
     >
       <div class="space-y-6">
         <div>
@@ -525,7 +528,7 @@ View full details: ${shareUrl}`;
             {#each games as game (game.id)}
               <article
                 id="game-{game.id}"
-                class="space-y-4 rounded-lg border border-subtle bg-surface-panel transition-colors p-5"
+                class="space-y-4 rounded-lg border border-subtle transition-colors p-5 {game.status === 'pending' ? 'bg-amber-500/5' : game.status === 'sold' ? 'bg-surface-panel/50 opacity-75' : 'bg-surface-panel'}"
               >
                 <header class="space-y-2">
                   <div class="flex flex-wrap items-center justify-between gap-3">
@@ -661,7 +664,7 @@ View full details: ${shareUrl}`;
             <p class="text-sm text-muted">Sign in to send a message to this trader.</p>
             <!-- eslint-disable svelte/no-navigation-without-resolve -->
             <a
-              class="inline-flex w-full items-center justify-center rounded-lg border border-emerald-500 bg-emerald-500/10 px-4 py-2 font-semibold text-emerald-200 transition hover:bg-emerald-500/20"
+              class="btn-secondary w-full"
               href="/login"
             >
               Sign in to message
@@ -927,7 +930,7 @@ View full details: ${shareUrl}`;
         <h2 class="text-2xl font-bold text-primary">Discussion</h2>
         <a
           href="/discussions/new?listing={listing.id}"
-          class="rounded-lg border border-subtle bg-surface-body px-4 py-2 text-sm font-medium text-secondary transition hover:border-accent hover:text-primary"
+          class="btn-secondary"
         >
           Start a Discussion
         </a>
@@ -941,7 +944,7 @@ View full details: ${shareUrl}`;
           </p>
           <a
             href="/discussions/new?listing={listing.id}"
-            class="mt-4 inline-block rounded-lg border border-emerald-500 bg-emerald-500 px-6 py-2 font-semibold text-surface-body transition hover:bg-emerald-600"
+            class="btn-primary mt-4 text-base px-8 py-3"
           >
             Start Discussion
           </a>

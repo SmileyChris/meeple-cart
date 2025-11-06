@@ -26,17 +26,17 @@
     { border: string; bg: string; text: string }
   > = {
     trade: {
-      border: 'border-emerald-600',
+      border: 'border-[var(--border-listing-trade)]',
       bg: 'bg-emerald-500/10',
       text: 'text-badge-emerald',
     },
     sell: {
-      border: 'border-emerald-600',
-      bg: 'bg-emerald-500/10',
-      text: 'text-badge-emerald',
+      border: 'border-[var(--border-listing-want)]',
+      bg: 'bg-blue-500/10',
+      text: 'text-badge-blue',
     },
     want: {
-      border: 'border-blue-600',
+      border: 'border-[var(--border-listing-want)]',
       bg: 'bg-blue-500/10',
       text: 'text-badge-blue',
     },
@@ -82,11 +82,24 @@
 
   let colors = $derived(typeColors[listing.listingType]);
 
-  let borderClass = $derived(
-    isPreferredRegion
-      ? 'border-2 border-[var(--accent)]'
-      : `border border-subtle group-hover:${colors.border}`
-  );
+  // Build border class based on listing type and region match
+  let borderClass = $derived.by(() => {
+    if (isPreferredRegion) {
+      // 1px colored border for preferred region
+      return listing.listingType === 'trade'
+        ? 'border border-listing-trade'
+        : 'border border-listing-sell';
+    }
+
+    // Grey border by default with colored border on hover
+    switch (listing.listingType) {
+      case 'trade':
+        return 'border border-subtle group-hover:border-listing-trade';
+      case 'sell':
+      case 'want':
+        return 'border border-subtle group-hover:border-listing-sell';
+    }
+  });
 
   let showAllGames = $state(false);
 </script>
