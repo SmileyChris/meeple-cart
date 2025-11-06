@@ -19,6 +19,8 @@
     showLabel?: boolean;
     /** Show tooltip on hover */
     showTooltip?: boolean;
+    /** Show border */
+    showBorder?: boolean;
     /** Custom class names */
     class?: string;
   }
@@ -29,6 +31,7 @@
     size = 'medium',
     showLabel = true,
     showTooltip = true,
+    showBorder = true,
     class: className = '',
   }: Props = $props();
 
@@ -52,7 +55,7 @@
 </script>
 
 <span
-  class="inline-flex items-center rounded-full border {tierInfo.styles.border} {tierInfo.styles.background} {tierInfo.styles.text} {sizeClasses} {className}"
+  class="inline-flex items-center rounded-full {showBorder ? `border ${tierInfo.styles.border}` : ''} {tierInfo.styles.background} {tierInfo.styles.text} {sizeClasses} {className}"
   title={showTooltip ? tooltipText : undefined}
   role="status"
   aria-label="Trust tier: {tierInfo.label}"

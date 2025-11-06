@@ -1,9 +1,18 @@
 <script lang="ts">
-  import type { ListingPreview } from '$lib/types/listing';
-  import MeepleIcon from './MeepleIcon.svelte';
   import { REGION_LABELS } from '$lib/constants/regions';
+  import type { ListingPreview } from '$lib/types/listing';
+  import {
+    getAccountAgeDays,
+    getTrustTier,
+    getTrustTierInfo,
+    getTooltipText,
+  } from '$lib/utils/trust-tiers';
 
-  let { listing, userPreferredRegions }: { listing: ListingPreview; userPreferredRegions?: string[] } = $props();
+  let {
+    listing,
+    userPreferredRegions,
+    hideOwner = false,
+  }: { listing: ListingPreview; userPreferredRegions?: string[]; hideOwner?: boolean } = $props();
 
   const typeLabels: Record<ListingPreview['listingType'], string> = {
     trade: 'Trade',
@@ -14,14 +23,12 @@
   // Check if any listing region matches user's preferred regions
   let isPreferredRegion = $derived(
     userPreferredRegions &&
-    listing.regions &&
-    listing.regions.some(r => userPreferredRegions.includes(r))
+      listing.regions &&
+      listing.regions.some((r) => userPreferredRegions.includes(r))
   );
 
   // Check if any game can be posted
-  let canPost = $derived(
-    listing.games.some(game => game.canPost)
-  );
+  let canPost = $derived(listing.games.some((game) => game.canPost));
 
   let createdLabel = $derived(
     new Intl.DateTimeFormat('en-NZ', {
@@ -81,10 +88,9 @@
       />
     {:else}
       <div
-        class="flex h-48 w-full flex-col items-center justify-center gap-3 bg-surface-card-alt text-muted transition-colors"
+        class="flex h-48 w-full items-center justify-center bg-surface-card-alt transition-colors"
       >
-        <MeepleIcon size={64} className="opacity-50" seed={listing.id} />
-        <span class="text-xs font-medium uppercase tracking-wider opacity-40">No image yet</span>
+        <img src="/logo.png" alt="" class="h-32 w-32 opacity-20" />
       </div>
     {/if}
     <div class="flex flex-1 flex-col gap-4 p-5">
@@ -99,6 +105,42 @@
 
       <div class="space-y-2">
         <h3 class="text-lg font-semibold text-primary transition-colors">{listing.title}</h3>
+
+        <!-- Owner info right after title -->
+        {#if !hideOwner}
+          <div class="flex items-center gap-1.5 text-sm">
+            {#if listing.ownerId && listing.ownerName}
+              {#if listing.ownerJoinedDate}
+                {@const tier = getTrustTier(
+                  getAccountAgeDays(listing.ownerJoinedDate),
+                  listing.ownerVouchedTrades
+                )}
+                {@const tierInfo = getTrustTierInfo(tier)}
+                {@const tooltipText = getTooltipText(tier)}
+                <span
+                  class="text-base leading-none"
+                  title={tooltipText}
+                  role="img"
+                  aria-label="Trust tier: {tierInfo.label}"
+                >
+                  {tierInfo.icon}
+                </span>
+              {/if}
+              <a
+                href={`/users/${listing.ownerId}`}
+                class="font-medium text-primary transition hover:text-[var(--accent)]"
+                onclick={(e) => e.stopPropagation()}
+              >
+                {listing.ownerName}
+              </a>
+            {:else if listing.ownerName}
+              <span class="font-medium text-primary">{listing.ownerName}</span>
+            {:else}
+              <span class="font-medium text-primary">Meeple Cart trader</span>
+            {/if}
+          </div>
+        {/if}
+
         {#if listing.summary}
           <p class="text-sm text-secondary transition-colors">{listing.summary}</p>
         {/if}
@@ -107,7 +149,8 @@
       {#if listing.games.length > 0}
         <div class="space-y-2">
           <h4 class="text-xs font-semibold uppercase tracking-wide text-muted">
-            {listing.games.length} {listing.games.length === 1 ? 'game' : 'games'} included
+            {listing.games.length}
+            {listing.games.length === 1 ? 'game' : 'games'} included
           </h4>
           <div class="flex flex-wrap gap-2">
             {#each listing.games.slice(0, 3) as game (game.id)}
@@ -129,58 +172,49 @@
       {/if}
 
       <div class="mt-auto space-y-2">
-        <!-- Owner info -->
-        <div class="text-sm">
-          {#if listing.ownerId && listing.ownerName}
-            <a
-              href={`/users/${listing.ownerId}`}
-              class="font-medium text-primary transition hover:text-[var(--accent)]"
-              onclick={(e) => e.stopPropagation()}
-            >
-              {listing.ownerName}
-            </a>
-          {:else if listing.ownerName}
-            <span class="font-medium text-primary">{listing.ownerName}</span>
-          {:else}
-            <span class="font-medium text-primary">Meeple Cart trader</span>
-          {/if}
-        </div>
-
         <!-- Region badges -->
-        {#if listing.regions && listing.regions.length > 0}
-          <div class="flex flex-wrap gap-1.5">
-            {#each listing.regions.slice(0, 3) as regionValue (regionValue)}
-              <span
-                class={`rounded-full px-2 py-0.5 text-xs font-medium transition-colors ${
-                  isPreferredRegion && userPreferredRegions?.includes(regionValue)
-                    ? 'bg-[var(--accent)] text-[var(--accent-contrast)]'
-                    : 'border border-subtle bg-surface-card-alt text-secondary'
-                }`}
-              >
-                {REGION_LABELS[regionValue] || regionValue}
-              </span>
-            {/each}
-            {#if listing.regions.length > 3}
-              <span
-                class="rounded-full border border-dashed border-subtle bg-surface-card-alt px-2 py-0.5 text-xs font-medium text-muted transition-colors"
-              >
-                +{listing.regions.length - 3}
-              </span>
-            {/if}
+        {#if (listing.regions && listing.regions.length > 0) || listing.location || canPost}
+          <!-- Divider line -->
+          <div class="border-t border-subtle opacity-50 pt-2"></div>
+          <div class="flex items-center gap-1">
+            <span class="text-base text-muted leading-none">📍</span>
+            <div class="flex flex-wrap items-center gap-1.5">
+              {#if listing.regions && listing.regions.length > 0}
+                {#each listing.regions.slice(0, 3) as regionValue (regionValue)}
+                  <span
+                    class={`flex items-center gap-1 rounded-full px-2 text-xs font-medium transition-colors ${
+                      isPreferredRegion && userPreferredRegions?.includes(regionValue)
+                        ? 'bg-[var(--accent)] text-[var(--accent-contrast)]'
+                        : 'border border-subtle bg-surface-card-alt text-secondary'
+                    }`}
+                  >
+                    <span class="text-xs">🤝</span>
+                    {REGION_LABELS[regionValue] || regionValue}
+                  </span>
+                {/each}
+                {#if listing.regions.length > 3}
+                  <span
+                    class="rounded-full border border-dashed border-subtle bg-surface-card-alt px-2 text-xs font-medium text-muted transition-colors"
+                  >
+                    +{listing.regions.length - 3}
+                  </span>
+                {/if}
+              {/if}
+              {#if canPost}
+                <span class="flex items-center gap-1 rounded-full border border-subtle bg-surface-card-alt px-2 text-xs font-medium text-secondary">
+                  <span class="text-xs">🚚</span>
+                  Can post
+                </span>
+              {/if}
+              <!-- Additional location details -->
+              {#if listing.location}
+                <span class="text-xs text-muted w-full pl-2">{listing.location}</span>
+              {/if}
+            </div>
           </div>
-        {/if}
-
-        <!-- Additional location details -->
-        {#if listing.location}
-          <span class="text-xs text-muted">{listing.location}</span>
         {/if}
 
         <!-- Can post badge -->
-        {#if canPost}
-          <div class="flex items-center gap-1 text-xs text-secondary">
-            <span>📮 Can post</span>
-          </div>
-        {/if}
       </div>
     </div>
   </article>

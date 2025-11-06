@@ -135,6 +135,8 @@ export const load: PageLoad = async ({ fetch, url, parent, depends }) => {
         created: item.created,
         ownerName: owner?.display_name ?? null,
         ownerId: owner?.id ?? null,
+        ownerJoinedDate: owner?.created ?? null,
+        ownerVouchedTrades: typeof owner?.vouched_trade_count === 'number' ? owner.vouched_trade_count : 0,
         coverImage,
         href: `/listings/${item.id}`,
         games,

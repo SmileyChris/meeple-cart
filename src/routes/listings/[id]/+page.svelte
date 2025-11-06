@@ -565,7 +565,7 @@ View full details: ${shareUrl}`;
                       <span
                         class="inline-flex items-center rounded-full border border-subtle bg-surface-card-alt px-2 py-1 text-secondary"
                       >
-                        📮 Can post
+                        🚚 Can post
                       </span>
                     {/if}
                   </div>
@@ -769,7 +769,7 @@ View full details: ${shareUrl}`;
                                   · Value: {toCurrency(game.tradeValue)}
                                 {/if}
                                 {#if game.can_post}
-                                  · 📮 Can post
+                                  · 🚚 Can post
                                 {/if}
                                 {#if game.status !== 'available'}
                                   · {game.status}

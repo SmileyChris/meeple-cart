@@ -98,6 +98,8 @@ export interface ListingPreview {
   created: string;
   ownerName: string | null;
   ownerId: string | null;
+  ownerJoinedDate: string | null;
+  ownerVouchedTrades: number;
   coverImage: string | null;
   href: string;
   games: ListingGameSummary[];

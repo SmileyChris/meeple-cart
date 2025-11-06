@@ -207,7 +207,7 @@
                     name="can_post"
                     bind:checked={addFormValues.can_post}
                   />
-                  📮 Can post (available for courier/postal delivery)
+                  🚚 Can post (available for courier/postal delivery)
                 </label>
               </div>
             </div>
@@ -313,7 +313,7 @@
                         name="can_post"
                         checked={game.can_post ?? false}
                       />
-                      📮 Can post (available for courier/postal delivery)
+                      🚚 Can post (available for courier/postal delivery)
                     </label>
                   </div>
                 </div>
@@ -358,7 +358,7 @@
                         <span>• BGG ID: {game.bgg_id}</span>
                       {/if}
                       {#if game.can_post}
-                        <span>• 📮 Can post</span>
+                        <span>• 🚚 Can post</span>
                       {/if}
                     </div>
                     {#if game.notes}

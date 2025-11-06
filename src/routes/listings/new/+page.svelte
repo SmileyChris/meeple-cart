@@ -535,7 +535,7 @@
                     name="game_{index}_can_post"
                     bind:checked={game.can_post}
                   />
-                  📮 Can post (available for courier/postal delivery)
+                  🚚 Can post (available for courier/postal delivery)
                 </label>
               </div>
             </div>
