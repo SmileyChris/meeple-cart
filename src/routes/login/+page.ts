@@ -9,15 +9,16 @@ export const load: PageLoad = async () => {
     try {
       // Validate the auth is actually valid by trying to refresh
       await pb.collection('users').authRefresh();
+      // Auth is valid, redirect to profile
       throw redirect(302, '/profile');
     } catch (e) {
-      // Auth refresh failed - token is invalid, clear it
-      if (e instanceof Error && 'status' in e) {
-        pb.authStore.clear();
-      } else {
-        // It's a redirect, re-throw it
+      // Check if it's a redirect (successful validation)
+      if (e && typeof e === 'object' && 'status' in e && e.status === 302) {
         throw e;
       }
+      // Auth refresh failed - token is invalid, clear it
+      pb.authStore.clear();
+      // Continue to show login page
     }
   }
 
