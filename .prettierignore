@@ -7,3 +7,9 @@ bun.lockb
 
 # Miscellaneous
 /static/
+
+# Documentation with code examples
+CLAUDE.md
+MVP_IMPLEMENTATION_PLAN.md
+TRADE_FLOW_STATUS.md
+spec/*.md

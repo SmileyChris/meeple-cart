@@ -8,22 +8,26 @@ describe('PhotoRegionOverlay', () => {
   const mockGames: ItemRecord[] = [
     {
       id: 'game1',
+      collectionId: 'items_collection',
+      collectionName: 'items',
       listing: 'listing1',
       title: 'Gloomhaven',
       condition: 'excellent',
       status: 'available',
       created: '2024-01-01',
       updated: '2024-01-01',
-    } as ItemRecord,
+    },
     {
       id: 'game2',
+      collectionId: 'items_collection',
+      collectionName: 'items',
       listing: 'listing1',
       title: 'Wingspan',
       condition: 'good',
       status: 'sold',
       created: '2024-01-01',
       updated: '2024-01-01',
-    } as ItemRecord,
+    },
   ];
 
   it('renders nothing when no regions for photo', () => {

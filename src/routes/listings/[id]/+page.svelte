@@ -42,7 +42,7 @@
 
   // Photo region state
   let photoRegions = $derived(listing.photo_region_map ?? []);
-  let mainImageRef: HTMLImageElement;
+  let mainImageRef: HTMLImageElement | undefined = undefined;
   let imageWidth = $state(0);
   let imageHeight = $state(0);
 

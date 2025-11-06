@@ -4,10 +4,10 @@ import { getLowestHistoricalPrice, getMostRecentPrice } from './price-history';
 describe('price history utilities', () => {
   it('returns lowest eligible historical price after three days', () => {
     const priceHistory = [
-      { price: 260, trade_value: null, timestamp: '2024-01-01T10:00:00Z' },
-      { price: 220, trade_value: null, timestamp: '2024-01-04T12:00:00Z' },
-      { price: 180, trade_value: null, timestamp: '2024-01-06T15:00:00Z' },
-      { price: 170, trade_value: null, timestamp: '2024-01-08T15:00:00Z' },
+      { price: 260, trade_value: undefined, timestamp: '2024-01-01T10:00:00Z' },
+      { price: 220, trade_value: undefined, timestamp: '2024-01-04T12:00:00Z' },
+      { price: 180, trade_value: undefined, timestamp: '2024-01-06T15:00:00Z' },
+      { price: 170, trade_value: undefined, timestamp: '2024-01-08T15:00:00Z' },
     ];
 
     const result = getLowestHistoricalPrice(priceHistory, '2024-01-01T09:00:00Z', 'price');
@@ -17,9 +17,9 @@ describe('price history utilities', () => {
 
   it('ignores entries within the three-day threshold and missing prices', () => {
     const priceHistory = [
-      { price: 220, trade_value: null, timestamp: '2024-01-01T10:00:00Z' },
+      { price: 220, trade_value: undefined, timestamp: '2024-01-01T10:00:00Z' },
       { price: undefined, trade_value: 210, timestamp: '2024-01-02T12:00:00Z' },
-      { price: 205, trade_value: null, timestamp: '2024-01-03T12:00:00Z' },
+      { price: 205, trade_value: undefined, timestamp: '2024-01-03T12:00:00Z' },
     ];
 
     const result = getLowestHistoricalPrice(priceHistory, '2024-01-01T09:00:00Z', 'price');
@@ -31,7 +31,7 @@ describe('price history utilities', () => {
     expect(getLowestHistoricalPrice([], '2024-01-01T09:00:00Z', 'price')).toBeNull();
     expect(
       getLowestHistoricalPrice(
-        [{ price: 200, trade_value: null, timestamp: '2024-01-05T10:00:00Z' }],
+        [{ price: 200, trade_value: undefined, timestamp: '2024-01-05T10:00:00Z' }],
         '2024-01-01T09:00:00Z',
         'price'
       )
@@ -59,7 +59,7 @@ describe('price history utilities', () => {
     expect(getMostRecentPrice({ price_history: [] } as any)).toBeNull();
     expect(
       getMostRecentPrice({
-        price_history: [{ price: 200, trade_value: null, timestamp: '2024-01-01T10:00:00Z' }],
+        price_history: [{ price: 200, trade_value: undefined, timestamp: '2024-01-01T10:00:00Z' }],
       } as any)
     ).toBeNull();
   });

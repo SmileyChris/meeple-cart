@@ -77,23 +77,23 @@ describe('price tracking handlers', () => {
       'game-1',
       {
         price: 220,
-        trade_value: null,
+        trade_value: undefined,
         price_history: [
-          { price: 260, trade_value: null, timestamp: '2024-05-15T12:00:00Z' },
-          { price: 220, trade_value: null, timestamp: '2024-05-20T12:00:00Z' },
+          { price: 260, trade_value: undefined, timestamp: '2024-05-15T12:00:00Z' },
+          { price: 220, trade_value: undefined, timestamp: '2024-05-20T12:00:00Z' },
         ],
       } as any,
       180,
-      null
+      undefined
     );
 
     expect(updateMock).toHaveBeenCalledWith('game-1', {
       price_history: [
-        { price: 260, trade_value: null, timestamp: '2024-05-15T12:00:00Z' },
-        { price: 220, trade_value: null, timestamp: '2024-05-20T12:00:00Z' },
+        { price: 260, trade_value: undefined, timestamp: '2024-05-15T12:00:00Z' },
+        { price: 220, trade_value: undefined, timestamp: '2024-05-20T12:00:00Z' },
         {
           price: 180,
-          trade_value: null,
+          trade_value: undefined,
           timestamp: new Date('2024-06-01T12:00:00Z').toISOString(),
         },
       ],
@@ -129,14 +129,14 @@ describe('price tracking handlers', () => {
       pb as any,
       'game-2',
       {
-        price: null,
+        price: undefined,
         trade_value: 250,
         price_history: [
-          { price: null, trade_value: 260, timestamp: '2024-05-01T12:00:00Z' },
-          { price: null, trade_value: 250, timestamp: '2024-05-10T12:00:00Z' },
+          { price: undefined, trade_value: 260, timestamp: '2024-05-01T12:00:00Z' },
+          { price: undefined, trade_value: 250, timestamp: '2024-05-10T12:00:00Z' },
         ],
       } as any,
-      null,
+      undefined,
       220
     );
 
@@ -168,11 +168,11 @@ describe('price tracking handlers', () => {
       'game-3',
       {
         price: 120,
-        trade_value: null,
-        price_history: [{ price: 130, trade_value: null, timestamp: '2024-05-01T12:00:00Z' }],
+        trade_value: undefined,
+        price_history: [{ price: 130, trade_value: undefined, timestamp: '2024-05-01T12:00:00Z' }],
       } as any,
       110,
-      null
+      undefined
     );
 
     expect(createNotification).not.toHaveBeenCalled();

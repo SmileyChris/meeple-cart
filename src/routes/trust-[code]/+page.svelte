@@ -17,12 +17,12 @@
   let errorDetails = $state<string | null>(null);
 
   // Check if link is already used or expired
-  let linkStatus = $derived(() => {
+  let linkStatus = $derived.by(() => {
     if (!data.link) return 'invalid';
     if (data.link.used) return 'used';
     if (isVerificationExpired(data.link.expires_at)) return 'expired';
     return 'valid';
-  })();
+  });
 
   async function handleVerify() {
     if (!data.link) return;
