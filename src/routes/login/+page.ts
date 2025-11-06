@@ -12,11 +12,12 @@ export const load: PageLoad = async () => {
       // Auth is valid, redirect to profile
       throw redirect(302, '/profile');
     } catch (e) {
-      // Check if it's a redirect (successful validation)
-      if (e && typeof e === 'object' && 'status' in e && e.status === 302) {
+      // Check if it's a SvelteKit redirect (has location property)
+      if (e && typeof e === 'object' && 'location' in e) {
         throw e;
       }
       // Auth refresh failed - token is invalid, clear it
+      console.log('Invalid auth detected, clearing:', e);
       pb.authStore.clear();
       // Continue to show login page
     }
