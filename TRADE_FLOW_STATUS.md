@@ -236,7 +236,7 @@ All 6 critical gaps identified in `spec/trade-flow-gaps.md` are now **fully func
 4. `src/lib/utils/trade-validation.ts` - Trade validation (auto-created)
 5. `src/lib/components/StatusHistory.svelte` - Status history display component
 6. `src/lib/components/StatusHistory.test.ts` - Component tests (10 tests)
-7. `services/pocketbase/migrations/0006_status_history.js` - Schema migration
+7. `pocketbase/pb_migrations/0006_status_history.js` - Schema migration
 8. `tests/e2e/trade-flow.spec.ts` - E2E test for complete trade flow
 
 ### Files Modified (10)
@@ -249,7 +249,7 @@ All 6 critical gaps identified in `spec/trade-flow-gaps.md` are now **fully func
 6. `src/routes/trades/+page.ts` - Trade history loader
 7. `src/routes/trades/+page.svelte` - Trade history UI
 8. `src/routes/+layout.svelte` - Navigation (My Trades link)
-9. `services/pocketbase/schema/pb_schema.json` - Added status_history field
+9. `pocketbase/schema/pb_schema.json` - Added status_history field
 10. `TRADE_FLOW_STATUS.md` - Updated with Gap 6 completion
 
 ---

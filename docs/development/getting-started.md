@@ -22,7 +22,7 @@ npm run lint
 npm run test
 ```
 
-PocketBase migrations are located in `services/pocketbase/migrations/`. When you modify the schema, update `services/pocketbase/schema/pb_schema.json` to keep the snapshot in sync.
+PocketBase migrations are located under `pocketbase/pb_migrations/`. When you modify the schema, update `pocketbase/schema/pb_schema.json` to keep the snapshot in sync.
 
 ## Documentation preview
 

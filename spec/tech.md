@@ -366,7 +366,7 @@ services:
   pocketbase:
     image: pocketbase/pocketbase
     volumes:
-      - ./pb_data:/pb_data
+      - ./pocketbase/pb_data:/pb_data
       - ./pb_public:/pb_public
     environment:
       - PB_ENCRYPTION_KEY=${ENCRYPTION_KEY}

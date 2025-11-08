@@ -4,7 +4,7 @@
 
 ### 1. Database Schema & Migrations ✅
 
-**File**: `services/pocketbase/migrations/0004_cascades.js`
+**File**: `pocketbase/pb_migrations/0004_cascades.js`
 
 Created three new PocketBase collections:
 

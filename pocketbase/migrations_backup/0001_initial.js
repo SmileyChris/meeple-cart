@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/triple-slash-reference */
-/// <reference path="../../pocketbase/pb_data/types.d.ts" />
+/// <reference path="../pb_data/types.d.ts" />
 
 migrate(
   (db) => {

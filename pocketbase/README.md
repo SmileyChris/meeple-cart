@@ -16,8 +16,9 @@ This directory keeps the PocketBase schema and helper scripts used by Meeple Car
 
 Apply the schema using either:
 
-- `just dev` / `scripts/dev.sh`: downloads PocketBase if needed, applies `migrations/` automatically, and starts the local server.
-- Manual CLI: `./pocketbase/pocketbase migrate up --dir pocketbase/pb_data --migrationsDir services/pocketbase/migrations`
+- `just dev` / `scripts/dev.sh`: downloads PocketBase if needed, applies `pocketbase/pb_migrations/` automatically, and starts the local server.
+- Manual CLI (repo root): `./pocketbase/pocketbase migrate up --dir pocketbase/pb_data --migrationsDir pocketbase/pb_migrations`
+- Manual CLI (`cd pocketbase`): `./pocketbase migrate up`
 - Admin UI: Collections → Import → upload `schema/pb_schema.json`
 
-Use `POCKETBASE_URL` (see `.env.example`) to point the SvelteKit app at the running PocketBase instance.
+PocketBase stores its local data in `./pb_data` relative to the directory you run it from (so the repo keeps data under `pocketbase/pb_data`). Remove that folder if you need a clean slate. Use `POCKETBASE_URL` (see `.env.example`) to point the SvelteKit app at the running PocketBase instance.

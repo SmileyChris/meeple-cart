@@ -47,7 +47,7 @@ This document specifies a comprehensive photo management system for Meeple Cart 
 ### 3. Database Schema
 
 - **Status:** ✅ Complete
-- **Location:** `services/pocketbase/schema/pb_schema.json`
+- **Location:** `pocketbase/schema/pb_schema.json`
 - `listings.photos` - File field (up to 6 images)
 - `games.photo_regions` - JSON field (currently unused)
 - PocketBase file storage and CDN URLs
@@ -1092,7 +1092,7 @@ Test scenarios:
 6. `src/lib/components/PhotoRegionOverlay.svelte` - Region display overlay
 7. `src/lib/utils/photo-regions.test.ts` - Unit tests
 8. `tests/e2e/photo-gallery.spec.ts` - E2E tests
-9. `services/pocketbase/migrations/0006_add_photo_region_map.js` - Database migration
+9. `pocketbase/pb_migrations/0006_add_photo_region_map.js` - Database migration
 
 ### Modified Files (3)
 

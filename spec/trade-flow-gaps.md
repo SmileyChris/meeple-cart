@@ -35,7 +35,7 @@ The following components are fully functional:
 ### 2. Database Schema
 
 - **Status:** ✅ Complete
-- **Location:** `services/pocketbase/schema/pb_schema.json`
+- **Location:** `pocketbase/schema/pb_schema.json`
 - `trades` collection with all required fields:
   - `listing`, `buyer`, `seller` relations
   - `status` (initiated, confirmed, completed, disputed)
@@ -1196,7 +1196,7 @@ The trade flow is complete when:
 - [Product Requirements Document](./prd.md) - Phase 1 MVP requirements
 - [Trust & Vouches](../docs/trust-and-vouches.md) - Vouch system documentation
 - [Trade Chains](../docs/trade-chains.md) - Multi-party trade specification
-- [Database Schema](../services/pocketbase/schema/pb_schema.json) - Current collections
+- [Database Schema](../pocketbase/schema/pb_schema.json) - Current collections
 
 ---
 

@@ -135,8 +135,8 @@ src/
 
 **Schema Location:**
 
-- `services/pocketbase/schema/pb_schema.json` - Complete schema (11 collections)
-- `services/pocketbase/migrations/` - 5 migration files (all applied)
+- `pocketbase/schema/pb_schema.json` - Complete schema (11 collections)
+- `pocketbase/pb_migrations/` - Migration scripts (auto-applied via PocketBase)
 
 **Collections You'll Use Most:**
 

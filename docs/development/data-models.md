@@ -250,6 +250,6 @@ System alerts delivered to users.
 ## Updating the schema
 
 1. Modify the PocketBase schema using the admin UI or migration scripts.
-2. Export the latest schema snapshot to `services/pocketbase/schema/pb_schema.json`.
-3. Create a corresponding auto-migration with `./pocketbase/pocketbase migrate diff` and commit the resulting file under `services/pocketbase/migrations/`.
+2. Export the latest schema snapshot to `pocketbase/schema/pb_schema.json`.
+3. Create a corresponding auto-migration with `./pocketbase/pocketbase migrate diff` and commit the resulting file under `pocketbase/pb_migrations/`.
 4. Update these docs if relationships or key fields change.

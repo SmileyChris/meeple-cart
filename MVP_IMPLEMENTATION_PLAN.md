@@ -434,7 +434,7 @@ src/lib/components/
 - [Trade Flow Gaps (Detailed Specs)](./spec/trade-flow-gaps.md) - 984 lines of implementation details
 - [Product Requirements (PRD)](./spec/prd.md) - Original vision & MVP requirements
 - [Trust & Vouches](./docs/trust-and-vouches.md) - Trust system documentation
-- [Database Schema](./services/pocketbase/schema/pb_schema.json) - Complete schema
+- [Database Schema](./pocketbase/schema/pb_schema.json) - Complete schema
 - [CLAUDE.md](./CLAUDE.md) - Development setup & commands
 
 ---

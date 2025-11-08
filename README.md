@@ -131,9 +131,14 @@ meeple/
 │   │   ├── utils/           # Shared utilities
 │   │   └── pocketbase.ts    # Client instance
 │   └── app.css             # Tailwind + CSS variables
-├── services/pocketbase/
-│   ├── migrations/          # 5 migration files
-│   └── schema/              # pb_schema.json
+├── pocketbase/
+│   ├── pocketbase*          # PocketBase binary (symlink)
+│   ├── pocketbase-*/        # Versioned binaries
+│   ├── pb_data/             # Local data dir (gitignored)
+│   ├── pb_migrations/       # Active migrations
+│   ├── migrations_backup/   # Historical migrations
+│   ├── schema/              # pb_schema.json snapshot
+│   └── README.md            # Backend usage notes
 ├── spec/                    # Feature specifications (6 docs)
 ├── docs/                    # Architecture & system docs
 ├── scripts/                 # Development scripts
@@ -186,8 +191,8 @@ npm run seed:demo     # Seed demo data (from scripts/seed-demo-data.ts)
 | `cascade_entries` | User entries in cascades         | ✅ Complete                   |
 | `cascade_history` | Cascade event timeline           | ✅ Complete                   |
 
-**Schema:** See `services/pocketbase/schema/pb_schema.json`
-**Migrations:** 5 files in `services/pocketbase/migrations/`
+**Schema:** See `pocketbase/schema/pb_schema.json`
+**Migrations:** Stored under `pocketbase/pb_migrations/`
 
 ---
 
