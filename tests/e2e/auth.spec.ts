@@ -178,9 +178,7 @@ test.describe('Authentication', () => {
     });
 
     test('should successfully login with valid credentials', async ({ page }) => {
-      const loginEmail = await page.evaluate(() =>
-        sessionStorage.getItem('testLoginEmail')
-      );
+      const loginEmail = await page.evaluate(() => sessionStorage.getItem('testLoginEmail'));
 
       await page.goto('/login');
 
@@ -201,7 +199,7 @@ test.describe('Authentication', () => {
 
       // Should show error message
       await expect(
-        page.locator('text=/couldn\'t find.*account|invalid.*credentials/i')
+        page.locator("text=/couldn't find.*account|invalid.*credentials/i")
       ).toBeVisible();
 
       // Should still be on login page
@@ -209,9 +207,7 @@ test.describe('Authentication', () => {
     });
 
     test('should show error for incorrect password', async ({ page }) => {
-      const loginEmail = await page.evaluate(() =>
-        sessionStorage.getItem('testLoginEmail')
-      );
+      const loginEmail = await page.evaluate(() => sessionStorage.getItem('testLoginEmail'));
 
       await page.goto('/login');
 
@@ -221,7 +217,7 @@ test.describe('Authentication', () => {
 
       // Should show error
       await expect(
-        page.locator('text=/couldn\'t find.*account|invalid.*credentials/i')
+        page.locator("text=/couldn't find.*account|invalid.*credentials/i")
       ).toBeVisible();
     });
 
@@ -245,9 +241,7 @@ test.describe('Authentication', () => {
     });
 
     test('should redirect to profile if already logged in', async ({ page }) => {
-      const loginEmail = await page.evaluate(() =>
-        sessionStorage.getItem('testLoginEmail')
-      );
+      const loginEmail = await page.evaluate(() => sessionStorage.getItem('testLoginEmail'));
 
       // Login first
       await page.goto('/login');
@@ -403,7 +397,7 @@ test.describe('Authentication', () => {
       await page.click('button[type="submit"]');
 
       // Error should be visible and in DOM (screen readers can access)
-      const errorMessage = page.locator('text=/couldn\'t find.*account/i');
+      const errorMessage = page.locator("text=/couldn't find.*account/i");
       await expect(errorMessage).toBeVisible();
     });
   });
@@ -428,9 +422,7 @@ test.describe('Authentication', () => {
 
     test('should handle network error gracefully on login', async ({ page }) => {
       // Mock network failure
-      await page.route('**/api/collections/users/auth-with-password', (route) =>
-        route.abort()
-      );
+      await page.route('**/api/collections/users/auth-with-password', (route) => route.abort());
 
       await page.goto('/login');
 
@@ -439,7 +431,7 @@ test.describe('Authentication', () => {
       await page.click('button[type="submit"]');
 
       // Should show error message
-      await expect(page.locator('text=/couldn\'t find.*account/i')).toBeVisible();
+      await expect(page.locator("text=/couldn't find.*account/i")).toBeVisible();
     });
   });
 });

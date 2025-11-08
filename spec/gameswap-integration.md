@@ -50,6 +50,7 @@ This document outlines the plan to integrate proven multi-party trade matching f
 ### 1.1 TradeMaximizer Algorithm
 
 **What It Does:**
+
 - Computes optimal multi-party trade chains using the Hungarian algorithm
 - Maximizes number of users trading or total chain length
 - Handles "any one of" groups via dummy items
@@ -57,6 +58,7 @@ This document outlines the plan to integrate proven multi-party trade matching f
 - Deterministic shuffling for consistent results
 
 **Files to Copy:**
+
 ```
 gameswap/src/lib/olwlg/trademax.js       → meeple/src/lib/trade-optimizer/trademax.js
 gameswap/src/lib/olwlg/_trademax.ts      → meeple/src/lib/trade-optimizer/trademax.ts
@@ -64,6 +66,7 @@ gameswap/src/lib/olwlg/javarandom.js     → meeple/src/lib/trade-optimizer/java
 ```
 
 **Adaptations Needed:**
+
 - None for core algorithm (pure logic)
 - Update TypeScript wrapper for Meeple's data models
 
@@ -72,17 +75,20 @@ gameswap/src/lib/olwlg/javarandom.js     → meeple/src/lib/trade-optimizer/java
 ### 1.2 Trade Running Logic
 
 **What It Does:**
+
 - Fetches user games, wants, and offers from database
 - Builds input format for TradeMaximizer
 - Runs algorithm and parses results
 - Returns matches as structured data
 
 **File to Adapt:**
+
 ```
 gameswap/src/routes/(event)/trades/trades.ts → meeple/src/lib/trade-optimizer/runner.ts
 ```
 
 **Adaptations Needed:**
+
 - Remove event scoping
 - Query from Meeple's `listings`, `trade_preferences`, `trade_groups` collections
 - Map results to Meeple's trade record format
@@ -93,25 +99,28 @@ gameswap/src/routes/(event)/trades/trades.ts → meeple/src/lib/trade-optimizer/
 ### 1.3 Wants Groups ("Any One Of")
 
 **What It Does:**
+
 - Users can group multiple wanted items: "I want any one of Games X, Y, Z"
 - Specify single offer set for the entire group
 - Algorithm uses dummy items to represent groups
 
 **Database Schema (New Collection):**
+
 ```typescript
 type TradeGroup = {
-  id: string
-  user: string              // relation(users)
-  name: string              // User-provided name (e.g., "Worker placement games")
-  listings: string[]        // Array of listing IDs (any one of these)
-  offer_listings: string[]  // What they'll trade for ANY match
-  offer_cash: number        // Or cash amount
-  created: date
-  updated: date
-}
+  id: string;
+  user: string; // relation(users)
+  name: string; // User-provided name (e.g., "Worker placement games")
+  listings: string[]; // Array of listing IDs (any one of these)
+  offer_listings: string[]; // What they'll trade for ANY match
+  offer_cash: number; // Or cash amount
+  created: date;
+  updated: date;
+};
 ```
 
 **UI Pattern:**
+
 - Checkbox selection on browse page
 - "Create group from selection" button
 - Group management page (list groups, edit, delete)
@@ -121,26 +130,29 @@ type TradeGroup = {
 ### 1.4 Trade Preferences
 
 **What It Does:**
+
 - Users specify what they want and what they'll offer per item
 - Multiple offers per want (trade Game A, B, OR C for Game X)
 - Cash offers alongside game offers
 - Priority ranking (implicit from list order)
 
 **Database Schema (New Collection):**
+
 ```typescript
 type TradePreference = {
-  id: string
-  user: string              // relation(users)
-  wanted_listing: string    // relation(listings) - What they want
-  offer_listings: string[]  // Array of listing IDs they'll trade
-  offer_cash: number        // Or cash amount
-  priority: number          // 1 = highest, for ranking
-  created: date
-  updated: date
-}
+  id: string;
+  user: string; // relation(users)
+  wanted_listing: string; // relation(listings) - What they want
+  offer_listings: string[]; // Array of listing IDs they'll trade
+  offer_cash: number; // Or cash amount
+  priority: number; // 1 = highest, for ranking
+  created: date;
+  updated: date;
+};
 ```
 
 **Key Behaviors:**
+
 - User can have multiple preferences for same wanted listing (different offers)
 - Lower priority = higher preference in algorithm cost calculation
 - Empty offers = "haven't decided yet" warning
@@ -150,25 +162,28 @@ type TradePreference = {
 ### 1.5 Confirmation Workflow
 
 **What It Does:**
+
 - Track which items in a trade have been sent/received
 - Visual indicators (badges, icons)
 - Both parties can mark their side
 - Admin override capability
 
 **Database Fields (Add to `trades` collection):**
+
 ```typescript
 // Extend existing trades collection
 type Trade = {
   // ... existing fields
-  buyer_items_sent: string[]     // Array of listing IDs sent by buyer
-  seller_items_sent: string[]    // Array of listing IDs sent by seller
-  buyer_items_received: string[] // Array of listing IDs received by buyer
-  seller_items_received: string[]// Array of listing IDs received by seller
-  confirmation_notes: string     // Optional shipping/tracking info
-}
+  buyer_items_sent: string[]; // Array of listing IDs sent by buyer
+  seller_items_sent: string[]; // Array of listing IDs sent by seller
+  buyer_items_received: string[]; // Array of listing IDs received by buyer
+  seller_items_received: string[]; // Array of listing IDs received by seller
+  confirmation_notes: string; // Optional shipping/tracking info
+};
 ```
 
 **UI Components:**
+
 - Send button (mark as sent)
 - Receive button (mark as received)
 - Undo action
@@ -179,18 +194,20 @@ type Trade = {
 ### 1.6 Utility Functions
 
 **Currency Formatting:**
+
 ```typescript
 // gameswap/src/lib/utils.ts → meeple/src/lib/utils/currency.ts
 function currency(price: number | null): string {
   return new Intl.NumberFormat('en-NZ', {
     style: 'currency',
     currency: 'NZD',
-    trailingZeroDisplay: 'stripIfInteger'
-  }).format(price ?? 0)
+    trailingZeroDisplay: 'stripIfInteger',
+  }).format(price ?? 0);
 }
 ```
 
 **Time Countdown:**
+
 ```typescript
 // gameswap/src/routes/(event)/remaining.ts → meeple/src/lib/utils/countdown.ts
 function timeRemaining(date: Date): string {
@@ -309,6 +326,7 @@ src/lib/components/TradeOptimizer/
 ### 2.3 Integration with Existing MVP Trade Flow
 
 **Scenario 1: Manual Trade (MVP Week 1)**
+
 1. User A messages User B about a listing
 2. They negotiate via messages
 3. User A clicks "Propose Trade" on listing detail page
@@ -316,6 +334,7 @@ src/lib/components/TradeOptimizer/
 5. Continue with MVP confirmation → completion flow
 
 **Scenario 2: Optimized Trade (This Spec)**
+
 1. User A adds preferences: "I want Listing X, will trade Listings Y or Z"
 2. User B adds preferences: "I want Listing Y, will trade Listing W"
 3. User C adds preferences: "I want Listing W, will trade Listing X"
@@ -605,12 +624,14 @@ src/lib/components/TradeOptimizer/
 ### 4.1 Trade Optimizer Core (`src/lib/trade-optimizer/`)
 
 #### `algorithm/trademax.js`
+
 - **Source:** Copy directly from gameswap
 - **Changes:** None (pure algorithm)
 - **Lines:** ~1,640
 - **Purpose:** Core Hungarian algorithm implementation
 
 #### `algorithm/trademax.ts`
+
 - **Source:** Adapt from gameswap
 - **Changes:** Update types for Meeple's models
 - **Purpose:** TypeScript wrapper
@@ -631,6 +652,7 @@ export class TradeMaximizer {
 ```
 
 #### `algorithm/javarandom.js`
+
 - **Source:** Copy directly from gameswap
 - **Changes:** None
 - **Purpose:** Deterministic random generation
@@ -649,25 +671,25 @@ import type { OptimizationResult, TradeChain } from './types';
 export async function optimizeTrades(
   userId: string,
   options?: {
-    includeUser?: boolean;    // Include user's own preferences
+    includeUser?: boolean; // Include user's own preferences
     onlyUserChains?: boolean; // Only return chains involving user
-    previewOnly?: boolean;    // Don't create trades, just preview
+    previewOnly?: boolean; // Don't create trades, just preview
   }
 ): Promise<OptimizationResult> {
   // 1. Fetch all active listings
   const listings = await pb.collection('listings').getFullList({
     filter: 'status = "active"',
-    expand: 'owner'
+    expand: 'owner',
   });
 
   // 2. Fetch all trade preferences
   const preferences = await pb.collection('trade_preferences').getFullList({
-    expand: 'user,wanted_listing,offer_listings'
+    expand: 'user,wanted_listing,offer_listings',
   });
 
   // 3. Fetch all trade groups
   const groups = await pb.collection('trade_groups').getFullList({
-    expand: 'user,listings,offer_listings'
+    expand: 'user,listings,offer_listings',
   });
 
   // 4. Build input for TradeMaximizer
@@ -678,7 +700,7 @@ export async function optimizeTrades(
     allowDummies: true,
     metric: 'USERS-TRADING',
     iterations: 10,
-    priorityScheme: 'LINEAR'
+    priorityScheme: 'LINEAR',
   });
 
   const output = tm.run(input);
@@ -688,26 +710,23 @@ export async function optimizeTrades(
 
   // 7. Filter to user's chains if requested
   const userChains = options?.onlyUserChains
-    ? chains.filter(chain => chain.participants.includes(userId))
+    ? chains.filter((chain) => chain.participants.includes(userId))
     : chains;
 
   return {
     chains: userChains,
     allChains: chains,
     totalTrades: chains.reduce((sum, c) => sum + c.trades.length, 0),
-    totalUsers: new Set(chains.flatMap(c => c.participants)).size,
-    input,  // For debugging
-    output  // For debugging
+    totalUsers: new Set(chains.flatMap((c) => c.participants)).size,
+    input, // For debugging
+    output, // For debugging
   };
 }
 
-export async function acceptOptimization(
-  optimizationId: string,
-  userId: string
-): Promise<void> {
+export async function acceptOptimization(optimizationId: string, userId: string): Promise<void> {
   // 1. Fetch optimization result
   const result = await pb.collection('optimization_results').getOne(optimizationId, {
-    expand: 'participants'
+    expand: 'participants',
   });
 
   // 2. Check if user is participant
@@ -717,7 +736,7 @@ export async function acceptOptimization(
 
   // 3. Mark as accepted by user
   await pb.collection('optimization_results').update(optimizationId, {
-    'accepted_by+': userId
+    'accepted_by+': userId,
   });
 
   // 4. Check if ALL participants have accepted
@@ -741,7 +760,7 @@ async function createTradesFromOptimization(result: any): Promise<void> {
         seller: trade.sellerId,
         status: 'initiated',
         is_multi_party: true,
-        optimization_result: result.id
+        optimization_result: result.id,
       });
 
       // Send notifications
@@ -751,16 +770,16 @@ async function createTradesFromOptimization(result: any): Promise<void> {
         title: 'New trade from optimizer',
         message: `Trade chain found! Check your trades.`,
         link: `/trades`,
-        read: false
+        read: false,
       });
     }
   }
 
   // Mark listings as pending
-  const allListingIds = chains.flatMap(c => c.trades.map(t => t.listingId));
+  const allListingIds = chains.flatMap((c) => c.trades.map((t) => t.listingId));
   for (const listingId of allListingIds) {
     await pb.collection('listings').update(listingId, {
-      status: 'pending'
+      status: 'pending',
     });
   }
 }
@@ -899,7 +918,7 @@ export function parseResults(
       currentChain = {
         chainNumber: parseInt(line.split(' ')[2]),
         trades: [],
-        participants: []
+        participants: [],
       };
       continue;
     }
@@ -915,14 +934,14 @@ export function parseResults(
       // Skip cash for now (TODO: handle cash trades)
       if (itemId.startsWith('$')) continue;
 
-      const listing = listings.find(l => l.id === itemId);
+      const listing = listings.find((l) => l.id === itemId);
       if (!listing) continue;
 
       currentChain.trades.push({
         listingId: itemId,
         listing,
         buyerId: buyer,
-        sellerId: seller
+        sellerId: seller,
       });
 
       if (!currentChain.participants.includes(buyer)) {
@@ -960,16 +979,16 @@ export interface Trade {
 export interface TradeChain {
   chainNumber: number;
   trades: Trade[];
-  participants: string[];  // User IDs
+  participants: string[]; // User IDs
 }
 
 export interface OptimizationResult {
   chains: TradeChain[];
-  allChains: TradeChain[];  // Including non-user chains
+  allChains: TradeChain[]; // Including non-user chains
   totalTrades: number;
   totalUsers: number;
-  input: string;   // Debug
-  output: string;  // Debug
+  input: string; // Debug
+  output: string; // Debug
 }
 
 export interface UserTradesSummary {
@@ -986,12 +1005,7 @@ export interface UserTradesSummary {
 ```typescript
 export { optimizeTrades, acceptOptimization } from './runner';
 export { TradeMaximizer } from './algorithm/trademax';
-export type {
-  Trade,
-  TradeChain,
-  OptimizationResult,
-  UserTradesSummary
-} from './types';
+export type { Trade, TradeChain, OptimizationResult, UserTradesSummary } from './types';
 ```
 
 ---
@@ -1008,7 +1022,7 @@ export async function getUserPreferences(userId: string): Promise<TradePreferenc
   return pb.collection('trade_preferences').getFullList({
     filter: `user = "${userId}"`,
     expand: 'wanted_listing,offer_listings',
-    sort: 'priority'
+    sort: 'priority',
   });
 }
 
@@ -1024,7 +1038,7 @@ export async function createPreference(
     wanted_listing: wantedListingId,
     offer_listings: offerListingIds,
     offer_cash: offerCash,
-    priority
+    priority,
   });
 }
 
@@ -1039,14 +1053,11 @@ export async function deletePreference(preferenceId: string): Promise<void> {
   await pb.collection('trade_preferences').delete(preferenceId);
 }
 
-export async function reorderPreferences(
-  userId: string,
-  preferenceIds: string[]
-): Promise<void> {
+export async function reorderPreferences(userId: string, preferenceIds: string[]): Promise<void> {
   // Update priorities based on new order
   for (let i = 0; i < preferenceIds.length; i++) {
     await pb.collection('trade_preferences').update(preferenceIds[i], {
-      priority: i + 1
+      priority: i + 1,
     });
   }
 }
@@ -1094,7 +1105,7 @@ export function validatePreference(
 
   return {
     valid: errors.length === 0,
-    errors
+    errors,
   };
 }
 ```
@@ -1104,6 +1115,7 @@ export function validatePreference(
 ### 4.3 Trade Groups Module (`src/lib/trade-groups/`)
 
 Similar structure to `trade-preferences/`, with:
+
 - `queries.ts` - CRUD operations for groups
 - `validation.ts` - Group validation (min 2 listings, must be different, etc.)
 
@@ -1116,6 +1128,7 @@ Similar structure to `trade-preferences/`, with:
 **Goal:** Set up module structure and copy algorithm
 
 **Tasks:**
+
 1. ✅ Create module directories
 2. ✅ Copy TradeMaximizer files
 3. ✅ Add TypeScript types
@@ -1131,6 +1144,7 @@ Similar structure to `trade-preferences/`, with:
 **Goal:** Build preference/group management
 
 **Tasks:**
+
 1. ✅ Implement `trade_preferences` CRUD
 2. ✅ Implement `trade_groups` CRUD
 3. ✅ Write validation functions
@@ -1146,6 +1160,7 @@ Similar structure to `trade-preferences/`, with:
 **Goal:** Build input/output pipeline
 
 **Tasks:**
+
 1. ✅ Implement `input-builder.ts`
 2. ✅ Implement `result-parser.ts`
 3. ✅ Implement `runner.ts` (main orchestrator)
@@ -1161,6 +1176,7 @@ Similar structure to `trade-preferences/`, with:
 **Goal:** Build preference management UI
 
 **Tasks:**
+
 1. ✅ Create `PreferenceList.svelte`
 2. ✅ Create `PreferenceEditor.svelte`
 3. ✅ Create `OfferSelector.svelte`
@@ -1177,6 +1193,7 @@ Similar structure to `trade-preferences/`, with:
 **Goal:** Build optimization flow
 
 **Tasks:**
+
 1. ✅ Create `/optimize-trades` route
 2. ✅ Create `ResultsPreview.svelte`
 3. ✅ Create `TradeChainVisualization.svelte`
@@ -1192,6 +1209,7 @@ Similar structure to `trade-preferences/`, with:
 **Goal:** Add sent/received tracking
 
 **Tasks:**
+
 1. ✅ Extend `trades` collection schema
 2. ✅ Create `ConfirmationTracker.svelte`
 3. ✅ Add to trade detail page
@@ -1207,6 +1225,7 @@ Similar structure to `trade-preferences/`, with:
 **Goal:** Testing, docs, launch
 
 **Tasks:**
+
 1. ✅ Write end-to-end tests
 2. ✅ Performance testing with large datasets
 3. ✅ Write user documentation
@@ -1222,29 +1241,29 @@ Similar structure to `trade-preferences/`, with:
 
 ### Direct Copies (Minimal Changes)
 
-| Source (gameswap) | Destination (meeple) | Changes |
-|---|---|---|
-| `src/lib/olwlg/trademax.js` | `src/lib/trade-optimizer/algorithm/trademax.js` | None |
-| `src/lib/olwlg/javarandom.js` | `src/lib/trade-optimizer/algorithm/javarandom.js` | None |
-| `src/lib/utils.ts` (currency function) | `src/lib/utils/currency.ts` | Change locale to en-NZ, currency to NZD |
-| `src/routes/(event)/remaining.ts` | `src/lib/utils/countdown.ts` | Remove event dependency |
+| Source (gameswap)                      | Destination (meeple)                              | Changes                                 |
+| -------------------------------------- | ------------------------------------------------- | --------------------------------------- |
+| `src/lib/olwlg/trademax.js`            | `src/lib/trade-optimizer/algorithm/trademax.js`   | None                                    |
+| `src/lib/olwlg/javarandom.js`          | `src/lib/trade-optimizer/algorithm/javarandom.js` | None                                    |
+| `src/lib/utils.ts` (currency function) | `src/lib/utils/currency.ts`                       | Change locale to en-NZ, currency to NZD |
+| `src/routes/(event)/remaining.ts`      | `src/lib/utils/countdown.ts`                      | Remove event dependency                 |
 
 ### Heavy Adaptations
 
-| Source (gameswap) | Destination (meeple) | Changes |
-|---|---|---|
-| `src/lib/olwlg/_trademax.ts` | `src/lib/trade-optimizer/algorithm/trademax.ts` | Update types for Meeple models |
-| `src/routes/(event)/trades/trades.ts` | `src/lib/trade-optimizer/runner.ts` | Remove event scoping, use Meeple collections, add preview mode |
-| `src/components/WantOffers.svelte` | `src/lib/components/TradeOptimizer/OfferSelector.svelte` | Adapt to Meeple's UI style, use Tailwind classes |
-| `src/routes/(event)/trades/all/+page.svelte` | `src/lib/components/TradeOptimizer/ConfirmationTracker.svelte` | Extract confirmation UI into component |
+| Source (gameswap)                            | Destination (meeple)                                           | Changes                                                        |
+| -------------------------------------------- | -------------------------------------------------------------- | -------------------------------------------------------------- |
+| `src/lib/olwlg/_trademax.ts`                 | `src/lib/trade-optimizer/algorithm/trademax.ts`                | Update types for Meeple models                                 |
+| `src/routes/(event)/trades/trades.ts`        | `src/lib/trade-optimizer/runner.ts`                            | Remove event scoping, use Meeple collections, add preview mode |
+| `src/components/WantOffers.svelte`           | `src/lib/components/TradeOptimizer/OfferSelector.svelte`       | Adapt to Meeple's UI style, use Tailwind classes               |
+| `src/routes/(event)/trades/all/+page.svelte` | `src/lib/components/TradeOptimizer/ConfirmationTracker.svelte` | Extract confirmation UI into component                         |
 
 ### Inspiration Only (Rewrite)
 
-| Source (gameswap) | Destination (meeple) | Approach |
-|---|---|---|
+| Source (gameswap)              | Destination (meeple)                  | Approach                                                  |
+| ------------------------------ | ------------------------------------- | --------------------------------------------------------- |
 | `src/routes/(event)/my/wants/` | `src/routes/preferences/+page.svelte` | Reference UI patterns, rebuild for continuous marketplace |
-| `src/routes/(event)/browse/` | Update existing `src/routes/browse/` | Add "Add to preferences" button |
-| `src/routes/(event)/trades/` | Update existing `src/routes/trades/` | Add "Optimize" button, chain visualization |
+| `src/routes/(event)/browse/`   | Update existing `src/routes/browse/`  | Add "Add to preferences" button                           |
+| `src/routes/(event)/trades/`   | Update existing `src/routes/trades/`  | Add "Optimize" button, chain visualization                |
 
 ---
 
@@ -1263,7 +1282,7 @@ async function runOptimizer() {
   try {
     const result = await optimizeTrades(user.id, {
       onlyUserChains: true,
-      previewOnly: true
+      previewOnly: true,
     });
 
     // Show preview
@@ -1287,6 +1306,7 @@ async function acceptResult(optimizationId: string) {
 All operations use PocketBase client SDK. No custom endpoints needed.
 
 **Preferences:**
+
 ```typescript
 // Create
 pb.collection('trade_preferences').create({
@@ -1294,19 +1314,19 @@ pb.collection('trade_preferences').create({
   wanted_listing: listingId,
   offer_listings: [offerId1, offerId2],
   offer_cash: 50,
-  priority: 1
+  priority: 1,
 });
 
 // List user's preferences
 pb.collection('trade_preferences').getFullList({
   filter: `user = "${userId}"`,
   expand: 'wanted_listing,offer_listings',
-  sort: 'priority'
+  sort: 'priority',
 });
 
 // Update
 pb.collection('trade_preferences').update(prefId, {
-  offer_listings: [offerId3]
+  offer_listings: [offerId3],
 });
 
 // Delete
@@ -1314,6 +1334,7 @@ pb.collection('trade_preferences').delete(prefId);
 ```
 
 **Groups:**
+
 ```typescript
 // Create
 pb.collection('trade_groups').create({
@@ -1321,13 +1342,13 @@ pb.collection('trade_groups').create({
   name: 'Worker placement games',
   listings: [listingId1, listingId2, listingId3],
   offer_listings: [offerId1],
-  offer_cash: 0
+  offer_cash: 0,
 });
 
 // List user's groups
 pb.collection('trade_groups').getFullList({
   filter: `user = "${userId}"`,
-  expand: 'listings,offer_listings'
+  expand: 'listings,offer_listings',
 });
 ```
 
@@ -1363,7 +1384,10 @@ pb.collection('trade_groups').getFullList({
     <h1 class="text-3xl font-bold">Trade Preferences</h1>
     <button
       class="btn-primary"
-      onclick={() => { showEditor = true; editingPreference = null; }}
+      onclick={() => {
+        showEditor = true;
+        editingPreference = null;
+      }}
     >
       Add Preference
     </button>
@@ -1372,33 +1396,33 @@ pb.collection('trade_groups').getFullList({
   <div class="bg-surface-card rounded-lg p-6 mb-6">
     <h2 class="text-xl font-semibold mb-2">How It Works</h2>
     <p class="text-secondary">
-      Add games you want and specify what you're willing to trade for them.
-      When you run the trade optimizer, it will find multi-party trade chains
-      that give you what you want while helping others too.
+      Add games you want and specify what you're willing to trade for them. When you run the trade
+      optimizer, it will find multi-party trade chains that give you what you want while helping
+      others too.
     </p>
   </div>
 
   {#if preferences.length === 0}
     <div class="text-center py-12">
       <p class="text-secondary mb-4">You haven't added any preferences yet.</p>
-      <button class="btn-primary" onclick={() => showEditor = true}>
+      <button class="btn-primary" onclick={() => (showEditor = true)}>
         Add Your First Preference
       </button>
     </div>
   {:else}
     <PreferenceList
       {preferences}
-      onedit={(pref) => { showEditor = true; editingPreference = pref; }}
+      onedit={(pref) => {
+        showEditor = true;
+        editingPreference = pref;
+      }}
       ondelete={async (prefId) => {
         await deletePreference(prefId);
-        preferences = preferences.filter(p => p.id !== prefId);
+        preferences = preferences.filter((p) => p.id !== prefId);
       }}
     />
 
-    <button
-      class="btn-accent btn-lg mt-8 w-full"
-      onclick={() => goto('/optimize-trades')}
-    >
+    <button class="btn-accent btn-lg mt-8 w-full" onclick={() => goto('/optimize-trades')}>
       Optimize My Trades
     </button>
   {/if}
@@ -1406,7 +1430,10 @@ pb.collection('trade_groups').getFullList({
   {#if showEditor}
     <PreferenceEditor
       preference={editingPreference}
-      onclose={() => { showEditor = false; editingPreference = null; }}
+      onclose={() => {
+        showEditor = false;
+        editingPreference = null;
+      }}
       onsave={async (newPref) => {
         preferences = await getUserPreferences($currentUser.id);
         showEditor = false;
@@ -1427,7 +1454,7 @@ pb.collection('trade_groups').getFullList({
   let {
     preferences = $bindable(),
     onedit,
-    ondelete
+    ondelete,
   }: {
     preferences: any[];
     onedit: (pref: any) => void;
@@ -1470,18 +1497,8 @@ pb.collection('trade_groups').getFullList({
 
       <!-- Actions -->
       <div class="flex gap-2">
-        <button
-          class="btn-sm btn-secondary"
-          onclick={() => onedit(pref)}
-        >
-          Edit
-        </button>
-        <button
-          class="btn-sm btn-error"
-          onclick={() => ondelete(pref.id)}
-        >
-          Delete
-        </button>
+        <button class="btn-sm btn-secondary" onclick={() => onedit(pref)}> Edit </button>
+        <button class="btn-sm btn-error" onclick={() => ondelete(pref.id)}> Delete </button>
       </div>
     </div>
   {/each}
@@ -1501,7 +1518,7 @@ pb.collection('trade_groups').getFullList({
   let {
     selectedOffers = $bindable([]),
     offerCash = $bindable(0),
-    excludeListingId
+    excludeListingId,
   }: {
     selectedOffers: string[];
     offerCash: number;
@@ -1514,19 +1531,19 @@ pb.collection('trade_groups').getFullList({
     if ($currentUser) {
       userListings = await pb.collection('listings').getFullList({
         filter: `owner = "${$currentUser.id}" && status = "active"`,
-        sort: '-created'
+        sort: '-created',
       });
 
       // Exclude the wanted listing
       if (excludeListingId) {
-        userListings = userListings.filter(l => l.id !== excludeListingId);
+        userListings = userListings.filter((l) => l.id !== excludeListingId);
       }
     }
   });
 
   function toggleListing(listingId: string) {
     if (selectedOffers.includes(listingId)) {
-      selectedOffers = selectedOffers.filter(id => id !== listingId);
+      selectedOffers = selectedOffers.filter((id) => id !== listingId);
     } else {
       selectedOffers = [...selectedOffers, listingId];
     }
@@ -1537,9 +1554,7 @@ pb.collection('trade_groups').getFullList({
   <div>
     <h3 class="font-semibold mb-2">Select games to offer:</h3>
     {#if userListings.length === 0}
-      <p class="text-secondary text-sm">
-        You don't have any active listings to offer.
-      </p>
+      <p class="text-secondary text-sm">You don't have any active listings to offer.</p>
     {:else}
       <div class="grid grid-cols-1 gap-2 max-h-64 overflow-y-auto">
         {#each userListings as listing}
@@ -1578,9 +1593,7 @@ pb.collection('trade_groups').getFullList({
   </div>
 
   {#if selectedOffers.length === 0 && offerCash === 0}
-    <p class="text-warning text-sm">
-      ⚠️ Please select at least one game or enter a cash amount
-    </p>
+    <p class="text-warning text-sm">⚠️ Please select at least one game or enter a cash amount</p>
   {/if}
 </div>
 ```
@@ -1612,7 +1625,7 @@ pb.collection('trade_groups').getFullList({
     try {
       result = await optimizeTrades($currentUser.id, {
         onlyUserChains: true,
-        previewOnly: true
+        previewOnly: true,
       });
 
       if (result.chains.length === 0) {
@@ -1638,15 +1651,11 @@ pb.collection('trade_groups').getFullList({
   <div class="bg-surface-card rounded-lg p-6 mb-6">
     <h2 class="text-xl font-semibold mb-2">How It Works</h2>
     <p class="text-secondary mb-4">
-      The trade optimizer finds multi-party trade chains where everyone gets
-      something they want. For example: You trade Game A to Alice, Alice trades
-      Game B to Bob, and Bob trades Game C to you. Everyone wins!
+      The trade optimizer finds multi-party trade chains where everyone gets something they want.
+      For example: You trade Game A to Alice, Alice trades Game B to Bob, and Bob trades Game C to
+      you. Everyone wins!
     </p>
-    <button
-      class="btn-primary"
-      onclick={runOptimizer}
-      disabled={isRunning}
-    >
+    <button class="btn-primary" onclick={runOptimizer} disabled={isRunning}>
       {isRunning ? 'Finding trades...' : 'Run Optimizer'}
     </button>
   </div>
@@ -1684,7 +1693,7 @@ pb.collection('trade_groups').getFullList({
 
   let {
     result,
-    userId
+    userId,
   }: {
     result: OptimizationResult;
     userId: string;
@@ -1764,12 +1773,7 @@ pb.collection('trade_groups').getFullList({
       <span>Total users: {result.totalUsers}</span>
     </div>
 
-    <button
-      class="btn-accent w-full"
-      onclick={acceptTrades}
-    >
-      Accept These Trades
-    </button>
+    <button class="btn-accent w-full" onclick={acceptTrades}> Accept These Trades </button>
     <p class="text-xs text-secondary text-center mt-2">
       All participants must accept before trades are created
     </p>
@@ -1792,6 +1796,7 @@ Administrators need visibility and control over the trade optimizer system to mo
 #### Optimization Metrics Dashboard (`/admin/optimizer`)
 
 **Key Metrics:**
+
 ```svelte
 <script lang="ts">
   import { onMount } from 'svelte';
@@ -1806,7 +1811,7 @@ Administrators need visibility and control over the trade optimizer system to mo
     averageRunTime: 0,
     lastRunDate: null,
     activePreferences: 0,
-    activeGroups: 0
+    activeGroups: 0,
   });
 
   onMount(async () => {
@@ -1814,22 +1819,30 @@ Administrators need visibility and control over the trade optimizer system to mo
     const results = await pb.collection('optimization_results').getFullList();
 
     metrics.totalOptimizations = results.length;
-    metrics.successfulChains = results.filter(r => r.accepted_by?.length === r.participants.length).length;
+    metrics.successfulChains = results.filter(
+      (r) => r.accepted_by?.length === r.participants.length
+    ).length;
 
     // Calculate averages
-    const chainLengths = results.map(r => r.chains.length);
+    const chainLengths = results.map((r) => r.chains.length);
     metrics.averageChainLength = chainLengths.reduce((a, b) => a + b, 0) / chainLengths.length;
 
     metrics.acceptanceRate = (metrics.successfulChains / metrics.totalOptimizations) * 100;
 
     // Fetch active preferences/groups counts
-    metrics.activePreferences = await pb.collection('trade_preferences').getList(1, 1, {
-      filter: 'created > "2025-01-01"'
-    }).then(r => r.totalItems);
+    metrics.activePreferences = await pb
+      .collection('trade_preferences')
+      .getList(1, 1, {
+        filter: 'created > "2025-01-01"',
+      })
+      .then((r) => r.totalItems);
 
-    metrics.activeGroups = await pb.collection('trade_groups').getList(1, 1, {
-      filter: 'created > "2025-01-01"'
-    }).then(r => r.totalItems);
+    metrics.activeGroups = await pb
+      .collection('trade_groups')
+      .getList(1, 1, {
+        filter: 'created > "2025-01-01"',
+      })
+      .then((r) => r.totalItems);
   });
 </script>
 
@@ -1868,6 +1881,7 @@ Administrators need visibility and control over the trade optimizer system to mo
 ```
 
 **Time-Series Charts:**
+
 - Optimizations per day (last 30 days)
 - Success rate trend
 - Average run time trend
@@ -1880,6 +1894,7 @@ Administrators need visibility and control over the trade optimizer system to mo
 #### View All Optimizations (`/admin/optimizer/history`)
 
 **Features:**
+
 - Paginated list of all optimization runs
 - Filter by: date, user, success/failure, chain count
 - Sort by: date, participants, chain length
@@ -1893,6 +1908,7 @@ Administrators need visibility and control over the trade optimizer system to mo
 | opt_121 | 2025-10-29 18:45 | charlie | 0 | 0 | Failed | - | View Error |
 
 **Detail View:**
+
 ```svelte
 <!-- Optimization Detail Modal -->
 <div class="modal">
@@ -1900,10 +1916,12 @@ Administrators need visibility and control over the trade optimizer system to mo
 
   <div class="grid grid-cols-2 gap-4 mb-6">
     <div>
-      <strong>Initiated By:</strong> {result.expand?.user?.display_name}
+      <strong>Initiated By:</strong>
+      {result.expand?.user?.display_name}
     </div>
     <div>
-      <strong>Date:</strong> {new Date(result.created).toLocaleString()}
+      <strong>Date:</strong>
+      {new Date(result.created).toLocaleString()}
     </div>
     <div>
       <strong>Status:</strong>
@@ -1912,7 +1930,8 @@ Administrators need visibility and control over the trade optimizer system to mo
       </span>
     </div>
     <div>
-      <strong>Expires:</strong> {new Date(result.expires).toLocaleString()}
+      <strong>Expires:</strong>
+      {new Date(result.expires).toLocaleString()}
     </div>
   </div>
 
@@ -1962,7 +1981,7 @@ Administrators need visibility and control over the trade optimizer system to mo
 async function forceAcceptOptimization(optimizationId: string, userId: string) {
   // Admin override to mark user as accepted
   await pb.collection('optimization_results').update(optimizationId, {
-    'accepted_by+': userId
+    'accepted_by+': userId,
   });
 
   // Log admin action
@@ -1971,7 +1990,7 @@ async function forceAcceptOptimization(optimizationId: string, userId: string) {
     action: 'force_accept_optimization',
     target_id: optimizationId,
     details: `Forced acceptance for user ${userId}`,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 }
 ```
@@ -1987,7 +2006,7 @@ async function cancelOptimization(optimizationId: string, reason: string) {
   // Mark as cancelled
   await pb.collection('optimization_results').update(optimizationId, {
     status: 'cancelled',
-    cancel_reason: reason
+    cancel_reason: reason,
   });
 
   // Notify all participants
@@ -1998,7 +2017,7 @@ async function cancelOptimization(optimizationId: string, reason: string) {
       title: 'Trade optimization cancelled',
       message: `An admin cancelled the optimization: ${reason}`,
       link: `/optimize-trades`,
-      read: false
+      read: false,
     });
   }
 
@@ -2008,7 +2027,7 @@ async function cancelOptimization(optimizationId: string, reason: string) {
     action: 'cancel_optimization',
     target_id: optimizationId,
     details: reason,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 }
 ```
@@ -2027,17 +2046,17 @@ async function rerunOptimization(optimizationId: string, options?: any) {
   // Run optimizer again with new options
   const newResult = await optimizeTrades(userId, {
     ...options,
-    iterations: options?.iterations ?? 20  // More iterations for better results
+    iterations: options?.iterations ?? 20, // More iterations for better results
   });
 
   // Save new result
   const newRecord = await pb.collection('optimization_results').create({
     user: userId,
     chains: newResult.chains,
-    participants: newResult.chains.flatMap(c => c.participants),
+    participants: newResult.chains.flatMap((c) => c.participants),
     expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days
     is_rerun: true,
-    original_optimization: optimizationId
+    original_optimization: optimizationId,
   });
 
   // Log admin action
@@ -2046,7 +2065,7 @@ async function rerunOptimization(optimizationId: string, options?: any) {
     action: 'rerun_optimization',
     target_id: optimizationId,
     details: `Rerun with iterations: ${options?.iterations}`,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 
   return newRecord;
@@ -2060,6 +2079,7 @@ async function rerunOptimization(optimizationId: string, options?: any) {
 #### View User's Preferences (`/admin/users/[id]/preferences`)
 
 **Admin View:**
+
 - See all user's trade preferences
 - See all user's trade groups
 - Identify problematic preferences (e.g., offering deleted listings)
@@ -2077,12 +2097,12 @@ async function rerunOptimization(optimizationId: string, options?: any) {
   onMount(async () => {
     preferences = await pb.collection('trade_preferences').getFullList({
       filter: `user = "${userId}"`,
-      expand: 'wanted_listing,offer_listings'
+      expand: 'wanted_listing,offer_listings',
     });
 
     groups = await pb.collection('trade_groups').getFullList({
       filter: `user = "${userId}"`,
-      expand: 'listings,offer_listings'
+      expand: 'listings,offer_listings',
     });
 
     // Check for issues
@@ -2098,19 +2118,19 @@ async function rerunOptimization(optimizationId: string, options?: any) {
         issues.push({
           type: 'missing_wanted',
           preferenceId: pref.id,
-          message: 'Wanted listing no longer exists'
+          message: 'Wanted listing no longer exists',
         });
       }
 
       // Check if any offer listing is missing
       if (pref.offer_listings) {
         for (const offerId of pref.offer_listings) {
-          const exists = pref.expand?.offer_listings?.find(l => l.id === offerId);
+          const exists = pref.expand?.offer_listings?.find((l) => l.id === offerId);
           if (!exists) {
             issues.push({
               type: 'missing_offer',
               preferenceId: pref.id,
-              message: `Offer listing ${offerId} no longer exists`
+              message: `Offer listing ${offerId} no longer exists`,
             });
           }
         }
@@ -2121,7 +2141,7 @@ async function rerunOptimization(optimizationId: string, options?: any) {
         issues.push({
           type: 'no_offers',
           preferenceId: pref.id,
-          message: 'No offers specified'
+          message: 'No offers specified',
         });
       }
     }
@@ -2133,7 +2153,7 @@ async function rerunOptimization(optimizationId: string, options?: any) {
     if (issue.type === 'missing_wanted' || issue.type === 'missing_offer') {
       // Delete the invalid preference
       await pb.collection('trade_preferences').delete(issue.preferenceId);
-      preferences = preferences.filter(p => p.id !== issue.preferenceId);
+      preferences = preferences.filter((p) => p.id !== issue.preferenceId);
     }
   }
 </script>
@@ -2147,9 +2167,7 @@ async function rerunOptimization(optimizationId: string, options?: any) {
         {#each issues as issue}
           <li class="flex items-center justify-between">
             <span>{issue.message}</span>
-            <button class="btn-sm btn-primary" onclick={() => fixIssue(issue)}>
-              Fix
-            </button>
+            <button class="btn-sm btn-primary" onclick={() => fixIssue(issue)}> Fix </button>
           </li>
         {/each}
       </ul>
@@ -2180,18 +2198,18 @@ async function rerunOptimization(optimizationId: string, options?: any) {
 
 ```typescript
 type OptimizerConfig = {
-  enabled: boolean;              // Global on/off switch
-  maxIterations: number;         // Default: 10, max: 50
+  enabled: boolean; // Global on/off switch
+  maxIterations: number; // Default: 10, max: 50
   metric: 'CHAIN-SIZES-SOS' | 'USERS-TRADING';
   priorityScheme: 'LINEAR' | 'TRIANGLE' | 'SQUARE';
-  allowDummies: boolean;         // Enable groups feature
+  allowDummies: boolean; // Enable groups feature
   caseSensitive: boolean;
-  maxChainLength: number;        // Limit chain size (e.g., max 6 people)
-  minChainLength: number;        // Filter out tiny chains (e.g., min 3)
-  expirationDays: number;        // Days until optimization expires (default: 7)
+  maxChainLength: number; // Limit chain size (e.g., max 6 people)
+  minChainLength: number; // Filter out tiny chains (e.g., min 3)
+  expirationDays: number; // Days until optimization expires (default: 7)
   maxConcurrentOptimizations: number; // Rate limiting
   requireAllAcceptance: boolean; // All must accept vs. majority
-  autoRunSchedule: string;       // Cron expression (e.g., "0 0 * * 1" = weekly)
+  autoRunSchedule: string; // Cron expression (e.g., "0 0 * * 1" = weekly)
 };
 
 // Stored in PocketBase settings collection
@@ -2199,6 +2217,7 @@ const config = await pb.collection('settings').getFirstListItem('key = "optimize
 ```
 
 **UI:**
+
 ```svelte
 <form onsubmit={saveConfig}>
   <div class="form-control">
@@ -2210,13 +2229,7 @@ const config = await pb.collection('settings').getFirstListItem('key = "optimize
 
   <div class="form-control">
     <label class="label">Max Iterations</label>
-    <input
-      type="number"
-      class="input"
-      bind:value={config.maxIterations}
-      min="1"
-      max="50"
-    />
+    <input type="number" class="input" bind:value={config.maxIterations} min="1" max="50" />
     <span class="label-text-alt">Higher = better results, slower runtime</span>
   </div>
 
@@ -2247,25 +2260,13 @@ const config = await pb.collection('settings').getFirstListItem('key = "optimize
 
   <div class="form-control">
     <label class="label">Max Chain Length</label>
-    <input
-      type="number"
-      class="input"
-      bind:value={config.maxChainLength}
-      min="2"
-      max="20"
-    />
+    <input type="number" class="input" bind:value={config.maxChainLength} min="2" max="20" />
     <span class="label-text-alt">Filter out chains longer than this</span>
   </div>
 
   <div class="form-control">
     <label class="label">Expiration (days)</label>
-    <input
-      type="number"
-      class="input"
-      bind:value={config.expirationDays}
-      min="1"
-      max="30"
-    />
+    <input type="number" class="input" bind:value={config.expirationDays} min="1" max="30" />
   </div>
 
   <div class="form-control">
@@ -2287,55 +2288,60 @@ const config = await pb.collection('settings').getFirstListItem('key = "optimize
 #### Slow Query Detection
 
 **Monitor:**
+
 - Average optimization run time
 - P95, P99 latency
 - Timeouts
 - Algorithm iterations vs. results quality
 
 **Alerts:**
+
 - Run time > 10 seconds
 - Timeout rate > 5%
 - Zero results > 50% (algorithm not finding matches)
 
 **Dashboard Visualization:**
-```svelte
-<!-- Performance Chart -->
-<div class="chart-container">
-  <h3>Optimization Run Time (Last 100)</h3>
-  <canvas id="perfChart"></canvas>
-</div>
 
+```svelte
 <script>
   import Chart from 'chart.js/auto';
 
   onMount(() => {
     const ctx = document.getElementById('perfChart');
-    const data = perfMetrics.map(m => ({
+    const data = perfMetrics.map((m) => ({
       x: new Date(m.timestamp),
-      y: m.runtime_ms
+      y: m.runtime_ms,
     }));
 
     new Chart(ctx, {
       type: 'line',
       data: {
-        datasets: [{
-          label: 'Run Time (ms)',
-          data: data,
-          borderColor: 'rgb(75, 192, 192)',
-          tension: 0.1
-        }]
+        datasets: [
+          {
+            label: 'Run Time (ms)',
+            data: data,
+            borderColor: 'rgb(75, 192, 192)',
+            tension: 0.1,
+          },
+        ],
       },
       options: {
         scales: {
           y: {
             beginAtZero: true,
-            title: { display: true, text: 'Milliseconds' }
-          }
-        }
-      }
+            title: { display: true, text: 'Milliseconds' },
+          },
+        },
+      },
     });
   });
 </script>
+
+<!-- Performance Chart -->
+<div class="chart-container">
+  <h3>Optimization Run Time (Last 100)</h3>
+  <canvas id="perfChart"></canvas>
+</div>
 ```
 
 ---
@@ -2347,21 +2353,23 @@ const config = await pb.collection('settings').getFirstListItem('key = "optimize
 **Scenario:** User A accepted but now regrets, claims algorithm was wrong
 
 **Admin Actions:**
+
 1. **Review Chain:** View optimization detail, verify algorithm logic
 2. **Check Preferences:** Ensure user's preferences were valid at time of run
 3. **Cancel if Justified:** If algorithm error or user has valid claim
 4. **Educate if Not:** Explain how algorithm works, what they agreed to
 
 **Dispute Log:**
+
 ```typescript
 type DisputeLog = {
   id: string;
-  optimization: string;          // relation(optimization_results)
-  user: string;                  // relation(users) - who disputed
-  reason: string;                // User's claim
-  admin: string;                 // relation(users) - admin handling
+  optimization: string; // relation(optimization_results)
+  user: string; // relation(users) - who disputed
+  reason: string; // User's claim
+  admin: string; // relation(users) - admin handling
   resolution: 'cancelled' | 'upheld' | 'modified';
-  notes: string;                 // Admin notes
+  notes: string; // Admin notes
   created: date;
   resolved: date;
 };
@@ -2374,24 +2382,26 @@ type DisputeLog = {
 #### Automated Health Monitoring
 
 **Checks (Run Daily):**
+
 1. **Orphaned Preferences:** Preferences pointing to deleted listings
 2. **Expired Optimizations:** Clean up old results (> 30 days)
 3. **Stuck Acceptances:** Optimizations pending > 7 days
 4. **Dead Groups:** Groups with < 2 valid listings
 
 **Cleanup Script:**
+
 ```typescript
 async function runHealthChecks() {
   const report = {
     orphanedPreferences: 0,
     expiredOptimizations: 0,
     stuckAcceptances: 0,
-    deadGroups: 0
+    deadGroups: 0,
   };
 
   // 1. Find and delete orphaned preferences
   const allPrefs = await pb.collection('trade_preferences').getFullList({
-    expand: 'wanted_listing,offer_listings'
+    expand: 'wanted_listing,offer_listings',
   });
 
   for (const pref of allPrefs) {
@@ -2404,7 +2414,7 @@ async function runHealthChecks() {
   // 2. Delete expired optimizations
   const cutoffDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
   const expired = await pb.collection('optimization_results').getFullList({
-    filter: `created < "${cutoffDate.toISOString()}"`
+    filter: `created < "${cutoffDate.toISOString()}"`,
   });
 
   for (const opt of expired) {
@@ -2415,7 +2425,7 @@ async function runHealthChecks() {
   // 3. Cancel stuck acceptances
   const stuckDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
   const stuck = await pb.collection('optimization_results').getFullList({
-    filter: `created < "${stuckDate.toISOString()}" && status = "pending"`
+    filter: `created < "${stuckDate.toISOString()}" && status = "pending"`,
   });
 
   for (const opt of stuck) {
@@ -2425,11 +2435,11 @@ async function runHealthChecks() {
 
   // 4. Clean up dead groups
   const groups = await pb.collection('trade_groups').getFullList({
-    expand: 'listings'
+    expand: 'listings',
   });
 
   for (const group of groups) {
-    const validListings = group.expand?.listings?.filter(l => l.status === 'active') ?? [];
+    const validListings = group.expand?.listings?.filter((l) => l.status === 'active') ?? [];
     if (validListings.length < 2) {
       await pb.collection('trade_groups').delete(group.id);
       report.deadGroups++;
@@ -2441,7 +2451,7 @@ async function runHealthChecks() {
     admin: 'system',
     action: 'health_check',
     details: JSON.stringify(report),
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 
   return report;
@@ -2456,12 +2466,12 @@ async function runHealthChecks() {
 
 ```typescript
 type AdminPermissions = {
-  canViewMetrics: boolean;       // View analytics dashboard
-  canViewHistory: boolean;       // View optimization history
+  canViewMetrics: boolean; // View analytics dashboard
+  canViewHistory: boolean; // View optimization history
   canCancelOptimizations: boolean;
   canForceAccept: boolean;
   canRerunOptimizations: boolean;
-  canEditConfig: boolean;        // Change algorithm parameters
+  canEditConfig: boolean; // Change algorithm parameters
   canViewUserPreferences: boolean;
   canEditUserPreferences: boolean;
   canRunHealthChecks: boolean;
@@ -2472,24 +2482,25 @@ const ADMIN_ROLES = {
   viewer: {
     canViewMetrics: true,
     canViewHistory: true,
-    canViewUserPreferences: true
+    canViewUserPreferences: true,
   },
   moderator: {
     ...ADMIN_ROLES.viewer,
     canCancelOptimizations: true,
     canForceAccept: true,
-    canRerunOptimizations: true
+    canRerunOptimizations: true,
   },
   admin: {
     ...ADMIN_ROLES.moderator,
     canEditConfig: true,
     canEditUserPreferences: true,
-    canRunHealthChecks: true
-  }
+    canRunHealthChecks: true,
+  },
 };
 ```
 
 **Check Permissions:**
+
 ```typescript
 function requirePermission(permission: keyof AdminPermissions) {
   const user = get(currentUser);
@@ -2514,6 +2525,7 @@ async function editConfig() {
 **New Collections:**
 
 #### `admin_logs`
+
 ```typescript
 {
   "name": "admin_logs",
@@ -2560,6 +2572,7 @@ async function editConfig() {
 ```
 
 #### `settings` (if doesn't exist)
+
 ```typescript
 {
   "name": "settings",
@@ -2595,6 +2608,7 @@ async function editConfig() {
 **Extend Existing Collections:**
 
 Add to `users`:
+
 ```typescript
 {
   "name": "admin_role",
@@ -2607,6 +2621,7 @@ Add to `users`:
 ```
 
 Add to `optimization_results`:
+
 ```typescript
 {
   "name": "status",
@@ -2644,6 +2659,7 @@ Add to `optimization_results`:
 ### 9.12 Admin Best Practices
 
 **When to Intervene:**
+
 1. ✅ User reports technical issue preventing acceptance
 2. ✅ Optimization stuck for > 7 days
 3. ✅ Algorithm timeout/error needs investigation
@@ -2652,11 +2668,13 @@ Add to `optimization_results`:
 6. ❌ User doesn't like the match (algorithm worked as intended)
 
 **Logging Everything:**
+
 - Every admin action must be logged
 - Include reason/justification
 - Preserve audit trail for disputes
 
 **Communication:**
+
 - Always notify affected users when intervening
 - Explain what happened and why
 - Provide link to help docs
@@ -2668,6 +2686,7 @@ Add to `optimization_results`:
 ### 10.1 Unit Tests
 
 **Algorithm Tests** (`src/lib/trade-optimizer/algorithm/trademax.test.ts`):
+
 ```typescript
 import { describe, it, expect } from 'vitest';
 import { TradeMaximizer } from './trademax';
@@ -2703,6 +2722,7 @@ game2 Game Two
 ```
 
 **Input Builder Tests** (`src/lib/trade-optimizer/input-builder.test.ts`):
+
 ```typescript
 describe('buildInput', () => {
   it('generates correct format for simple preferences', () => {
@@ -2724,6 +2744,7 @@ describe('buildInput', () => {
 ### 10.2 Integration Tests
 
 **Trade Flow Test** (`src/lib/trade-optimizer/runner.test.ts`):
+
 ```typescript
 describe('optimizeTrades', () => {
   it('returns empty chains when no preferences exist', async () => {
@@ -2744,6 +2765,7 @@ describe('optimizeTrades', () => {
 ### 10.3 E2E Tests
 
 **Full Optimizer Flow** (`tests/e2e/trade-optimizer.spec.ts`):
+
 ```typescript
 import { test, expect } from '@playwright/test';
 
@@ -2776,18 +2798,21 @@ test('complete optimization flow', async ({ page, context }) => {
 **Target:** 20-30 active users
 
 **Goals:**
+
 - Test algorithm with real data
 - Gather UX feedback
 - Identify edge cases
 - Monitor performance
 
 **Beta Features:**
+
 - Trade preferences (no groups yet)
 - Basic optimizer (manual run only)
 - Simple results preview
 - Manual acceptance (no multi-party coordination)
 
 **Success Metrics:**
+
 - 10+ optimization runs
 - 5+ accepted trade chains
 - No critical bugs
@@ -2798,17 +2823,20 @@ test('complete optimization flow', async ({ page, context }) => {
 ### 11.2 Launch Phase (MVP+ Release)
 
 **Marketing:**
+
 - Blog post: "Introducing Trade Optimizer"
 - Email to all users
 - Social media announcement
 - Demo video
 
 **Documentation:**
+
 - Help page with examples
 - FAQ section
 - Video tutorial
 
 **Monitoring:**
+
 - Error tracking (Sentry)
 - Performance metrics
 - User engagement (# of preferences, optimization runs, acceptances)
@@ -2818,18 +2846,21 @@ test('complete optimization flow', async ({ page, context }) => {
 ### 11.3 Post-Launch Improvements
 
 **Month 1:**
+
 - Add trade groups ("any one of")
 - Improve visualization (graph view)
 - Add filtering/sorting to results
 - Performance optimizations
 
 **Month 2:**
+
 - Auto-run optimizer weekly (email digest)
 - "Smart suggestions" for preferences
 - Trade chain history
 - Advanced metrics (preference efficiency)
 
 **Month 3:**
+
 - Mobile app support
 - Push notifications for matches
 - Reputation integration (prefer trusted users)
@@ -2871,6 +2902,7 @@ game3 Pandemic
 ```
 
 **Output:**
+
 ```
 TRADE CHAINS:
 *** CHAIN 1
@@ -2940,13 +2972,13 @@ charlie receives game1 from alice
 
 ### Error States
 
-| Error | User Message | Recovery |
-|---|---|---|
-| No preferences | "Add trade preferences first" | Link to preferences page |
-| Algorithm timeout | "Optimization taking too long. Try again." | Reduce iterations or shrink graph |
-| Network error | "Connection lost. Check your internet." | Retry button |
-| Invalid data | "Some preferences are invalid. Please review." | Highlight invalid prefs |
-| Acceptance timeout | "Not all users accepted in time. Trades cancelled." | Rerun optimizer |
+| Error              | User Message                                        | Recovery                          |
+| ------------------ | --------------------------------------------------- | --------------------------------- |
+| No preferences     | "Add trade preferences first"                       | Link to preferences page          |
+| Algorithm timeout  | "Optimization taking too long. Try again."          | Reduce iterations or shrink graph |
+| Network error      | "Connection lost. Check your internet."             | Retry button                      |
+| Invalid data       | "Some preferences are invalid. Please review."      | Highlight invalid prefs           |
+| Acceptance timeout | "Not all users accepted in time. Trades cancelled." | Rerun optimizer                   |
 
 ---
 
@@ -2955,6 +2987,7 @@ charlie receives game1 from alice
 This spec provides a comprehensive plan for integrating GameSwap's proven multi-party trade matching features into Meeple Cart. The TradeMaximizer algorithm is production-ready and can power an exciting "Trade Optimizer" feature that sets Meeple apart from simple marketplace platforms.
 
 **Next Steps:**
+
 1. Review and approve this spec
 2. Decide on priority (post-MVP or include in MVP Week 3?)
 3. Begin Phase 1: Copy algorithm and set up module structure
@@ -2962,6 +2995,7 @@ This spec provides a comprehensive plan for integrating GameSwap's proven multi-
 5. Implement incrementally following the 7-phase plan
 
 **Questions? Decisions Needed:**
+
 - Should we launch optimizer as beta-only feature first?
 - Do we need trade groups in v1 or just simple preferences?
 - Should we support cash trades from day 1?

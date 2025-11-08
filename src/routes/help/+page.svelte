@@ -18,9 +18,7 @@
 
       <!-- Header -->
       <div class="space-y-4">
-        <h1 class="text-4xl font-semibold tracking-tight text-primary sm:text-5xl">
-          Help & FAQ
-        </h1>
+        <h1 class="text-4xl font-semibold tracking-tight text-primary sm:text-5xl">Help & FAQ</h1>
         <p class="text-lg text-secondary">
           Get answers to common questions about using Meeple Cart
         </p>
@@ -28,11 +26,12 @@
 
       <!-- Coming Soon -->
       <div class="rounded-xl border border-subtle bg-surface-card p-12 text-center">
-        <p class="text-lg text-secondary">
-          Help & FAQ content coming soon
-        </p>
+        <p class="text-lg text-secondary">Help & FAQ content coming soon</p>
         <p class="mt-4 text-sm text-muted">
-          In the meantime, check out our <a href="/about" class="text-accent hover:underline">About page</a> or <a href="/guidelines" class="text-accent hover:underline">Community Guidelines</a>
+          In the meantime, check out our <a href="/about" class="text-accent hover:underline"
+            >About page</a
+          >
+          or <a href="/guidelines" class="text-accent hover:underline">Community Guidelines</a>
         </p>
       </div>
     </div>

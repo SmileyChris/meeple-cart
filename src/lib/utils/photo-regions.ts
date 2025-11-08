@@ -212,6 +212,8 @@ export function validateRegionCoordinates(region: PhotoRegion): boolean {
     );
   } else {
     const poly = region.coordinates as PolygonCoordinates;
-    return poly.points.every((point) => point.x >= 0 && point.x <= 100 && point.y >= 0 && point.y <= 100);
+    return poly.points.every(
+      (point) => point.x >= 0 && point.x <= 100 && point.y >= 0 && point.y <= 100
+    );
   }
 }

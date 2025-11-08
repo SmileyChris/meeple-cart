@@ -86,9 +86,7 @@ describe('cascade create load', () => {
       },
     ]);
 
-    cascadesCollection.getFullList.mockResolvedValue([
-      { current_game: 'game-2' },
-    ]);
+    cascadesCollection.getFullList.mockResolvedValue([{ current_game: 'game-2' }]);
 
     const result = await load({} as any);
 

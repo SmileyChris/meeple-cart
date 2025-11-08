@@ -1,6 +1,11 @@
 <script lang="ts">
   import { pb, currentUser } from '$lib/pocketbase';
-  import type { ReactionEmoji, ReactionCounts, ReactionRecord, UserRecord } from '$lib/types/pocketbase';
+  import type {
+    ReactionEmoji,
+    ReactionCounts,
+    ReactionRecord,
+    UserRecord,
+  } from '$lib/types/pocketbase';
   import { get } from 'svelte/store';
 
   let {
@@ -110,9 +115,7 @@
   }
 
   // Get emojis with counts for display
-  let emojisWithCounts = $derived(
-    emojis.filter((emoji) => counts[emoji] > 0)
-  );
+  let emojisWithCounts = $derived(emojis.filter((emoji) => counts[emoji] > 0));
 </script>
 
 <div class="flex flex-wrap items-center gap-2">
@@ -128,12 +131,11 @@
           : 'border-subtle bg-surface-card hover:border-emerald-500/50 hover:bg-surface-card-alt'} px-3 py-1.5 text-sm cursor-pointer"
         aria-label={`See who reacted with ${emoji}`}
       >
-        <span class="text-base transition-transform {isActive ? 'scale-110' : 'group-hover:scale-110'}"
+        <span
+          class="text-base transition-transform {isActive ? 'scale-110' : 'group-hover:scale-110'}"
           >{emoji}</span
         >
-        <span class="font-medium {isActive ? 'text-emerald-300' : 'text-secondary'}"
-          >{count}</span
-        >
+        <span class="font-medium {isActive ? 'text-emerald-300' : 'text-secondary'}">{count}</span>
       </button>
 
       {#if showUsersForEmoji === emoji}
@@ -150,7 +152,9 @@
         >
           <div class="mb-2 flex items-center gap-2 border-b border-subtle pb-2">
             <span class="text-lg">{emoji}</span>
-            <span class="text-sm font-semibold text-primary">{count} {count === 1 ? 'reaction' : 'reactions'}</span>
+            <span class="text-sm font-semibold text-primary"
+              >{count} {count === 1 ? 'reaction' : 'reactions'}</span
+            >
           </div>
 
           {#if loadingUsers}
@@ -183,12 +187,7 @@
         class="inline-flex items-center gap-2 rounded-full border border-subtle bg-surface-card px-3 py-1.5 text-sm transition-all hover:border-emerald-500/50 hover:bg-surface-card-alt"
         aria-label="Add reaction"
       >
-        <svg
-          class="h-4 w-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             stroke-linecap="round"
             stroke-linejoin="round"

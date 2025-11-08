@@ -198,7 +198,8 @@ const demoListings: SeedListing[] = [
   {
     ownerEmail: 'demo-alex@meeplecart.test',
     title: 'Wellington euro trade bundle - Large collection',
-    summary: 'Mix of medium-heavy euros ready for the next table. Prefer bundle swaps but open to offers. Moving to smaller space, need to downsize!',
+    summary:
+      'Mix of medium-heavy euros ready for the next table. Prefer bundle swaps but open to offers. Moving to smaller space, need to downsize!',
     listingType: 'trade',
     location: 'CBD or Newtown',
     regions: ['wellington'],
@@ -292,7 +293,8 @@ const demoListings: SeedListing[] = [
   {
     ownerEmail: 'demo-bella@meeplecart.test',
     title: 'Auckland family night sale - Big collection clearout',
-    summary: 'Family-friendly lineup that we have outgrown. Priced to move, can post nationwide. Some already sold!',
+    summary:
+      'Family-friendly lineup that we have outgrown. Priced to move, can post nationwide. Some already sold!',
     listingType: 'sell',
     location: 'North Shore area',
     regions: ['auckland'],
@@ -421,7 +423,8 @@ const demoListings: SeedListing[] = [
   {
     ownerEmail: 'demo-sarah@meeplecart.test',
     title: 'Party games collection - Hamilton pickup preferred',
-    summary: 'Great for game nights! Selling to make room for new arrivals. Buy the bundle and save!',
+    summary:
+      'Great for game nights! Selling to make room for new arrivals. Buy the bundle and save!',
     listingType: 'sell',
     location: 'Hamilton East',
     regions: ['waikato'],
@@ -524,7 +527,8 @@ const demoListings: SeedListing[] = [
   {
     ownerEmail: 'demo-james@meeplecart.test',
     title: 'Strategy heavyweights collection - Dunedin',
-    summary: 'Premium titles for experienced gamers. All well-maintained. Looking for other heavy euros or 18XX games.',
+    summary:
+      'Premium titles for experienced gamers. All well-maintained. Looking for other heavy euros or 18XX games.',
     listingType: 'trade',
     location: 'North Dunedin',
     regions: ['otago'],
@@ -753,7 +757,8 @@ const demoListings: SeedListing[] = [
   {
     ownerEmail: 'demo-lisa@meeplecart.test',
     title: 'Cooperative games collection for trade',
-    summary: 'Looking to trade my co-ops for other co-ops or party games! Love thematic games with good narratives.',
+    summary:
+      'Looking to trade my co-ops for other co-ops or party games! Love thematic games with good narratives.',
     listingType: 'trade',
     location: 'Palmerston North CBD',
     regions: ['manawatu_whanganui'],
@@ -1193,7 +1198,7 @@ const demoDiscussions: SeedDiscussionThread[] = [
     authorEmail: 'demo-kiran@meeplecart.test',
     title: 'Welcome to Meeple Cart!',
     content:
-      "Kia ora everyone! 👋\n\nWelcome to the Meeple Cart discussion forums. This is a space for our trading community to chat about board games, organize meetups, and help each other out.\n\n**Some guidelines:**\n- Be respectful and friendly\n- Keep discussions relevant to board gaming and trading\n- Use listing-specific discussions for questions about particular items\n- Have fun and share your passion for games!\n\nFeel free to introduce yourself below. What got you into board gaming?",
+      'Kia ora everyone! 👋\n\nWelcome to the Meeple Cart discussion forums. This is a space for our trading community to chat about board games, organize meetups, and help each other out.\n\n**Some guidelines:**\n- Be respectful and friendly\n- Keep discussions relevant to board gaming and trading\n- Use listing-specific discussions for questions about particular items\n- Have fun and share your passion for games!\n\nFeel free to introduce yourself below. What got you into board gaming?',
     daysAgo: 30,
     pinned: true,
     replies: [
@@ -1206,7 +1211,7 @@ const demoDiscussions: SeedDiscussionThread[] = [
       {
         authorEmail: 'demo-maya@meeplecart.test',
         content:
-          "Hello! Maya here from Tauranga. Started with Catan and now branching out. This community seems amazing!",
+          'Hello! Maya here from Tauranga. Started with Catan and now branching out. This community seems amazing!',
         hoursAfterThread: 5,
       },
       {
@@ -1233,7 +1238,7 @@ const demoDiscussions: SeedDiscussionThread[] = [
       {
         authorEmail: 'demo-alex@meeplecart.test',
         content:
-          "Not in Auckland but just want to say Food Chain Magnate is amazing. You all are in for a treat!",
+          'Not in Auckland but just want to say Food Chain Magnate is amazing. You all are in for a treat!',
         hoursAfterThread: 6,
       },
       {
@@ -1266,7 +1271,7 @@ const demoDiscussions: SeedDiscussionThread[] = [
       {
         authorEmail: 'demo-maya@meeplecart.test',
         content:
-          "Just went through this myself! Ticket to Ride was perfect for my group. Also King of Tokyo was a hit - simple but exciting.",
+          'Just went through this myself! Ticket to Ride was perfect for my group. Also King of Tokyo was a hit - simple but exciting.',
         hoursAfterThread: 7,
       },
       {
@@ -1293,7 +1298,7 @@ const demoDiscussions: SeedDiscussionThread[] = [
       {
         authorEmail: 'demo-alex@meeplecart.test',
         content:
-          "Agreed with Kiran. Better to cancel early than to regret it later. Just be honest and apologize for any inconvenience.",
+          'Agreed with Kiran. Better to cancel early than to regret it later. Just be honest and apologize for any inconvenience.',
         hoursAfterThread: 2,
       },
       {
@@ -1315,7 +1320,8 @@ const demoDiscussions: SeedDiscussionThread[] = [
     replies: [
       {
         authorEmail: 'demo-bella@meeplecart.test',
-        content: 'Yes it does! All expansion components are included. Happy to send photos if helpful.',
+        content:
+          'Yes it does! All expansion components are included. Happy to send photos if helpful.',
         hoursAfterThread: 2,
       },
       {
@@ -1499,7 +1505,11 @@ const recreateListing = async (
   return listing;
 };
 
-const addRandomReactions = async (listingId: string, userRecords: Map<string, RecordModel>, userEmails: string[]): Promise<void> => {
+const addRandomReactions = async (
+  listingId: string,
+  userRecords: Map<string, RecordModel>,
+  userEmails: string[]
+): Promise<void> => {
   const pb = new PocketBase(baseUrl);
 
   // Random number of reactions (0-4 users will react)
@@ -1629,7 +1639,9 @@ const createDiscussionThread = async (
         continue;
       }
 
-      const replyDate = new Date(threadDate.getTime() + replySeed.hoursAfterThread * 60 * 60 * 1000);
+      const replyDate = new Date(
+        threadDate.getTime() + replySeed.hoursAfterThread * 60 * 60 * 1000
+      );
       lastReplyDate = replyDate;
 
       // Authenticate as reply author
@@ -1699,7 +1711,9 @@ const clearAllListings = async (): Promise<void> => {
     }
   }
 
-  console.log(`Deleted ${listings.length} listings, ${items.length} items, and ${reactions.length} reactions.`);
+  console.log(
+    `Deleted ${listings.length} listings, ${items.length} items, and ${reactions.length} reactions.`
+  );
 };
 
 const seedDemoData = async (): Promise<void> => {
@@ -1741,10 +1755,16 @@ const seedDemoData = async (): Promise<void> => {
 
     const record = await recreateListing(listing, ownerRecord, ownerSeed.password);
     listingRecords.push(record);
-    console.log(`✓ "${listing.title}" (${listing.daysAgo} days ago, ${listing.games.length} games)`);
+    console.log(
+      `✓ "${listing.title}" (${listing.daysAgo} days ago, ${listing.games.length} games)`
+    );
 
     // Add random reactions to this listing
-    await addRandomReactions(record.id, userRecords, demoUsers.map((u) => u.email));
+    await addRandomReactions(
+      record.id,
+      userRecords,
+      demoUsers.map((u) => u.email)
+    );
   }
 
   console.log('\n=== Creating Vouches ===\n');
@@ -1763,7 +1783,12 @@ const seedDemoData = async (): Promise<void> => {
   console.log('\n=== Creating Discussions ===\n');
   const discussionRecords: RecordModel[] = [];
   for (const discussion of demoDiscussions) {
-    const record = await createDiscussionThread(discussion, userRecords, listingRecords, demoPassword);
+    const record = await createDiscussionThread(
+      discussion,
+      userRecords,
+      listingRecords,
+      demoPassword
+    );
     if (record) {
       discussionRecords.push(record);
       const authorName = userRecords.get(discussion.authorEmail)?.display_name;
@@ -1781,7 +1806,9 @@ const seedDemoData = async (): Promise<void> => {
   console.log(`✓ ${listingRecords.length} listings created`);
   console.log(`✓ ${vouchRecords.length} vouches created`);
   console.log(`✓ ${discussionRecords.length} discussion threads created`);
-  console.log(`✓ Activities spread across the last ${Math.max(...demoListings.map(l => l.daysAgo))} days`);
+  console.log(
+    `✓ Activities spread across the last ${Math.max(...demoListings.map((l) => l.daysAgo))} days`
+  );
   console.log('\n✨ Demo data seeded successfully!\n');
 };
 

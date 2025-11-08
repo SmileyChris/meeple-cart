@@ -26,6 +26,7 @@ Meeple Cart enables New Zealand's 10,000+ board gamers to trade, sell, and acqui
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Node.js 20+
 - Just command runner (optional but recommended)
 
@@ -41,6 +42,7 @@ just dev
 ```
 
 The `just dev` recipe handles everything:
+
 - ✅ Installs npm dependencies
 - ✅ Creates `.env` from template
 - ✅ Downloads PocketBase binary
@@ -87,20 +89,24 @@ See **[MVP_IMPLEMENTATION_PLAN.md](./MVP_IMPLEMENTATION_PLAN.md)** for detailed 
 ## 🛠️ Tech Stack
 
 **Frontend:**
+
 - SvelteKit 2 + Svelte 5 (runes mode)
 - Tailwind CSS 4
 - TypeScript
 
 **Backend:**
+
 - PocketBase (embedded SQLite)
 - Real-time subscriptions
 - Built-in auth & file storage
 
 **Testing:**
+
 - Vitest (unit tests)
 - Playwright (E2E tests)
 
 **Deployment:**
+
 - Client-side SPA (no SSR)
 - Static export via adapter-static
 - Can deploy to any static host
@@ -166,19 +172,19 @@ npm run seed:demo     # Seed demo data (from scripts/seed-demo-data.ts)
 
 ## 🗃️ Database Collections
 
-| Collection | Purpose | Status |
-|------------|---------|--------|
-| `users` | Auth + profiles with trade stats | ✅ Complete |
-| `listings` | Marketplace posts (multi-game) | ✅ Complete |
-| `games` | Individual games within listings | ✅ Complete |
-| `messages` | Private messaging threads | ✅ Complete |
-| `trades` | Formal trade records | ✅ Schema done, UI incomplete |
-| `vouches` | Trust vouches between users | ✅ Schema done, UI incomplete |
-| `watchlist` | Saved listings per user | ✅ Complete |
-| `notifications` | In-app + email notifications | ✅ Complete |
-| `cascades` | Gift cascade events | ✅ Complete |
-| `cascade_entries` | User entries in cascades | ✅ Complete |
-| `cascade_history` | Cascade event timeline | ✅ Complete |
+| Collection        | Purpose                          | Status                        |
+| ----------------- | -------------------------------- | ----------------------------- |
+| `users`           | Auth + profiles with trade stats | ✅ Complete                   |
+| `listings`        | Marketplace posts (multi-game)   | ✅ Complete                   |
+| `games`           | Individual games within listings | ✅ Complete                   |
+| `messages`        | Private messaging threads        | ✅ Complete                   |
+| `trades`          | Formal trade records             | ✅ Schema done, UI incomplete |
+| `vouches`         | Trust vouches between users      | ✅ Schema done, UI incomplete |
+| `watchlist`       | Saved listings per user          | ✅ Complete                   |
+| `notifications`   | In-app + email notifications     | ✅ Complete                   |
+| `cascades`        | Gift cascade events              | ✅ Complete                   |
+| `cascade_entries` | User entries in cascades         | ✅ Complete                   |
+| `cascade_history` | Cascade event timeline           | ✅ Complete                   |
 
 **Schema:** See `services/pocketbase/schema/pb_schema.json`
 **Migrations:** 5 files in `services/pocketbase/migrations/`
@@ -187,14 +193,14 @@ npm run seed:demo     # Seed demo data (from scripts/seed-demo-data.ts)
 
 ## 📖 Documentation
 
-| Document | Description |
-|----------|-------------|
-| **[MVP_IMPLEMENTATION_PLAN.md](./MVP_IMPLEMENTATION_PLAN.md)** | **Start here** - 3-week roadmap to launch |
-| [CLAUDE.md](./CLAUDE.md) | Development setup & commands for AI assistants |
-| [spec/prd.md](./spec/prd.md) | Product requirements & original vision |
-| [spec/trade-flow-gaps.md](./spec/trade-flow-gaps.md) | Detailed implementation specs for trade flow |
-| [docs/trust-and-vouches.md](./docs/trust-and-vouches.md) | Trust system documentation |
-| [docs/listings.md](./docs/listings.md) | Listing lifecycle & mechanics |
+| Document                                                       | Description                                    |
+| -------------------------------------------------------------- | ---------------------------------------------- |
+| **[MVP_IMPLEMENTATION_PLAN.md](./MVP_IMPLEMENTATION_PLAN.md)** | **Start here** - 3-week roadmap to launch      |
+| [CLAUDE.md](./CLAUDE.md)                                       | Development setup & commands for AI assistants |
+| [spec/prd.md](./spec/prd.md)                                   | Product requirements & original vision         |
+| [spec/trade-flow-gaps.md](./spec/trade-flow-gaps.md)           | Detailed implementation specs for trade flow   |
+| [docs/trust-and-vouches.md](./docs/trust-and-vouches.md)       | Trust system documentation                     |
+| [docs/listings.md](./docs/listings.md)                         | Listing lifecycle & mechanics                  |
 
 ---
 
@@ -225,6 +231,7 @@ Track progress in [MVP_IMPLEMENTATION_PLAN.md](./MVP_IMPLEMENTATION_PLAN.md)
 6. Submit PR with clear description
 
 **Code Style:**
+
 - 2-space indentation
 - Single quotes
 - Trailing commas

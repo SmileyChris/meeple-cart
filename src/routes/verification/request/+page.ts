@@ -28,11 +28,9 @@ export const load: PageLoad = async () => {
     }
 
     // Get current queue length
-    const pendingRequests = await pb
-      .collection('verification_requests')
-      .getList(1, 1, {
-        filter: 'status = "pending"',
-      });
+    const pendingRequests = await pb.collection('verification_requests').getList(1, 1, {
+      filter: 'status = "pending"',
+    });
 
     return {
       user,

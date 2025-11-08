@@ -55,8 +55,7 @@
     } catch (err: any) {
       console.error('Failed to confirm verification:', err);
       error =
-        err.message ||
-        'Failed to verify email. The verification link may be expired or invalid.';
+        err.message || 'Failed to verify email. The verification link may be expired or invalid.';
     } finally {
       loading = false;
     }
@@ -85,16 +84,21 @@
           </svg>
         </div>
         <h1 class="mt-6 text-2xl font-bold text-primary">Email Verification</h1>
-        <p class="mt-2 text-sm text-muted">Verify your email to unlock vouching and other features</p>
+        <p class="mt-2 text-sm text-muted">
+          Verify your email to unlock vouching and other features
+        </p>
       </div>
 
       <!-- Current Status -->
       <div class="mt-8">
         {#if user?.verified}
-          <div
-            class="flex items-center gap-3 rounded-lg border border-subtle bg-surface-body p-4"
-          >
-            <svg class="h-6 w-6 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="flex items-center gap-3 rounded-lg border border-subtle bg-surface-body p-4">
+            <svg
+              class="h-6 w-6 text-secondary"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -111,7 +115,12 @@
           <div
             class="flex items-center gap-3 rounded-lg border border-amber-500/80 bg-amber-500/10 p-4"
           >
-            <svg class="h-6 w-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              class="h-6 w-6 text-amber-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -130,7 +139,12 @@
             <h2 class="font-semibold text-primary">Why verify your email?</h2>
             <ul class="space-y-2 text-sm text-muted">
               <li class="flex items-start gap-2">
-                <svg class="mt-0.5 h-4 w-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg
+                  class="mt-0.5 h-4 w-4 text-accent"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path
                     stroke-linecap="round"
                     stroke-linejoin="round"
@@ -141,7 +155,12 @@
                 <span>Required to vouch for other traders</span>
               </li>
               <li class="flex items-start gap-2">
-                <svg class="mt-0.5 h-4 w-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg
+                  class="mt-0.5 h-4 w-4 text-accent"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path
                     stroke-linecap="round"
                     stroke-linejoin="round"
@@ -152,7 +171,12 @@
                 <span>Build trust with the community</span>
               </li>
               <li class="flex items-start gap-2">
-                <svg class="mt-0.5 h-4 w-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg
+                  class="mt-0.5 h-4 w-4 text-accent"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path
                     stroke-linecap="round"
                     stroke-linejoin="round"
@@ -163,7 +187,12 @@
                 <span>Unlock all platform features</span>
               </li>
               <li class="flex items-start gap-2">
-                <svg class="mt-0.5 h-4 w-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg
+                  class="mt-0.5 h-4 w-4 text-accent"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path
                     stroke-linecap="round"
                     stroke-linejoin="round"
@@ -195,7 +224,9 @@
           </div>
 
           {#if verificationSent}
-            <div class="mt-4 rounded-lg border border-subtle bg-surface-body p-4 text-sm text-muted">
+            <div
+              class="mt-4 rounded-lg border border-subtle bg-surface-body p-4 text-sm text-muted"
+            >
               <p class="font-medium text-secondary">Check your inbox!</p>
               <p class="mt-1">
                 We've sent a verification link to <span class="text-primary">{user?.email}</span>.
@@ -244,10 +275,13 @@
 
       <div class="mt-8">
         {#if user?.phone_verified}
-          <div
-            class="flex items-center gap-3 rounded-lg border border-subtle bg-surface-body p-4"
-          >
-            <svg class="h-6 w-6 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="flex items-center gap-3 rounded-lg border border-subtle bg-surface-body p-4">
+            <svg
+              class="h-6 w-6 text-secondary"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"

@@ -70,7 +70,7 @@ export function validateFeedback(
   trade: TradeRecord,
   userId: string,
   rating?: number,
-  review?: string,
+  review?: string
 ): string | null {
   // Must be a participant
   if (trade.buyer !== userId && trade.seller !== userId) {
@@ -111,7 +111,7 @@ export function validateFeedback(
 export function canVouchForUser(
   voucherId: string,
   voucheeId: string,
-  completedTrades: TradeRecord[],
+  completedTrades: TradeRecord[]
 ): boolean {
   // Cannot vouch for yourself
   if (voucherId === voucheeId) {
@@ -123,7 +123,7 @@ export function canVouchForUser(
     (trade) =>
       trade.status === 'completed' &&
       ((trade.buyer === voucherId && trade.seller === voucheeId) ||
-        (trade.buyer === voucheeId && trade.seller === voucherId)),
+        (trade.buyer === voucheeId && trade.seller === voucherId))
   );
 
   return hasCompletedTrade;
@@ -136,7 +136,7 @@ export function validateVouch(
   voucherId: string,
   voucheeId: string,
   message: string,
-  completedTrades: TradeRecord[],
+  completedTrades: TradeRecord[]
 ): string | null {
   // Cannot vouch for yourself
   if (voucherId === voucheeId) {

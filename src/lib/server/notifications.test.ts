@@ -30,17 +30,11 @@ describe('notifications server utilities', () => {
   it('creates notifications with the provided payload', async () => {
     const pb = createPbMock();
 
-    await createNotification(
-      pb as any,
-      'user-123',
-      'new_message',
-      'You have a new message',
-      {
-        message: 'Morgan sent you a reply',
-        link: '/messages/thread-1',
-        listingId: 'listing-42',
-      }
-    );
+    await createNotification(pb as any, 'user-123', 'new_message', 'You have a new message', {
+      message: 'Morgan sent you a reply',
+      link: '/messages/thread-1',
+      listingId: 'listing-42',
+    });
 
     expect(pb.collection).toHaveBeenCalledWith('notifications');
     expect(pb.create).toHaveBeenCalledWith({
@@ -132,10 +126,7 @@ describe('notifications server utilities', () => {
 
     await notifyNewListing(pb as any, listing, 'Morgan');
 
-    expect(consoleSpy).toHaveBeenCalledWith(
-      'Failed to notify users about new listing',
-      failure
-    );
+    expect(consoleSpy).toHaveBeenCalledWith('Failed to notify users about new listing', failure);
     expect(pb.create).not.toHaveBeenCalled();
   });
 });

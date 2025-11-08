@@ -8,6 +8,7 @@
 ## Executive Summary
 
 All 6 critical gaps identified in `spec/trade-flow-gaps.md` are now **fully functional**. The trade flow is production-ready, with the only remaining work being:
+
 - Adding `status_history` JSON field to PocketBase schema (5 min task)
 - End-to-end testing with two real users
 
@@ -16,9 +17,11 @@ All 6 critical gaps identified in `spec/trade-flow-gaps.md` are now **fully func
 ## Gap-by-Gap Status
 
 ### ✅ Gap 1: Trade Record Creation - **COMPLETE**
+
 **Location:** `src/routes/listings/[id]/+page.svelte`
 
 **Implemented Features:**
+
 - ✅ "Propose Trade" button visible to non-owners
 - ✅ `handleInitiateTrade()` function with full validation
 - ✅ Duplicate trade prevention
@@ -30,6 +33,7 @@ All 6 critical gaps identified in `spec/trade-flow-gaps.md` are now **fully func
 - ✅ Status change logging
 
 **Code Quality:**
+
 - Error handling: ✅ Complete
 - Loading states: ✅ Complete
 - User feedback: ✅ Complete
@@ -37,9 +41,11 @@ All 6 critical gaps identified in `spec/trade-flow-gaps.md` are now **fully func
 ---
 
 ### ✅ Gap 2: Trade Detail & Status Management - **COMPLETE**
+
 **Location:** `src/routes/trades/[id]/`
 
 **Implemented Features:**
+
 - ✅ Client-side loader (+page.ts) with auth/authorization
 - ✅ Trade detail UI with timeline
 - ✅ Status update functions:
@@ -59,6 +65,7 @@ All 6 critical gaps identified in `spec/trade-flow-gaps.md` are now **fully func
 - ✅ Listing and trading partner info display
 
 **Code Quality:**
+
 - Error handling: ✅ Complete
 - Loading states: ✅ Complete
 - User feedback: ✅ Complete
@@ -67,9 +74,11 @@ All 6 critical gaps identified in `spec/trade-flow-gaps.md` are now **fully func
 ---
 
 ### ✅ Gap 3: Trade History Dashboard - **COMPLETE**
+
 **Location:** `src/routes/trades/`
 
 **Implemented Features:**
+
 - ✅ Client-side loader with filtering
 - ✅ Three filter tabs:
   - Active (initiated + confirmed + shipped)
@@ -86,6 +95,7 @@ All 6 critical gaps identified in `spec/trade-flow-gaps.md` are now **fully func
 - ✅ "My Trades" link added to main navigation
 
 **Code Quality:**
+
 - Error handling: ✅ Complete
 - Loading states: ✅ Complete
 - Responsive design: ✅ Complete
@@ -93,9 +103,11 @@ All 6 critical gaps identified in `spec/trade-flow-gaps.md` are now **fully func
 ---
 
 ### ✅ Gap 4: Feedback & Rating System - **COMPLETE**
+
 **Location:** `src/routes/trades/[id]/+page.svelte`
 
 **Implemented Features:**
+
 - ✅ Feedback form shows after trade completion
 - ✅ 5-star rating selector
 - ✅ Optional review text (max 2000 chars)
@@ -106,9 +118,11 @@ All 6 critical gaps identified in `spec/trade-flow-gaps.md` are now **fully func
 - ✅ Cancel button to close form
 
 **Remaining Work:**
+
 - Display reviews on user profiles (separate task, not critical for MVP)
 
 **Code Quality:**
+
 - Error handling: ✅ Complete
 - Loading states: ✅ Complete
 - User feedback: ✅ Complete
@@ -116,9 +130,11 @@ All 6 critical gaps identified in `spec/trade-flow-gaps.md` are now **fully func
 ---
 
 ### ✅ Gap 5: Vouch System UI - **COMPLETE**
+
 **Location:** `src/routes/trades/[id]/+page.svelte` + loader
 
 **Implemented Features:**
+
 - ✅ Vouch prompt shows after trade completion
 - ✅ Checks if user has already vouched (prevents duplicates)
 - ✅ `handleSubmitVouch()` creates vouch record
@@ -129,9 +145,11 @@ All 6 critical gaps identified in `spec/trade-flow-gaps.md` are now **fully func
 - ✅ Cancel button to close form
 
 **Remaining Work:**
+
 - Display vouches on user profiles (separate task, not critical for MVP)
 
 **Code Quality:**
+
 - Error handling: ✅ Complete
 - Loading states: ✅ Complete
 - User feedback: ✅ Complete
@@ -139,9 +157,11 @@ All 6 critical gaps identified in `spec/trade-flow-gaps.md` are now **fully func
 ---
 
 ### ✅ Gap 6: Listing Status Transitions - **COMPLETE**
+
 **Location:** Multiple files + `src/lib/utils/listing-status.ts`
 
 **Implemented Features:**
+
 - ✅ Automatic status transitions:
   - `active` → `pending` (when trade initiated)
   - `pending` → `completed` (when trade completes)
@@ -159,6 +179,7 @@ All 6 critical gaps identified in `spec/trade-flow-gaps.md` are now **fully func
   - `timestamp` (ISO 8601)
 
 **Fully Implemented:**
+
 - ✅ Status history persistence: Enabled and working
 - ✅ Status history display: Component created and integrated
 - ✅ Unit tests: 8 tests for listing-status utilities
@@ -167,6 +188,7 @@ All 6 critical gaps identified in `spec/trade-flow-gaps.md` are now **fully func
 - ✅ Migration: 0006_status_history.js created
 
 **Completed Work:**
+
 1. ✅ Added `status_history` JSON field to listings collection
 2. ✅ Enabled persistence code in `listing-status.ts`
 3. ✅ Created StatusHistory.svelte component
@@ -178,6 +200,7 @@ All 6 critical gaps identified in `spec/trade-flow-gaps.md` are now **fully func
 ## Testing Status
 
 ### Manual Testing Completed
+
 - ✅ Trade initiation flow (Gap 1)
 - ✅ Button visibility and validation
 - ✅ Duplicate prevention
@@ -187,6 +210,7 @@ All 6 critical gaps identified in `spec/trade-flow-gaps.md` are now **fully func
 - ⏳ Trade history filtering
 
 ### Automated Tests
+
 - ✅ Unit tests for status history utilities (8 tests passing)
 - ✅ Component tests for StatusHistory (10 tests passing)
 - ✅ E2E test for complete trade flow (trade-flow.spec.ts)
@@ -205,6 +229,7 @@ All 6 critical gaps identified in `spec/trade-flow-gaps.md` are now **fully func
 ## Files Modified/Created
 
 ### New Files (8)
+
 1. `src/lib/utils/listing-status.ts` - Status logging utilities
 2. `src/lib/utils/listing-status.test.ts` - Unit tests for status utilities (8 tests)
 3. `src/lib/utils/trade-status.ts` - Trade status helpers (auto-created)
@@ -215,6 +240,7 @@ All 6 critical gaps identified in `spec/trade-flow-gaps.md` are now **fully func
 8. `tests/e2e/trade-flow.spec.ts` - E2E test for complete trade flow
 
 ### Files Modified (10)
+
 1. `src/routes/listings/[id]/+page.svelte` - Trade initiation with status logging
 2. `src/routes/listings/[id]/manage/+page.svelte` - Added StatusHistory component
 3. `src/routes/listings/[id]/manage/+page.ts` - Client-side loader (NEW)
@@ -231,6 +257,7 @@ All 6 critical gaps identified in `spec/trade-flow-gaps.md` are now **fully func
 ## Database Schema Status
 
 ### ✅ Already Implemented
+
 - `trades` collection: Complete with all fields
   - `listing`, `buyer`, `seller` relations
   - `status` (initiated, confirmed, completed, disputed)
@@ -243,6 +270,7 @@ All 6 critical gaps identified in `spec/trade-flow-gaps.md` are now **fully func
 - `users` collection: Has `trade_count` and `vouch_count`
 
 ### ✅ Schema Changes Complete
+
 - `listings` collection: `status_history` field added
   - Type: JSON
   - Format: Array of StatusChange objects
@@ -258,6 +286,7 @@ All 6 critical gaps identified in `spec/trade-flow-gaps.md` are now **fully func
 **Status:** Gap 6 is fully implemented and tested!
 
 All status history features are now complete:
+
 1. ✅ Schema field added
 2. ✅ Persistence code enabled
 3. ✅ History display UI added
@@ -267,6 +296,7 @@ All status history features are now complete:
 ### ✅ Testing Complete!
 
 All testing levels now in place:
+
 - ✅ Unit tests (8 tests for utilities)
 - ✅ Component tests (10 tests for UI)
 - ✅ E2E tests (full trade flow walkthrough)
@@ -288,16 +318,16 @@ All testing levels now in place:
 
 ## Success Metrics (from spec)
 
-| Metric | Target | Status |
-|--------|--------|--------|
-| Users can initiate trades | ✅ | Complete |
-| Trade status progresses | ✅ | Complete |
-| trade_count increments | ✅ | Complete |
-| Users can leave ratings/reviews | ✅ | Complete |
-| Vouches can be created | ✅ | Complete |
-| Trade history viewable | ✅ | Complete |
-| Listing statuses auto-update | ✅ | Complete |
-| State changes logged | ✅ | Complete (persisted to database) |
+| Metric                          | Target | Status                           |
+| ------------------------------- | ------ | -------------------------------- |
+| Users can initiate trades       | ✅     | Complete                         |
+| Trade status progresses         | ✅     | Complete                         |
+| trade_count increments          | ✅     | Complete                         |
+| Users can leave ratings/reviews | ✅     | Complete                         |
+| Vouches can be created          | ✅     | Complete                         |
+| Trade history viewable          | ✅     | Complete                         |
+| Listing statuses auto-update    | ✅     | Complete                         |
+| State changes logged            | ✅     | Complete (persisted to database) |
 
 **All 8 success criteria met!**
 
@@ -306,9 +336,11 @@ All testing levels now in place:
 ## Known Issues & TODOs
 
 ### High Priority (Blockers)
+
 None! ✅
 
 ### Medium Priority (Nice to Have)
+
 1. ✅ ~~Add `status_history` field to schema~~ (COMPLETE)
 2. ✅ ~~Display status history on listing management page~~ (COMPLETE)
 3. Display user reviews on profile pages
@@ -316,6 +348,7 @@ None! ✅
 5. Write E2E tests for complete trade flow
 
 ### Low Priority (Future Enhancements)
+
 1. Email notifications for trade events
 2. Trade cancellation workflow
 3. Dispute resolution admin tools
@@ -327,7 +360,9 @@ None! ✅
 ## Architecture Notes
 
 ### Why Client-Side Only?
+
 The codebase uses **client-side architecture** (Svelte 5 + PocketBase SDK):
+
 - No `+page.server.ts` files (removed during Svelte 5 migration)
 - All data fetching via PocketBase client SDK
 - No server actions - just async functions
@@ -335,6 +370,7 @@ The codebase uses **client-side architecture** (Svelte 5 + PocketBase SDK):
 - Event handlers: `onclick={}` not `on:click={}`
 
 ### Key Patterns Used
+
 1. **Client-side loaders:** `+page.ts` with `pb.collection().getOne()`
 2. **Reactive state:** `$state()` and `$derived()` runes
 3. **Data revalidation:** `invalidate()` after mutations
@@ -348,6 +384,7 @@ The codebase uses **client-side architecture** (Svelte 5 + PocketBase SDK):
 🎉 **The trade flow is production-ready!**
 
 All critical functionality works. Users can:
+
 - Propose trades from listings
 - Track trade progress
 - Complete trades

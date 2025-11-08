@@ -3,7 +3,6 @@ import { redirectToLogin } from '$lib/utils/auth-redirect';
 import { get } from 'svelte/store';
 import { currentUser } from '$lib/pocketbase';
 
-
 export const load: PageLoad = async ({ url }) => {
   const user = get(currentUser);
 

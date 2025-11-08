@@ -29,8 +29,8 @@
       phoneVerified,
       user?.trade_count || 0,
       user?.vouch_count || 0,
-      user?.joined_date ? getAccountAgeDays(user.joined_date) : 0,
-    ),
+      user?.joined_date ? getAccountAgeDays(user.joined_date) : 0
+    )
   );
 
   async function savePhoneNumber() {
@@ -160,9 +160,7 @@
       <div class="mt-6 space-y-4">
         <!-- Phone Number Input -->
         <div>
-          <label for="phone" class="block text-sm font-medium text-secondary">
-            Phone Number
-          </label>
+          <label for="phone" class="block text-sm font-medium text-secondary"> Phone Number </label>
           <div class="mt-1 flex gap-2">
             <input
               id="phone"
@@ -192,7 +190,9 @@
 
         <!-- Verification Status -->
         {#if phoneVerified}
-          <div class="flex items-center gap-2 rounded-md border border-emerald-500/80 bg-emerald-500/10 px-4 py-3">
+          <div
+            class="flex items-center gap-2 rounded-md border border-emerald-500/80 bg-emerald-500/10 px-4 py-3"
+          >
             <span class="text-2xl">✅</span>
             <div class="flex-1">
               <p class="font-medium text-emerald-200">Phone Verified</p>
@@ -230,7 +230,9 @@
             <div class="flex items-center justify-between">
               <div>
                 <p class="font-medium text-primary">Active Verifier</p>
-                <p class="text-sm text-muted">Receive verification requests to help the community</p>
+                <p class="text-sm text-muted">
+                  Receive verification requests to help the community
+                </p>
               </div>
               <button
                 type="button"
@@ -270,14 +272,14 @@
                   <option value={10}>10 per week (Active)</option>
                   <option value={20}>20 per week (Super Helper)</option>
                 </select>
-                <p class="mt-1 text-xs text-muted">
-                  You can change this limit at any time
-                </p>
+                <p class="mt-1 text-xs text-muted">You can change this limit at any time</p>
               </div>
 
               <!-- Verifier Stats -->
               {#if data.verifierSettings}
-                <div class="grid grid-cols-3 gap-4 rounded-md border border-subtle bg-surface-body p-4">
+                <div
+                  class="grid grid-cols-3 gap-4 rounded-md border border-subtle bg-surface-body p-4"
+                >
                   <div class="text-center">
                     <div class="text-2xl font-bold text-emerald-300">
                       {data.verifierSettings.total_verifications}
@@ -309,9 +311,7 @@
           </div>
         {:else}
           <div class="mt-6 rounded-md border border-subtle bg-surface-body p-4">
-            <p class="text-sm text-muted">
-              To become a verifier, you need:
-            </p>
+            <p class="text-sm text-muted">To become a verifier, you need:</p>
             <ul class="mt-2 space-y-1 text-sm text-muted">
               <li class="flex items-center gap-2">
                 <span class={phoneVerified ? 'text-emerald-400' : 'text-muted'}>
@@ -320,13 +320,21 @@
                 Verified phone number
               </li>
               <li class="flex items-center gap-2">
-                <span class={getAccountAgeDays(user?.joined_date || '') >= 7 ? 'text-emerald-400' : 'text-muted'}>
+                <span
+                  class={getAccountAgeDays(user?.joined_date || '') >= 7
+                    ? 'text-emerald-400'
+                    : 'text-muted'}
+                >
                   {getAccountAgeDays(user?.joined_date || '') >= 7 ? '✓' : '○'}
                 </span>
                 Account at least 7 days old
               </li>
               <li class="flex items-center gap-2">
-                <span class={(user?.trade_count || 0) > 0 || (user?.vouch_count || 0) > 0 ? 'text-emerald-400' : 'text-muted'}>
+                <span
+                  class={(user?.trade_count || 0) > 0 || (user?.vouch_count || 0) > 0
+                    ? 'text-emerald-400'
+                    : 'text-muted'}
+                >
                   {(user?.trade_count || 0) > 0 || (user?.vouch_count || 0) > 0 ? '✓' : '○'}
                 </span>
                 At least 1 completed trade or 1 vouch received
@@ -339,7 +347,9 @@
 
     <!-- Success/Error Messages -->
     {#if success}
-      <div class="rounded-md border border-emerald-500/80 bg-emerald-500/10 px-4 py-3 text-emerald-200">
+      <div
+        class="rounded-md border border-emerald-500/80 bg-emerald-500/10 px-4 py-3 text-emerald-200"
+      >
         {success}
       </div>
     {/if}

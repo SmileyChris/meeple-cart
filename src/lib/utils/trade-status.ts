@@ -10,7 +10,7 @@ export type TradeAction = 'confirm' | 'complete' | 'dispute';
 export function canTransitionTo(
   currentStatus: TradeStatus,
   newStatus: TradeStatus,
-  userRole: UserRole,
+  userRole: UserRole
 ): boolean {
   // Non-participants cannot transition
   if (userRole === 'other') {
@@ -39,7 +39,7 @@ export function canTransitionTo(
 export function validateStatusTransition(
   currentStatus: TradeStatus,
   newStatus: TradeStatus,
-  userRole: UserRole,
+  userRole: UserRole
 ): string | null {
   // Check if user is a participant
   if (userRole === 'other') {

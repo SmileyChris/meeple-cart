@@ -14,9 +14,7 @@
         <h1 class="text-4xl font-semibold tracking-tight text-primary sm:text-5xl">
           About Meeple Cart
         </h1>
-        <p class="text-lg text-secondary">
-          New Zealand's board game trading platform
-        </p>
+        <p class="text-lg text-secondary">New Zealand's board game trading platform</p>
       </div>
 
       <!-- What is Meeple Cart -->
@@ -24,10 +22,14 @@
         <h2 class="mb-4 text-2xl font-bold text-primary">What is Meeple Cart?</h2>
         <div class="space-y-3 text-secondary">
           <p>
-            Meeple Cart is a peer-to-peer platform connecting board game enthusiasts across Aotearoa New Zealand. We make it easy to trade, sell, or gift games with fellow players in your community.
+            Meeple Cart is a peer-to-peer platform connecting board game enthusiasts across Aotearoa
+            New Zealand. We make it easy to trade, sell, or gift games with fellow players in your
+            community.
           </p>
           <p>
-            Whether you're looking to swap games you've played out for something new, sell titles gathering dust on your shelf, or pay forward the joy of gaming through our Gift Cascade system, Meeple Cart brings the New Zealand board gaming community together.
+            Whether you're looking to swap games you've played out for something new, sell titles
+            gathering dust on your shelf, or pay forward the joy of gaming through our Gift Cascade
+            system, Meeple Cart brings the New Zealand board gaming community together.
           </p>
         </div>
       </div>
@@ -57,18 +59,14 @@
           class="rounded-lg border border-subtle bg-surface-card p-4 transition hover:border-accent"
         >
           <h3 class="mb-1 font-semibold text-primary">Terms & Privacy</h3>
-          <p class="text-sm text-secondary">
-            Understand our policies and how we protect your data
-          </p>
+          <p class="text-sm text-secondary">Understand our policies and how we protect your data</p>
         </a>
         <a
           href="/contact"
           class="rounded-lg border border-subtle bg-surface-card p-4 transition hover:border-accent"
         >
           <h3 class="mb-1 font-semibold text-primary">Contact & Support</h3>
-          <p class="text-sm text-secondary">
-            Learn how to get help or report issues
-          </p>
+          <p class="text-sm text-secondary">Learn how to get help or report issues</p>
         </a>
       </div>
 
@@ -77,10 +75,12 @@
         <h2 class="mb-4 text-2xl font-bold text-primary">Why We Built This</h2>
         <div class="space-y-3 text-secondary">
           <p>
-            Board games are meant to be played and shared. But as collections grow, many games end up unplayed while other gamers are searching for exactly those titles.
+            Board games are meant to be played and shared. But as collections grow, many games end
+            up unplayed while other gamers are searching for exactly those titles.
           </p>
           <p>
-            We created Meeple Cart to solve this problem for the New Zealand board gaming community. Our platform makes it simple to:
+            We created Meeple Cart to solve this problem for the New Zealand board gaming community.
+            Our platform makes it simple to:
           </p>
           <ul class="ml-6 space-y-1 list-disc">
             <li>Trade games directly with other enthusiasts</li>
@@ -99,25 +99,29 @@
           <div>
             <h3 class="mb-2 font-semibold text-primary">1. Create Your Listings</h3>
             <p class="text-sm">
-              List games you want to trade, sell, or mark titles you're looking for. Include photos, condition details, and pricing to help others make informed decisions.
+              List games you want to trade, sell, or mark titles you're looking for. Include photos,
+              condition details, and pricing to help others make informed decisions.
             </p>
           </div>
           <div>
             <h3 class="mb-2 font-semibold text-primary">2. Browse & Connect</h3>
             <p class="text-sm">
-              Search for games you're interested in, message sellers directly, and negotiate trades or purchases that work for both parties.
+              Search for games you're interested in, message sellers directly, and negotiate trades
+              or purchases that work for both parties.
             </p>
           </div>
           <div>
             <h3 class="mb-2 font-semibold text-primary">3. Complete Trades Safely</h3>
             <p class="text-sm">
-              Arrange meetups in public places or use tracked shipping. Check user ratings and vouches before committing to ensure safe, trustworthy transactions.
+              Arrange meetups in public places or use tracked shipping. Check user ratings and
+              vouches before committing to ensure safe, trustworthy transactions.
             </p>
           </div>
           <div>
             <h3 class="mb-2 font-semibold text-primary">4. Build Your Reputation</h3>
             <p class="text-sm">
-              Leave reviews, earn vouches from trading partners, and participate in Gift Cascades to build trust within the community.
+              Leave reviews, earn vouches from trading partners, and participate in Gift Cascades to
+              build trust within the community.
             </p>
           </div>
         </div>
@@ -128,13 +132,18 @@
         <h2 class="mb-4 text-2xl font-bold text-primary">🎁 Gift Cascades</h2>
         <div class="space-y-3 text-secondary">
           <p>
-            One of our favorite features is Gift Cascades - a pay-it-forward system where games travel through the community for free.
+            One of our favorite features is Gift Cascades - a pay-it-forward system where games
+            travel through the community for free.
           </p>
           <p>
-            Here's how it works: A member seeds a game into the cascade. Other members can join to win it. The winner receives the game for free, plays it, then passes it on to the next winner. Each game can travel through multiple players, spreading joy across the community.
+            Here's how it works: A member seeds a game into the cascade. Other members can join to
+            win it. The winner receives the game for free, plays it, then passes it on to the next
+            winner. Each game can travel through multiple players, spreading joy across the
+            community.
           </p>
           <p>
-            Participating in Gift Cascades builds your reputation and demonstrates your commitment to the community spirit.
+            Participating in Gift Cascades builds your reputation and demonstrates your commitment
+            to the community spirit.
           </p>
         </div>
       </div>
@@ -146,19 +155,22 @@
           <div>
             <h3 class="mb-2 font-semibold text-primary">💚 Respect</h3>
             <p class="text-sm text-secondary">
-              We treat every member with kindness and courtesy, fostering a welcoming environment for all board game enthusiasts.
+              We treat every member with kindness and courtesy, fostering a welcoming environment
+              for all board game enthusiasts.
             </p>
           </div>
           <div>
             <h3 class="mb-2 font-semibold text-primary">✨ Honesty</h3>
             <p class="text-sm text-secondary">
-              Accurate descriptions, fair pricing, and transparent communication build trust within our community.
+              Accurate descriptions, fair pricing, and transparent communication build trust within
+              our community.
             </p>
           </div>
           <div>
             <h3 class="mb-2 font-semibold text-primary">🛡️ Safety</h3>
             <p class="text-sm text-secondary">
-              We provide tools and guidelines to help members trade safely while maintaining a self-monitoring community.
+              We provide tools and guidelines to help members trade safely while maintaining a
+              self-monitoring community.
             </p>
           </div>
         </div>
@@ -169,13 +181,24 @@
         <h2 class="mb-4 text-2xl font-bold text-primary">Open Source & Privacy</h2>
         <div class="space-y-3 text-secondary">
           <p>
-            Meeple Cart is built with transparency in mind. Our platform is open source and available on <a href="https://github.com/smileychris/meeple-cart" target="_blank" rel="noopener noreferrer" class="text-accent hover:underline">GitHub</a>.
+            Meeple Cart is built with transparency in mind. Our platform is open source and
+            available on <a
+              href="https://github.com/smileychris/meeple-cart"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-accent hover:underline">GitHub</a
+            >.
           </p>
           <p>
-            We collect minimal personal data, never sell your information, and give you full control over your account and data. Read our <a href="/terms" class="text-accent hover:underline">Terms & Privacy Policy</a> for details.
+            We collect minimal personal data, never sell your information, and give you full control
+            over your account and data. Read our <a
+              href="/terms"
+              class="text-accent hover:underline">Terms & Privacy Policy</a
+            > for details.
           </p>
           <p>
-            Your data is stored securely on servers located in New Zealand, and you can delete your account at any time.
+            Your data is stored securely on servers located in New Zealand, and you can delete your
+            account at any time.
           </p>
         </div>
       </div>
@@ -184,7 +207,8 @@
       <div class="rounded-xl border border-accent bg-accent/5 p-6 text-center">
         <h2 class="mb-4 text-2xl font-bold text-primary">Ready to Join?</h2>
         <p class="mb-6 text-secondary">
-          Create an account to start trading, selling, or gifting board games with the New Zealand community.
+          Create an account to start trading, selling, or gifting board games with the New Zealand
+          community.
         </p>
         <a
           href="/register"

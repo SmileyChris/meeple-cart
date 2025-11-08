@@ -62,10 +62,7 @@
   >
     <div class="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
       <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-      <a
-        class="flex items-center gap-3 transition-opacity hover:opacity-80"
-        href="/"
-      >
+      <a class="flex items-center gap-3 transition-opacity hover:opacity-80" href="/">
         <img src="/logo.png" alt="Meeple Cart" class="h-8" />
         <span class="text-lg font-semibold" style="font-family: var(--font-heading)">
           Meeple Cart
@@ -75,7 +72,7 @@
       <nav class="flex items-center gap-3 text-sm">
         <ThemeToggle />
         {#if $currentUser}
-          <NotificationBell unreadCount={unreadNotifications} currentPath={currentPath} />
+          <NotificationBell unreadCount={unreadNotifications} {currentPath} />
           <a class="btn-primary" href="/listings/new"> New listing </a>
         {:else}
           <a class="btn-ghost" href="/login"> Log in </a>
@@ -86,7 +83,10 @@
     </div>
 
     <!-- Main Navigation Bar -->
-    <nav class="border-t transition-colors" style="background-color: var(--surface-nav); border-color: var(--border-nav)">
+    <nav
+      class="border-t transition-colors"
+      style="background-color: var(--surface-nav); border-color: var(--border-nav)"
+    >
       <div class="mx-auto max-w-5xl px-4">
         <div class="flex items-center justify-between gap-1 overflow-x-auto py-2">
           {#if isProfileSection}

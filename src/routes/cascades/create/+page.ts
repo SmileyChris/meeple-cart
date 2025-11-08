@@ -1,4 +1,3 @@
-
 import type { PageLoad } from './$types';
 import { redirectToLogin } from '$lib/utils/auth-redirect';
 import type { ItemRecord } from '$lib/types/listing';

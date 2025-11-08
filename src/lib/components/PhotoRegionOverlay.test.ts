@@ -194,7 +194,11 @@ describe('PhotoRegionOverlay', () => {
 
   it('does not call onRegionClick for manually obscured region', () => {
     const onRegionClick = vi.fn();
-    const region = createRectangleRegion('photo1.jpg', { x: 10, y: 10, width: 20, height: 20 }, null);
+    const region = createRectangleRegion(
+      'photo1.jpg',
+      { x: 10, y: 10, width: 20, height: 20 },
+      null
+    );
     region.manuallyObscured = true;
 
     const { container } = render(PhotoRegionOverlay, {
@@ -290,15 +294,17 @@ describe('PhotoRegionOverlay', () => {
     const regionDiv = container.querySelector('[role="button"]');
 
     // Simulate Enter key
-    regionDiv?.dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })
-    );
+    regionDiv?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
 
     expect(onRegionClick).toHaveBeenCalledWith('game1');
   });
 
   it('shows "Obscured" for manually obscured regions', () => {
-    const region = createRectangleRegion('photo1.jpg', { x: 10, y: 10, width: 20, height: 20 }, null);
+    const region = createRectangleRegion(
+      'photo1.jpg',
+      { x: 10, y: 10, width: 20, height: 20 },
+      null
+    );
     region.manuallyObscured = true;
 
     const { container } = render(PhotoRegionOverlay, {

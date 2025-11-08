@@ -93,7 +93,8 @@ describe('cascades listing load', () => {
 
     let capturedUrl: URL | null = null;
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
-      const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
+      const url =
+        typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
       capturedUrl = new URL(url);
       return createJsonResponse(responsePayload, { status: 200 });
     });

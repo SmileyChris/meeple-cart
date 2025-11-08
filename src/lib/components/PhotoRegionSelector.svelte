@@ -1,7 +1,12 @@
 <script lang="ts">
   import type { PhotoRegion } from '$lib/types/photo-region';
   import type { ItemRecord, ListingRecord } from '$lib/types/listing';
-  import { createRectangleRegion, createPolygonRegion, isRectangleCoordinates, isPolygonCoordinates } from '$lib/types/photo-region';
+  import {
+    createRectangleRegion,
+    createPolygonRegion,
+    isRectangleCoordinates,
+    isPolygonCoordinates,
+  } from '$lib/types/photo-region';
   import {
     rectanglePixelsToPercent,
     rectanglePercentToPixels,
@@ -57,7 +62,9 @@
   let polygonPoints = $state<Array<{ x: number; y: number }>>([]);
 
   // Regions
-  let regions = $state<PhotoRegion[]>([...existingRegions.filter(r => r.photoId === photoFilename)]);
+  let regions = $state<PhotoRegion[]>([
+    ...existingRegions.filter((r) => r.photoId === photoFilename),
+  ]);
   let selectedRegionId = $state<string | null>(null);
   let editingRegionId = $state<string | null>(null);
 
@@ -104,12 +111,7 @@
     if (isDrawingRect) {
       ctx.strokeStyle = '#34d399';
       ctx.lineWidth = 2;
-      ctx.strokeRect(
-        rectStartX,
-        rectStartY,
-        rectCurrentX - rectStartX,
-        rectCurrentY - rectStartY
-      );
+      ctx.strokeRect(rectStartX, rectStartY, rectCurrentX - rectStartX, rectCurrentY - rectStartY);
     } else if (isDrawingPolygon && polygonPoints.length > 0) {
       ctx.strokeStyle = '#34d399';
       ctx.lineWidth = 2;
@@ -346,7 +348,9 @@
 </script>
 
 <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
-  <div class="max-h-[90vh] w-full max-w-7xl overflow-y-auto rounded-xl border border-subtle bg-surface-card">
+  <div
+    class="max-h-[90vh] w-full max-w-7xl overflow-y-auto rounded-xl border border-subtle bg-surface-card"
+  >
     <!-- Header -->
     <div class="sticky top-0 z-10 border-b border-subtle bg-surface-card p-6">
       <div class="flex items-center justify-between">
@@ -472,9 +476,7 @@
               {@const gameName = getGameName(region.gameId)}
               <div
                 class={`cursor-pointer rounded-lg border p-3 transition ${
-                  selectedRegionId === region.id
-                    ? 'border-accent bg-accent/5'
-                    : 'border-subtle'
+                  selectedRegionId === region.id ? 'border-accent bg-accent/5' : 'border-subtle'
                 }`}
                 onclick={() => selectRegion(region.id)}
                 role="button"
@@ -483,10 +485,13 @@
                 <div class="mb-2 flex items-start justify-between">
                   <div>
                     <p class="text-sm font-medium text-primary">
-                      {region.type === 'rectangle' ? '□' : '⬡'} {gameName}
+                      {region.type === 'rectangle' ? '□' : '⬡'}
+                      {gameName}
                     </p>
                     <p class="text-xs text-muted">
-                      {region.type} · {region.manuallyObscured ? 'Manual obscure' : 'Linked to game'}
+                      {region.type} · {region.manuallyObscured
+                        ? 'Manual obscure'
+                        : 'Linked to game'}
                     </p>
                   </div>
 

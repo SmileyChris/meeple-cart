@@ -48,10 +48,12 @@
       ? 'px-2 py-0.5 text-xs gap-1'
       : size === 'large'
         ? 'px-4 py-2 text-base gap-2'
-        : 'px-3 py-1 text-sm gap-1.5',
+        : 'px-3 py-1 text-sm gap-1.5'
   );
 
-  let iconSize = $derived(size === 'small' ? 'text-sm' : size === 'large' ? 'text-lg' : 'text-base');
+  let iconSize = $derived(
+    size === 'small' ? 'text-sm' : size === 'large' ? 'text-lg' : 'text-base'
+  );
 </script>
 
 <span

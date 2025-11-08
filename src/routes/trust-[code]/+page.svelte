@@ -71,12 +71,8 @@
 
       // Update verifier success count
       await pb.collection('verifier_settings').update(data.link.verifier, {
-        success_count: data.verifierSettings
-          ? data.verifierSettings.success_count + 1
-          : 1,
-        karma_earned: data.verifierSettings
-          ? data.verifierSettings.karma_earned + 50
-          : 50, // Bonus 50 karma for completed verification
+        success_count: data.verifierSettings ? data.verifierSettings.success_count + 1 : 1,
+        karma_earned: data.verifierSettings ? data.verifierSettings.karma_earned + 50 : 50, // Bonus 50 karma for completed verification
       });
 
       // Create verification pair to prevent re-verification
@@ -183,12 +179,16 @@
           <div class="text-center">
             <span class="text-6xl">📱</span>
             <h2 class="mt-4 text-2xl font-bold text-primary">Verify Your Phone</h2>
-            <p class="mt-2 text-muted">
-              Enter the phone number where you received this link
-            </p>
+            <p class="mt-2 text-muted">Enter the phone number where you received this link</p>
           </div>
 
-          <form onsubmit={(e) => { e.preventDefault(); handleVerify(); }} class="mt-8 space-y-6">
+          <form
+            onsubmit={(e) => {
+              e.preventDefault();
+              handleVerify();
+            }}
+            class="mt-8 space-y-6"
+          >
             <div>
               <label for="phone" class="block text-sm font-medium text-secondary">
                 Phone Number
@@ -202,9 +202,7 @@
                 autofocus
                 class="mt-1 block w-full rounded-md border border-subtle bg-surface-body px-4 py-3 text-primary placeholder-muted"
               />
-              <p class="mt-1 text-xs text-muted">
-                Must match the number this link was sent to
-              </p>
+              <p class="mt-1 text-xs text-muted">Must match the number this link was sent to</p>
             </div>
 
             <button
@@ -219,7 +217,9 @@
       {:else if step === 'verifying'}
         <!-- Verifying -->
         <div class="rounded-xl border border-subtle bg-surface-card p-8 text-center">
-          <div class="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-accent/20 border-t-accent"></div>
+          <div
+            class="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-accent/20 border-t-accent"
+          ></div>
           <h2 class="mt-4 text-2xl font-bold text-primary">Verifying...</h2>
           <p class="mt-2 text-muted">Please wait while we verify your phone number</p>
         </div>
@@ -228,9 +228,7 @@
         <div class="rounded-xl border border-emerald-500/80 bg-emerald-500/10 p-8 text-center">
           <span class="text-6xl">🎉</span>
           <h2 class="mt-4 text-2xl font-bold text-emerald-200">Verification Complete!</h2>
-          <p class="mt-2 text-emerald-200/80">
-            Your phone number has been verified successfully.
-          </p>
+          <p class="mt-2 text-emerald-200/80">Your phone number has been verified successfully.</p>
           <div class="mt-6 rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-4">
             <p class="text-sm text-emerald-200">
               <strong>You can now:</strong>

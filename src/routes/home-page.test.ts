@@ -110,7 +110,8 @@ describe('home page load function', () => {
     };
 
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
-      const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
+      const url =
+        typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
 
       if (url.includes('/collections/listings/records')) {
         return createJsonResponse(listingsPayload, { status: 200 });
@@ -170,8 +171,7 @@ describe('home page load function', () => {
       listingType: 'trade',
       ownerName: 'Chris',
       ownerId: 'owner-1',
-      coverImage:
-        'https://pb.example/api/files/abc123/listing-1/cover.jpg?thumb=800x600',
+      coverImage: 'https://pb.example/api/files/abc123/listing-1/cover.jpg?thumb=800x600',
       href: '/listings/listing-1',
     });
     expect(listing.games).toEqual([
@@ -210,8 +210,7 @@ describe('home page load function', () => {
         userName: 'Morgan',
         userLocation: 'Auckland',
         listingHref: '/listings/listing-1',
-        thumbnail:
-          'https://pb.example/api/files/abc123/listing-1/activity-cover.jpg?thumb=100x100',
+        thumbnail: 'https://pb.example/api/files/abc123/listing-1/activity-cover.jpg?thumb=100x100',
       },
     ]);
   });
@@ -220,7 +219,8 @@ describe('home page load function', () => {
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
-      const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
+      const url =
+        typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
 
       if (url.includes('/collections/listings/records')) {
         return createJsonResponse({ error: 'fail' }, { status: 500, statusText: 'Server error' });

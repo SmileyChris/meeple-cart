@@ -133,7 +133,7 @@ export function getTrustTierInfo(tier: TrustTier): TrustTierInfo {
 export function getBadgeText(
   tier: TrustTier,
   accountAgeDays: number,
-  vouchedTrades: number,
+  vouchedTrades: number
 ): string {
   const info = getTrustTierInfo(tier);
 
@@ -217,7 +217,7 @@ export function formatAccountAge(joinedDate: string | Date): string {
 export function getNextTierProgress(
   tier: TrustTier,
   accountAgeDays: number,
-  vouchedTrades: number,
+  vouchedTrades: number
 ): {
   nextTier: TrustTier | null;
   requirements: { label: string; current: number; needed: number; met: boolean }[];

@@ -79,16 +79,19 @@ Implement the trade workflow following the day-by-day plan in MVP_IMPLEMENTATION
 ### Critical Architecture Decisions
 
 **✅ Client-Side Only Architecture**
+
 - No `+page.server.ts` files (we removed them during Svelte 5 migration)
 - All routes use `+page.ts` loaders with client-side PocketBase SDK
 - Import from `$lib/pocketbase` (not `$lib/server/*` - that's for PocketBase hooks only)
 - Use Svelte 5 runes (`$state`, `$derived`, `$effect`) not reactive statements (`$:`)
 
 **✅ Event Handlers**
+
 - Use new syntax: `onclick={handler}` not `on:click={handler}`
 - Same for `onsubmit`, `onchange`, etc.
 
 **✅ PocketBase Access**
+
 ```typescript
 import { pb, currentUser } from '$lib/pocketbase';
 
@@ -131,6 +134,7 @@ src/
 ### PocketBase Integration
 
 **Schema Location:**
+
 - `services/pocketbase/schema/pb_schema.json` - Complete schema (11 collections)
 - `services/pocketbase/migrations/` - 5 migration files (all applied)
 
@@ -178,6 +182,7 @@ src/
 ```
 
 **TypeScript Types:**
+
 - `src/lib/types/pocketbase.ts` - Generated types for all collections
 - `src/lib/types/listing.ts` - Domain models for listings/games
 - Use these types everywhere for type safety
@@ -224,9 +229,11 @@ Each day in the MVP plan follows this pattern:
 **Task:** Add "Propose Trade" button to listing detail page
 
 **Steps:**
+
 1. Open `src/routes/listings/[id]/+page.svelte`
 2. Find the contact/message section (around line 400-500)
 3. Add button that creates trade via PocketBase:
+
 ```svelte
 {#if $currentUser && $currentUser.id !== listing.owner}
   <button
@@ -237,7 +244,7 @@ Each day in the MVP plan follows this pattern:
           listing: listing.id,
           buyer: $currentUser.id,
           seller: listing.owner,
-          status: 'initiated'
+          status: 'initiated',
         });
 
         // Send notification
@@ -247,7 +254,7 @@ Each day in the MVP plan follows this pattern:
           title: 'New trade proposal',
           message: `${$currentUser.display_name} wants to trade for "${listing.title}"`,
           link: `/trades/${trade.id}`,
-          read: false
+          read: false,
         });
 
         goto(`/trades/${trade.id}`);
@@ -261,6 +268,7 @@ Each day in the MVP plan follows this pattern:
   </button>
 {/if}
 ```
+
 4. Test with two users (seller and buyer)
 5. Verify notification appears, redirects to trade detail
 6. Commit: `feat: add trade initiation from listing detail (Day 1)`
@@ -279,6 +287,7 @@ Each day in the MVP plan follows this pattern:
 ### Svelte 5 Specifics
 
 **✅ Do this:**
+
 ```svelte
 <script>
   import { pb, currentUser } from '$lib/pocketbase';
@@ -299,6 +308,7 @@ Each day in the MVP plan follows this pattern:
 ```
 
 **❌ Don't do this:**
+
 ```svelte
 <script>
   // Old Svelte 4 patterns - don't use these
@@ -354,6 +364,7 @@ try {
 ### Manual Testing (Required Daily)
 
 **Two-Browser Setup:**
+
 1. Open browser window 1: Register as "Alice"
 2. Open browser window 2 (incognito): Register as "Bob"
 3. Alice creates listing
@@ -362,9 +373,10 @@ try {
 6. Follow through complete workflow
 
 **Check:**
+
 - UI updates correctly
 - Notifications sent to right user
-- Database records created (check PocketBase admin at :8090/_/)
+- Database records created (check PocketBase admin at :8090/\_/)
 - Mobile view works (responsive design)
 
 ### Unit Tests (Write for Complex Logic)
@@ -453,7 +465,7 @@ async function createTrade(listingId: string, sellerId: string) {
     buyer: user.id,
     seller: sellerId,
     status: 'initiated',
-    created: new Date().toISOString()
+    created: new Date().toISOString(),
   });
 
   return trade;
@@ -465,7 +477,7 @@ async function createTrade(listingId: string, sellerId: string) {
 ```typescript
 // Load trade with related buyer, seller, and listing
 const trade = await pb.collection('trades').getOne(tradeId, {
-  expand: 'buyer,seller,listing,listing.owner'
+  expand: 'buyer,seller,listing,listing.owner',
 });
 
 // Access expanded data
@@ -485,7 +497,7 @@ async function notifyTradeUpdate(userId: string, tradeId: string, message: strin
     message: message,
     link: `/trades/${tradeId}`,
     read: false,
-    created: new Date().toISOString()
+    created: new Date().toISOString(),
   });
 }
 ```
@@ -499,7 +511,7 @@ async function notifyTradeUpdate(userId: string, tradeId: string, message: strin
   async function updateStatus(newStatus: string) {
     try {
       await pb.collection('trades').update(tradeId, {
-        status: newStatus
+        status: newStatus,
       });
       status = newStatus;
       // Send notifications, update related records, etc.
@@ -520,13 +532,9 @@ async function notifyTradeUpdate(userId: string, tradeId: string, message: strin
 
 <!-- Action buttons based on status -->
 {#if status === 'initiated' && isCounterparty}
-  <button onclick={() => updateStatus('confirmed')}>
-    Confirm Trade
-  </button>
+  <button onclick={() => updateStatus('confirmed')}> Confirm Trade </button>
 {:else if status === 'confirmed' && isSeller}
-  <button onclick={() => updateStatus('shipped')}>
-    Mark as Shipped
-  </button>
+  <button onclick={() => updateStatus('shipped')}> Mark as Shipped </button>
 {/if}
 ```
 
@@ -557,6 +565,7 @@ async function notifyTradeUpdate(userId: string, tradeId: string, message: strin
 ### Files You'll Edit Most
 
 **Week 1:**
+
 - `src/routes/listings/[id]/+page.svelte` - Add trade button
 - `src/routes/trades/[id]/+page.svelte` - Trade detail improvements
 - `src/routes/trades/[id]/+page.ts` - Load trade data
@@ -564,12 +573,14 @@ async function notifyTradeUpdate(userId: string, tradeId: string, message: strin
 - `src/routes/trades/+page.ts` - Load user's trades
 
 **Week 2:**
+
 - `src/routes/trades/[id]/+page.svelte` - Add feedback forms
 - `src/routes/users/[id]/+page.svelte` - Display reviews & vouches
 - `src/lib/components/TrustBadge.svelte` - NEW component
 - `src/lib/utils/trust-tiers.ts` - NEW utility
 
 **Week 3:**
+
 - `src/routes/browse/+page.svelte` - NEW page
 - `src/routes/browse/+page.ts` - NEW loader
 - `src/routes/wanted/+page.svelte` - NEW page
@@ -590,6 +601,7 @@ async function notifyTradeUpdate(userId: string, tradeId: string, message: strin
 ### PocketBase Admin Dashboard
 
 Access at http://127.0.0.1:8090/_/
+
 - View all records in collections
 - Check if trades/notifications were created
 - Verify relationships expanded correctly
@@ -613,7 +625,7 @@ console.log('Expanded buyer:', trade.expand?.buyer);
 **Fix:** Use `onclick={}` not `on:click={}`
 
 **Issue:** "$: is not allowed in runes mode"
-**Fix:** Use `$derived` for reactive values, `$effect` for side effects
+**Fix:** Use `$derived`for reactive values,`$effect` for side effects
 
 **Issue:** Trade not showing up in dashboard
 **Fix:** Check buyer/seller IDs match current user, check expand parameter

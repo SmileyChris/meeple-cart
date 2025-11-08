@@ -11,7 +11,9 @@
 <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 <a
   {href}
-  class="btn-ghost relative {isActive ? 'bg-[color:var(--accent-soft)] text-[color:var(--accent-strong)]' : ''}"
+  class="btn-ghost relative {isActive
+    ? 'bg-[color:var(--accent-soft)] text-[color:var(--accent-strong)]'
+    : ''}"
   aria-label={unreadCount > 0 ? `${unreadCount} unread notifications` : 'Notifications'}
 >
   <span class="flex items-center gap-2">

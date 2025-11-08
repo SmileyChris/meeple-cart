@@ -402,7 +402,9 @@
     </section>
 
     <!-- Trade Details -->
-    <section class="rounded-xl border border-subtle bg-surface-card transition-colors p-6 space-y-4">
+    <section
+      class="rounded-xl border border-subtle bg-surface-card transition-colors p-6 space-y-4"
+    >
       <h2 class="text-xl font-semibold text-primary">Trade Details</h2>
 
       <!-- Shipping Method -->

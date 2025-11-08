@@ -116,7 +116,9 @@
 
     try {
       // Remove photo from array
-      const updatedPhotos = photos.filter((p) => p.filename !== photoFilename).map((p) => p.filename);
+      const updatedPhotos = photos
+        .filter((p) => p.filename !== photoFilename)
+        .map((p) => p.filename);
 
       // Update listing
       const formData = new FormData();
@@ -236,9 +238,8 @@
         <div class="space-y-2">
           <h1 class="text-3xl font-semibold tracking-tight">Manage Photos</h1>
           <p class="text-sm text-muted">
-            for <a
-              href="/listings/{listing.id}"
-              class="text-accent hover:underline">{listing.title}</a
+            for <a href="/listings/{listing.id}" class="text-accent hover:underline"
+              >{listing.title}</a
             >
           </p>
         </div>
@@ -257,7 +258,9 @@
           <span class="text-muted">/ {maxPhotos} photos</span>
         </p>
         {#if canUploadMore}
-          <p class="text-xs text-muted">({remainingSlots} slot{remainingSlots !== 1 ? 's' : ''} remaining)</p>
+          <p class="text-xs text-muted">
+            ({remainingSlots} slot{remainingSlots !== 1 ? 's' : ''} remaining)
+          </p>
         {/if}
       </div>
     </header>
@@ -404,13 +407,18 @@
         </li>
         <li class="flex gap-2">
           <span class="text-accent">•</span>
+<<<<<<< Updated upstream
           <span>Click "Edit Regions" to map items to areas within the photo (coming in Phase 3)</span>
+=======
+          <span
+            >Click "Edit Regions" to map games to areas within the photo (coming in Phase 3)</span
+          >
+>>>>>>> Stashed changes
         </li>
         <li class="flex gap-2">
           <span class="text-accent">•</span>
           <span
-            >Delete photos by hovering over them and clicking "Delete" (requires
-            confirmation)</span
+            >Delete photos by hovering over them and clicking "Delete" (requires confirmation)</span
           >
         </li>
       </ul>

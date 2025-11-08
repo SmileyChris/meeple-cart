@@ -1,9 +1,6 @@
 <svelte:head>
   <title>Community Guidelines · Meeple Cart</title>
-  <meta
-    name="description"
-    content="Guidelines for respectful and safe trading on Meeple Cart"
-  />
+  <meta name="description" content="Guidelines for respectful and safe trading on Meeple Cart" />
 </svelte:head>
 
 <main class="space-y-10 bg-surface-body pb-16 transition-colors">
@@ -22,7 +19,8 @@
           Community Guidelines
         </h1>
         <p class="text-lg text-secondary">
-          Help us build a safe, welcoming, and trustworthy community for board game enthusiasts across Aotearoa.
+          Help us build a safe, welcoming, and trustworthy community for board game enthusiasts
+          across Aotearoa.
         </p>
       </div>
 
@@ -121,7 +119,9 @@
           <ul class="space-y-2 text-secondary">
             <li class="flex gap-2">
               <span class="text-accent">✓</span>
-              <span>Use the platform's messaging system - don't move to external chat immediately</span>
+              <span
+                >Use the platform's messaging system - don't move to external chat immediately</span
+              >
             </li>
             <li class="flex gap-2">
               <span class="text-accent">✓</span>
@@ -167,7 +167,9 @@
             </li>
             <li class="flex gap-2">
               <span class="text-accent">✓</span>
-              <span>Breaking a chain harms your reputation - only enter if you can follow through</span>
+              <span
+                >Breaking a chain harms your reputation - only enter if you can follow through</span
+              >
             </li>
           </ul>
         </div>
@@ -197,7 +199,9 @@
             </li>
             <li class="flex gap-2">
               <span class="text-rose-500">✗</span>
-              <span>Spamming, advertising unrelated products, or soliciting outside the platform</span>
+              <span
+                >Spamming, advertising unrelated products, or soliciting outside the platform</span
+              >
             </li>
             <li class="flex gap-2">
               <span class="text-rose-500">✗</span>
@@ -219,23 +223,40 @@
             <ul class="space-y-2">
               <li class="flex gap-2">
                 <span class="text-accent">1.</span>
-                <span>Try to resolve it directly with the other party through respectful communication</span>
+                <span
+                  >Try to resolve it directly with the other party through respectful communication</span
+                >
               </li>
               <li class="flex gap-2">
                 <span class="text-accent">2.</span>
-                <span>Start a discussion in the <a href="/discussions" class="text-accent hover:underline">Discussions</a> section to get community input</span>
+                <span
+                  >Start a discussion in the <a
+                    href="/discussions"
+                    class="text-accent hover:underline">Discussions</a
+                  > section to get community input</span
+                >
               </li>
               <li class="flex gap-2">
                 <span class="text-accent">3.</span>
-                <span>Share your experience (without naming users) to warn others and help the community learn</span>
+                <span
+                  >Share your experience (without naming users) to warn others and help the
+                  community learn</span
+                >
               </li>
               <li class="flex gap-2">
                 <span class="text-accent">4.</span>
-                <span>For serious issues, contact us at the <a href="/contact" class="text-accent hover:underline">contact page</a></span>
+                <span
+                  >For serious issues, contact us at the <a
+                    href="/contact"
+                    class="text-accent hover:underline">contact page</a
+                  ></span
+                >
               </li>
             </ul>
             <p class="text-sm text-muted">
-              Meeple Cart is a self-monitoring community. We rely on transparency, open communication, and community wisdom to maintain trust. Use your judgment and reputation system to decide who to trade with.
+              Meeple Cart is a self-monitoring community. We rely on transparency, open
+              communication, and community wisdom to maintain trust. Use your judgment and
+              reputation system to decide who to trade with.
             </p>
           </div>
         </div>
@@ -265,7 +286,12 @@
             </li>
             <li class="flex gap-2">
               <span class="text-accent">✓</span>
-              <span>Expect your privacy to be protected per our <a href="/terms" class="text-accent hover:underline">Privacy Policy</a></span>
+              <span
+                >Expect your privacy to be protected per our <a
+                  href="/terms"
+                  class="text-accent hover:underline">Privacy Policy</a
+                ></span
+              >
             </li>
           </ul>
         </div>
@@ -274,14 +300,14 @@
       <!-- Final Message -->
       <div class="rounded-xl border border-subtle bg-surface-card p-6 text-center">
         <p class="text-lg text-secondary">
-          These guidelines help keep Meeple Cart a place where everyone can enjoy trading and collecting board games safely. By using this platform, you agree to follow these rules.
+          These guidelines help keep Meeple Cart a place where everyone can enjoy trading and
+          collecting board games safely. By using this platform, you agree to follow these rules.
         </p>
         <p class="mt-4 text-sm text-muted">
-          Questions? <a href="/contact" class="text-accent hover:underline">Contact us</a> or check our <a href="/help" class="text-accent hover:underline">Help & FAQ</a>.
+          Questions? <a href="/contact" class="text-accent hover:underline">Contact us</a> or check
+          our <a href="/help" class="text-accent hover:underline">Help & FAQ</a>.
         </p>
-        <p class="mt-6 text-xs text-muted">
-          Last updated: January 2025
-        </p>
+        <p class="mt-6 text-xs text-muted">Last updated: January 2025</p>
       </div>
     </div>
   </section>

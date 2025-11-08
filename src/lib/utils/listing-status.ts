@@ -52,7 +52,7 @@ export async function logStatusChange(
     history.push(change);
 
     await pb.collection('listings').update(listingId, {
-      status_history: history
+      status_history: history,
     });
   } catch (err) {
     console.error('Failed to log status change:', err);

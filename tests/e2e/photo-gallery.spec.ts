@@ -41,7 +41,7 @@ test.describe('Photo Gallery Manager', () => {
     // (The /listings/new form is broken - uses method="POST" but no server action)
     const response = await request.post('http://127.0.0.1:8090/api/collections/listings/records', {
       headers: {
-        'Authorization': authData.token,
+        Authorization: authData.token,
         'Content-Type': 'application/json',
       },
       data: {

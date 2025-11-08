@@ -21,14 +21,14 @@ test.describe('Complete Trade Flow', () => {
     email: `trader-a-${timestamp}@test.com`,
     password: 'TestPassword123!',
     displayName: 'Trader Alice',
-    location: 'Wellington'
+    location: 'Wellington',
   };
 
   const userB = {
     email: `trader-b-${timestamp}@test.com`,
     password: 'TestPassword123!',
     displayName: 'Trader Bob',
-    location: 'Auckland'
+    location: 'Auckland',
   };
 
   test('complete trade from listing creation to feedback', async ({ page, context }) => {
@@ -168,7 +168,9 @@ test.describe('Complete Trade Flow', () => {
     await test.step('Both users complete trade', async () => {
       // User A completes
       await page.reload();
-      const completeButtonA = page.locator('button', { hasText: /complete.*trade|mark.*complete/i });
+      const completeButtonA = page.locator('button', {
+        hasText: /complete.*trade|mark.*complete/i,
+      });
       if (await completeButtonA.isVisible()) {
         await completeButtonA.click();
         await page.waitForTimeout(1000);
@@ -194,13 +196,17 @@ test.describe('Complete Trade Flow', () => {
       }
 
       // Rate 5 stars (look for star rating buttons)
-      const fiveStars = page.locator('button[aria-label*="5 star"]').or(page.locator('[data-rating="5"]'));
+      const fiveStars = page
+        .locator('button[aria-label*="5 star"]')
+        .or(page.locator('[data-rating="5"]'));
       if (await fiveStars.first().isVisible()) {
         await fiveStars.first().click();
       }
 
       // Leave review
-      const reviewTextarea = page.locator('textarea[name="review"]').or(page.locator('textarea[placeholder*="review"]'));
+      const reviewTextarea = page
+        .locator('textarea[name="review"]')
+        .or(page.locator('textarea[placeholder*="review"]'));
       if (await reviewTextarea.isVisible()) {
         await reviewTextarea.fill('Great trader! Item was as described.');
       }
@@ -216,18 +222,24 @@ test.describe('Complete Trade Flow', () => {
     await test.step('User B leaves feedback for User A', async () => {
       await userBPage.reload();
 
-      const feedbackButton = userBPage.locator('button', { hasText: /leave.*feedback|add.*feedback/i });
+      const feedbackButton = userBPage.locator('button', {
+        hasText: /leave.*feedback|add.*feedback/i,
+      });
       if (await feedbackButton.isVisible()) {
         await feedbackButton.click();
         await userBPage.waitForTimeout(500);
       }
 
-      const fiveStars = userBPage.locator('button[aria-label*="5 star"]').or(userBPage.locator('[data-rating="5"]'));
+      const fiveStars = userBPage
+        .locator('button[aria-label*="5 star"]')
+        .or(userBPage.locator('[data-rating="5"]'));
       if (await fiveStars.first().isVisible()) {
         await fiveStars.first().click();
       }
 
-      const reviewTextarea = userBPage.locator('textarea[name="review"]').or(userBPage.locator('textarea[placeholder*="review"]'));
+      const reviewTextarea = userBPage
+        .locator('textarea[name="review"]')
+        .or(userBPage.locator('textarea[placeholder*="review"]'));
       if (await reviewTextarea.isVisible()) {
         await reviewTextarea.fill('Excellent seller! Fast shipping.');
       }
@@ -252,12 +264,16 @@ test.describe('Complete Trade Flow', () => {
         await page.waitForTimeout(500);
       }
 
-      const vouchTextarea = page.locator('textarea[name="message"]').or(page.locator('textarea[placeholder*="vouch"]'));
+      const vouchTextarea = page
+        .locator('textarea[name="message"]')
+        .or(page.locator('textarea[placeholder*="vouch"]'));
       if (await vouchTextarea.isVisible()) {
         await vouchTextarea.fill('Trustworthy trader!');
       }
 
-      const submitButton = page.locator('button[type="submit"]', { hasText: /submit.*vouch|vouch/i });
+      const submitButton = page.locator('button[type="submit"]', {
+        hasText: /submit.*vouch|vouch/i,
+      });
       if (await submitButton.isVisible()) {
         await submitButton.click();
         await page.waitForTimeout(1000);
@@ -273,12 +289,16 @@ test.describe('Complete Trade Flow', () => {
         await userBPage.waitForTimeout(500);
       }
 
-      const vouchTextarea = userBPage.locator('textarea[name="message"]').or(userBPage.locator('textarea[placeholder*="vouch"]'));
+      const vouchTextarea = userBPage
+        .locator('textarea[name="message"]')
+        .or(userBPage.locator('textarea[placeholder*="vouch"]'));
       if (await vouchTextarea.isVisible()) {
         await vouchTextarea.fill('Great experience!');
       }
 
-      const submitButton = userBPage.locator('button[type="submit"]', { hasText: /submit.*vouch|vouch/i });
+      const submitButton = userBPage.locator('button[type="submit"]', {
+        hasText: /submit.*vouch|vouch/i,
+      });
       if (await submitButton.isVisible()) {
         await submitButton.click();
         await userBPage.waitForTimeout(1000);

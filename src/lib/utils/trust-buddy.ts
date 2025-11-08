@@ -170,7 +170,7 @@ export function canBecomeVerifier(
   phoneVerified: boolean,
   tradeCount: number,
   vouchCount: number,
-  accountAgeDays: number,
+  accountAgeDays: number
 ): boolean {
   if (!phoneVerified) return false;
   if (accountAgeDays < 7) return false;
@@ -189,7 +189,7 @@ export function canBecomeVerifier(
 export function canRequestVerification(
   phoneVerified: boolean,
   hasPendingRequest: boolean,
-  phoneNumber?: string,
+  phoneNumber?: string
 ): boolean {
   if (phoneVerified) return false; // Already verified
   if (hasPendingRequest) return false; // Already has pending request
@@ -227,7 +227,7 @@ export function formatKarma(karma: number): string {
  * Get verifier badge based on verifications completed
  */
 export function getVerifierBadge(
-  totalVerifications: number,
+  totalVerifications: number
 ): { name: string; icon: string; color: string } | null {
   if (totalVerifications >= 100) {
     return { name: 'Trust Legend', icon: '👑', color: 'text-violet-300' };

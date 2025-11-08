@@ -83,10 +83,12 @@ No interface to add, remove, or reorder photos after listing is published.
 #### Required Implementation
 
 **New Page:**
+
 - `src/routes/listings/[id]/photos/+page.svelte` - Gallery manager UI
 - `src/routes/listings/[id]/photos/+page.ts` - Load listing data
 
 **Features:**
+
 - Photo grid with drag-and-drop reordering (using HTML5 drag API)
 - Upload button (opens file picker)
 - Delete button per photo (with confirmation)
@@ -95,6 +97,7 @@ No interface to add, remove, or reorder photos after listing is published.
 - Save indicator (auto-save on changes)
 
 **PocketBase Operations:**
+
 ```typescript
 // Upload new photo
 const formData = new FormData();
@@ -111,6 +114,7 @@ await pb.collection('listings').update(listingId, { photos: reorderedArray });
 ```
 
 **Acceptance Criteria:**
+
 - [ ] Owner can upload additional photos (respecting 6 photo limit)
 - [ ] Owner can delete photos (with "Are you sure?" confirmation)
 - [ ] Owner can reorder photos via drag-and-drop
@@ -149,6 +153,7 @@ No UI for defining regions within photos that correspond to games.
 #### Data Structure
 
 **New field on listings table:**
+
 ```typescript
 // Add to listings collection schema
 {
@@ -160,24 +165,25 @@ No UI for defining regions within photos that correspond to games.
 ```
 
 **Data format:**
+
 ```typescript
 type PhotoRegionMap = PhotoRegion[];
 
 interface PhotoRegion {
-  id: string;                    // UUID
-  photoId: string;               // Filename of photo
-  gameId: string | null;         // Linked game (null for manual obscures)
+  id: string; // UUID
+  photoId: string; // Filename of photo
+  gameId: string | null; // Linked game (null for manual obscures)
   type: 'rectangle' | 'polygon';
   coordinates: RectangleCoordinates | PolygonCoordinates;
-  manuallyObscured: boolean;     // True if no game link
-  created: string;               // ISO date
-  updated: string;               // ISO date
+  manuallyObscured: boolean; // True if no game link
+  created: string; // ISO date
+  updated: string; // ISO date
 }
 
 interface RectangleCoordinates {
-  x: number;      // Left position (%)
-  y: number;      // Top position (%)
-  width: number;  // Width (%)
+  x: number; // Left position (%)
+  y: number; // Top position (%)
+  width: number; // Width (%)
   height: number; // Height (%)
 }
 
@@ -191,9 +197,11 @@ interface PolygonCoordinates {
 #### Required Implementation
 
 **New Component:**
+
 - `src/lib/components/PhotoRegionSelector.svelte`
 
 **Features:**
+
 - Canvas-based region drawing
 - Tool selector (Rectangle / Polygon radio buttons)
 - **Rectangle mode:**
@@ -215,6 +223,7 @@ interface PolygonCoordinates {
 - Save button (updates listing.photo_region_map)
 
 **Canvas Implementation:**
+
 ```typescript
 // Drawing rectangle
 let isDrawing = false;
@@ -259,6 +268,7 @@ function onMouseUp(e: MouseEvent) {
 ```
 
 **Polygon Implementation:**
+
 ```typescript
 let polygonPoints: Array<{ x: number; y: number }> = [];
 let isDrawingPolygon = false;
@@ -271,17 +281,11 @@ function onPolygonClick(e: MouseEvent) {
   // Check if clicking near first point (close polygon)
   if (polygonPoints.length >= 3) {
     const firstPoint = polygonPoints[0];
-    const distance = Math.sqrt(
-      Math.pow(x - firstPoint.x, 2) + Math.pow(y - firstPoint.y, 2)
-    );
+    const distance = Math.sqrt(Math.pow(x - firstPoint.x, 2) + Math.pow(y - firstPoint.y, 2));
 
     if (distance < 10) {
       // Close polygon
-      const coords = polygonPixelsToPercent(
-        polygonPoints,
-        canvas.width,
-        canvas.height
-      );
+      const coords = polygonPixelsToPercent(polygonPoints, canvas.width, canvas.height);
       // Save polygon
       polygonPoints = [];
       return;
@@ -320,6 +324,7 @@ function drawPolygonPreview() {
 ```
 
 **Utility Functions:**
+
 - `src/lib/utils/photo-regions.ts` ✅ (already created)
   - `pixelsToPercent()`, `percentToPixels()`
   - `rectanglePixelsToPercent()`, `rectanglePercentToPixels()`
@@ -328,6 +333,7 @@ function drawPolygonPreview() {
   - `shouldBlurRegion()`
 
 **Acceptance Criteria:**
+
 - [ ] Can draw rectangular regions via click-drag
 - [ ] Can draw polygon regions via point-by-point clicks
 - [ ] Polygon closes when clicking first point or double-clicking
@@ -354,6 +360,7 @@ No visual rendering of photo regions on listing detail page. No automatic blurri
 #### Expected Behavior
 
 **On Listing Detail Page:**
+
 1. Load `listing.photo_region_map` from PocketBase
 2. For each region on the active photo:
    - Render semi-transparent overlay at region coordinates
@@ -365,6 +372,7 @@ No visual rendering of photo regions on listing detail page. No automatic blurri
 3. Clicking a region scrolls to that game in the game list
 
 **Blur Effect:**
+
 ```css
 .photo-region {
   position: absolute;
@@ -402,21 +410,24 @@ No visual rendering of photo regions on listing detail page. No automatic blurri
 #### Required Implementation
 
 **New Component:**
+
 - `src/lib/components/PhotoRegionOverlay.svelte`
 
 **Props:**
+
 ```typescript
 interface Props {
-  regions: PhotoRegion[];          // All regions for this photo
-  photoId: string;                 // Current photo filename
-  games: GameRecord[];             // All games in listing
-  imageWidth: number;              // Actual displayed image width
-  imageHeight: number;             // Actual displayed image height
+  regions: PhotoRegion[]; // All regions for this photo
+  photoId: string; // Current photo filename
+  games: GameRecord[]; // All games in listing
+  imageWidth: number; // Actual displayed image width
+  imageHeight: number; // Actual displayed image height
   onRegionClick?: (gameId: string) => void; // Callback for clicking region
 }
 ```
 
 **Component Logic:**
+
 ```svelte
 <script lang="ts">
   import { percentToPixels, shouldBlurRegion } from '$lib/utils/photo-regions';
@@ -424,17 +435,17 @@ interface Props {
   let { regions, photoId, games, imageWidth, imageHeight, onRegionClick } = $props();
 
   // Filter regions for this photo
-  const photoRegions = $derived(regions.filter(r => r.photoId === photoId));
+  const photoRegions = $derived(regions.filter((r) => r.photoId === photoId));
 
   // Get game status for each region
   function getGameStatus(gameId: string | null) {
     if (!gameId) return undefined;
-    return games.find(g => g.id === gameId)?.status;
+    return games.find((g) => g.id === gameId)?.status;
   }
 
   function getGameName(gameId: string | null) {
     if (!gameId) return 'Manual obscure';
-    return games.find(g => g.id === gameId)?.title ?? 'Unknown game';
+    return games.find((g) => g.id === gameId)?.title ?? 'Unknown game';
   }
 
   function handleRegionClick(region: PhotoRegion) {
@@ -474,7 +485,7 @@ interface Props {
     {:else}
       {@const coords = region.coordinates}
       {@const pixels = polygonPercentToPixels(coords, imageWidth, imageHeight)}
-      {@const pathData = `M ${pixels.map(p => `${p.x},${p.y}`).join(' L ')} Z`}
+      {@const pathData = `M ${pixels.map((p) => `${p.x},${p.y}`).join(' L ')} Z`}
 
       <svg
         class="polygon-region"
@@ -624,6 +635,7 @@ Modify `src/routes/listings/[id]/+page.svelte`:
 ```
 
 **Acceptance Criteria:**
+
 - [ ] Regions display as overlays on photos
 - [ ] Rectangular regions render with correct position/size
 - [ ] Polygon regions render with correct shape
@@ -648,6 +660,7 @@ No links or navigation to the photo gallery manager from existing pages.
 #### Expected Flow
 
 **From Listing Detail Page (Owner View):**
+
 ```
 1. Owner views their own listing
 2. Sees "Manage Photos" button next to "Edit prices" and "Manage games"
@@ -655,6 +668,7 @@ No links or navigation to the photo gallery manager from existing pages.
 ```
 
 **From Listing Creation:**
+
 ```
 Option A: Inline during creation
 1. User uploads photos in create form
@@ -677,15 +691,9 @@ Add button in owner actions section:
 ```svelte
 {#if $currentUser && $currentUser.id === listing.owner}
   <div class="owner-actions">
-    <a href="/listings/{listing.id}/edit" class="btn-secondary">
-      Edit prices
-    </a>
-    <a href="/listings/{listing.id}/manage" class="btn-secondary">
-      Manage games
-    </a>
-    <a href="/listings/{listing.id}/photos" class="btn-secondary">
-      Manage photos
-    </a>
+    <a href="/listings/{listing.id}/edit" class="btn-secondary"> Edit prices </a>
+    <a href="/listings/{listing.id}/manage" class="btn-secondary"> Manage games </a>
+    <a href="/listings/{listing.id}/photos" class="btn-secondary"> Manage photos </a>
   </div>
 {/if}
 ```
@@ -707,6 +715,7 @@ Add link after successful creation:
 ```
 
 **Acceptance Criteria:**
+
 - [ ] "Manage Photos" button visible to listing owner on detail page
 - [ ] Button not visible to non-owners
 - [ ] Button navigates to `/listings/[id]/photos`
@@ -721,6 +730,7 @@ Add link after successful creation:
 **Migration Required:** Yes
 
 **SQL Migration:**
+
 ```sql
 -- Add photo_region_map field to listings collection
 -- This is a JSON field that stores an array of PhotoRegion objects
@@ -729,6 +739,7 @@ ALTER TABLE listings ADD COLUMN photo_region_map JSON;
 ```
 
 **PocketBase Schema Update:**
+
 ```json
 {
   "id": "photo_region_map_field",
@@ -743,6 +754,7 @@ ALTER TABLE listings ADD COLUMN photo_region_map JSON;
 **Default Value:** `[]` (empty array)
 
 **Data Format:**
+
 ```json
 [
   {
@@ -787,9 +799,11 @@ ALTER TABLE listings ADD COLUMN photo_region_map JSON;
 ### New Types
 
 **Files to create:**
+
 - ✅ `src/lib/types/photo-region.ts` (already created)
 
 **Types defined:**
+
 ```typescript
 export type RegionType = 'rectangle' | 'polygon';
 
@@ -823,6 +837,7 @@ export interface PhotoRegion {
 **Modify:** `src/lib/types/pocketbase.ts`
 
 Add to `ListingRecord`:
+
 ```typescript
 export interface ListingRecord {
   // ... existing fields
@@ -839,6 +854,7 @@ export interface ListingRecord {
 **File:** `src/lib/utils/photo-regions.test.ts`
 
 Test cases:
+
 - [ ] `pixelsToPercent()` converts correctly
 - [ ] `percentToPixels()` converts correctly
 - [ ] `rectanglePixelsToPercent()` handles edge cases
@@ -856,6 +872,7 @@ Test cases:
 **File:** `tests/e2e/photo-gallery.spec.ts`
 
 Test scenarios:
+
 - [ ] Owner can access photo gallery manager
 - [ ] Non-owner cannot access photo gallery manager
 - [ ] Owner can upload new photo
@@ -875,6 +892,7 @@ Test scenarios:
 ### Manual Testing Checklist
 
 **Photo Management:**
+
 - [ ] Upload photo at 6 photo limit (should show error/disable button)
 - [ ] Delete all photos (should show "No photos" message)
 - [ ] Drag-drop photo order (should persist after page reload)
@@ -882,6 +900,7 @@ Test scenarios:
 - [ ] Upload unsupported format (.gif - should show error)
 
 **Region Selection:**
+
 - [ ] Draw rectangle that exceeds image bounds (should constrain)
 - [ ] Draw polygon with <3 points (should not allow save)
 - [ ] Draw overlapping regions (should allow)
@@ -891,6 +910,7 @@ Test scenarios:
 - [ ] Delete region with associated game (should not affect game record)
 
 **Region Display:**
+
 - [ ] View listing with no regions (should show photos normally)
 - [ ] View listing with rectangular regions (should display overlays)
 - [ ] View listing with polygon regions (should display correct shapes)
@@ -901,6 +921,7 @@ Test scenarios:
 - [ ] Resize browser window (regions should scale proportionally)
 
 **Permissions:**
+
 - [ ] Try to access /listings/[id]/photos as non-owner (should redirect)
 - [ ] Try to access /listings/[id]/photos when not logged in (should redirect to login)
 
@@ -1013,6 +1034,7 @@ Test scenarios:
 ## Implementation Order
 
 ### Phase 1: Foundation (2 hours)
+
 1. ✅ Create type definitions (`photo-region.ts`)
 2. ✅ Create utility functions (`photo-regions.ts`)
 3. Add database field (`photo_region_map` to listings)
@@ -1020,6 +1042,7 @@ Test scenarios:
 5. Write unit tests for utilities
 
 ### Phase 2: Photo Gallery Manager (3-4 hours)
+
 1. Create page route (`/listings/[id]/photos`)
 2. Build photo grid UI
 3. Implement photo upload
@@ -1028,6 +1051,7 @@ Test scenarios:
 6. Add "Edit Regions" button per photo
 
 ### Phase 3: Region Selection Tool (4-6 hours)
+
 1. Create `PhotoRegionSelector` component
 2. Implement canvas overlay
 3. Implement rectangle drawing mode
@@ -1037,6 +1061,7 @@ Test scenarios:
 7. Implement save to PocketBase
 
 ### Phase 4: Region Display & Blur (2-3 hours)
+
 1. Create `PhotoRegionOverlay` component
 2. Render rectangular regions
 3. Render polygon regions
@@ -1046,6 +1071,7 @@ Test scenarios:
 7. Update listing detail page
 
 ### Phase 5: Integration (1 hour)
+
 1. Add "Manage Photos" button to listing detail
 2. Add permission checks (owner-only)
 3. (Optional) Add link after listing creation
@@ -1089,16 +1115,19 @@ Test scenarios:
 ## Success Metrics
 
 **Adoption:**
+
 - % of listings with photos
 - % of multi-game listings using regions
 - Average regions per photo
 
 **Engagement:**
+
 - Click-through rate on regions
 - Time spent on listings with regions vs without
 - User feedback on clarity
 
 **Quality:**
+
 - % of regions linked to games (vs manual obscures)
 - % of sold games with blurred regions
 - Error rate during region creation

@@ -111,7 +111,7 @@ async function initiateTrade() {
   try {
     // Check for duplicate trades
     const existing = await pb.collection('trades').getList(1, 1, {
-      filter: `listing = "${listing.id}" && buyer = "${$currentUser.id}"`
+      filter: `listing = "${listing.id}" && buyer = "${$currentUser.id}"`,
     });
 
     if (existing.items.length > 0) {
@@ -124,12 +124,12 @@ async function initiateTrade() {
       listing: listing.id,
       buyer: $currentUser.id,
       seller: listing.owner,
-      status: 'initiated'
+      status: 'initiated',
     });
 
     // Update listing status to pending
     await pb.collection('listings').update(listing.id, {
-      status: 'pending'
+      status: 'pending',
     });
 
     // Send notification to seller
@@ -139,7 +139,7 @@ async function initiateTrade() {
       title: 'New trade proposal',
       message: `${$currentUser.display_name} wants to trade for "${listing.title}"`,
       link: `/trades/${trade.id}`,
-      read: false
+      read: false,
     });
 
     // Redirect to trade detail
@@ -157,9 +157,7 @@ async function initiateTrade() {
 <!-- src/routes/listings/[id]/+page.svelte -->
 <!-- Add to sidebar contact section -->
 {#if $currentUser && $currentUser.id !== listing.owner}
-  <button class="btn-primary w-full" onclick={initiateTrade}>
-    Propose Trade
-  </button>
+  <button class="btn-primary w-full" onclick={initiateTrade}> Propose Trade </button>
 {/if}
 ```
 
@@ -225,7 +223,7 @@ export const load: PageLoad = async ({ params }) => {
 
   try {
     const trade = await pb.collection('trades').getOne(params.id, {
-      expand: 'listing,buyer,seller,listing.games_via_listing'
+      expand: 'listing,buyer,seller,listing.games_via_listing',
     });
 
     // Verify user is participant
@@ -250,7 +248,7 @@ import { invalidate } from '$app/navigation';
 async function confirmReceipt() {
   try {
     await pb.collection('trades').update(trade.id, {
-      status: 'confirmed'
+      status: 'confirmed',
     });
 
     // Notify seller
@@ -260,7 +258,7 @@ async function confirmReceipt() {
       title: 'Buyer confirmed receipt',
       message: `${$currentUser.display_name} confirmed receipt of the trade`,
       link: `/trades/${trade.id}`,
-      read: false
+      read: false,
     });
 
     // Reload trade data
@@ -274,7 +272,7 @@ async function confirmReceipt() {
 async function markShipped() {
   try {
     await pb.collection('trades').update(trade.id, {
-      status: 'shipped'
+      status: 'shipped',
     });
 
     // Notify buyer
@@ -284,7 +282,7 @@ async function markShipped() {
       title: 'Item shipped',
       message: `${$currentUser.display_name} marked the item as shipped`,
       link: `/trades/${trade.id}`,
-      read: false
+      read: false,
     });
 
     // Reload trade data
@@ -300,12 +298,12 @@ async function completeTrade() {
     // Update trade status
     await pb.collection('trades').update(trade.id, {
       status: 'completed',
-      completed_date: new Date().toISOString()
+      completed_date: new Date().toISOString(),
     });
 
     // Update listing status
     await pb.collection('listings').update(trade.listing, {
-      status: 'completed'
+      status: 'completed',
     });
 
     // Update all games to sold
@@ -313,7 +311,7 @@ async function completeTrade() {
     if (listing?.expand?.games_via_listing) {
       for (const game of listing.expand.games_via_listing) {
         await pb.collection('games').update(game.id, {
-          status: 'sold'
+          status: 'sold',
         });
       }
     }
@@ -321,12 +319,12 @@ async function completeTrade() {
     // Increment trade counts
     const buyer = await pb.collection('users').getOne(trade.buyer);
     await pb.collection('users').update(trade.buyer, {
-      trade_count: buyer.trade_count + 1
+      trade_count: buyer.trade_count + 1,
     });
 
     const seller = await pb.collection('users').getOne(trade.seller);
     await pb.collection('users').update(trade.seller, {
-      trade_count: seller.trade_count + 1
+      trade_count: seller.trade_count + 1,
     });
 
     // Send completion notifications
@@ -336,7 +334,7 @@ async function completeTrade() {
       title: 'Trade completed!',
       message: 'Please leave feedback for your trading partner',
       link: `/trades/${trade.id}`,
-      read: false
+      read: false,
     });
 
     await pb.collection('notifications').create({
@@ -345,7 +343,7 @@ async function completeTrade() {
       title: 'Trade completed!',
       message: 'Please leave feedback for your trading partner',
       link: `/trades/${trade.id}`,
-      read: false
+      read: false,
     });
 
     // Reload trade data
@@ -363,7 +361,7 @@ async function disputeTrade() {
   try {
     await pb.collection('trades').update(trade.id, {
       status: 'disputed',
-      dispute_reason: reason
+      dispute_reason: reason,
     });
 
     // Notify both parties
@@ -373,7 +371,7 @@ async function disputeTrade() {
       title: 'Trade disputed',
       message: 'A dispute has been raised. A moderator will review.',
       link: `/trades/${trade.id}`,
-      read: false
+      read: false,
     });
 
     await pb.collection('notifications').create({
@@ -382,7 +380,7 @@ async function disputeTrade() {
       title: 'Trade disputed',
       message: 'A dispute has been raised. A moderator will review.',
       link: `/trades/${trade.id}`,
-      read: false
+      read: false,
     });
 
     // Reload trade data
@@ -425,27 +423,19 @@ async function disputeTrade() {
 <!-- Action Buttons (conditional based on status & role) -->
 <div class="flex gap-2 mt-4">
   {#if isSeller && status === 'initiated'}
-    <button class="btn-primary" onclick={markShipped}>
-      Mark as Shipped
-    </button>
+    <button class="btn-primary" onclick={markShipped}> Mark as Shipped </button>
   {/if}
 
   {#if isBuyer && status === 'shipped'}
-    <button class="btn-primary" onclick={confirmReceipt}>
-      Confirm Receipt
-    </button>
+    <button class="btn-primary" onclick={confirmReceipt}> Confirm Receipt </button>
   {/if}
 
   {#if (isBuyer || isSeller) && status === 'confirmed'}
-    <button class="btn-success" onclick={completeTrade}>
-      Complete Trade
-    </button>
+    <button class="btn-success" onclick={completeTrade}> Complete Trade </button>
   {/if}
 
   {#if status !== 'completed' && status !== 'disputed'}
-    <button class="btn-error btn-outline" onclick={disputeTrade}>
-      Report Issue
-    </button>
+    <button class="btn-error btn-outline" onclick={disputeTrade}> Report Issue </button>
   {/if}
 </div>
 ```
@@ -526,7 +516,7 @@ export const load: PageLoad = async ({ url }) => {
   const trades = await pb.collection('trades').getFullList({
     filter: `(buyer = "${user.id}" || seller = "${user.id}") && (${statusFilter})`,
     expand: 'listing,buyer,seller',
-    sort: '-created'
+    sort: '-created',
   });
 
   return { trades, filter };

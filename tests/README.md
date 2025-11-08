@@ -46,6 +46,7 @@ This document provides an overview of the tests created for the Photo Gallery Ma
    - Tests for valid edge cases
 
 **Key Test Features:**
+
 - Comprehensive edge case testing (zero, max, negative values)
 - Round-trip conversion testing to ensure accuracy
 - Complex polygon testing (triangles, squares, irregular shapes)
@@ -85,6 +86,7 @@ This document provides an overview of the tests created for the Photo Gallery Ma
    - Shows "Obscured" for manually obscured regions
 
 **Key Test Features:**
+
 - Uses `@testing-library/svelte` for component testing
 - Mocks game data with different statuses
 - Tests both visual rendering and interaction
@@ -145,6 +147,7 @@ This document provides an overview of the tests created for the Photo Gallery Ma
    - Handles network errors on region save
 
 **Key Test Features:**
+
 - Full user workflow testing (login → manage photos → create regions → display)
 - Multi-browser testing via Playwright
 - Screenshot and video capture on failure
@@ -152,6 +155,7 @@ This document provides an overview of the tests created for the Photo Gallery Ma
 - Accessibility testing (keyboard, ARIA, focus management)
 
 **Setup Requirements:**
+
 ```bash
 # Install Playwright browsers
 npx playwright install
@@ -207,6 +211,7 @@ mkdir -p tests/fixtures
    - Handle network errors gracefully on login
 
 **Key Test Features:**
+
 - Unique test data generation (timestamp-based emails)
 - Tests isolation (each test creates its own user)
 - Session storage for sharing data between test steps
@@ -219,31 +224,37 @@ mkdir -p tests/fixtures
 ## Running Tests
 
 ### All Tests
+
 ```bash
 npm run test
 ```
 
 ### Unit Tests Only
+
 ```bash
 npm run test -- src/lib/utils/photo-regions.test.ts
 ```
 
 ### Component Tests Only
+
 ```bash
 npm run test -- src/lib/components/PhotoRegionOverlay.test.ts
 ```
 
 ### E2E Tests Only
+
 ```bash
 npm run test:e2e
 ```
 
 ### With UI (Playwright)
+
 ```bash
 npm run test:e2e:ui
 ```
 
 ### Watch Mode
+
 ```bash
 npm run test:watch
 ```
@@ -255,6 +266,7 @@ npm run test:watch
 ### Mock Data Examples
 
 **Game Records:**
+
 ```typescript
 const mockGames: GameRecord[] = [
   {
@@ -275,16 +287,21 @@ const mockGames: GameRecord[] = [
 ```
 
 **Photo Regions:**
+
 ```typescript
 const regions = [
   createRectangleRegion('photo1.jpg', { x: 10, y: 10, width: 20, height: 20 }, 'game1'),
-  createPolygonRegion('photo1.jpg', {
-    points: [
-      { x: 10, y: 10 },
-      { x: 30, y: 10 },
-      { x: 30, y: 30 },
-    ],
-  }, 'game1'),
+  createPolygonRegion(
+    'photo1.jpg',
+    {
+      points: [
+        { x: 10, y: 10 },
+        { x: 30, y: 10 },
+        { x: 30, y: 30 },
+      ],
+    },
+    'game1'
+  ),
 ];
 ```
 
@@ -300,18 +317,18 @@ Create these files in `tests/fixtures/`:
 
 ## Coverage Goals
 
-| Area | Target | Current |
-|------|--------|---------|
-| Utility Functions | 100% | ✅ 100% |
-| PhotoRegionOverlay Component | 90% | ✅ 95% |
-| PhotoRegionSelector Component | 80% | ⚠️ Not tested* |
-| Photo Gallery Manager Page | 70% | ✅ ~75% (E2E) |
+| Area                              | Target  | Current           |
+| --------------------------------- | ------- | ----------------- |
+| Utility Functions                 | 100%    | ✅ 100%           |
+| PhotoRegionOverlay Component      | 90%     | ✅ 95%            |
+| PhotoRegionSelector Component     | 80%     | ⚠️ Not tested\*   |
+| Photo Gallery Manager Page        | 70%     | ✅ ~75% (E2E)     |
 | **Authentication (Registration)** | **90%** | **✅ ~95% (E2E)** |
-| **Authentication (Login)** | **90%** | **✅ ~95% (E2E)** |
-| **Authentication (Logout)** | **90%** | **✅ 100% (E2E)** |
-| Integration Flows | 80% | ✅ ~80% (E2E) |
+| **Authentication (Login)**        | **90%** | **✅ ~95% (E2E)** |
+| **Authentication (Logout)**       | **90%** | **✅ 100% (E2E)** |
+| Integration Flows                 | 80%     | ✅ ~80% (E2E)     |
 
-*PhotoRegionSelector is complex and primarily tested via E2E tests due to canvas interactions.
+\*PhotoRegionSelector is complex and primarily tested via E2E tests due to canvas interactions.
 
 ---
 
@@ -429,16 +446,19 @@ jobs:
 ## Test Statistics
 
 **Total Test Count:** 116+ tests
+
 - Unit tests: 43 (photo-regions utilities)
 - Component tests: 13 (PhotoRegionOverlay)
 - E2E tests: ~60 (photo gallery + authentication)
 
 **Total Coverage:**
+
 - Photo gallery features: ~85%
 - Authentication flows: ~95%
 - Core utilities: 100%
 
 **Average Test Runtime:**
+
 - Unit tests: < 2 seconds
 - Component tests: < 3 seconds
 - E2E tests: ~3-5 minutes (full suite)

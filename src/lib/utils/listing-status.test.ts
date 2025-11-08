@@ -114,10 +114,7 @@ describe('listing-status utilities', () => {
       ).resolves.toBeUndefined();
 
       // Should log error
-      expect(console.error).toHaveBeenCalledWith(
-        'Failed to log status change:',
-        expect.any(Error)
-      );
+      expect(console.error).toHaveBeenCalledWith('Failed to log status change:', expect.any(Error));
     });
   });
 
@@ -200,7 +197,10 @@ describe('listing-status utilities', () => {
       const history = await getStatusHistory('listing789');
 
       expect(history).toEqual([]);
-      expect(console.error).toHaveBeenCalledWith('Failed to get status history:', expect.any(Error));
+      expect(console.error).toHaveBeenCalledWith(
+        'Failed to get status history:',
+        expect.any(Error)
+      );
     });
   });
 

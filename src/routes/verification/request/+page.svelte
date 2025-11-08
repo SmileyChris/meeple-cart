@@ -20,11 +20,7 @@
 
   // Check eligibility
   let canRequest = $derived(
-    canRequestVerification(
-      user?.phone_verified || false,
-      data.hasPendingRequest,
-      phoneNumber,
-    ),
+    canRequestVerification(user?.phone_verified || false, data.hasPendingRequest, phoneNumber)
   );
 
   let step = $state<'input' | 'confirm' | 'submitted'>('input');
@@ -95,10 +91,7 @@
 
 <svelte:head>
   <title>Request Phone Verification · Meeple Cart</title>
-  <meta
-    name="description"
-    content="Request phone verification from the Meeple Cart community"
-  />
+  <meta name="description" content="Request phone verification from the Meeple Cart community" />
 </svelte:head>
 
 <main class="bg-surface-body px-6 py-12">
@@ -106,7 +99,9 @@
     {#if user?.phone_verified}
       <!-- Already Verified -->
       <div class="text-center">
-        <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-emerald-500/80 bg-emerald-500/10">
+        <div
+          class="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-emerald-500/80 bg-emerald-500/10"
+        >
           <span class="text-4xl">✅</span>
         </div>
         <h1 class="mt-6 text-3xl font-bold text-primary">Already Verified</h1>
@@ -124,7 +119,9 @@
       <!-- Pending Request -->
       <div class="rounded-xl border border-subtle bg-surface-card p-8">
         <div class="text-center">
-          <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-sky-500/80 bg-sky-500/10">
+          <div
+            class="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-sky-500/80 bg-sky-500/10"
+          >
             <span class="text-4xl">⏳</span>
           </div>
           <h1 class="mt-6 text-3xl font-bold text-primary">Verification Pending</h1>
@@ -156,7 +153,9 @@
           <div class="rounded-lg border border-subtle bg-surface-body p-4">
             <div class="flex items-center justify-between">
               <span class="text-sm text-muted">Status</span>
-              <span class="rounded-full border border-sky-500/80 bg-sky-500/10 px-3 py-1 text-sm font-medium text-sky-200">
+              <span
+                class="rounded-full border border-sky-500/80 bg-sky-500/10 px-3 py-1 text-sm font-medium text-sky-200"
+              >
                 {data.existingRequest.status}
               </span>
             </div>
@@ -166,7 +165,9 @@
           <div class="rounded-lg border border-accent/30 bg-accent/5 p-4">
             <p class="text-sm text-secondary">
               <strong>What happens next:</strong><br />
-              A verified community member will send you a verification link via SMS to your phone number ending in {data.existingRequest.phone_last_four}. Click the link when you receive it to complete verification.
+              A verified community member will send you a verification link via SMS to your phone number
+              ending in {data.existingRequest.phone_last_four}. Click the link when you receive it
+              to complete verification.
             </p>
           </div>
         </div>
@@ -179,7 +180,13 @@
           Get verified by a trusted community member to unlock vouching privileges
         </p>
 
-        <form onsubmit={(e) => { e.preventDefault(); handleNext(); }} class="mt-8 space-y-6">
+        <form
+          onsubmit={(e) => {
+            e.preventDefault();
+            handleNext();
+          }}
+          class="mt-8 space-y-6"
+        >
           <!-- Phone Number Input -->
           <div>
             <label for="phone" class="block text-sm font-medium text-secondary">
@@ -193,9 +200,7 @@
               required
               class="mt-1 block w-full rounded-md border border-subtle bg-surface-body px-4 py-3 text-primary placeholder-muted"
             />
-            <p class="mt-1 text-xs text-muted">
-              Enter your NZ mobile or landline number
-            </p>
+            <p class="mt-1 text-xs text-muted">Enter your NZ mobile or landline number</p>
           </div>
 
           <!-- How It Works -->
@@ -235,7 +240,9 @@
           {/if}
 
           {#if error}
-            <div class="rounded-md border border-rose-500/80 bg-rose-500/10 px-4 py-3 text-rose-200">
+            <div
+              class="rounded-md border border-rose-500/80 bg-rose-500/10 px-4 py-3 text-rose-200"
+            >
               {error}
             </div>
           {/if}
@@ -253,9 +260,7 @@
       <!-- Step 2: Confirmation -->
       <div class="rounded-xl border border-subtle bg-surface-card p-8">
         <h1 class="text-3xl font-bold text-primary">Confirm Your Request</h1>
-        <p class="mt-2 text-muted">
-          Please review your information before submitting
-        </p>
+        <p class="mt-2 text-muted">Please review your information before submitting</p>
 
         <div class="mt-8 space-y-4">
           <!-- Phone Number -->
@@ -278,7 +283,9 @@
           </div>
 
           {#if error}
-            <div class="rounded-md border border-rose-500/80 bg-rose-500/10 px-4 py-3 text-rose-200">
+            <div
+              class="rounded-md border border-rose-500/80 bg-rose-500/10 px-4 py-3 text-rose-200"
+            >
               {error}
             </div>
           {/if}
@@ -306,18 +313,18 @@
     {:else if step === 'submitted'}
       <!-- Step 3: Success -->
       <div class="text-center">
-        <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-emerald-500/80 bg-emerald-500/10">
+        <div
+          class="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-emerald-500/80 bg-emerald-500/10"
+        >
           <span class="text-4xl">🎉</span>
         </div>
         <h1 class="mt-6 text-3xl font-bold text-primary">Request Submitted!</h1>
-        <p class="mt-2 text-muted">
-          You're in the verification queue
-        </p>
+        <p class="mt-2 text-muted">You're in the verification queue</p>
 
         <div class="mt-8">
           <p class="text-secondary">
-            A community member will send you a verification link via SMS soon.
-            Watch for a text message!
+            A community member will send you a verification link via SMS soon. Watch for a text
+            message!
           </p>
         </div>
       </div>

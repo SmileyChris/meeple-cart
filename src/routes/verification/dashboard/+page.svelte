@@ -28,7 +28,7 @@
 
   // Verifier badge
   let badge = $derived(
-    verifierSettings ? getVerifierBadge(verifierSettings.total_verifications) : null,
+    verifierSettings ? getVerifierBadge(verifierSettings.total_verifications) : null
   );
 
   async function acceptRequest(request: VerificationRequestRecord) {
@@ -184,7 +184,9 @@
           <div class="text-center">
             <div class="text-2xl font-bold text-emerald-300">
               {verifierSettings.total_verifications > 0
-                ? Math.round((verifierSettings.success_count / verifierSettings.total_verifications) * 100)
+                ? Math.round(
+                    (verifierSettings.success_count / verifierSettings.total_verifications) * 100
+                  )
                 : 0}%
             </div>
             <div class="text-sm text-muted">Success Rate</div>
@@ -197,7 +199,9 @@
     <div class="rounded-xl border border-subtle bg-surface-card p-6">
       <div class="flex items-center justify-between">
         <h2 class="text-xl font-bold text-primary">Pending Requests</h2>
-        <span class="rounded-full border border-accent bg-accent/10 px-3 py-1 text-sm font-medium text-accent">
+        <span
+          class="rounded-full border border-accent bg-accent/10 px-3 py-1 text-sm font-medium text-accent"
+        >
           {pendingRequests.length} waiting
         </span>
       </div>
@@ -219,7 +223,9 @@
                       {request.expand?.user?.display_name || 'User'}
                     </span>
                     {#if request.queue_position}
-                      <span class="rounded-full border border-subtle bg-surface-card px-2 py-0.5 text-xs text-muted">
+                      <span
+                        class="rounded-full border border-subtle bg-surface-card px-2 py-0.5 text-xs text-muted"
+                      >
                         #{request.queue_position} in queue
                       </span>
                     {/if}
@@ -262,7 +268,9 @@
 
     <!-- Success/Error Messages -->
     {#if success && !selectedRequest}
-      <div class="rounded-md border border-emerald-500/80 bg-emerald-500/10 px-4 py-3 text-emerald-200">
+      <div
+        class="rounded-md border border-emerald-500/80 bg-emerald-500/10 px-4 py-3 text-emerald-200"
+      >
         {success}
       </div>
     {/if}
@@ -347,7 +355,9 @@
       </div>
 
       {#if success}
-        <div class="mt-4 rounded-md border border-emerald-500/80 bg-emerald-500/10 px-4 py-3 text-emerald-200">
+        <div
+          class="mt-4 rounded-md border border-emerald-500/80 bg-emerald-500/10 px-4 py-3 text-emerald-200"
+        >
           {success}
         </div>
       {/if}

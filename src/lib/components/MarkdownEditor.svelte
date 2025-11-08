@@ -22,9 +22,7 @@
   });
 
   let renderedMarkdown = $derived(
-    showPreview
-      ? marked.parse(value, { async: false }) as string
-      : ''
+    showPreview ? (marked.parse(value, { async: false }) as string) : ''
   );
 </script>
 

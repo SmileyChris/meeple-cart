@@ -64,38 +64,41 @@
           isStopped = true;
 
           // Wait a bit, then decide what to do
-          setTimeout(() => {
-            const action = Math.random();
+          setTimeout(
+            () => {
+              const action = Math.random();
 
-            if (action < 0.25) {
-              // Just start walking again
-              isWalking = true;
-              isStopped = false;
-            } else if (action < 0.5) {
-              // Peck at the ground
-              isPecking = true;
-              peckCount = 0;
-              maxPecks = Math.floor(Math.random() * 5) + 2; // 2-6 pecks
-              isStopped = false;
-            } else if (action < 0.75) {
-              // Look around
-              isLookingAround = true;
-              lookCount = 0;
-              lookScale = 1;
-              isStopped = false;
-            } else {
-              // Poop!
-              isPooping = true;
-              poopPhase = 0;
-              // Start from the back of the kiwi at 50% height
-              // Kiwi is 64px, poop is 16px (so offset by 8px to center)
-              // Back is ~20% from the back edge
-              poopX = direction === 1 ? meepleX + 4 : meepleX + 44;
-              poopY = 32; // Start at 50% of kiwi height
-              poopRotation = 0;
-              isStopped = false;
-            }
-          }, Math.random() * 4000 + 2000); // Stop for 2-6 seconds before deciding
+              if (action < 0.25) {
+                // Just start walking again
+                isWalking = true;
+                isStopped = false;
+              } else if (action < 0.5) {
+                // Peck at the ground
+                isPecking = true;
+                peckCount = 0;
+                maxPecks = Math.floor(Math.random() * 5) + 2; // 2-6 pecks
+                isStopped = false;
+              } else if (action < 0.75) {
+                // Look around
+                isLookingAround = true;
+                lookCount = 0;
+                lookScale = 1;
+                isStopped = false;
+              } else {
+                // Poop!
+                isPooping = true;
+                poopPhase = 0;
+                // Start from the back of the kiwi at 50% height
+                // Kiwi is 64px, poop is 16px (so offset by 8px to center)
+                // Back is ~20% from the back edge
+                poopX = direction === 1 ? meepleX + 4 : meepleX + 44;
+                poopY = 32; // Start at 50% of kiwi height
+                poopRotation = 0;
+                isStopped = false;
+              }
+            },
+            Math.random() * 4000 + 2000
+          ); // Stop for 2-6 seconds before deciding
         }
       } else if (isStopped) {
         // Just standing still, return to upright
@@ -144,10 +147,13 @@
             isPecking = false;
             isStopped = true;
             // Wait a bit before walking again
-            setTimeout(() => {
-              isStopped = false;
-              isWalking = true;
-            }, Math.random() * 3000 + 1000); // Stop for 1-4 seconds
+            setTimeout(
+              () => {
+                isStopped = false;
+                isWalking = true;
+              },
+              Math.random() * 3000 + 1000
+            ); // Stop for 1-4 seconds
           }
         }
       } else if (isLookingAround) {
@@ -188,10 +194,13 @@
             isLookingAround = false;
             isStopped = true;
             // Wait a bit before walking again
-            setTimeout(() => {
-              isStopped = false;
-              isWalking = true;
-            }, Math.random() * 3000 + 1000); // Stop for 1-4 seconds
+            setTimeout(
+              () => {
+                isStopped = false;
+                isWalking = true;
+              },
+              Math.random() * 3000 + 1000
+            ); // Stop for 1-4 seconds
           }
         }
       } else if (isPooping) {
@@ -220,31 +229,35 @@
               y: 48,
               opacity: 1,
               rotation: Math.floor(Math.random() * 360), // Random orientation
-              timestamp: Date.now()
+              timestamp: Date.now(),
             };
             poops = [...poops, newPoop];
 
             // Schedule fade out after 30 seconds
             setTimeout(() => {
-              poops = poops.filter(p => p.id !== newPoop.id);
+              poops = poops.filter((p) => p.id !== newPoop.id);
             }, 30000);
 
             // Finished pooping, stop before walking
             isPooping = false;
             isStopped = true;
-            setTimeout(() => {
-              isStopped = false;
-              isWalking = true;
-            }, Math.random() * 3000 + 1000);
+            setTimeout(
+              () => {
+                isStopped = false;
+                isWalking = true;
+              },
+              Math.random() * 3000 + 1000
+            );
           }
         }
       }
 
       // Update poop fade animation
       const now = Date.now();
-      poops = poops.map(poop => {
+      poops = poops.map((poop) => {
         const age = now - poop.timestamp;
-        if (age > 27000) { // Start fading at 27 seconds (fade over 3 seconds)
+        if (age > 27000) {
+          // Start fading at 27 seconds (fade over 3 seconds)
           const fadeProgress = (age - 27000) / 3000;
           return { ...poop, opacity: Math.max(0, 1 - fadeProgress) };
         }
@@ -270,7 +283,8 @@
     src="/poop.png"
     alt="Poop"
     class="absolute h-4 w-4 object-contain pointer-events-none"
-    style="left: {poop.x}px; top: {poop.y - 44}px; opacity: {poop.opacity}; transform: rotate({poop.rotation}deg); transition: opacity 0.5s;"
+    style="left: {poop.x}px; top: {poop.y -
+      44}px; opacity: {poop.opacity}; transform: rotate({poop.rotation}deg); transition: opacity 0.5s;"
   />
 {/each}
 
@@ -289,5 +303,6 @@
   src="/walking.png"
   alt="Kiwi meeple"
   class="absolute -top-[44px] h-16 w-16 object-contain transition-transform duration-100"
-  style="left: {meepleX}px; transform: scaleX({direction * lookScale}) rotate({waddleAngle + peckAngle}deg);"
+  style="left: {meepleX}px; transform: scaleX({direction * lookScale}) rotate({waddleAngle +
+    peckAngle}deg);"
 />

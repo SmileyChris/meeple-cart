@@ -48,9 +48,7 @@ export interface PhotoRegion {
 /**
  * Helper type to check if coordinates are rectangular
  */
-export function isRectangleCoordinates(
-  coords: RegionCoordinates
-): coords is RectangleCoordinates {
+export function isRectangleCoordinates(coords: RegionCoordinates): coords is RectangleCoordinates {
   return 'width' in coords && 'height' in coords;
 }
 

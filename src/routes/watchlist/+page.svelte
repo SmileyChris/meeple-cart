@@ -58,7 +58,9 @@
     <!-- Header -->
     <div class="space-y-2">
       <h1 class="text-3xl font-bold text-primary">Watchlist</h1>
-      <p class="text-muted">Listings you've reacted to. React to any listing to add it to your watchlist.</p>
+      <p class="text-muted">
+        Listings you've reacted to. React to any listing to add it to your watchlist.
+      </p>
     </div>
 
     <!-- Error Alert -->

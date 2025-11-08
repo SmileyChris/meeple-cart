@@ -90,9 +90,7 @@ export const load: PageLoad = async ({ params }) => {
 
     // Calculate average rating
     const averageRating =
-      reviews.length > 0
-        ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-        : null;
+      reviews.length > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length : null;
 
     // Calculate vouched trades count (unique trades that resulted in vouches)
     // A vouched trade is when THIS user received a vouch from a trading partner

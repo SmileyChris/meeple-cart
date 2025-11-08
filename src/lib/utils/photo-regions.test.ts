@@ -256,34 +256,58 @@ describe('photo-regions utilities', () => {
 
   describe('shouldBlurRegion', () => {
     it('returns true for manually obscured regions', () => {
-      const region = createRectangleRegion('photo1.jpg', { x: 10, y: 10, width: 20, height: 20 }, null);
+      const region = createRectangleRegion(
+        'photo1.jpg',
+        { x: 10, y: 10, width: 20, height: 20 },
+        null
+      );
       region.manuallyObscured = true;
       expect(shouldBlurRegion(region, 'available')).toBe(true);
       expect(shouldBlurRegion(region, undefined)).toBe(true);
     });
 
     it('returns true for sold game', () => {
-      const region = createRectangleRegion('photo1.jpg', { x: 10, y: 10, width: 20, height: 20 }, 'game1');
+      const region = createRectangleRegion(
+        'photo1.jpg',
+        { x: 10, y: 10, width: 20, height: 20 },
+        'game1'
+      );
       expect(shouldBlurRegion(region, 'sold')).toBe(true);
     });
 
     it('returns true for pending game', () => {
-      const region = createRectangleRegion('photo1.jpg', { x: 10, y: 10, width: 20, height: 20 }, 'game1');
+      const region = createRectangleRegion(
+        'photo1.jpg',
+        { x: 10, y: 10, width: 20, height: 20 },
+        'game1'
+      );
       expect(shouldBlurRegion(region, 'pending')).toBe(true);
     });
 
     it('returns false for available game', () => {
-      const region = createRectangleRegion('photo1.jpg', { x: 10, y: 10, width: 20, height: 20 }, 'game1');
+      const region = createRectangleRegion(
+        'photo1.jpg',
+        { x: 10, y: 10, width: 20, height: 20 },
+        'game1'
+      );
       expect(shouldBlurRegion(region, 'available')).toBe(false);
     });
 
     it('returns false for bundled game', () => {
-      const region = createRectangleRegion('photo1.jpg', { x: 10, y: 10, width: 20, height: 20 }, 'game1');
+      const region = createRectangleRegion(
+        'photo1.jpg',
+        { x: 10, y: 10, width: 20, height: 20 },
+        'game1'
+      );
       expect(shouldBlurRegion(region, 'bundled')).toBe(false);
     });
 
     it('returns false when game status is undefined and not manually obscured', () => {
-      const region = createRectangleRegion('photo1.jpg', { x: 10, y: 10, width: 20, height: 20 }, 'game1');
+      const region = createRectangleRegion(
+        'photo1.jpg',
+        { x: 10, y: 10, width: 20, height: 20 },
+        'game1'
+      );
       expect(shouldBlurRegion(region, undefined)).toBe(false);
     });
   });
@@ -385,7 +409,14 @@ describe('photo-regions utilities', () => {
   describe('coordinate conversion round-trip', () => {
     it('preserves rectangle coordinates through conversion cycle', () => {
       const original = { x: 100, y: 50, width: 200, height: 100 };
-      const percent = rectanglePixelsToPercent(original.x, original.y, original.width, original.height, 1000, 500);
+      const percent = rectanglePixelsToPercent(
+        original.x,
+        original.y,
+        original.width,
+        original.height,
+        1000,
+        500
+      );
       const backToPixels = rectanglePercentToPixels(percent, 1000, 500);
 
       expect(backToPixels.x).toBeCloseTo(original.x, 0.01);

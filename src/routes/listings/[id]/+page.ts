@@ -1,7 +1,12 @@
 import { error } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 import type { ItemRecord, ListingGameDetail, ListingRecord } from '$lib/types/listing';
-import type { UserRecord, ReactionCounts, ReactionEmoji, ReactionRecord } from '$lib/types/pocketbase';
+import type {
+  UserRecord,
+  ReactionCounts,
+  ReactionEmoji,
+  ReactionRecord,
+} from '$lib/types/pocketbase';
 import { normalizeListingType } from '$lib/types/listing';
 import { getLowestHistoricalPrice } from '$lib/utils/price-history';
 import { pb, currentUser } from '$lib/pocketbase';
