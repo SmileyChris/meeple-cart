@@ -4,6 +4,7 @@
   import type { TradePartySubmissionRecord } from '$lib/types/pocketbase';
   import SubmissionForm from '$lib/components/TradeParty/SubmissionForm.svelte';
   import WantListBuilder from '$lib/components/TradeParty/WantListBuilder.svelte';
+  import { runTradeMatching } from '$lib/trade-optimizer/runner';
 
   let { data }: { data: PageData } = $props();
 
@@ -15,6 +16,11 @@
 
   let showSubmissionForm = $state(false);
   let selectedSubmissionForWantList = $state<TradePartySubmissionRecord | null>(null);
+
+  // Algorithm running state
+  let isRunningAlgorithm = $state(false);
+  let algorithmError = $state<string | null>(null);
+  let algorithmSuccess = $state<string | null>(null);
 
   function handleSubmissionSuccess(submission: TradePartySubmissionRecord) {
     showSubmissionForm = false;
@@ -37,6 +43,39 @@
     } catch (err) {
       console.error('Failed to delete submission:', err);
       alert('Failed to delete submission. Please try again.');
+    }
+  }
+
+  async function handleRunAlgorithm() {
+    if (!isOrganizer) return;
+
+    const confirmRun = confirm(
+      'Are you sure you want to run the matching algorithm? This will generate trade matches for all participants.'
+    );
+
+    if (!confirmRun) return;
+
+    isRunningAlgorithm = true;
+    algorithmError = null;
+    algorithmSuccess = null;
+
+    try {
+      const result = await runTradeMatching(party.id);
+
+      if (result.success) {
+        algorithmSuccess = `Successfully created ${result.matchCount} matches across ${result.chainCount} trade chains!`;
+        // Reload page to show updated status
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } else {
+        algorithmError = result.errorMessage || 'Failed to run algorithm';
+      }
+    } catch (err: any) {
+      console.error('Failed to run algorithm:', err);
+      algorithmError = err.message || 'An unexpected error occurred';
+    } finally {
+      isRunningAlgorithm = false;
     }
   }
 
@@ -281,7 +320,55 @@
           </div>
         {/if}
       </div>
-    {:else if resultsPublished}
+    {/if}
+
+    <!-- Organizer-Only Algorithm Trigger -->
+    {#if isOrganizer && party.status === 'want_lists'}
+      <div class="mb-8 rounded-lg border border-amber-500/30 bg-amber-500/10 p-6">
+        <div class="mb-4 flex items-center gap-3">
+          <span class="text-3xl">🤖</span>
+          <div>
+            <h3 class="text-xl font-semibold text-amber-200">Run Matching Algorithm</h3>
+            <p class="text-sm text-amber-300/80">
+              As the organizer, you can run the matching algorithm to find optimal trades
+            </p>
+          </div>
+        </div>
+
+        {#if algorithmError}
+          <div class="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 p-4">
+            <p class="text-sm text-red-200">{algorithmError}</p>
+          </div>
+        {/if}
+
+        {#if algorithmSuccess}
+          <div class="mb-4 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4">
+            <p class="text-sm text-emerald-200">{algorithmSuccess}</p>
+          </div>
+        {/if}
+
+        <button
+          onclick={handleRunAlgorithm}
+          disabled={isRunningAlgorithm}
+          class="rounded-lg border border-accent bg-accent px-6 py-2 font-semibold text-surface-body transition hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {isRunningAlgorithm ? 'Running Algorithm...' : 'Run Algorithm'}
+        </button>
+
+        <div class="mt-4 space-y-2 text-sm text-amber-300/80">
+          <p><strong>What happens when you run the algorithm:</strong></p>
+          <ul class="ml-6 list-disc space-y-1">
+            <li>All submissions and want lists are processed</li>
+            <li>The TradeMaximizer algorithm finds optimal multi-way trades</li>
+            <li>Match records are created for each trade in each chain</li>
+            <li>All participants receive notifications about their matches</li>
+            <li>Party status changes to "matching_complete"</li>
+          </ul>
+        </div>
+      </div>
+    {/if}
+
+    {#if resultsPublished}
       <!-- Results Published -->
       <div class="mb-8 rounded-lg border border-blue-500/30 bg-blue-500/10 p-6">
         <div class="mb-4 flex items-center gap-3">

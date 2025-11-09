@@ -935,37 +935,43 @@ export interface OptimizationResult {
 
 ---
 
-### Phase 4: Want List Builder 🚧 IN PROGRESS
+### Phase 4: Want List Builder ✅ COMPLETE
 
 **Goal:** Build want list creation UI
 
 **Tasks:**
 
-1. 🚧 Create want list builder interface
-2. 🚧 Implement preference ranking (drag-and-drop or number input)
-3. 🚧 Add "no trade" option
-4. 🚧 Build progress tracking (X/Y submissions have want lists)
-5. 🚧 Add validation (ensure all submissions have want lists)
-6. 🚧 Display available submissions from other users
-7. 🚧 Save/update want lists to PocketBase
+1. ✅ Create want list builder interface (WantListBuilder.svelte)
+2. ✅ Implement preference ranking (up/down buttons for reordering)
+3. ✅ Add "no trade" option (checkbox to opt out)
+4. ✅ Display available submissions from other users
+5. ✅ Save/update want lists to PocketBase
+6. ✅ Load existing want lists on mount
+7. ✅ Integrate into party detail page during want list phase
+8. ✅ Toggle open/close for each submission's builder
+9. ✅ Filter out user's own submissions from available list
 
-**Deliverable:** Users can build want lists
+**Deliverable:** Users can build want lists ✅
 
 ---
 
-### Phase 5: Algorithm Integration (Week 5)
+### Phase 5: Algorithm Integration 🚧 NEXT UP
 
-**Goal:** Integrate TradeMaximizer
+**Goal:** Integrate TradeMaximizer and run matching algorithm
 
 **Tasks:**
 
-1. ⏸ Implement `input-builder.ts`
-2. ⏸ Implement `result-parser.ts`
-3. ⏸ Implement `runner.ts`
-4. ⏸ Add admin trigger for algorithm
-5. ⏸ Write integration tests
+1. ✅ Implement `input-builder.ts` (COMPLETED - Phase 1)
+2. ✅ Implement `result-parser.ts` (COMPLETED - Phase 1)
+3. ✅ Write unit tests for algorithm (COMPLETED - Phase 1)
+4. 🚧 Implement `runner.ts` - Orchestrate algorithm execution
+5. 🚧 Create match records from algorithm results
+6. 🚧 Add admin/organizer trigger button for algorithm
+7. 🚧 Send notifications to matched participants
+8. 🚧 Update party status after algorithm runs
+9. 🚧 Handle algorithm errors gracefully
 
-**Deliverable:** Algorithm runs and produces results
+**Deliverable:** Algorithm runs and creates matches
 
 ---
 
