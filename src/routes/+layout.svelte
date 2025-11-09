@@ -254,16 +254,30 @@
 
               <a
                 href="/group-buys"
-                class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition whitespace-nowrap opacity-40 cursor-default {currentPath.startsWith(
+                class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition whitespace-nowrap {currentPath.startsWith(
                   '/group-buys'
                 )
                   ? 'text-secondary'
-                  : 'text-muted'}"
+                  : 'text-muted hover:text-secondary'}"
                 style={currentPath.startsWith('/group-buys')
                   ? 'background-color: var(--accent-soft); color: var(--accent-strong)'
                   : ''}
               >
                 🛒 Group Buys
+              </a>
+
+              <a
+                href="/trade-parties"
+                class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition whitespace-nowrap {currentPath.startsWith(
+                  '/trade-parties'
+                )
+                  ? 'text-secondary'
+                  : 'text-muted hover:text-secondary'}"
+                style={currentPath.startsWith('/trade-parties')
+                  ? 'background-color: var(--accent-soft); color: var(--accent-strong)'
+                  : ''}
+              >
+                🎉 Trade Parties
               </a>
             </div>
 
