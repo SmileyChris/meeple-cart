@@ -8,6 +8,20 @@
   let organizer = $derived(party.expand?.organizer);
   let isOrganizer = $derived($currentUser?.id === party.organizer);
 
+  // Check current phase based on dates and status
+  let now = $derived(new Date());
+  let submissionsOpen = $derived(
+    party.status === 'submissions' ||
+      (new Date(party.submission_opens) <= now && new Date(party.submission_closes) > now)
+  );
+  let wantListsOpen = $derived(
+    party.status === 'want_lists' ||
+      (new Date(party.want_list_opens) <= now && new Date(party.want_list_closes) > now)
+  );
+  let resultsPublished = $derived(
+    party.status === 'execution' || party.status === 'completed'
+  );
+
   // Format date helper
   function formatDate(dateString: string) {
     return new Date(dateString).toLocaleDateString('en-NZ', {
@@ -73,19 +87,96 @@
     </div>
   </div>
 
-  <!-- Under Construction Notice -->
-  <div class="mb-8 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
-    <div class="flex items-start gap-3">
-      <span class="text-2xl">🚧</span>
-      <div>
-        <p class="font-semibold text-amber-200">Under Construction</p>
-        <p class="mt-1 text-sm text-amber-300/80">
-          Party details page is being built. Soon you'll be able to submit games, build want lists,
-          and view results here!
+  <!-- Phase-based Action Cards -->
+  {#if $currentUser}
+    {#if submissionsOpen}
+      <!-- Submission Phase Active -->
+      <div class="mb-8 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-6">
+        <div class="mb-4 flex items-center gap-3">
+          <span class="text-3xl">📦</span>
+          <div>
+            <h3 class="text-xl font-semibold text-emerald-200">Submission Phase Open</h3>
+            <p class="text-sm text-emerald-300/80">
+              Add games you want to trade until {formatDate(party.submission_closes)}
+            </p>
+          </div>
+        </div>
+        <button
+          disabled
+          class="rounded-lg border border-accent bg-accent px-6 py-2 font-semibold text-surface-body opacity-50"
+        >
+          Submit a Game (Coming Soon)
+        </button>
+      </div>
+    {:else if wantListsOpen}
+      <!-- Want List Phase Active -->
+      <div class="mb-8 rounded-lg border border-purple-500/30 bg-purple-500/10 p-6">
+        <div class="mb-4 flex items-center gap-3">
+          <span class="text-3xl">📝</span>
+          <div>
+            <h3 class="text-xl font-semibold text-purple-200">Want List Phase Open</h3>
+            <p class="text-sm text-purple-300/80">
+              Build your want lists until {formatDate(party.want_list_closes)}
+            </p>
+          </div>
+        </div>
+        <button
+          disabled
+          class="rounded-lg border border-accent bg-accent px-6 py-2 font-semibold text-surface-body opacity-50"
+        >
+          Build Want Lists (Coming Soon)
+        </button>
+      </div>
+    {:else if resultsPublished}
+      <!-- Results Published -->
+      <div class="mb-8 rounded-lg border border-blue-500/30 bg-blue-500/10 p-6">
+        <div class="mb-4 flex items-center gap-3">
+          <span class="text-3xl">🎉</span>
+          <div>
+            <h3 class="text-xl font-semibold text-blue-200">Results Published!</h3>
+            <p class="text-sm text-blue-300/80">
+              The algorithm has run. Check your matches below.
+            </p>
+          </div>
+        </div>
+        <button
+          disabled
+          class="rounded-lg border border-accent bg-accent px-6 py-2 font-semibold text-surface-body opacity-50"
+        >
+          View My Matches (Coming Soon)
+        </button>
+      </div>
+    {:else}
+      <!-- Planning/Waiting Phase -->
+      <div class="mb-8 rounded-lg border border-gray-500/30 bg-gray-500/10 p-6">
+        <div class="flex items-start gap-3">
+          <span class="text-2xl">⏳</span>
+          <div>
+            <p class="font-semibold text-gray-200">Waiting for Next Phase</p>
+            <p class="mt-1 text-sm text-gray-300/80">
+              Check back when submissions open on {formatDate(party.submission_opens)}
+            </p>
+          </div>
+        </div>
+      </div>
+    {/if}
+  {:else}
+    <!-- Not logged in -->
+    <div class="mb-8 rounded-lg border border-blue-500/30 bg-blue-500/10 p-6">
+      <div class="mb-4">
+        <p class="font-semibold text-blue-200">Sign in to Participate</p>
+        <p class="mt-1 text-sm text-blue-300/80">
+          Create an account or sign in to join this trade party
         </p>
       </div>
+      <a
+        href="/login?redirect=/trade-parties/{party.id}"
+        class="inline-block rounded-lg border border-accent bg-accent px-6 py-2 font-semibold text-surface-body transition hover:bg-accent/90"
+      >
+        Sign In
+      </a>
     </div>
-  </div>
+  {/if}
 
   <!-- Description -->
   <div class="mb-8 rounded-lg border border-subtle bg-surface-card p-6">
