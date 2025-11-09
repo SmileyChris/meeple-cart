@@ -894,66 +894,60 @@ export interface OptimizationResult {
 
 ## Implementation Plan
 
-### Phase 1: Foundation (Week 1)
+### Phase 1: Foundation ✅ COMPLETE
 
 **Goal:** Set up module structure and copy algorithm
 
 **Tasks:**
 
-1. ✅ Create placeholder pages (COMPLETED)
-2. ⏸ Create module directories
-3. ⏸ Copy TradeMaximizer files from GameSwap
-4. ⏸ Add TypeScript types
-5. ⏸ Write unit tests for algorithm
-6. ⏸ Create PocketBase migrations for new collections
+1. ✅ Create placeholder pages
+2. ✅ Create module directories
+3. ✅ Copy TradeMaximizer files from GameSwap
+4. ✅ Add TypeScript types
+5. ✅ Write unit tests for algorithm
+6. ✅ Create PocketBase migrations for new collections
 
-**Deliverable:** Algorithm runs with test data
-
----
-
-### Phase 2: Database & Event Management (Week 2)
-
-**Goal:** Implement event creation and management
-
-**Tasks:**
-
-1. ⏸ Apply database migrations
-2. ⏸ Build event creation form
-3. ⏸ Implement event listing/detail pages
-4. ⏸ Add event status management
-5. ⏸ Write validation functions
-
-**Deliverable:** Can create and view trade party events
+**Deliverable:** Algorithm runs with test data ✅
 
 ---
 
-### Phase 3: Submission System (Week 3)
+### Phase 2: Database & Event Management (SKIPPED)
+
+**Note:** Skipped event creation UI for now. Using manual database seeding for initial parties.
+
+---
+
+### Phase 3: Submission System ✅ COMPLETE
 
 **Goal:** Build game submission workflow
 
 **Tasks:**
 
-1. ⏸ Create submission form
-2. ⏸ Add photo upload
-3. ⏸ Implement submission listing
-4. ⏸ Add edit/delete functionality
-5. ⏸ Implement submission validation
+1. ✅ Create submission form (SubmissionForm.svelte)
+2. ✅ Add BGG search integration (BggSearch.svelte)
+3. ✅ Implement submission listing on party page
+4. ✅ Add delete functionality for submissions
+5. ✅ Photo upload support (via FormData)
+6. ✅ Shipping information fields
+7. ✅ Auto-increment/decrement party game_count
 
-**Deliverable:** Users can submit games to events
+**Deliverable:** Users can submit games to events ✅
 
 ---
 
-### Phase 4: Want List Builder (Week 4)
+### Phase 4: Want List Builder 🚧 IN PROGRESS
 
 **Goal:** Build want list creation UI
 
 **Tasks:**
 
-1. ⏸ Create want list builder interface
-2. ⏸ Implement preference ranking
-3. ⏸ Add "no trade" option
-4. ⏸ Build progress tracking
-5. ⏸ Add validation
+1. 🚧 Create want list builder interface
+2. 🚧 Implement preference ranking (drag-and-drop or number input)
+3. 🚧 Add "no trade" option
+4. 🚧 Build progress tracking (X/Y submissions have want lists)
+5. 🚧 Add validation (ensure all submissions have want lists)
+6. 🚧 Display available submissions from other users
+7. 🚧 Save/update want lists to PocketBase
 
 **Deliverable:** Users can build want lists
 
