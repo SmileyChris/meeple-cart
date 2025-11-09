@@ -86,18 +86,5 @@
         </div>
       </div>
     </div>
-
-    <!-- Sign in prompt for guests -->
-    {#if !$currentUser}
-      <div class="rounded-lg border border-subtle bg-surface-card p-6 text-center">
-        <p class="mb-4 text-secondary">Sign in to start or join group buys</p>
-        <a
-          href="/login?redirect=/group-buys"
-          class="inline-block rounded-lg border border-emerald-500 bg-emerald-500 px-6 py-2 font-semibold text-surface-body transition hover:bg-emerald-600"
-        >
-          Sign In
-        </a>
-      </div>
-    {/if}
   </div>
 </main>
