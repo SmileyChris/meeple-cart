@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { currentUser } from '$lib/pocketbase';
+  import { pb, currentUser } from '$lib/pocketbase';
   import type { PageData } from './$types';
   import type { TradePartySubmissionRecord } from '$lib/types/pocketbase';
   import SubmissionForm from '$lib/components/TradeParty/SubmissionForm.svelte';
@@ -9,6 +9,7 @@
   let party = $derived(data.party);
   let organizer = $derived(party.expand?.organizer);
   let isOrganizer = $derived($currentUser?.id === party.organizer);
+  let mySubmissions = $derived(data.mySubmissions);
 
   let showSubmissionForm = $state(false);
 
@@ -16,6 +17,24 @@
     showSubmissionForm = false;
     // Refresh page data to show updated game count
     window.location.reload();
+  }
+
+  async function handleDeleteSubmission(submissionId: string) {
+    if (!confirm('Are you sure you want to delete this submission?')) return;
+
+    try {
+      await pb.collection('trade_party_submissions').delete(submissionId);
+
+      // Update party game count
+      await pb.collection('trade_parties').update(party.id, {
+        game_count: { $inc: -1 },
+      });
+
+      window.location.reload();
+    } catch (err) {
+      console.error('Failed to delete submission:', err);
+      alert('Failed to delete submission. Please try again.');
+    }
   }
 
   // Check current phase based on dates and status
@@ -127,6 +146,74 @@
           </button>
         {/if}
       </div>
+
+      <!-- User's Submissions List -->
+      {#if mySubmissions.length > 0}
+        <div class="mb-8 rounded-lg border border-subtle bg-surface-card p-6">
+          <h2 class="mb-4 text-lg font-semibold text-primary">Your Submissions ({mySubmissions.length})</h2>
+          <div class="space-y-4">
+            {#each mySubmissions as submission}
+              <div class="flex items-start gap-4 rounded-lg border border-subtle bg-surface-body p-4">
+                <div class="flex-1">
+                  <div class="mb-2 flex items-start justify-between">
+                    <div>
+                      <h3 class="font-semibold text-primary">{submission.title}</h3>
+                      {#if submission.bgg_id}
+                        <a
+                          href="https://boardgamegeek.com/boardgame/{submission.bgg_id}"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          class="text-xs text-muted hover:text-accent"
+                        >
+                          BGG #{submission.bgg_id}
+                        </a>
+                      {/if}
+                    </div>
+                    <span
+                      class="rounded-full px-3 py-1 text-xs font-medium {submission.status ===
+                      'approved'
+                        ? 'bg-emerald-500/20 text-emerald-200'
+                        : submission.status === 'pending'
+                          ? 'bg-amber-500/20 text-amber-200'
+                          : 'bg-red-500/20 text-red-200'}"
+                    >
+                      {submission.status}
+                    </span>
+                  </div>
+
+                  <div class="space-y-2 text-sm">
+                    <div class="flex items-center gap-2">
+                      <span class="text-muted">Condition:</span>
+                      <span class="font-medium text-secondary capitalize">{submission.condition.replace('_', ' ')}</span>
+                    </div>
+
+                    {#if submission.description}
+                      <div>
+                        <span class="text-muted">Description:</span>
+                        <p class="mt-1 text-secondary">{submission.description}</p>
+                      </div>
+                    {/if}
+
+                    {#if submission.ship_from_region}
+                      <div class="flex items-center gap-2">
+                        <span class="text-muted">Ships from:</span>
+                        <span class="text-secondary">{submission.ship_from_region}</span>
+                      </div>
+                    {/if}
+                  </div>
+                </div>
+
+                <button
+                  onclick={() => handleDeleteSubmission(submission.id)}
+                  class="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm font-semibold text-red-200 transition hover:bg-red-500/20"
+                >
+                  Delete
+                </button>
+              </div>
+            {/each}
+          </div>
+        </div>
+      {/if}
     {:else if wantListsOpen}
       <!-- Want List Phase Active -->
       <div class="mb-8 rounded-lg border border-purple-500/30 bg-purple-500/10 p-6">
