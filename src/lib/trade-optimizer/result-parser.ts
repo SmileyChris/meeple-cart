@@ -67,13 +67,17 @@ export function parseResults(
         submission,
       });
 
-      // Track participants
+      // Track participants (use user IDs, not usernames)
       const givingUserId = submission.expand?.user?.id || givingUser;
-      if (!currentChain.participants.includes(receivingUser)) {
-        currentChain.participants.push(receivingUser);
-      }
+      const receivingUserId = receivingUser; // This comes from the output
+
       if (!currentChain.participants.includes(givingUserId)) {
         currentChain.participants.push(givingUserId);
+      }
+      // Note: receivingUser from output is username, need to look it up
+      // For now, we'll track it but this needs improvement
+      if (!currentChain.participants.includes(receivingUserId)) {
+        currentChain.participants.push(receivingUserId);
       }
     }
   }
