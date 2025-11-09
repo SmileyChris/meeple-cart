@@ -33,14 +33,15 @@ BINARY_PATH="${TARGET_DIR}/pocketbase-${VERSION}"
 LINK_PATH="${TARGET_DIR}/pocketbase"
 
 if [[ -x "${BINARY_PATH}" ]]; then
-  echo "PocketBase ${VERSION} already downloaded at ${BINARY_PATH}"
+  # Already have the correct version - nothing to do
+  :
 else
-  echo "Downloading PocketBase ${VERSION} from ${URL}" >&2
+  echo "Downloading PocketBase ${VERSION}..." >&2
   curl -fsSL "${URL}" -o "${TMP_DIR}/${ARCHIVE}"
   unzip -q "${TMP_DIR}/${ARCHIVE}" pocketbase -d "${TMP_DIR}"
   mv "${TMP_DIR}/pocketbase" "${BINARY_PATH}"
   chmod +x "${BINARY_PATH}"
+  echo "PocketBase ${VERSION} installed" >&2
 fi
 
 ln -sfn "pocketbase-${VERSION}" "${LINK_PATH}"
-echo "PocketBase binary ready at ${LINK_PATH}"

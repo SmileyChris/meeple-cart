@@ -8,10 +8,8 @@ MIGRATIONS_DIR="${ROOT_DIR}/pocketbase/pb_migrations"
 
 cd "${ROOT_DIR}"
 
-if [[ ! -x "${PB_BIN}" ]]; then
-  echo "PocketBase binary not found; downloading..."
-  "${ROOT_DIR}/scripts/download-pocketbase.sh"
-fi
+# Ensure we have the correct PocketBase version
+"${ROOT_DIR}/scripts/download-pocketbase.sh"
 
 mkdir -p "${PB_DATA_DIR}"
 

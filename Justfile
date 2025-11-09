@@ -13,5 +13,11 @@ dev:
     fi
     @./scripts/dev.sh
 
+migrate:
+    @./scripts/download-pocketbase.sh
+    @mkdir -p pocketbase/pb_data
+    @echo "Running PocketBase migrations..."
+    @./pocketbase/pocketbase migrate up --dir pocketbase/pb_data --migrationsDir pocketbase/pb_migrations
+
 docs:
     @uvx --with mkdocs-material mkdocs serve
