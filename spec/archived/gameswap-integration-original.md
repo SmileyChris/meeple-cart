@@ -4,12 +4,15 @@
 **Date:** 2025-10-30
 **Status:** Planning
 **Target:** Meeple Cart MVP+
+**Product Spec:** See [trade-parties.md](./trade-parties.md) for user-facing feature design
 
 ---
 
 ## Executive Summary
 
-This document outlines the plan to integrate proven multi-party trade matching features from the [GameSwap](https://github.com/tactful-ai/gameswap) codebase into Meeple Cart. GameSwap is a production-ready SvelteKit application that uses the TradeMaximizer algorithm (Hungarian algorithm implementation) to compute optimal trade chains for board game exchanges.
+This document outlines the **technical implementation plan** to integrate proven multi-party trade matching features from the [GameSwap](https://github.com/tactful-ai/gameswap) codebase into Meeple Cart. GameSwap is a production-ready SvelteKit application that uses the TradeMaximizer algorithm (Hungarian algorithm implementation) to compute optimal trade chains for board game exchanges.
+
+**Note:** In Meeple Cart, we call this feature **"Trade Parties"** instead of "Math Trades" to make it more approachable for casual users. See [trade-parties.md](./trade-parties.md) for the complete product specification, user experience design, and feature roadmap.
 
 ### What We're Getting
 
