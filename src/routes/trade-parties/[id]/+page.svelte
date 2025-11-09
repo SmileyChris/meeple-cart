@@ -4,6 +4,7 @@
   import type { TradePartySubmissionRecord } from '$lib/types/pocketbase';
   import SubmissionForm from '$lib/components/TradeParty/SubmissionForm.svelte';
   import WantListBuilder from '$lib/components/TradeParty/WantListBuilder.svelte';
+  import TradeMatchViewer from '$lib/components/TradeParty/TradeMatchViewer.svelte';
   import { runTradeMatching } from '$lib/trade-optimizer/runner';
 
   let { data }: { data: PageData } = $props();
@@ -380,12 +381,11 @@
             </p>
           </div>
         </div>
-        <button
-          disabled
-          class="rounded-lg border border-accent bg-accent px-6 py-2 font-semibold text-surface-body opacity-50"
-        >
-          View My Matches (Coming Soon)
-        </button>
+      </div>
+
+      <!-- Match Viewer -->
+      <div class="mb-8">
+        <TradeMatchViewer partyId={party.id} />
       </div>
     {:else}
       <!-- Planning/Waiting Phase -->

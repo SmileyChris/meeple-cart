@@ -180,10 +180,14 @@ async function createMatchRecords(
   const matches: TradePartyMatchRecord[] = [];
 
   for (const chain of chains) {
-    for (const trade of chain.trades) {
+    const chainId = `${partyId}_chain_${chain.chainNumber}`;
+
+    for (let position = 0; position < chain.trades.length; position++) {
+      const trade = chain.trades[position];
       const match = await pb.collection('trade_party_matches').create<TradePartyMatchRecord>({
         trade_party: partyId,
-        chain_number: chain.chainNumber,
+        chain_id: chainId,
+        chain_position: position + 1,
         giving_submission: trade.givingSubmissionId,
         receiving_submission: trade.receivingSubmissionId,
         giving_user: trade.givingUserId,
