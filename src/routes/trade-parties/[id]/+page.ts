@@ -14,11 +14,12 @@ export const load: PageLoad = async ({ params }) => {
     // Load user's submissions for this party (if logged in)
     const user = get(currentUser);
     let mySubmissions = [];
+    let allSubmissions = [];
 
     if (user) {
       try {
         mySubmissions = await pb.collection('trade_party_submissions').getFullList({
-          filter: `trade_party = "${id}" && user = "${user.id}"`,
+          filter: `trade_party = "${id}" && user = "${user.id}" && status = "approved"`,
           sort: '-created',
         });
       } catch (err) {
@@ -27,9 +28,21 @@ export const load: PageLoad = async ({ params }) => {
       }
     }
 
+    // Load all approved submissions for the party (for want list builder)
+    try {
+      allSubmissions = await pb.collection('trade_party_submissions').getFullList({
+        filter: `trade_party = "${id}" && status = "approved"`,
+        sort: '-created',
+        expand: 'user',
+      });
+    } catch (err) {
+      console.error('Failed to load all submissions:', err);
+    }
+
     return {
       party,
       mySubmissions,
+      allSubmissions,
     };
   } catch (err) {
     console.error('Failed to load trade party:', err);

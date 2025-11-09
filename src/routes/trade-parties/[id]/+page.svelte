@@ -3,6 +3,7 @@
   import type { PageData } from './$types';
   import type { TradePartySubmissionRecord } from '$lib/types/pocketbase';
   import SubmissionForm from '$lib/components/TradeParty/SubmissionForm.svelte';
+  import WantListBuilder from '$lib/components/TradeParty/WantListBuilder.svelte';
 
   let { data }: { data: PageData } = $props();
 
@@ -10,8 +11,10 @@
   let organizer = $derived(party.expand?.organizer);
   let isOrganizer = $derived($currentUser?.id === party.organizer);
   let mySubmissions = $derived(data.mySubmissions);
+  let allSubmissions = $derived(data.allSubmissions);
 
   let showSubmissionForm = $state(false);
+  let selectedSubmissionForWantList = $state<TradePartySubmissionRecord | null>(null);
 
   function handleSubmissionSuccess(submission: TradePartySubmissionRecord) {
     showSubmissionForm = false;
@@ -226,12 +229,57 @@
             </p>
           </div>
         </div>
-        <button
-          disabled
-          class="rounded-lg border border-accent bg-accent px-6 py-2 font-semibold text-surface-body opacity-50"
-        >
-          Build Want Lists (Coming Soon)
-        </button>
+
+        {#if mySubmissions.length === 0}
+          <p class="text-sm text-purple-200">
+            You haven't submitted any games yet. Want lists are for games you've already submitted.
+          </p>
+        {:else}
+          <div class="mt-4">
+            <h4 class="mb-3 font-semibold text-purple-100">
+              Build Want Lists for Your Submissions
+            </h4>
+            <div class="space-y-2">
+              {#each mySubmissions as submission}
+                <button
+                  onclick={() => {
+                    selectedSubmissionForWantList =
+                      selectedSubmissionForWantList?.id === submission.id ? null : submission;
+                  }}
+                  class="w-full rounded-lg border border-purple-300/30 bg-purple-900/30 p-3 text-left transition hover:bg-purple-900/50"
+                >
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <div class="font-medium text-purple-100">{submission.title}</div>
+                      <div class="text-xs text-purple-300">
+                        {#if submission.bgg_id}
+                          BGG #{submission.bgg_id} ·
+                        {/if}
+                        <span class="capitalize">{submission.condition.replace('_', ' ')}</span>
+                      </div>
+                    </div>
+                    <div class="text-sm text-purple-300">
+                      {selectedSubmissionForWantList?.id === submission.id ? '▼ Close' : '▶ Build Want List'}
+                    </div>
+                  </div>
+                </button>
+
+                {#if selectedSubmissionForWantList?.id === submission.id}
+                  <div class="mt-2 rounded-lg border border-purple-300/30 bg-surface-card p-4">
+                    <WantListBuilder
+                      mySubmission={submission}
+                      availableSubmissions={allSubmissions}
+                      tradePartyId={party.id}
+                      onSave={() => {
+                        selectedSubmissionForWantList = null;
+                      }}
+                    />
+                  </div>
+                {/if}
+              {/each}
+            </div>
+          </div>
+        {/if}
       </div>
     {:else if resultsPublished}
       <!-- Results Published -->
