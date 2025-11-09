@@ -71,7 +71,7 @@
           </p>
         </div>
         <div class="rounded-lg border border-subtle bg-surface-body p-4">
-          <div class="mb-2 text-2xl">🎯</div>
+          <div class="mb-2 text-2xl">📍</div>
           <h3 class="font-semibold text-primary">Regional Hubs</h3>
           <p class="mt-1 text-sm text-muted">
             Coordinate local pickup points across New Zealand
