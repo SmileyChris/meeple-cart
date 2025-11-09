@@ -1,12 +1,22 @@
 <script lang="ts">
   import { currentUser } from '$lib/pocketbase';
   import type { PageData } from './$types';
+  import type { TradePartySubmissionRecord } from '$lib/types/pocketbase';
+  import SubmissionForm from '$lib/components/TradeParty/SubmissionForm.svelte';
 
   let { data }: { data: PageData } = $props();
 
   let party = $derived(data.party);
   let organizer = $derived(party.expand?.organizer);
   let isOrganizer = $derived($currentUser?.id === party.organizer);
+
+  let showSubmissionForm = $state(false);
+
+  function handleSubmissionSuccess(submission: TradePartySubmissionRecord) {
+    showSubmissionForm = false;
+    // Refresh page data to show updated game count
+    window.location.reload();
+  }
 
   // Check current phase based on dates and status
   let now = $derived(new Date());
@@ -101,12 +111,21 @@
             </p>
           </div>
         </div>
-        <button
-          disabled
-          class="rounded-lg border border-accent bg-accent px-6 py-2 font-semibold text-surface-body opacity-50"
-        >
-          Submit a Game (Coming Soon)
-        </button>
+
+        {#if showSubmissionForm}
+          <SubmissionForm
+            tradePartyId={party.id}
+            onSuccess={handleSubmissionSuccess}
+            onCancel={() => (showSubmissionForm = false)}
+          />
+        {:else}
+          <button
+            onclick={() => (showSubmissionForm = true)}
+            class="rounded-lg border border-accent bg-accent px-6 py-2 font-semibold text-surface-body transition hover:bg-accent/90"
+          >
+            Submit a Game
+          </button>
+        {/if}
       </div>
     {:else if wantListsOpen}
       <!-- Want List Phase Active -->
