@@ -1,10 +1,61 @@
 <script lang="ts">
   import { currentUser } from '$lib/pocketbase';
+  import { goto } from '$app/navigation';
+  import { page } from '$app/stores';
   import type { PageData } from './$types';
 
   let { data }: { data: PageData } = $props();
 
-  let threads = $derived(data.threads);
+  let threads = $derived(data.threads.items);
+  let categories = $derived(data.categories);
+  let currentTab = $derived(data.currentTab);
+  let currentCategory = $derived(data.currentCategory);
+  let currentTags = $derived(data.currentTags);
+  let currentSearch = $derived(data.currentSearch);
+
+  let searchInput = $state(currentSearch ?? '');
+
+  function setTab(tab: string) {
+    const url = new URL($page.url);
+    url.searchParams.set('tab', tab);
+    url.searchParams.delete('page'); // Reset to page 1
+    goto(url.toString());
+  }
+
+  function setCategory(slug: string | null) {
+    const url = new URL($page.url);
+    if (slug) {
+      url.searchParams.set('category', slug);
+    } else {
+      url.searchParams.delete('category');
+    }
+    url.searchParams.delete('page'); // Reset to page 1
+    goto(url.toString());
+  }
+
+  function handleSearch() {
+    const url = new URL($page.url);
+    if (searchInput.trim()) {
+      url.searchParams.set('search', searchInput.trim());
+    } else {
+      url.searchParams.delete('search');
+    }
+    url.searchParams.delete('page'); // Reset to page 1
+    goto(url.toString());
+  }
+
+  function nextPage() {
+    const url = new URL($page.url);
+    url.searchParams.set('page', (data.threads.page + 1).toString());
+    goto(url.toString());
+  }
+
+  function prevPage() {
+    const url = new URL($page.url);
+    const prevPageNum = Math.max(1, data.threads.page - 1);
+    url.searchParams.set('page', prevPageNum.toString());
+    goto(url.toString());
+  }
 
   // Format date for display
   function formatDate(dateStr: string): string {
@@ -70,6 +121,135 @@
       </div>
     </div>
 
+    <!-- Tabs & Filters -->
+    <div class="space-y-4">
+      <!-- Tabs -->
+      <div class="flex gap-2 border-b border-subtle">
+        <button
+          onclick={() => setTab('latest')}
+          class="border-b-2 px-4 py-2 text-sm font-medium transition {currentTab === 'latest'
+            ? 'border-accent text-accent'
+            : 'border-transparent text-secondary hover:text-primary'}"
+        >
+          Latest
+        </button>
+        <button
+          onclick={() => setTab('top')}
+          class="border-b-2 px-4 py-2 text-sm font-medium transition {currentTab === 'top'
+            ? 'border-accent text-accent'
+            : 'border-transparent text-secondary hover:text-primary'}"
+        >
+          Top
+        </button>
+        <button
+          onclick={() => setTab('wanted')}
+          class="border-b-2 px-4 py-2 text-sm font-medium transition {currentTab === 'wanted'
+            ? 'border-accent text-accent'
+            : 'border-transparent text-secondary hover:text-primary'}"
+        >
+          🔍 Wanted
+        </button>
+        <button
+          onclick={() => setTab('unanswered')}
+          class="border-b-2 px-4 py-2 text-sm font-medium transition {currentTab === 'unanswered'
+            ? 'border-accent text-accent'
+            : 'border-transparent text-secondary hover:text-primary'}"
+        >
+          Unanswered
+        </button>
+      </div>
+
+      <!-- Search & Category Filter -->
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <!-- Search -->
+        <div class="flex flex-1 gap-2">
+          <input
+            type="search"
+            bind:value={searchInput}
+            placeholder="Search discussions..."
+            onkeydown={(e) => e.key === 'Enter' && handleSearch()}
+            class="flex-1 rounded-lg border border-subtle bg-surface-body px-4 py-2 text-sm text-primary placeholder-muted focus:border-accent focus:outline-none"
+          />
+          <button
+            onclick={handleSearch}
+            class="rounded-lg border border-accent bg-accent px-4 py-2 text-sm font-medium text-surface-body hover:opacity-90"
+          >
+            Search
+          </button>
+        </div>
+
+        <!-- Category Dropdown -->
+        <div class="flex items-center gap-2">
+          <label for="category-filter" class="text-sm font-medium text-secondary">Category:</label>
+          <select
+            id="category-filter"
+            onchange={(e) => setCategory(e.currentTarget.value || null)}
+            value={currentCategory ?? ''}
+            class="rounded-lg border border-subtle bg-surface-body px-3 py-2 text-sm text-primary focus:border-accent focus:outline-none"
+          >
+            <option value="">All Categories</option>
+            {#each categories as category}
+              <option value={category.slug}>
+                {category.icon} {category.name}
+              </option>
+            {/each}
+          </select>
+        </div>
+      </div>
+
+      <!-- Active Filters Display -->
+      {#if currentCategory || currentTags.length > 0 || currentSearch}
+        <div class="flex flex-wrap items-center gap-2 text-sm">
+          <span class="text-muted">Filters:</span>
+          {#if currentCategory}
+            {@const cat = categories.find((c) => c.slug === currentCategory)}
+            {#if cat}
+              <button
+                onclick={() => setCategory(null)}
+                class="inline-flex items-center gap-1 rounded-full border border-subtle bg-surface-card px-3 py-1 text-sm font-medium text-secondary hover:border-accent"
+              >
+                {cat.icon} {cat.name}
+                <span class="text-muted">×</span>
+              </button>
+            {/if}
+          {/if}
+          {#each currentTags as tag}
+            <button
+              onclick={() => {
+                const url = new URL($page.url);
+                const params = url.searchParams;
+                const allTags = params.getAll('tag');
+                // Remove all tag params
+                while (params.has('tag')) {
+                  params.delete('tag');
+                }
+                // Re-add all except the one being removed
+                allTags.filter(t => t !== tag).forEach(t => params.append('tag', t));
+                params.delete('page');
+                goto(url.toString());
+              }}
+              class="inline-flex items-center gap-1 rounded-full border border-subtle bg-surface-card px-3 py-1 text-sm font-medium text-secondary hover:border-accent"
+            >
+              #{tag}
+              <span class="text-muted">×</span>
+            </button>
+          {/each}
+          {#if currentSearch}
+            <button
+              onclick={() => {
+                searchInput = '';
+                handleSearch();
+              }}
+              class="inline-flex items-center gap-1 rounded-full border border-subtle bg-surface-card px-3 py-1 text-sm font-medium text-secondary hover:border-accent"
+            >
+              Search: "{currentSearch}"
+              <span class="text-muted">×</span>
+            </button>
+          {/if}
+        </div>
+      {/if}
+    </div>
+
     <!-- Thread List -->
     {#if threads.length === 0}
       <div class="rounded-xl border border-subtle bg-surface-card p-12 text-center">
@@ -100,17 +280,29 @@
           >
             <div class="mb-3 flex items-start justify-between gap-4">
               <div class="flex-1">
+                <!-- Category Badge -->
+                {#if thread.expand?.category}
+                  {@const category = thread.expand.category}
+                  <div class="mb-2">
+                    <span
+                      class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium"
+                      style="background-color: {category.color}15; color: {category.color}"
+                    >
+                      {category.icon} {category.name}
+                    </span>
+                  </div>
+                {/if}
+
                 <div class="mb-1 flex items-center gap-2">
+                  {#if thread.pinned}
+                    <span class="text-sm">📌</span>
+                  {/if}
+                  {#if thread.thread_type === 'wanted'}
+                    <span class="text-sm">🔍</span>
+                  {/if}
                   <h2 class="text-lg font-semibold text-primary hover:text-accent">
                     {thread.title}
                   </h2>
-                  {#if thread.pinned}
-                    <span
-                      class="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-semibold text-badge-emerald"
-                    >
-                      📌 Pinned
-                    </span>
-                  {/if}
                   {#if thread.locked}
                     <span
                       class="rounded-full bg-amber-500/20 px-2 py-0.5 text-xs font-semibold text-badge-amber"
@@ -123,6 +315,38 @@
                 <p class="text-sm text-secondary">
                   {getPreview(thread.content)}
                 </p>
+
+                <!-- Wanted Items Preview -->
+                {#if thread.thread_type === 'wanted' && thread.wanted_items && thread.wanted_items.length > 0}
+                  <div class="mt-2 text-xs text-muted">
+                    <span class="font-medium">Looking for:</span>
+                    {thread.wanted_items
+                      .slice(0, 3)
+                      .map((i) => i.title)
+                      .join(', ')}
+                    {#if thread.wanted_items.length > 3}
+                      <span>+{thread.wanted_items.length - 3} more</span>
+                    {/if}
+                  </div>
+                {/if}
+
+                <!-- Tags -->
+                {#if thread.tags && thread.tags.length > 0}
+                  <div class="mt-2 flex flex-wrap gap-1">
+                    {#each thread.tags.slice(0, 5) as tag}
+                      <a
+                        href="/discussions?tag={encodeURIComponent(tag)}"
+                        class="inline-block rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent hover:bg-accent/20"
+                        onclick={(e) => e.stopPropagation()}
+                      >
+                        #{tag}
+                      </a>
+                    {/each}
+                    {#if thread.tags.length > 5}
+                      <span class="text-xs text-muted">+{thread.tags.length - 5}</span>
+                    {/if}
+                  </div>
+                {/if}
               </div>
             </div>
 
@@ -143,6 +367,29 @@
             </div>
           </a>
         {/each}
+      </div>
+    {/if}
+
+    <!-- Pagination -->
+    {#if data.threads.totalPages > 1}
+      <div class="flex items-center justify-center gap-4">
+        <button
+          onclick={prevPage}
+          disabled={data.threads.page === 1}
+          class="rounded-lg border border-subtle bg-surface-card px-4 py-2 text-sm font-medium text-secondary transition hover:border-accent hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          ← Previous
+        </button>
+        <span class="text-sm text-muted">
+          Page {data.threads.page} of {data.threads.totalPages}
+        </span>
+        <button
+          onclick={nextPage}
+          disabled={data.threads.page === data.threads.totalPages}
+          class="rounded-lg border border-subtle bg-surface-card px-4 py-2 text-sm font-medium text-secondary transition hover:border-accent hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Next →
+        </button>
       </div>
     {/if}
 

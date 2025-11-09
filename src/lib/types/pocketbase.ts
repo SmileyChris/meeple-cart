@@ -28,13 +28,58 @@ export interface UserRecord extends RecordModel {
 
 export type AuthenticatedUser = UserRecord | null;
 
+export type OfferStatus = 'pending' | 'accepted' | 'declined' | 'withdrawn';
+export type TradeStatus = 'initiated' | 'confirmed' | 'completed' | 'disputed' | 'cancelled';
+export type ShippingMethod = 'in_person' | 'shipped' | 'either';
+
+export interface ItemRecord extends RecordModel {
+  listing: string;
+  bgg_id?: number;
+  title: string;
+  year?: number;
+  condition: 'mint' | 'excellent' | 'good' | 'fair' | 'poor';
+  notes?: string;
+  status: 'available' | 'pending' | 'sold' | 'bundled';
+  photo_regions?: Record<string, unknown>;
+  expand?: {
+    listing?: RecordModel;
+  };
+}
+
+export interface OfferTemplateRecord extends RecordModel {
+  listing: string;
+  owner: string;
+  items: string[]; // Item IDs
+  template_type: 'cash_only' | 'trade_only' | 'cash_or_trade';
+  cash_amount?: number; // NZD cents
+  trade_for_items?: Array<{ title: string; bgg_id?: number }>;
+  open_to_lower_offers: boolean;
+  open_to_shipping_negotiation: boolean;
+  open_to_trade_offers: boolean;
+  status: 'active' | 'accepted' | 'invalidated' | 'withdrawn';
+  display_name?: string;
+  notes?: string;
+  expand?: {
+    listing?: RecordModel;
+    owner?: UserRecord;
+    items?: ItemRecord[];
+  };
+}
+
 export interface TradeRecord extends RecordModel {
   listing: string;
   buyer: string;
   seller: string;
-  items?: string[]; // Selected item IDs for this trade
-  shipping_method?: 'in_person' | 'shipped';
-  status: 'initiated' | 'confirmed' | 'completed' | 'disputed' | 'cancelled';
+  // Offer-related fields
+  offer_status: OfferStatus;
+  offer_template?: string; // Reference to accepted offer template
+  cash_offer_amount?: number; // NZD cents
+  requested_items?: string[]; // Item IDs the buyer wants
+  shipping_method?: ShippingMethod;
+  offer_message?: string; // Buyer's message with their offer
+  declined_reason?: string; // Seller's reason for declining
+  // Trade status (post-acceptance)
+  status: TradeStatus;
   rating?: number;
   review?: string;
   completed_date?: string;
@@ -42,7 +87,8 @@ export interface TradeRecord extends RecordModel {
     listing?: RecordModel;
     buyer?: UserRecord;
     seller?: UserRecord;
-    items?: RecordModel[];
+    requested_items?: ItemRecord[];
+    offer_template?: OfferTemplateRecord;
   };
 }
 
@@ -67,10 +113,25 @@ export interface ReactionCounts {
   '😍': number;
 }
 
+export interface DiscussionCategoryRecord extends RecordModel {
+  slug: string;
+  name: string;
+  icon: string;
+  description: string;
+  color: string;
+  order: number;
+  enabled: boolean;
+}
+
 export interface DiscussionThreadRecord extends RecordModel {
   title: string;
   content: string;
   author: string;
+  category: string; // Relation to discussion_categories
+  thread_type: 'discussion' | 'wanted';
+  tags?: string[]; // Array of tag strings
+  wanted_items?: Array<{ title: string; bgg_id?: number; max_price?: number }>;
+  wanted_offer_type?: 'buying' | 'trading' | 'either';
   listing?: string; // Optional - links discussion to a specific listing
   pinned?: boolean;
   locked?: boolean;
@@ -79,18 +140,47 @@ export interface DiscussionThreadRecord extends RecordModel {
   last_reply_at?: string;
   expand?: {
     author?: UserRecord;
+    category?: DiscussionCategoryRecord;
     listing?: RecordModel;
   };
 }
 
 export interface DiscussionReplyRecord extends RecordModel {
   thread: string;
-  content: string;
   author: string;
+  content: string;
+  quoted_reply?: string; // Optional relation to parent reply
+  edited?: boolean;
+  edited_at?: string;
   expand?: {
     thread?: DiscussionThreadRecord;
     author?: UserRecord;
+    quoted_reply?: DiscussionReplyRecord;
   };
+}
+
+export const DISCUSSION_REACTION_EMOJIS = ['❤️', '👍', '🔥', '😂', '🤔', '👀'] as const;
+export type DiscussionReactionEmoji = (typeof DISCUSSION_REACTION_EMOJIS)[number];
+
+export interface DiscussionReactionRecord extends RecordModel {
+  thread?: string; // Relation to discussion_threads (if reacting to OP)
+  reply?: string; // Relation to discussion_replies (if reacting to reply)
+  user: string; // Relation to users
+  emoji: DiscussionReactionEmoji;
+  expand?: {
+    thread?: DiscussionThreadRecord;
+    reply?: DiscussionReplyRecord;
+    user?: UserRecord;
+  };
+}
+
+export interface DiscussionReactionCounts {
+  '❤️': number;
+  '👍': number;
+  '🔥': number;
+  '😂': number;
+  '🤔': number;
+  '👀': number;
 }
 
 export interface DiscussionSubscriptionRecord extends RecordModel {

@@ -1,7 +1,7 @@
 import { error } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 import type { ItemRecord, ListingRecord } from '$lib/types/listing';
-import type { UserRecord } from '$lib/types/pocketbase';
+import type { UserRecord, OfferTemplateRecord } from '$lib/types/pocketbase';
 import type { StatusChange } from '$lib/utils/listing-status';
 import { pb, currentUser } from '$lib/pocketbase';
 import { get } from 'svelte/store';
@@ -30,6 +30,13 @@ export const load: PageLoad = async ({ params }) => {
     const owner = listing.expand?.owner as UserRecord | undefined;
     const games = (listing.expand?.[ITEMS_EXPAND_KEY] as ItemRecord[] | undefined) ?? [];
 
+    // Get offer templates for this listing
+    const templates = await pb.collection('offer_templates').getFullList<OfferTemplateRecord>({
+      filter: `listing = "${id}"`,
+      sort: '-created',
+      expand: 'items',
+    });
+
     // Get status history
     const statusHistory = (listing.status_history as StatusChange[] | undefined) ?? [];
 
@@ -43,6 +50,7 @@ export const load: PageLoad = async ({ params }) => {
       listing,
       owner: owner || null,
       games,
+      templates,
       statusHistory,
       conditionOptions,
       gameStatuses,

@@ -3,7 +3,18 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 const setupModule = async (browser: boolean) => {
   vi.resetModules();
   vi.doMock('$app/environment', () => ({ browser }));
-  vi.doMock('$lib/pocketbase', () => ({ pb: {} }));
+  vi.doMock('$lib/pocketbase', () => ({
+    pb: {
+      authStore: {
+        token: null,
+        isValid: false,
+        clear: vi.fn(),
+      },
+      collection: vi.fn(() => ({
+        authRefresh: vi.fn(),
+      })),
+    },
+  }));
 
   const module = await import('./+page.ts');
 

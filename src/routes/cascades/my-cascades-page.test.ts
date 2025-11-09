@@ -49,10 +49,10 @@ describe('my cascades page load', () => {
     const { get } = await import('svelte/store');
     vi.mocked(get).mockReturnValue(null);
 
-    await expect(load({} as any)).rejects.toMatchObject({
+    await expect(load({ url: { pathname: '/cascades/my-cascades' } } as any)).rejects.toMatchObject({
       message: 'REDIRECT',
       status: 302,
-      location: '/login',
+      location: '/login?next=%2Fcascades%2Fmy-cascades',
     });
   });
 
@@ -116,7 +116,7 @@ describe('my cascades page load', () => {
       },
     ]);
 
-    const result = await load({} as any);
+    const result = await load({ url: { pathname: '/cascades/my-cascades' } } as any);
 
     expect(result.enteredCascades).toEqual([
       {
@@ -165,7 +165,7 @@ describe('my cascades page load', () => {
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     entriesCollection.getFullList.mockRejectedValue(new Error('db failed'));
 
-    const result = await load({} as any);
+    const result = await load({ url: { pathname: '/cascades/my-cascades' } } as any);
 
     expect(result).toEqual({
       enteredCascades: [],

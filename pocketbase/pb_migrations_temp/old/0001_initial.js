@@ -1,0 +1,825 @@
+/* eslint-disable @typescript-eslint/triple-slash-reference */
+/// <reference path="../pb_data/types.d.ts" />
+
+migrate(
+  (db) => {
+    const dao = new Dao(db);
+    const snapshot = JSON.parse(`{
+  "collections": [
+    {
+      "id": "fhggsowykv3hz86",
+      "name": "users",
+      "type": "auth",
+      "system": false,
+      "schema": [
+        {
+          "id": "1doevg07mprqnh9",
+          "name": "display_name",
+          "type": "text",
+          "required": true,
+          "unique": false,
+          "options": {
+            "min": 2,
+            "max": 64,
+            "pattern": ""
+          }
+        },
+        {
+          "id": "i9jqb5gan8y2xvg",
+          "name": "location",
+          "type": "text",
+          "required": false,
+          "unique": false,
+          "options": {
+            "min": 0,
+            "max": 120,
+            "pattern": ""
+          }
+        },
+        {
+          "id": "jfoh35oho6kltto",
+          "name": "phone",
+          "type": "text",
+          "required": false,
+          "unique": false,
+          "options": {
+            "min": 0,
+            "max": 32,
+            "pattern": "^\\\\+?[0-9 ]{6,32}$"
+          }
+        },
+        {
+          "id": "amp8r9er41epd5u",
+          "name": "trade_count",
+          "type": "number",
+          "required": true,
+          "unique": false,
+          "options": {
+            "min": 0,
+            "max": null
+          }
+        },
+        {
+          "id": "czck1xyj9r74dqz",
+          "name": "vouch_count",
+          "type": "number",
+          "required": true,
+          "unique": false,
+          "options": {
+            "min": 0,
+            "max": null
+          }
+        },
+        {
+          "id": "j4xofuaae82xc9t",
+          "name": "joined_date",
+          "type": "date",
+          "required": true,
+          "unique": false,
+          "options": {
+            "max": null,
+            "min": null
+          }
+        },
+        {
+          "id": "zyipsq8ztpgml3p",
+          "name": "bio",
+          "type": "text",
+          "required": false,
+          "unique": false,
+          "options": {
+            "min": 0,
+            "max": 2000,
+            "pattern": ""
+          }
+        },
+        {
+          "id": "ar3dzktom1r2p8z",
+          "name": "preferred_contact",
+          "type": "select",
+          "required": true,
+          "unique": false,
+          "options": {
+            "maxSelect": 1,
+            "values": [
+              "platform",
+              "email",
+              "phone"
+            ]
+          }
+        },
+        {
+          "id": "0jxhiyvbf0u8dz4",
+          "name": "notification_prefs",
+          "type": "json",
+          "required": false,
+          "unique": false,
+          "options": {}
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_users_display_name ON users (display_name)",
+        "CREATE INDEX idx_users_location ON users (location)"
+      ],
+      "listRule": "@request.auth.id != ''",
+      "viewRule": "id = @request.auth.id",
+      "createRule": "",
+      "updateRule": "id = @request.auth.id",
+      "deleteRule": "",
+      "options": {
+        "allowEmailAuth": true,
+        "allowOAuth2Auth": false,
+        "allowUsernameAuth": false,
+        "emailAuth": true,
+        "emailVisibility": false,
+        "minPasswordLength": 10,
+        "requireEmail": true
+      }
+    },
+    {
+      "id": "w3c43ufqz9ejshk",
+      "name": "listings",
+      "type": "base",
+      "system": false,
+      "schema": [
+        {
+          "id": "cf0v1cv1z5x8qs6",
+          "name": "owner",
+          "type": "relation",
+          "required": true,
+          "unique": false,
+          "options": {
+            "collectionId": "users",
+            "cascadeDelete": false,
+            "minSelect": 1,
+            "maxSelect": 1
+          }
+        },
+        {
+          "id": "gps4yzwwt35lxmb",
+          "name": "title",
+          "type": "text",
+          "required": true,
+          "unique": false,
+          "options": {
+            "min": 3,
+            "max": 120,
+            "pattern": ""
+          }
+        },
+        {
+          "id": "6z7kue9hxfx36d9",
+          "name": "listing_type",
+          "type": "select",
+          "required": true,
+          "unique": false,
+          "options": {
+            "maxSelect": 1,
+            "values": [
+              "trade",
+              "sell",
+              "want"
+            ]
+          }
+        },
+        {
+          "id": "ec9pwhja5d9usvw",
+          "name": "status",
+          "type": "select",
+          "required": true,
+          "unique": false,
+          "options": {
+            "maxSelect": 1,
+            "values": [
+              "active",
+              "pending",
+              "completed",
+              "cancelled"
+            ]
+          }
+        },
+        {
+          "id": "fvkeec9fnpozeom",
+          "name": "summary",
+          "type": "text",
+          "required": false,
+          "unique": false,
+          "options": {
+            "min": 0,
+            "max": 2000,
+            "pattern": ""
+          }
+        },
+        {
+          "id": "p3sbrkmecpbol58",
+          "name": "location",
+          "type": "text",
+          "required": false,
+          "unique": false,
+          "options": {
+            "min": 0,
+            "max": 120,
+            "pattern": ""
+          }
+        },
+        {
+          "id": "5hhzvlaqpt6jjtm",
+          "name": "shipping_available",
+          "type": "bool",
+          "required": false,
+          "unique": false,
+          "options": {}
+        },
+        {
+          "id": "5ntcnt4banfiwbk",
+          "name": "prefer_bundle",
+          "type": "bool",
+          "required": false,
+          "unique": false,
+          "options": {}
+        },
+        {
+          "id": "bundle_discount",
+          "name": "bundle_discount",
+          "type": "number",
+          "required": false,
+          "unique": false,
+          "options": {
+            "min": 0,
+            "max": 100
+          }
+        },
+        {
+          "id": "y503bg4lbgj8ar0",
+          "name": "views",
+          "type": "number",
+          "required": true,
+          "unique": false,
+          "options": {
+            "min": 0,
+            "max": null
+          }
+        },
+        {
+          "id": "we4q4t9gfjhovyi",
+          "name": "bump_date",
+          "type": "date",
+          "required": false,
+          "unique": false,
+          "options": {
+            "min": null,
+            "max": null
+          }
+        },
+        {
+          "id": "i9ztt6vhuuvqoch",
+          "name": "photos",
+          "type": "file",
+          "required": false,
+          "unique": false,
+          "options": {
+            "maxSelect": 6,
+            "maxSize": 5242880,
+            "mimeTypes": [
+              "image/png",
+              "image/jpeg",
+              "image/webp"
+            ],
+            "thumbs": [
+              "100x100",
+              "800x600"
+            ]
+          }
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_listings_owner ON listings (owner)",
+        "CREATE INDEX idx_listings_status ON listings (status)",
+        "CREATE INDEX idx_listings_type ON listings (listing_type)"
+      ],
+      "listRule": "",
+      "viewRule": "",
+      "createRule": "@request.auth.id = owner",
+      "updateRule": "@request.auth.id = owner",
+      "deleteRule": "@request.auth.id = owner",
+      "options": {}
+    },
+    {
+      "id": "u0l5t5dn4gwl0sb",
+      "name": "games",
+      "type": "base",
+      "system": false,
+      "schema": [
+        {
+          "id": "riq8vjw6ltf9ic1",
+          "name": "listing",
+          "type": "relation",
+          "required": true,
+          "unique": false,
+          "options": {
+            "collectionId": "listings",
+            "cascadeDelete": true,
+            "minSelect": 1,
+            "maxSelect": 1
+          }
+        },
+        {
+          "id": "fikl7smnu5p69uj",
+          "name": "bgg_id",
+          "type": "number",
+          "required": false,
+          "unique": false,
+          "options": {
+            "min": 0,
+            "max": null
+          }
+        },
+        {
+          "id": "2ar8ewdhaiddmk2",
+          "name": "title",
+          "type": "text",
+          "required": true,
+          "unique": false,
+          "options": {
+            "min": 1,
+            "max": 200,
+            "pattern": ""
+          }
+        },
+        {
+          "id": "u7emuu5063yvgqm",
+          "name": "year",
+          "type": "number",
+          "required": false,
+          "unique": false,
+          "options": {
+            "min": 1900,
+            "max": 2100
+          }
+        },
+        {
+          "id": "fnibgm018qv1m80",
+          "name": "condition",
+          "type": "select",
+          "required": true,
+          "unique": false,
+          "options": {
+            "maxSelect": 1,
+            "values": [
+              "mint",
+              "excellent",
+              "good",
+              "fair",
+              "poor"
+            ]
+          }
+        },
+        {
+          "id": "ll62ygj1a67n7hg",
+          "name": "price",
+          "type": "number",
+          "required": false,
+          "unique": false,
+          "options": {
+            "min": 0,
+            "max": null
+          }
+        },
+        {
+          "id": "qre6dphdxzfqwhz",
+          "name": "trade_value",
+          "type": "number",
+          "required": false,
+          "unique": false,
+          "options": {
+            "min": 0,
+            "max": null
+          }
+        },
+        {
+          "id": "4se1j0u2ke6fici",
+          "name": "notes",
+          "type": "text",
+          "required": false,
+          "unique": false,
+          "options": {
+            "min": 0,
+            "max": 2000,
+            "pattern": ""
+          }
+        },
+        {
+          "id": "vdfu35uqxidgoep",
+          "name": "status",
+          "type": "select",
+          "required": true,
+          "unique": false,
+          "options": {
+            "maxSelect": 1,
+            "values": [
+              "available",
+              "pending",
+              "sold",
+              "bundled"
+            ]
+          }
+        },
+        {
+          "id": "j69azhakrznkl50",
+          "name": "photo_regions",
+          "type": "json",
+          "required": false,
+          "unique": false,
+          "options": {}
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_games_listing ON games (listing)",
+        "CREATE INDEX idx_games_bgg_id ON games (bgg_id)"
+      ],
+      "listRule": "",
+      "viewRule": "",
+      "createRule": "@request.auth.id != ''",
+      "updateRule": "@request.auth.id != ''",
+      "deleteRule": "@request.auth.id != ''",
+      "options": {}
+    },
+    {
+      "id": "7c3dxyfrf49yx0l",
+      "name": "messages",
+      "type": "base",
+      "system": false,
+      "schema": [
+        {
+          "id": "oq0qk2qhwkd9n5d",
+          "name": "listing",
+          "type": "relation",
+          "required": true,
+          "unique": false,
+          "options": {
+            "collectionId": "listings",
+            "cascadeDelete": true,
+            "minSelect": 1,
+            "maxSelect": 1
+          }
+        },
+        {
+          "id": "z44v32n68gizr2e",
+          "name": "thread_id",
+          "type": "text",
+          "required": true,
+          "unique": false,
+          "options": {
+            "min": 1,
+            "max": 64,
+            "pattern": ""
+          }
+        },
+        {
+          "id": "p4p417wtfvbxnx0",
+          "name": "sender",
+          "type": "relation",
+          "required": true,
+          "unique": false,
+          "options": {
+            "collectionId": "users",
+            "cascadeDelete": false,
+            "minSelect": 1,
+            "maxSelect": 1
+          }
+        },
+        {
+          "id": "l52j15dlcgx4eox",
+          "name": "recipient",
+          "type": "relation",
+          "required": false,
+          "unique": false,
+          "options": {
+            "collectionId": "users",
+            "cascadeDelete": false,
+            "minSelect": 0,
+            "maxSelect": 1
+          }
+        },
+        {
+          "id": "s0ergb6qu7l3xdq",
+          "name": "content",
+          "type": "text",
+          "required": true,
+          "unique": false,
+          "options": {
+            "min": 1,
+            "max": 4000,
+            "pattern": ""
+          }
+        },
+        {
+          "id": "stlvvsz0s9ahjxi",
+          "name": "is_public",
+          "type": "bool",
+          "required": true,
+          "unique": false,
+          "options": {}
+        },
+        {
+          "id": "57dnub11dghs638",
+          "name": "read",
+          "type": "bool",
+          "required": false,
+          "unique": false,
+          "options": {}
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_messages_listing_thread ON messages (listing, thread_id)",
+        "CREATE INDEX idx_messages_sender ON messages (sender)"
+      ],
+      "listRule": "",
+      "viewRule": "",
+      "createRule": "@request.auth.id != ''",
+      "updateRule": "sender = @request.auth.id",
+      "deleteRule": "sender = @request.auth.id",
+      "options": {}
+    },
+    {
+      "id": "50iprjgx7p8chq7",
+      "name": "trades",
+      "type": "base",
+      "system": false,
+      "schema": [
+        {
+          "id": "w6blkzot949whpk",
+          "name": "listing",
+          "type": "relation",
+          "required": true,
+          "unique": false,
+          "options": {
+            "collectionId": "listings",
+            "cascadeDelete": true,
+            "minSelect": 1,
+            "maxSelect": 1
+          }
+        },
+        {
+          "id": "aug2wbqzoky11g4",
+          "name": "buyer",
+          "type": "relation",
+          "required": true,
+          "unique": false,
+          "options": {
+            "collectionId": "users",
+            "cascadeDelete": false,
+            "minSelect": 1,
+            "maxSelect": 1
+          }
+        },
+        {
+          "id": "d2h3iypkm5067ta",
+          "name": "seller",
+          "type": "relation",
+          "required": true,
+          "unique": false,
+          "options": {
+            "collectionId": "users",
+            "cascadeDelete": false,
+            "minSelect": 1,
+            "maxSelect": 1
+          }
+        },
+        {
+          "id": "in1eyf6xtxsoevc",
+          "name": "status",
+          "type": "select",
+          "required": true,
+          "unique": false,
+          "options": {
+            "maxSelect": 1,
+            "values": [
+              "initiated",
+              "confirmed",
+              "completed",
+              "disputed"
+            ]
+          }
+        },
+        {
+          "id": "ymeto2b1660i3io",
+          "name": "rating",
+          "type": "number",
+          "required": false,
+          "unique": false,
+          "options": {
+            "min": 1,
+            "max": 5
+          }
+        },
+        {
+          "id": "e76bl1r566p2uwc",
+          "name": "review",
+          "type": "text",
+          "required": false,
+          "unique": false,
+          "options": {
+            "min": 0,
+            "max": 2000,
+            "pattern": ""
+          }
+        },
+        {
+          "id": "ixamwvd33tbdkz7",
+          "name": "completed_date",
+          "type": "date",
+          "required": false,
+          "unique": false,
+          "options": {
+            "min": null,
+            "max": null
+          }
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_trades_listing ON trades (listing)",
+        "CREATE INDEX idx_trades_participants ON trades (buyer, seller)"
+      ],
+      "listRule": "",
+      "viewRule": "",
+      "createRule": "@request.auth.id != ''",
+      "updateRule": "buyer = @request.auth.id || seller = @request.auth.id",
+      "deleteRule": "buyer = @request.auth.id || seller = @request.auth.id",
+      "options": {}
+    },
+    {
+      "id": "nyni5fcgmibsfly",
+      "name": "vouches",
+      "type": "base",
+      "system": false,
+      "schema": [
+        {
+          "id": "0yvmnzvga7tbgum",
+          "name": "voucher",
+          "type": "relation",
+          "required": true,
+          "unique": false,
+          "options": {
+            "collectionId": "users",
+            "cascadeDelete": false,
+            "minSelect": 1,
+            "maxSelect": 1
+          }
+        },
+        {
+          "id": "4pf36uika0yvndb",
+          "name": "vouchee",
+          "type": "relation",
+          "required": true,
+          "unique": false,
+          "options": {
+            "collectionId": "users",
+            "cascadeDelete": false,
+            "minSelect": 1,
+            "maxSelect": 1
+          }
+        },
+        {
+          "id": "vwvlmmxihkefkmr",
+          "name": "message",
+          "type": "text",
+          "required": false,
+          "unique": false,
+          "options": {
+            "min": 0,
+            "max": 1000,
+            "pattern": ""
+          }
+        },
+        {
+          "id": "591sbegw2fyyfql",
+          "name": "created",
+          "type": "date",
+          "required": true,
+          "unique": false,
+          "options": {
+            "min": null,
+            "max": null
+          }
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_vouches_vouchee ON vouches (vouchee)"
+      ],
+      "listRule": "",
+      "viewRule": "",
+      "createRule": "@request.auth.id = voucher",
+      "updateRule": "@request.auth.id = voucher",
+      "deleteRule": "@request.auth.id = voucher",
+      "options": {}
+    },
+    {
+      "id": "t4djrv5xct2ymfk",
+      "name": "watchlist",
+      "type": "base",
+      "system": false,
+      "schema": [
+        {
+          "id": "t9ja4wp8fbx7dqa",
+          "name": "user",
+          "type": "relation",
+          "required": true,
+          "unique": false,
+          "options": {
+            "collectionId": "users",
+            "cascadeDelete": true,
+            "minSelect": 1,
+            "maxSelect": 1
+          }
+        },
+        {
+          "id": "j9p1223fj0xonc7",
+          "name": "listing",
+          "type": "relation",
+          "required": false,
+          "unique": false,
+          "options": {
+            "collectionId": "listings",
+            "cascadeDelete": true,
+            "minSelect": 0,
+            "maxSelect": 1
+          }
+        },
+        {
+          "id": "ifkag8h2451519d",
+          "name": "bgg_id",
+          "type": "number",
+          "required": false,
+          "unique": false,
+          "options": {
+            "min": 0,
+            "max": null
+          }
+        },
+        {
+          "id": "8zne1uxv9hwmf7z",
+          "name": "max_price",
+          "type": "number",
+          "required": false,
+          "unique": false,
+          "options": {
+            "min": 0,
+            "max": null
+          }
+        },
+        {
+          "id": "207ra4ls0dwe4rf",
+          "name": "max_distance",
+          "type": "number",
+          "required": false,
+          "unique": false,
+          "options": {
+            "min": 0,
+            "max": null
+          }
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_watchlist_user ON watchlist (user)",
+        "CREATE UNIQUE INDEX idx_watchlist_unique ON watchlist (user, bgg_id)"
+      ],
+      "listRule": "user = @request.auth.id",
+      "viewRule": "user = @request.auth.id",
+      "createRule": "user = @request.auth.id",
+      "updateRule": "user = @request.auth.id",
+      "deleteRule": "user = @request.auth.id",
+      "options": {}
+    }
+  ]
+}`);
+
+    const existingUsers = dao.findCollectionByNameOrId('users');
+    if (existingUsers && existingUsers.id !== 'fhggsowykv3hz86') {
+      dao.deleteCollection(existingUsers);
+    }
+
+    for (const raw of snapshot.collections) {
+      const collection = new Collection(raw);
+      dao.saveCollection(collection);
+    }
+  },
+  (db) => {
+    const dao = new Dao(db);
+    const ids = [
+      'fhggsowykv3hz86',
+      'w3c43ufqz9ejshk',
+      'u0l5t5dn4gwl0sb',
+      '7c3dxyfrf49yx0l',
+      '50iprjgx7p8chq7',
+      'nyni5fcgmibsfly',
+      't4djrv5xct2ymfk',
+    ];
+    for (const id of ids) {
+      const collection = dao.findCollectionByNameOrId(id);
+      if (collection) {
+        dao.deleteCollection(collection);
+      }
+    }
+  }
+);

@@ -35,10 +35,10 @@ describe('notifications page load', () => {
     const { get } = await import('svelte/store');
     vi.mocked(get).mockReturnValue(null);
 
-    await expect(load({} as any)).rejects.toMatchObject({
+    await expect(load({ url: { pathname: '/notifications' } } as any)).rejects.toMatchObject({
       message: 'REDIRECT',
       status: 302,
-      location: '/login',
+      location: '/login?next=%2Fnotifications',
     });
   });
 
@@ -73,7 +73,7 @@ describe('notifications page load', () => {
     const getList = vi.fn().mockResolvedValue(mockNotifications);
     vi.mocked(pocketbaseModule.pb.collection).mockReturnValue({ getList } as any);
 
-    const result = await load({} as any);
+    const result = await load({ url: { pathname: '/notifications' } } as any);
 
     expect(getList).toHaveBeenCalledWith(1, 50, {
       filter: 'user = "user-1"',
@@ -92,7 +92,7 @@ describe('notifications page load', () => {
     const getList = vi.fn().mockRejectedValue(new Error('network'));
     vi.mocked(pocketbaseModule.pb.collection).mockReturnValue({ getList } as any);
 
-    const result = await load({} as any);
+    const result = await load({ url: { pathname: '/notifications' } } as any);
 
     expect(consoleSpy).toHaveBeenCalledWith('Failed to load notifications', expect.any(Error));
     expect(result).toEqual({

@@ -88,7 +88,6 @@ describe('notifications server utilities', () => {
       id: 'listing-99',
       owner: 'owner-1',
       title: 'Gloomhaven Bundle',
-      listing_type: 'trade',
       status: 'active',
       location: 'Wellington Central',
     } as ListingRecord;
@@ -102,7 +101,7 @@ describe('notifications server utilities', () => {
       user: 'user-2',
       type: 'new_listing',
       title: 'New listing in Wellington Central',
-      message: 'Chris listed "Gloomhaven Bundle" for trade',
+      message: 'Chris listed "Gloomhaven Bundle"',
       link: '/listings/listing-99',
       listing: 'listing-99',
       read: false,
@@ -119,7 +118,6 @@ describe('notifications server utilities', () => {
       id: 'listing-1',
       owner: 'owner-1',
       title: 'Terraforming Mars',
-      listing_type: 'sell',
       status: 'active',
       location: 'Auckland',
     } as ListingRecord;

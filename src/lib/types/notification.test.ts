@@ -18,6 +18,8 @@ describe('notification type helpers', () => {
       'new_message',
       'price_drop',
       'listing_update',
+      'discussion_reply',
+      'discussion_mention',
     ]);
 
     expect(NOTIFICATION_COLORS.new_listing).toEqual({

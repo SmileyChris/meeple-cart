@@ -407,13 +407,7 @@
         </li>
         <li class="flex gap-2">
           <span class="text-accent">•</span>
-<<<<<<< Updated upstream
           <span>Click "Edit Regions" to map items to areas within the photo (coming in Phase 3)</span>
-=======
-          <span
-            >Click "Edit Regions" to map games to areas within the photo (coming in Phase 3)</span
-          >
->>>>>>> Stashed changes
         </li>
         <li class="flex gap-2">
           <span class="text-accent">•</span>

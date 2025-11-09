@@ -28,7 +28,7 @@ vi.mock('svelte/store', () => ({
 
 describe('cascade create load', () => {
   const listingsCollection = { getFullList: vi.fn() };
-  const gamesCollection = { getFullList: vi.fn() };
+  const itemsCollection = { getFullList: vi.fn() };
   const cascadesCollection = { getFullList: vi.fn() };
 
   beforeEach(() => {
@@ -37,8 +37,8 @@ describe('cascade create load', () => {
       switch (name) {
         case 'listings':
           return listingsCollection as any;
-        case 'games':
-          return gamesCollection as any;
+        case 'items':
+          return itemsCollection as any;
         case 'cascades':
           return cascadesCollection as any;
         default:
@@ -52,10 +52,10 @@ describe('cascade create load', () => {
     const { get } = await import('svelte/store');
     vi.mocked(get).mockReturnValue(null);
 
-    await expect(load({} as any)).rejects.toMatchObject({
+    await expect(load({ url: { pathname: '/cascades/create' } } as any)).rejects.toMatchObject({
       message: 'REDIRECT',
       status: 302,
-      location: '/login',
+      location: '/login?next=%2Fcascades%2Fcreate',
     });
   });
 
@@ -69,7 +69,7 @@ describe('cascade create load', () => {
       { id: 'listing-2', title: 'Family Games' },
     ]);
 
-    gamesCollection.getFullList.mockResolvedValue([
+    itemsCollection.getFullList.mockResolvedValue([
       {
         id: 'game-1',
         title: 'Gloomhaven',
@@ -88,14 +88,14 @@ describe('cascade create load', () => {
 
     cascadesCollection.getFullList.mockResolvedValue([{ current_game: 'game-2' }]);
 
-    const result = await load({} as any);
+    const result = await load({ url: { pathname: '/cascades/create' } } as any);
 
     expect(listingsCollection.getFullList).toHaveBeenCalledWith({
       filter: 'owner = "user-1" && status = "active"',
       fields: 'id,title',
     });
 
-    const gameFilter = gamesCollection.getFullList.mock.calls[0][0].filter;
+    const gameFilter = itemsCollection.getFullList.mock.calls[0][0].filter;
     expect(gameFilter).toContain('listing = "listing-1"');
     expect(gameFilter).toContain('listing = "listing-2"');
 
@@ -116,10 +116,10 @@ describe('cascade create load', () => {
 
     listingsCollection.getFullList.mockResolvedValue([]);
 
-    const result = await load({} as any);
+    const result = await load({ url: { pathname: '/cascades/create' } } as any);
 
     expect(result.availableGames).toEqual([]);
-    expect(gamesCollection.getFullList).not.toHaveBeenCalled();
+    expect(itemsCollection.getFullList).not.toHaveBeenCalled();
   });
 
   it('returns fallback when loading fails', async () => {
@@ -130,7 +130,7 @@ describe('cascade create load', () => {
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     listingsCollection.getFullList.mockRejectedValue(new Error('db down'));
 
-    const result = await load({} as any);
+    const result = await load({ url: { pathname: '/cascades/create' } } as any);
 
     expect(consoleSpy).toHaveBeenCalledWith(
       'Failed to load available games for cascade',

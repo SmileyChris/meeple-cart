@@ -10,7 +10,18 @@ const setupModule = async (browser: boolean, redirectMessage = 'Redirect') => {
   });
 
   vi.doMock('$app/environment', () => ({ browser }));
-  vi.doMock('$lib/pocketbase', () => ({ pb: {} }));
+  vi.doMock('$lib/pocketbase', () => ({
+    pb: {
+      authStore: {
+        token: null,
+        isValid: false,
+        clear: vi.fn(),
+      },
+      collection: vi.fn(() => ({
+        authRefresh: vi.fn(),
+      })),
+    },
+  }));
   vi.doMock('@sveltejs/kit', () => ({ redirect: redirectMock }));
 
   const module = await import('./+page.ts');
@@ -32,10 +43,34 @@ describe('register page load', () => {
   });
 
   it('redirects to profile when auth token exists in local storage', async () => {
-    const { load, redirectMock } = await setupModule(true);
+    // Create a special setup for this test with a valid auth state
+    vi.resetModules();
+    const redirectMock = vi.fn((status: number, location: string) => {
+      const error = new Error('Redirect');
+      (error as any).status = status;
+      (error as any).location = location;
+      throw error;
+    });
+
+    vi.doMock('$app/environment', () => ({ browser: true }));
+    vi.doMock('$lib/pocketbase', () => ({
+      pb: {
+        authStore: {
+          token: 'abc123',
+          isValid: true,
+          clear: vi.fn(),
+        },
+        collection: vi.fn(() => ({
+          authRefresh: vi.fn().mockResolvedValue({}),
+        })),
+      },
+    }));
+    vi.doMock('@sveltejs/kit', () => ({ redirect: redirectMock }));
+
+    const module = await import('./+page.ts');
     localStorage.setItem('pocketbase_auth', JSON.stringify({ token: 'abc123' }));
 
-    await expect(load({} as any)).rejects.toMatchObject({
+    await expect(module.load({} as any)).rejects.toMatchObject({
       message: 'Redirect',
       status: 302,
       location: '/profile',

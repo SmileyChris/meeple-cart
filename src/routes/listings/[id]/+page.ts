@@ -1,14 +1,14 @@
 import { error } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
-import type { ItemRecord, ListingGameDetail, ListingRecord } from '$lib/types/listing';
+import type { ListingGameDetail, ListingRecord } from '$lib/types/listing';
 import type {
   UserRecord,
+  ItemRecord,
   ReactionCounts,
   ReactionEmoji,
   ReactionRecord,
+  OfferTemplateRecord,
 } from '$lib/types/pocketbase';
-import { normalizeListingType } from '$lib/types/listing';
-import { getLowestHistoricalPrice } from '$lib/utils/price-history';
 import { pb, currentUser } from '$lib/pocketbase';
 import { get } from 'svelte/store';
 
@@ -23,54 +23,28 @@ export const load: PageLoad = async ({ params }) => {
     });
 
     const owner = listing.expand?.owner as UserRecord | undefined;
-    const games = (listing.expand?.[ITEMS_EXPAND_KEY] as ItemRecord[] | undefined) ?? [];
-    const formattedGames: ListingGameDetail[] = games.map((game) => {
-      const bggId = typeof game.bgg_id === 'number' ? game.bgg_id : null;
+    const items = (listing.expand?.[ITEMS_EXPAND_KEY] as ItemRecord[] | undefined) ?? [];
+    const formattedItems: ListingGameDetail[] = items.map((item) => {
+      const bggId = typeof item.bgg_id === 'number' ? item.bgg_id : null;
 
-      // Get lowest historical price using anti-gaming logic
-      const currentPrice = typeof game.price === 'number' ? game.price : null;
-      const currentTradeValue = typeof game.trade_value === 'number' ? game.trade_value : null;
-
-      let previousPrice: number | null = null;
-      let previousTradeValue: number | null = null;
-
-      if (game.price_history && game.price_history.length >= 1) {
-        const lowestPrice = getLowestHistoricalPrice(game.price_history, listing.created, 'price');
-        const lowestTradeValue = getLowestHistoricalPrice(
-          game.price_history,
-          listing.created,
-          'trade_value'
-        );
-
-        // Only show previous price if current is lower (actual drop)
-        if (lowestPrice !== null && currentPrice !== null && currentPrice < lowestPrice) {
-          previousPrice = lowestPrice;
-        }
-
-        if (
-          lowestTradeValue !== null &&
-          currentTradeValue !== null &&
-          currentTradeValue < lowestTradeValue
-        ) {
-          previousTradeValue = lowestTradeValue;
-        }
-      }
-
+      // Note: price/tradeValue now come from offer_templates, not items
+      // For now, return null values - will need offer template integration
       return {
-        id: game.id,
-        title: game.title,
-        condition: game.condition,
-        status: game.status,
+        id: item.id,
+        title: item.title,
+        condition: item.condition,
+        status: item.status,
         bggId,
         bggUrl: bggId ? `https://boardgamegeek.com/boardgame/${bggId}` : null,
-        price: currentPrice,
-        tradeValue: currentTradeValue,
-        notes: game.notes ?? null,
-        year: typeof game.year === 'number' ? game.year : null,
-        previousPrice,
-        previousTradeValue,
+        price: null,
+        tradeValue: null,
+        notes: item.notes ?? null,
+        year: typeof item.year === 'number' ? item.year : null,
+        previousPrice: null,
+        previousTradeValue: null,
         listingCreated: listing.created,
-        priceHistory: game.price_history,
+        priceHistory: undefined,
+        canPost: false,
       };
     });
 
@@ -81,11 +55,6 @@ export const load: PageLoad = async ({ params }) => {
           thumb: pb.files.getUrl(listing, photo, { thumb: '400x300' }).toString(),
         }))
       : [];
-
-    const normalizedListing = {
-      ...listing,
-      listing_type: normalizeListingType(String(listing.listing_type)),
-    } satisfies ListingRecord;
 
     // Fetch reaction counts and user's reaction
     const user = get(currentUser);
@@ -115,15 +84,29 @@ export const load: PageLoad = async ({ params }) => {
     // User is "watching" if they have any reaction on this listing
     const isWatching = userReaction !== null;
 
-    // Check for existing trade (exclude cancelled trades)
+    // Check for existing pending offer or accepted trade from this user
     let existingTrade = null;
     if (user) {
       const existingTrades = await pb.collection('trades').getList(1, 1, {
-        filter: `listing = "${id}" && buyer = "${user.id}" && status != "cancelled"`,
+        filter: `listing = "${id}" && buyer = "${user.id}" && (offer_status = "pending" || offer_status = "accepted")`,
       });
       if (existingTrades.items.length > 0) {
         existingTrade = existingTrades.items[0];
       }
+    }
+
+    // Load active offer templates for this listing
+    let offerTemplates: OfferTemplateRecord[] = [];
+    try {
+      const templates = await pb.collection('offer_templates').getFullList<OfferTemplateRecord>({
+        filter: `listing = "${id}" && status = "active"`,
+        sort: '-created',
+        expand: 'items',
+      });
+      offerTemplates = templates;
+    } catch (err) {
+      console.error('Failed to load offer templates:', err);
+      // Don't fail the whole page if templates fail to load
     }
 
     // Load listing-specific discussion threads
@@ -140,16 +123,31 @@ export const load: PageLoad = async ({ params }) => {
       // Don't fail the whole page if discussions fail to load
     }
 
+    // Count pending offers for this listing (only visible to owner)
+    let pendingOfferCount = 0;
+    if (user && owner && user.id === owner.id) {
+      try {
+        const pendingOffers = await pb.collection('trades').getList(1, 1, {
+          filter: `listing = "${id}" && offer_status = "pending"`,
+        });
+        pendingOfferCount = pendingOffers.totalItems;
+      } catch (err) {
+        console.error('Failed to load pending offers count:', err);
+      }
+    }
+
     return {
-      listing: normalizedListing,
+      listing,
       owner: owner || null,
-      games: formattedGames,
+      games: formattedItems,
       photos,
       isWatching,
       reactionCounts,
       userReaction,
       existingTrade,
+      offerTemplates,
       discussions,
+      pendingOfferCount,
     };
   } catch (err) {
     console.error(`Failed to load listing ${id}`, err);

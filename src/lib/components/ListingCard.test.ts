@@ -25,8 +25,6 @@ const baseListing = (overrides: Partial<ListingPreview> = {}): ListingPreview =>
       status: 'available',
       bggId: 174430,
       bggUrl: 'https://boardgamegeek.com/boardgame/174430',
-      price: 150,
-      tradeValue: null,
       canPost: false,
     },
     {
@@ -36,8 +34,6 @@ const baseListing = (overrides: Partial<ListingPreview> = {}): ListingPreview =>
       status: 'pending',
       bggId: null,
       bggUrl: null,
-      price: null,
-      tradeValue: 200,
       canPost: true,
     },
     {
@@ -47,8 +43,6 @@ const baseListing = (overrides: Partial<ListingPreview> = {}): ListingPreview =>
       status: 'sold',
       bggId: null,
       bggUrl: null,
-      price: null,
-      tradeValue: null,
       canPost: false,
     },
   ],
@@ -78,8 +72,8 @@ describe('ListingCard', () => {
     expect(screen.getByRole('link', { name: 'Chris' })).toHaveAttribute('href', '/users/owner-1');
     expect(screen.getByText('Wellington')).toBeInTheDocument();
 
-    // Check games are displayed as badges
-    expect(screen.getByText('3 games included')).toBeInTheDocument();
+    // Check items are displayed as badges
+    expect(screen.getByText('3 items included')).toBeInTheDocument();
     expect(screen.getByText('Gloomhaven')).toBeInTheDocument();
     expect(screen.getByText('Frosthaven')).toBeInTheDocument();
     expect(screen.getByText('Spirit Island')).toBeInTheDocument();

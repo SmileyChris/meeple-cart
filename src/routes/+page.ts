@@ -1,8 +1,7 @@
 import { PUBLIC_POCKETBASE_URL } from '$env/static/public';
 import type { PageLoad } from './$types';
-import type { ItemRecord, ListingPreview, ListingRecord } from '$lib/types/listing';
-import type { UserRecord } from '$lib/types/pocketbase';
-import { normalizeListingType } from '$lib/types/listing';
+import type { ListingPreview, ListingRecord } from '$lib/types/listing';
+import type { UserRecord, ItemRecord } from '$lib/types/pocketbase';
 
 const ACTIVITY_LIMIT = 50;
 const FALLBACK_BASE_URL = 'http://127.0.0.1:8090';
@@ -65,18 +64,8 @@ export const load: PageLoad = async ({ fetch, url, parent, depends }) => {
   // Build filter - always include active status
   const filters = ['status = "active"'];
 
-  // Filter by selected listing types
-  if (selectedTypes.length > 0 && selectedTypes.length < 3) {
-    const typeConditions = selectedTypes
-      .filter((t) => ['trade', 'sell', 'want'].includes(t))
-      .map((t) => `listing_type = "${t}"`);
-    if (typeConditions.length > 0) {
-      filters.push(`(${typeConditions.join(' || ')})`);
-    }
-  }
-
-  // Note: can_post filter requires checking games, which is complex in PocketBase
-  // We'll filter on the client side after loading
+  // Note: listing_type field removed from schema
+  // Type filtering would need to be done via offer_templates in future
 
   const activityParams = new URLSearchParams({
     page,
@@ -105,18 +94,18 @@ export const load: PageLoad = async ({ fetch, url, parent, depends }) => {
     let listings: ListingPreview[] = result.items.map((item) => {
       const owner = item.expand?.owner as UserRecord | undefined;
       const games = Array.isArray(item.expand?.['items(listing)'])
-        ? (item.expand?.['items(listing)'] as ItemRecord[]).map((gameItem) => {
-            const bggId = typeof gameItem.bgg_id === 'number' ? gameItem.bgg_id : null;
+        ? (item.expand?.['items(listing)'] as ItemRecord[]).map((itemRecord) => {
+            const bggId = typeof itemRecord.bgg_id === 'number' ? itemRecord.bgg_id : null;
             return {
-              id: gameItem.id,
-              title: gameItem.title,
-              condition: gameItem.condition,
-              status: gameItem.status,
+              id: itemRecord.id,
+              title: itemRecord.title,
+              condition: itemRecord.condition,
+              status: itemRecord.status,
               bggId,
               bggUrl: bggId ? `https://boardgamegeek.com/boardgame/${bggId}` : null,
-              price: typeof gameItem.price === 'number' ? gameItem.price : null,
-              tradeValue: typeof gameItem.trade_value === 'number' ? gameItem.trade_value : null,
-              canPost: gameItem.can_post === true,
+              price: null, // Price now in offer_templates
+              tradeValue: null, // Trade value now in offer_templates
+              canPost: false, // can_post removed from schema
             };
           })
         : [];
@@ -128,7 +117,7 @@ export const load: PageLoad = async ({ fetch, url, parent, depends }) => {
       return {
         id: item.id,
         title: item.title,
-        listingType: normalizeListingType(String(item.listing_type)),
+        listingType: 'sell', // Default since listing_type removed
         summary: item.summary ?? '',
         location: item.location ?? null,
         regions: Array.isArray(item.regions) ? item.regions : null,
@@ -136,7 +125,7 @@ export const load: PageLoad = async ({ fetch, url, parent, depends }) => {
         ownerName: owner?.display_name ?? null,
         ownerId: owner?.id ?? null,
         ownerJoinedDate: owner?.created ?? null,
-        ownerVouchedTrades: typeof owner?.vouched_trade_count === 'number' ? owner.vouched_trade_count : 0,
+        ownerVouchedTrades: typeof owner?.vouch_count === 'number' ? owner.vouch_count : 0,
         coverImage,
         href: `/listings/${item.id}`,
         games,
@@ -146,14 +135,7 @@ export const load: PageLoad = async ({ fetch, url, parent, depends }) => {
     // Client-side filters
     if (myRegionsFilter && urlRegions.length > 0) {
       listings = listings.filter((listing) => {
-        // Match if listing is in filtered regions
-        const matchesRegion =
-          listing.regions && listing.regions.some((region) => urlRegions.includes(region));
-
-        // OR if "can post" is enabled and listing has games that can be posted
-        const matchesCanPost = canPostFilter && listing.games.some((game) => game.canPost);
-
-        return matchesRegion || matchesCanPost;
+        return listing.regions && listing.regions.some((region) => urlRegions.includes(region));
       });
     }
 

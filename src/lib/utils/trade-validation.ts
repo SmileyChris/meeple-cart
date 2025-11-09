@@ -6,7 +6,6 @@ interface Listing {
   id: string;
   owner: string;
   status: ListingStatus;
-  listing_type: string;
 }
 
 /**

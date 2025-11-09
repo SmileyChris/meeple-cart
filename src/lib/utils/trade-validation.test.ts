@@ -14,7 +14,6 @@ describe('canInitiateTrade', () => {
     id: 'listing123',
     owner: 'seller123',
     status: 'active' as const,
-    listing_type: 'trade' as const,
   };
 
   it('allows trade initiation on active listing by non-owner', () => {
@@ -49,7 +48,6 @@ describe('validateTradeInitiation', () => {
     id: 'listing123',
     owner: 'seller123',
     status: 'active' as const,
-    listing_type: 'trade' as const,
   };
 
   it('returns null for valid trade initiation', () => {
@@ -87,6 +85,7 @@ describe('canLeaveFeedback', () => {
     listing: 'listing123',
     buyer: 'buyer123',
     seller: 'seller123',
+    offer_status: 'accepted',
     status: 'completed',
     created: '2024-01-01T12:00:00Z',
     updated: '2024-01-01T12:00:00Z',
@@ -132,6 +131,7 @@ describe('validateFeedback', () => {
     listing: 'listing123',
     buyer: 'buyer123',
     seller: 'seller123',
+    offer_status: 'accepted',
     status: 'completed',
     created: '2024-01-01T12:00:00Z',
     updated: '2024-01-01T12:00:00Z',
@@ -192,6 +192,7 @@ describe('canVouchForUser', () => {
       listing: 'listing1',
       buyer: 'user1',
       seller: 'user2',
+      offer_status: 'accepted',
       status: 'completed',
       created: '2024-01-01T12:00:00Z',
       updated: '2024-01-01T12:00:00Z',
@@ -203,6 +204,7 @@ describe('canVouchForUser', () => {
       listing: 'listing2',
       buyer: 'user2',
       seller: 'user1',
+      offer_status: 'accepted',
       status: 'completed',
       created: '2024-01-02T12:00:00Z',
       updated: '2024-01-02T12:00:00Z',
@@ -251,6 +253,7 @@ describe('validateVouch', () => {
       listing: 'listing1',
       buyer: 'user1',
       seller: 'user2',
+      offer_status: 'accepted',
       status: 'completed',
       created: '2024-01-01T12:00:00Z',
       updated: '2024-01-01T12:00:00Z',

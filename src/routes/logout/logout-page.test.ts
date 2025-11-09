@@ -18,17 +18,16 @@ vi.mock('@sveltejs/kit', () => ({
 }));
 
 describe('logout page load', () => {
-  it('logs out the current user and redirects home', async () => {
+  it('returns empty object without logging out', async () => {
     const module = await import('./+page.ts');
 
-    await expect(module.load({} as any)).rejects.toMatchObject({
-      message: 'REDIRECT',
-      status: 302,
-      location: '/',
-    });
+    // The logout page load just returns empty object
+    // Actual logout happens when user confirms on the page
+    await expect(module.load({} as any)).resolves.toEqual({});
 
+    // currentUser.logout should not be called in the load function
     const { currentUser } = await import('$lib/pocketbase');
-    expect(currentUser.logout).toHaveBeenCalled();
-    expect(redirectMock).toHaveBeenCalledWith(302, '/');
+    expect(currentUser.logout).not.toHaveBeenCalled();
+    expect(redirectMock).not.toHaveBeenCalled();
   });
 });

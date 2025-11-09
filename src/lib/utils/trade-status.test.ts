@@ -93,6 +93,7 @@ describe('getAvailableActions', () => {
     listing: 'listing123',
     buyer: 'buyer123',
     seller: 'seller123',
+    offer_status: 'accepted',
     status: 'initiated',
     created: '2024-01-01T12:00:00Z',
     updated: '2024-01-01T12:00:00Z',

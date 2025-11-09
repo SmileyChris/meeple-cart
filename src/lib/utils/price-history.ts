@@ -1,70 +1,54 @@
-import type { PriceHistoryEntry, ItemRecord } from '$lib/types/listing';
+/**
+ * DEPRECATED: Price history functionality is no longer used.
+ * Items no longer have individual prices - pricing is now managed through offer_templates.
+ *
+ * These functions are stubbed out for backwards compatibility.
+ * Use offer_templates collection for pricing information instead.
+ */
+
+// Deprecated type - kept for backwards compatibility with tests
+export type PriceHistoryEntry = {
+  price?: number;
+  trade_value?: number;
+  timestamp: string;
+};
 
 /**
- * Get the lowest historical price from entries that are:
- * 1. At least 3 days after listing creation
- * 2. Not the current price (previous entries only)
- * 3. Have a valid price/trade_value
- *
- * This prevents gaming the system by showing inflated "previous" prices.
+ * @deprecated Use offer_templates for pricing information
  */
-export function getLowestHistoricalPrice(
-  priceHistory: PriceHistoryEntry[],
-  listingCreated: string,
-  priceType: 'price' | 'trade_value'
-): number | null {
-  if (!priceHistory || priceHistory.length < 2) {
-    return null; // Need at least 2 entries (initial + current)
-  }
-
-  // Calculate 3-day threshold from listing creation
-  const thresholdDate = new Date(listingCreated);
-  thresholdDate.setDate(thresholdDate.getDate() + 3);
-
-  // Get all entries except the most recent (current price)
-  const historicalEntries = priceHistory.slice(0, -1);
-
-  // Filter to entries after 3-day threshold
-  const validEntries = historicalEntries.filter(
-    (entry) => new Date(entry.timestamp) >= thresholdDate
-  );
-
-  if (validEntries.length === 0) {
-    return null; // No valid historical prices (all within 3-day window)
-  }
-
-  // Get all valid prices of the specified type
-  const prices = validEntries
-    .map((e) => (priceType === 'price' ? e.price : e.trade_value))
-    .filter((p): p is number => typeof p === 'number');
-
-  if (prices.length === 0) {
-    return null;
-  }
-
-  return Math.min(...prices);
+export function getLowestHistoricalPrice(): number | null {
+  return null;
 }
 
 /**
- * Get the most recent price from price history
- * @deprecated Use getLowestHistoricalPrice for anti-gaming protection
+ * @deprecated Use offer_templates for pricing information
  */
-export function getMostRecentPrice(
-  item: ItemRecord
-): { price?: number; tradeValue?: number } | null {
-  if (!item.price_history || item.price_history.length === 0) {
-    return null;
+export function getMostRecentPrice(): { price?: number; tradeValue?: number } | null {
+  return null;
+}
+
+/**
+ * Formats a price for display (handles null/undefined)
+ */
+export function formatPrice(price?: number | null): string {
+  if (price == null) {
+    return 'N/A';
   }
 
-  // Price history is ordered, so last entry is most recent before current
-  const history = item.price_history;
-  if (history.length < 2) {
-    return null; // Need at least 2 entries to show "was" price
+  // Convert cents to dollars
+  const dollars = price / 100;
+  return `$${dollars.toFixed(2)}`;
+}
+
+/**
+ * Formats a trade value for display (handles null/undefined)
+ */
+export function formatTradeValue(tradeValue?: number | null): string {
+  if (tradeValue == null) {
+    return 'N/A';
   }
 
-  const previousEntry = history[history.length - 2];
-  return {
-    price: previousEntry.price,
-    tradeValue: previousEntry.trade_value,
-  };
+  // Convert cents to dollars
+  const dollars = tradeValue / 100;
+  return `~$${dollars.toFixed(2)}`;
 }

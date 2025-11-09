@@ -8,11 +8,60 @@
   let { data }: { data: PageData } = $props();
 
   let listing = $derived(data.listing);
+  let categories = $derived(data.categories);
 
+  let threadType = $state<'discussion' | 'wanted'>('discussion');
+  let category = $state('');
   let title = $state('');
   let content = $state('');
+  let tags = $state<string[]>([]);
+  let tagInput = $state('');
+  let wantedItems = $state<Array<{ title: string; bgg_id: string; max_price: string }>>([
+    { title: '', bgg_id: '', max_price: '' },
+  ]);
+  let wantedOfferType = $state<'buying' | 'trading' | 'either'>('either');
   let isSubmitting = $state(false);
   let error = $state('');
+
+  // Auto-select "wanted" category for wanted posts
+  $effect(() => {
+    if (threadType === 'wanted') {
+      const wantedCat = categories.find((c) => c.slug === 'wanted');
+      if (wantedCat) {
+        category = wantedCat.id;
+      }
+    }
+  });
+
+  function addWantedItem() {
+    wantedItems = [...wantedItems, { title: '', bgg_id: '', max_price: '' }];
+  }
+
+  function removeWantedItem(index: number) {
+    wantedItems = wantedItems.filter((_, i) => i !== index);
+  }
+
+  function addTag() {
+    const tag = tagInput.trim().toLowerCase();
+    if (tag && !tags.includes(tag) && tags.length < 10) {
+      tags = [...tags, tag];
+      tagInput = '';
+    }
+  }
+
+  function removeTag(tag: string) {
+    tags = tags.filter(t => t !== tag);
+  }
+
+  function handleTagKeydown(e: KeyboardEvent) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addTag();
+    } else if (e.key === ',' && tagInput.trim()) {
+      e.preventDefault();
+      addTag();
+    }
+  }
 
   async function handleSubmit(e: Event) {
     e.preventDefault();
@@ -42,15 +91,45 @@
       return;
     }
 
+    if (!category) {
+      error = 'Please select a category';
+      return;
+    }
+
+    // Validate wanted items if this is a wanted post
+    if (threadType === 'wanted') {
+      const validWantedItems = wantedItems.filter(item => item.title.trim());
+      if (validWantedItems.length === 0) {
+        error = 'Please specify at least one item you want';
+        return;
+      }
+    }
+
     isSubmitting = true;
     error = '';
 
     try {
+      // Prepare wanted items data
+      const validWantedItems = threadType === 'wanted'
+        ? wantedItems
+            .filter(item => item.title.trim())
+            .map(item => ({
+              title: item.title.trim(),
+              ...(item.bgg_id.trim() ? { bgg_id: parseInt(item.bgg_id, 10) } : {}),
+              ...(item.max_price.trim() ? { max_price: Math.round(parseFloat(item.max_price) * 100) } : {}),
+            }))
+        : undefined;
+
       // Create thread
       const thread = await pb.collection('discussion_threads').create({
         title: title.trim(),
         content: content,
         author: $currentUser.id,
+        category: category,
+        thread_type: threadType,
+        tags: tags.length > 0 ? tags : undefined,
+        ...(threadType === 'wanted' ? { wanted_items: validWantedItems } : {}),
+        ...(threadType === 'wanted' ? { wanted_offer_type: wantedOfferType } : {}),
         listing: listing?.id || null,
         pinned: false,
         locked: false,
@@ -100,12 +179,16 @@
 
   <!-- Header -->
   <div class="mb-8">
-    <h1 class="mb-2 text-3xl font-bold text-primary">Start a Discussion</h1>
+    <h1 class="mb-2 text-3xl font-bold text-primary">
+      {threadType === 'wanted' ? 'Post a Wanted Ad' : 'Start a Discussion'}
+    </h1>
     <p class="text-secondary">
       {#if listing}
         About: <a href="/listings/{listing.id}" class="font-medium text-accent hover:underline">
           {listing.title}
         </a>
+      {:else if threadType === 'wanted'}
+        Let the community know what games or items you're looking for.
       {:else}
         Share your thoughts, ask questions, or start a conversation with the community.
       {/if}
@@ -150,6 +233,78 @@
     {/if}
 
     <form onsubmit={handleSubmit} class="space-y-6">
+      <!-- Thread Type -->
+      {#if !listing}
+        <div>
+          <label class="mb-3 block text-sm font-medium text-secondary">
+            Post Type <span class="text-red-400">*</span>
+          </label>
+          <div class="grid gap-3 sm:grid-cols-2">
+            <label class="flex cursor-pointer items-start gap-3 rounded-lg border border-subtle bg-surface-body p-4 transition hover:border-accent/50 {threadType === 'discussion' ? 'border-accent bg-accent/5' : ''}">
+              <input
+                type="radio"
+                name="thread_type"
+                value="discussion"
+                bind:group={threadType}
+                class="mt-1 h-4 w-4 accent-[var(--accent)]"
+              />
+              <div>
+                <div class="font-medium text-primary">💬 General Discussion</div>
+                <div class="mt-1 text-sm text-muted">
+                  Ask questions, share tips, or discuss board games
+                </div>
+              </div>
+            </label>
+
+            <label class="flex cursor-pointer items-start gap-3 rounded-lg border border-subtle bg-surface-body p-4 transition hover:border-accent/50 {threadType === 'wanted' ? 'border-accent bg-accent/5' : ''}">
+              <input
+                type="radio"
+                name="thread_type"
+                value="wanted"
+                bind:group={threadType}
+                class="mt-1 h-4 w-4 accent-[var(--accent)]"
+              />
+              <div>
+                <div class="font-medium text-primary">🔍 Wanted Ad</div>
+                <div class="mt-1 text-sm text-muted">
+                  Post what you're looking to buy or trade for
+                </div>
+              </div>
+            </label>
+          </div>
+        </div>
+      {/if}
+
+      <!-- Category Selection -->
+      <div>
+        <label for="category" class="mb-2 block text-sm font-medium text-secondary">
+          Category <span class="text-red-400">*</span>
+        </label>
+        <select
+          id="category"
+          bind:value={category}
+          disabled={threadType === 'wanted'}
+          class="w-full rounded-lg border border-subtle bg-surface-body px-4 py-2 text-primary focus:border-accent focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+          required
+        >
+          <option value="">Select a category...</option>
+          {#each categories as cat}
+            <option value={cat.id}>
+              {cat.icon} {cat.name}
+            </option>
+          {/each}
+        </select>
+        {#if threadType === 'wanted'}
+          <p class="mt-1 text-xs text-muted">
+            Wanted posts are automatically assigned to the "Wanted / Group Buys" category
+          </p>
+        {:else}
+          <p class="mt-1 text-xs text-muted">
+            Choose the category that best fits your discussion
+          </p>
+        {/if}
+      </div>
+
       <!-- Title -->
       <div>
         <label for="title" class="mb-2 block text-sm font-medium text-secondary">
@@ -183,6 +338,166 @@
           You can use markdown for formatting. @mention users to notify them.
         </p>
       </div>
+
+      <!-- Tags -->
+      <div>
+        <label for="tags" class="mb-2 block text-sm font-medium text-secondary">
+          Tags (optional)
+        </label>
+        <div class="space-y-2">
+          <div class="flex gap-2">
+            <input
+              type="text"
+              id="tags"
+              bind:value={tagInput}
+              onkeydown={handleTagKeydown}
+              placeholder="Type tags and press Enter or comma (e.g., euro, co-op, region:auckland)"
+              maxlength="50"
+              class="flex-1 rounded-lg border border-subtle bg-surface-body px-4 py-2 text-sm text-primary placeholder-muted focus:border-accent focus:outline-none"
+              disabled={tags.length >= 10}
+            />
+            <button
+              type="button"
+              onclick={addTag}
+              disabled={!tagInput.trim() || tags.length >= 10}
+              class="rounded-lg border border-accent bg-accent px-4 py-2 text-sm font-medium text-surface-body hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Add
+            </button>
+          </div>
+          {#if tags.length > 0}
+            <div class="flex flex-wrap gap-2">
+              {#each tags as tag}
+                <span class="inline-flex items-center gap-1 rounded-full border border-subtle bg-surface-card px-3 py-1 text-sm text-secondary">
+                  #{tag}
+                  <button
+                    type="button"
+                    onclick={() => removeTag(tag)}
+                    class="text-muted hover:text-primary"
+                    title="Remove tag"
+                  >
+                    ×
+                  </button>
+                </span>
+              {/each}
+            </div>
+          {/if}
+          <p class="text-xs text-muted">
+            Add up to 10 tags. Use prefixes like tag:, region:, or player-count: for clarity.
+            {#if tags.length > 0}
+              <span class="text-secondary">({tags.length}/10)</span>
+            {/if}
+          </p>
+        </div>
+      </div>
+
+      <!-- Wanted Items (only for wanted posts) -->
+      {#if threadType === 'wanted'}
+        <div class="space-y-4 rounded-lg border border-accent/30 bg-accent/5 p-4">
+          <div>
+            <h3 class="text-sm font-semibold text-primary">
+              Items You Want <span class="text-red-400">*</span>
+            </h3>
+            <p class="mt-1 text-xs text-muted">
+              List the games or items you're looking for. Include BGG IDs to help others identify exact games.
+            </p>
+          </div>
+
+          <div class="space-y-3">
+            {#each wantedItems as item, index (index)}
+              <div class="flex gap-3">
+                <div class="flex-1 space-y-2">
+                  <input
+                    type="text"
+                    bind:value={item.title}
+                    placeholder="Game title (e.g., Wingspan)"
+                    class="w-full rounded-lg border border-subtle bg-surface-body px-3 py-2 text-sm text-primary placeholder-muted focus:border-accent focus:outline-none"
+                  />
+                  <div class="grid grid-cols-2 gap-2">
+                    <input
+                      type="number"
+                      bind:value={item.bgg_id}
+                      placeholder="BGG ID (optional)"
+                      class="w-full rounded-lg border border-subtle bg-surface-body px-3 py-2 text-sm text-primary placeholder-muted focus:border-accent focus:outline-none"
+                    />
+                    <input
+                      type="number"
+                      bind:value={item.max_price}
+                      placeholder="Max price (NZD, optional)"
+                      step="0.01"
+                      class="w-full rounded-lg border border-subtle bg-surface-body px-3 py-2 text-sm text-primary placeholder-muted focus:border-accent focus:outline-none"
+                    />
+                  </div>
+                </div>
+                {#if wantedItems.length > 1}
+                  <button
+                    type="button"
+                    onclick={() => removeWantedItem(index)}
+                    class="rounded-lg p-2 text-rose-400 transition hover:bg-rose-500/10"
+                    title="Remove item"
+                  >
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                {/if}
+              </div>
+            {/each}
+          </div>
+
+          <button
+            type="button"
+            onclick={addWantedItem}
+            class="text-sm text-accent hover:underline"
+          >
+            + Add another item
+          </button>
+
+          <!-- Offer Type -->
+          <div>
+            <label class="mb-2 block text-sm font-medium text-secondary">
+              I'm looking to:
+            </label>
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 text-sm">
+                <input
+                  type="radio"
+                  name="wanted_offer_type"
+                  value="buying"
+                  bind:group={wantedOfferType}
+                  class="h-4 w-4 accent-[var(--accent)]"
+                />
+                <span class="text-secondary">💰 Buy (cash only)</span>
+              </label>
+              <label class="flex items-center gap-2 text-sm">
+                <input
+                  type="radio"
+                  name="wanted_offer_type"
+                  value="trading"
+                  bind:group={wantedOfferType}
+                  class="h-4 w-4 accent-[var(--accent)]"
+                />
+                <span class="text-secondary">🔄 Trade (no cash)</span>
+              </label>
+              <label class="flex items-center gap-2 text-sm">
+                <input
+                  type="radio"
+                  name="wanted_offer_type"
+                  value="either"
+                  bind:group={wantedOfferType}
+                  class="h-4 w-4 accent-[var(--accent)]"
+                />
+                <span class="text-secondary">💰🔄 Either buy or trade</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      {/if}
 
       <!-- Actions -->
       <div class="flex items-center justify-between gap-4">

@@ -1,13 +1,12 @@
 import { PUBLIC_POCKETBASE_URL } from '$env/static/public';
 import type { PageLoad } from './$types';
 import type {
-  ItemRecord,
   ListingFilters,
   ListingRecord,
   ListingType,
 } from '$lib/types/listing';
-import { LISTING_TYPES, normalizeListingType } from '$lib/types/listing';
-import type { UserRecord } from '$lib/types/pocketbase';
+import { LISTING_TYPES } from '$lib/types/listing';
+import type { UserRecord, ItemRecord } from '$lib/types/pocketbase';
 import type { ActivityItem } from '$lib/types/activity';
 import { currentUser } from '$lib/pocketbase';
 import { get } from 'svelte/store';
@@ -61,10 +60,6 @@ export const load: PageLoad = async ({ fetch, url, depends }) => {
   // Get current user's preferred regions
   const user = get(currentUser);
 
-  // Get types filter - check individual params, default to all three
-  const allTypes = ['sell', 'trade', 'want'];
-  const selectedTypes = allTypes.filter(type => url.searchParams.get(type) !== 'false');
-
   // Get regions from URL params (changed from 'regions' to 'region')
   const urlRegions = url.searchParams.getAll('region');
   const myRegionsFilter = urlRegions.length > 0;
@@ -94,28 +89,14 @@ export const load: PageLoad = async ({ fetch, url, depends }) => {
     ? conditionParam
     : '';
 
-  const minPriceParam = url.searchParams.get('minPrice')?.trim() ?? '';
-  const maxPriceParam = url.searchParams.get('maxPrice')?.trim() ?? '';
-  const minPrice = minPriceParam;
-  const maxPrice = maxPriceParam;
-
-  // Build filters for games collection
+  // Build filters for items collection
   const filters: string[] = ['listing.status = "active"'];
 
-  // Filter by selected listing types
-  if (selectedTypes.length > 0 && selectedTypes.length < 3) {
-    const typeConditions = selectedTypes
-      .filter((t) => ['trade', 'sell', 'want'].includes(t))
-      .map((t) => `listing.listing_type = "${t}"`);
-    if (typeConditions.length > 0) {
-      filters.push(`(${typeConditions.join(' || ')})`);
-    }
-  }
+  // Note: listing_type field no longer exists - type filtering removed
+  // In future, could filter by offer template type instead
 
   // Filter by regions if any are selected
-  // Note: can_post filtering is done client-side because it's a game property
-  // and we need to filter based on listings that have games with can_post=true
-  if (regions.length > 0 && !canPostFilter) {
+  if (regions.length > 0) {
     const regionFilters = regions
       .map((region) => `listing.regions ~ "${sanitizeForFilter(region)}"`)
       .join(' || ');
@@ -144,28 +125,13 @@ export const load: PageLoad = async ({ fetch, url, depends }) => {
     }
   }
 
-  // Filter by price range
-  if (minPrice) {
-    const minVal = parseFloat(minPrice);
-    if (!isNaN(minVal) && minVal >= 0) {
-      filters.push(`price >= ${minVal}`);
-    }
-  }
-
-  if (maxPrice) {
-    const maxVal = parseFloat(maxPrice);
-    if (!isNaN(maxVal) && maxVal >= 0) {
-      filters.push(`price <= ${maxVal}`);
-    }
-  }
+  // Note: Price filtering removed - price is now in offer_templates, not items
 
   const filtersState: ListingFilters = {
-    type: selectedTypes.length === 1 ? selectedTypes[0] as ListingType : '',
+    type: '', // listing_type field no longer exists
     regions: regions.length > 0 ? regions : undefined,
     search: search || undefined,
     condition: condition || undefined,
-    minPrice: minPrice || undefined,
-    maxPrice: maxPrice || undefined,
   };
 
   const baseUrl = (PUBLIC_POCKETBASE_URL || FALLBACK_BASE_URL).replace(/\/$/, '');
@@ -199,13 +165,13 @@ export const load: PageLoad = async ({ fetch, url, depends }) => {
     const result = (await itemsResponse.json()) as PocketBaseListResponse<ExpandedItemRecord>;
 
     let activities: ActivityItem[] = result.items
-      .filter((game) => {
-        return game.expand?.listing && game.expand.listing.status === 'active';
+      .filter((item) => {
+        return item.expand?.listing && item.expand.listing.status === 'active';
       })
-      .map((game) => {
-        const listing = game.expand!.listing!;
+      .map((item) => {
+        const listing = item.expand!.listing!;
         const owner = listing.expand?.owner;
-        const bggId = typeof game.bgg_id === 'number' ? game.bgg_id : null;
+        const bggId = typeof item.bgg_id === 'number' ? item.bgg_id : null;
 
         const thumbnail =
           Array.isArray(listing.photos) && listing.photos.length > 0
@@ -213,16 +179,16 @@ export const load: PageLoad = async ({ fetch, url, depends }) => {
             : null;
 
         return {
-          id: game.id,
+          id: item.id,
           activityType: 'listing' as const,
-          type: normalizeListingType(String(listing.listing_type)),
-          gameTitle: game.title,
+          type: 'sell' as ListingType, // Default type since listing_type removed
+          gameTitle: item.title,
           listingTitle: listing.title,
           bggId,
-          condition: game.condition,
-          price: typeof game.price === 'number' ? game.price : null,
-          tradeValue: typeof game.trade_value === 'number' ? game.trade_value : null,
-          timestamp: game.created,
+          condition: item.condition,
+          price: null, // Price now in offer_templates
+          tradeValue: null, // Trade value now in offer_templates
+          timestamp: item.created,
           userName: owner?.display_name ?? null,
           userId: owner?.id ?? null,
           userJoinedDate: owner?.created ?? null,
@@ -231,20 +197,14 @@ export const load: PageLoad = async ({ fetch, url, depends }) => {
           listingHref: `/listings/${listing.id}`,
           thumbnail,
           listingRegions: Array.isArray(listing.regions) ? listing.regions : [],
-          canPost: game.can_post === true,
+          canPost: false, // can_post field removed from schema
         };
       });
 
-    // Client-side filters for regions with can_post
+    // Client-side filters for regions
     if (myRegionsFilter && regions.length > 0) {
       activities = activities.filter((activity) => {
-        // Match if listing is in filtered regions
-        const matchesRegion = activity.listingRegions.some((region) => regions.includes(region));
-
-        // OR if "can post" is enabled and game has can_post=true
-        const matchesCanPost = canPostFilter && activity.canPost;
-
-        return matchesRegion || matchesCanPost;
+        return activity.listingRegions.some((region) => regions.includes(region));
       });
     }
 
@@ -257,7 +217,6 @@ export const load: PageLoad = async ({ fetch, url, depends }) => {
         totalItems: result.totalItems,
       },
       loadError: false as const,
-      selectedTypes,
       myRegionsFilter,
       canPostFilter,
       hasPreferredRegions: Boolean(user?.preferred_regions?.length || guestRegions.length > 0),
@@ -274,7 +233,6 @@ export const load: PageLoad = async ({ fetch, url, depends }) => {
         totalItems: 0,
       },
       loadError: true as const,
-      selectedTypes: ['sell', 'trade', 'want'],
       myRegionsFilter: false,
       canPostFilter: false,
       hasPreferredRegions: false,

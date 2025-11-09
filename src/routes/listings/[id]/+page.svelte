@@ -22,7 +22,9 @@
   let tradeError = $state<string | null>(null);
   let showTradeForm = $state(false);
   let selectedGameIds = $state<string[]>([]);
-  let shippingMethod = $state<'in_person' | 'shipped'>('in_person');
+  let shippingMethod = $state<'in_person' | 'shipped' | 'either'>('either');
+  let cashOffer = $state(''); // Cash amount in dollars (will convert to cents)
+  let offerMessage = $state(''); // Buyer's message with their offer
   let showShareModal = $state(false);
   let shareLinkCopied = $state(false);
   let shareTextCopied = $state(false);
@@ -201,23 +203,13 @@
             .map((g) => {
               const parts = [`• ${g.title}`];
               if (g.condition) parts.push(`- ${conditionBadges[g.condition]}`);
-              if (listing.listing_type === 'sell' && g.price) {
-                parts.push(`- ${toCurrency(g.price)}`);
-              } else if (listing.listing_type === 'trade' && g.tradeValue) {
-                parts.push(`- Trade value: ${toCurrency(g.tradeValue)}`);
-              }
-              if (g.can_post) parts.push('- 📮 Can post');
+              // Note: price/tradeValue now in offer templates, not shown here
               return parts.join(' ');
             })
             .join('\n')
         : '';
 
-    const type =
-      listing.listing_type === 'want'
-        ? 'WANTED'
-        : listing.listing_type === 'sell'
-          ? 'FOR SALE'
-          : 'FOR TRADE';
+    const type = 'LISTING';
 
     const regionText =
       listing.regions && listing.regions.length > 0
@@ -260,57 +252,73 @@ View full details: ${shareUrl}`;
 
     // Validate game selection if games exist
     if (games.length > 0 && selectedGameIds.length === 0) {
-      tradeError = 'Please select at least one item you want to trade for';
+      tradeError = 'Please select at least one item you want';
       return;
+    }
+
+    // Validate cash offer (optional but must be valid if provided)
+    let cashAmountCents: number | undefined = undefined;
+    if (cashOffer.trim()) {
+      const parsed = parseFloat(cashOffer);
+      if (isNaN(parsed) || parsed < 0) {
+        tradeError = 'Please enter a valid cash amount (or leave blank)';
+        return;
+      }
+      cashAmountCents = Math.round(parsed * 100); // Convert to cents
     }
 
     initiatingTrade = true;
     try {
-      // Check for duplicate trades
-      const existingTrades = await pb.collection('trades').getList(1, 1, {
-        filter: `listing = "${listing.id}" && buyer = "${$currentUser.id}" && status != "cancelled"`,
+      // Check for existing pending offer from this buyer
+      const existingOffers = await pb.collection('trades').getList(1, 1, {
+        filter: `listing = "${listing.id}" && buyer = "${$currentUser.id}" && offer_status = "pending"`,
       });
 
-      if (existingTrades.items.length > 0) {
-        tradeError = 'You already have an active trade for this listing';
+      if (existingOffers.items.length > 0) {
+        tradeError = 'You already have a pending offer for this listing';
         initiatingTrade = false;
         return;
       }
 
-      // Create trade record with selected games and shipping method
+      // Create offer (trade record with offer_status = pending)
       const trade = await pb.collection('trades').create({
         listing: listing.id,
         buyer: $currentUser.id,
         seller: owner.id,
-        status: 'initiated',
-        games: selectedGameIds.length > 0 ? selectedGameIds : undefined,
+        offer_status: 'pending',
+        status: 'initiated', // Status for after offer is accepted
+        requested_items: selectedGameIds.length > 0 ? selectedGameIds : undefined,
+        cash_offer_amount: cashAmountCents,
         shipping_method: shippingMethod,
+        offer_message: offerMessage.trim() || undefined,
       });
 
-      // Update listing status to pending
-      const oldStatus = listing.status;
-      await pb.collection('listings').update(listing.id, {
-        status: 'pending',
-      });
-
-      // Log status change
-      await logStatusChange(listing.id, oldStatus, 'pending', 'Trade initiated', $currentUser.id);
+      // DO NOT update listing status yet - only when offer is accepted
+      // Listing stays 'active' to allow other offers
 
       // Send notification to seller
+      const offerDetails = [];
+      if (cashAmountCents) {
+        offerDetails.push(`$${(cashAmountCents / 100).toFixed(2)}`);
+      }
+      if (selectedGameIds.length > 0) {
+        offerDetails.push(`${selectedGameIds.length} item(s)`);
+      }
+
       await pb.collection('notifications').create({
         user: owner.id,
-        type: 'new_message', // We'll need to add 'trade_initiated' type later
-        title: `${$currentUser.display_name} wants to trade`,
-        message: `${$currentUser.display_name} has initiated a trade for "${listing.title}"`,
-        link: `/trades/${trade.id}`,
+        type: 'new_message', // TODO: add 'offer_received' type
+        title: `New offer from ${$currentUser.display_name}`,
+        message: `${$currentUser.display_name} made an offer for "${listing.title}"${offerDetails.length > 0 ? `: ${offerDetails.join(' + ')}` : ''}`,
+        link: `/listings/${listing.id}/offers`,
         read: false,
       });
 
-      // Redirect to trade detail page
+      // Show success and redirect to offer view
       goto(`/trades/${trade.id}`);
     } catch (err) {
-      console.error('Failed to initiate trade', err);
-      tradeError = 'Failed to initiate trade. Please try again.';
+      console.error('Failed to create offer', err);
+      tradeError = 'Failed to create offer. Please try again.';
       initiatingTrade = false;
     }
   }
@@ -320,7 +328,7 @@ View full details: ${shareUrl}`;
   <title>{listing.title} · Meeple Cart</title>
   <meta
     name="description"
-    content={`${listing.listing_type === 'want' ? 'Wanted: ' : listing.listing_type === 'sell' ? 'For Sale: ' : 'For Trade: '}${listing.title}${listing.summary ? ` - ${listing.summary}` : ''}`}
+    content={`${listing.title}${listing.summary ? ` - ${listing.summary}` : ''}`}
   />
 
   <!-- Open Graph / Facebook -->
@@ -512,6 +520,109 @@ View full details: ${shareUrl}`;
       </section>
     {/if}
 
+    <!-- Offer Templates Section -->
+    {#if data.offerTemplates.length > 0}
+      <section class="space-y-6">
+        <div>
+          <h2 class="text-2xl font-semibold text-primary">Available Offers</h2>
+          <p class="text-sm text-muted">
+            The seller has created offer templates showing what they're willing to accept.
+          </p>
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-2">
+          {#each data.offerTemplates as template (template.id)}
+            <article class="rounded-lg border border-subtle bg-surface-panel p-5 transition-colors hover:border-accent/50">
+              <div class="space-y-3">
+                <div class="flex items-start justify-between gap-3">
+                  <h3 class="text-lg font-semibold text-primary">
+                    {template.display_name || 'Offer template'}
+                  </h3>
+                  <div class="flex items-center gap-1 text-sm">
+                    {#if template.template_type === 'cash_only'}
+                      <span title="Cash only">💰</span>
+                    {:else if template.template_type === 'trade_only'}
+                      <span title="Trade only">🔄</span>
+                    {:else}
+                      <span title="Cash or trade">💰🔄</span>
+                    {/if}
+                  </div>
+                </div>
+
+                <!-- Price -->
+                {#if template.cash_amount}
+                  <div class="text-2xl font-bold text-emerald-400">
+                    ${(template.cash_amount / 100).toFixed(2)} NZD
+                    {#if template.open_to_lower_offers}
+                      <span class="text-sm font-normal text-muted">(or nearest offer)</span>
+                    {/if}
+                  </div>
+                {/if}
+
+                <!-- Items included -->
+                {#if template.expand?.items && Array.isArray(template.expand.items)}
+                  <div>
+                    <div class="text-xs font-medium text-secondary">Includes:</div>
+                    <div class="mt-1 flex flex-wrap gap-1.5">
+                      {#each template.expand.items as item}
+                        <span class="rounded-full bg-surface-body px-2 py-0.5 text-xs text-muted">
+                          {item.title}
+                        </span>
+                      {/each}
+                    </div>
+                  </div>
+                {/if}
+
+                <!-- Trade items wanted -->
+                {#if template.trade_for_items && template.trade_for_items.length > 0}
+                  <div>
+                    <div class="text-xs font-medium text-secondary">Wants in trade:</div>
+                    <div class="mt-1 space-y-1">
+                      {#each template.trade_for_items.slice(0, 3) as wantedItem}
+                        <div class="text-sm text-muted">
+                          • {wantedItem.title}
+                          {#if wantedItem.bgg_id}
+                            <span class="text-xs">(BGG {wantedItem.bgg_id})</span>
+                          {/if}
+                        </div>
+                      {/each}
+                      {#if template.trade_for_items.length > 3}
+                        <div class="text-xs text-muted">
+                          +{template.trade_for_items.length - 3} more...
+                        </div>
+                      {/if}
+                    </div>
+                  </div>
+                {/if}
+
+                <!-- Options -->
+                <div class="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted">
+                  {#if template.open_to_shipping_negotiation}
+                    <span title="Open to shipping negotiation">📦 Shipping flexible</span>
+                  {/if}
+                  {#if template.open_to_trade_offers && template.template_type === 'cash_only'}
+                    <span title="Also open to trade offers">🔄 Trade offers OK</span>
+                  {/if}
+                </div>
+
+                <!-- Notes -->
+                {#if template.notes}
+                  <p class="text-sm text-muted italic">{template.notes}</p>
+                {/if}
+              </div>
+            </article>
+          {/each}
+        </div>
+
+        <div class="rounded-lg border border-subtle bg-surface-card p-4">
+          <p class="text-sm text-secondary">
+            💡 <strong>Tip:</strong> Contact the seller to discuss these offers or propose your own.
+            Scroll down to use the "Send Message" or "Propose Trade" buttons.
+          </p>
+        </div>
+      </section>
+    {/if}
+
     <section
       class="grid gap-8 lg:grid-cols-[2fr_1fr]"
     >
@@ -674,6 +785,19 @@ View full details: ${shareUrl}`;
         {:else if owner && $currentUser.id === owner.id}
           <div class="space-y-3 rounded-lg bg-surface-card transition-colors p-4">
             <p class="text-center text-sm text-muted">This is your listing</p>
+
+            <!-- Pending Offers Badge/Button -->
+            {#if data.pendingOfferCount > 0}
+              <!-- eslint-disable svelte/no-navigation-without-resolve -->
+              <a
+                href={`/listings/${listing.id}/offers`}
+                class="block w-full rounded-lg border border-amber-500 bg-amber-500 px-4 py-2 text-center font-semibold text-[var(--accent-contrast)] shadow-[0_10px_25px_rgba(245,158,11,0.25)] transition hover:bg-amber-400"
+              >
+                💰 {data.pendingOfferCount} Pending Offer{data.pendingOfferCount > 1 ? 's' : ''}
+              </a>
+              <!-- eslint-enable svelte/no-navigation-without-resolve -->
+            {/if}
+
             <!-- eslint-disable svelte/no-navigation-without-resolve -->
             <a
               href={`/listings/${listing.id}/edit`}
@@ -718,14 +842,14 @@ View full details: ${shareUrl}`;
                   }}
                   class="w-full rounded-lg border border-emerald-500 bg-emerald-500 px-4 py-2 font-semibold text-[var(--accent-contrast)] shadow-[0_10px_25px_rgba(16,185,129,0.25)] transition hover:bg-emerald-400"
                 >
-                  🤝 Propose Trade
+                  💰 Make Offer
                 </button>
               {:else}
                 <form
                   onsubmit={handleInitiateTrade}
                   class="space-y-4 rounded-lg border border-subtle bg-surface-card p-4"
                 >
-                  <h4 class="font-semibold text-primary">Trade Proposal</h4>
+                  <h4 class="font-semibold text-primary">Make an Offer</h4>
 
                   {#if tradeError}
                     <Alert type="error">{tradeError}</Alert>
@@ -785,10 +909,33 @@ View full details: ${shareUrl}`;
                     </div>
                   {/if}
 
+                  <!-- Cash Offer (Optional) -->
+                  <div class="space-y-2">
+                    <label for="cash-offer" class="block text-sm font-medium text-secondary">
+                      Cash offer (optional)
+                    </label>
+                    <div class="relative">
+                      <span
+                        class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-muted"
+                        >$</span
+                      >
+                      <input
+                        id="cash-offer"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        bind:value={cashOffer}
+                        placeholder="0.00"
+                        class="w-full rounded-lg border border-subtle bg-surface-body pl-7 pr-3 py-2 text-primary placeholder-muted transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-0"
+                      />
+                    </div>
+                    <p class="text-xs text-muted">Enter amount in NZD, or leave blank</p>
+                  </div>
+
                   <!-- Shipping Method Selection -->
                   <div class="space-y-2">
                     <label class="block text-sm font-medium text-secondary">
-                      Preferred method
+                      Preferred shipping method
                     </label>
                     <div class="space-y-2">
                       <label
@@ -827,7 +974,7 @@ View full details: ${shareUrl}`;
                         />
                         <div class="flex-1">
                           <div class="font-medium text-primary">
-                            📮 Can post
+                            📮 Shipping
                             {#if !canPostSelectedGames}
                               <span class="text-xs text-muted"
                                 >(not available for selected games)</span
@@ -837,7 +984,42 @@ View full details: ${shareUrl}`;
                           <div class="text-xs text-muted">Seller posts to you</div>
                         </div>
                       </label>
+                      <label
+                        class="flex cursor-pointer items-center gap-3 rounded-lg border border-subtle bg-surface-body p-3 transition hover:bg-surface-ghost {shippingMethod ===
+                        'either'
+                          ? 'border-emerald-500 bg-emerald-500/10'
+                          : ''}"
+                      >
+                        <input
+                          type="radio"
+                          name="shipping_method"
+                          value="either"
+                          checked={shippingMethod === 'either'}
+                          onchange={() => (shippingMethod = 'either')}
+                          class="h-4 w-4 border-subtle bg-surface-body text-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-0"
+                        />
+                        <div class="flex-1">
+                          <div class="font-medium text-primary">Either method</div>
+                          <div class="text-xs text-muted">Flexible - can arrange either way</div>
+                        </div>
+                      </label>
                     </div>
+                  </div>
+
+                  <!-- Offer Message (Optional) -->
+                  <div class="space-y-2">
+                    <label for="offer-message" class="block text-sm font-medium text-secondary">
+                      Message to seller (optional)
+                    </label>
+                    <textarea
+                      id="offer-message"
+                      bind:value={offerMessage}
+                      placeholder="Hi! I'm interested in your listing..."
+                      rows="3"
+                      maxlength="1000"
+                      class="w-full resize-none rounded-lg border border-subtle bg-surface-body px-3 py-2 text-primary placeholder-muted transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-0"
+                    />
+                    <p class="text-xs text-muted">{offerMessage.length}/1000 characters</p>
                   </div>
 
                   <!-- Action Buttons -->
@@ -847,13 +1029,16 @@ View full details: ${shareUrl}`;
                       disabled={initiatingTrade || selectedGameIds.length === 0}
                       class="flex-1 rounded-lg border border-emerald-500 bg-emerald-500 px-4 py-2 font-semibold text-[var(--accent-contrast)] shadow-[0_10px_25px_rgba(16,185,129,0.25)] transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      {initiatingTrade ? 'Initiating...' : 'Confirm Trade Proposal'}
+                      {initiatingTrade ? 'Submitting offer...' : 'Submit Offer'}
                     </button>
                     <button
                       type="button"
                       onclick={() => {
                         showTradeForm = false;
                         selectedGameIds = [];
+                        cashOffer = '';
+                        offerMessage = '';
+                        shippingMethod = 'either';
                         tradeError = null;
                       }}
                       disabled={initiatingTrade}

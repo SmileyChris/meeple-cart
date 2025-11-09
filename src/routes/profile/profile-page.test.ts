@@ -45,10 +45,10 @@ describe('profile client-side load', () => {
     pb.authStore.isValid = false;
     pb.authStore.model = null;
 
-    await expect(load({} as any)).rejects.toMatchObject({
+    await expect(load({ url: { pathname: '/profile' } } as any)).rejects.toMatchObject({
       message: 'REDIRECT',
       status: 302,
-      location: '/login',
+      location: '/login?next=%2Fprofile',
     });
   });
 
@@ -57,10 +57,10 @@ describe('profile client-side load', () => {
     pb.authStore.isValid = true;
     pb.authStore.model = null;
 
-    await expect(load({} as any)).rejects.toMatchObject({
+    await expect(load({ url: { pathname: '/profile' } } as any)).rejects.toMatchObject({
       message: 'REDIRECT',
       status: 302,
-      location: '/login',
+      location: '/login?next=%2Fprofile',
     });
   });
 
@@ -80,10 +80,14 @@ describe('profile client-side load', () => {
     pb.authStore.isValid = true;
     pb.authStore.model = mockUser;
 
+    // Mock the get function to return the user
+    const { get } = await import('svelte/store');
+    vi.mocked(get).mockReturnValue(mockUser);
+
     const getFullList = vi.fn().mockResolvedValue(mockListings);
     vi.mocked(pb.collection).mockReturnValue({ getFullList } as any);
 
-    const result = await load({} as any);
+    const result = await load({ url: { pathname: '/profile' } } as any);
 
     expect(getFullList).toHaveBeenCalledWith({
       filter: `owner = "user123"`,
@@ -101,9 +105,13 @@ describe('profile client-side load', () => {
     pb.authStore.isValid = true;
     pb.authStore.model = mockUser;
 
+    // Mock the get function to return the user
+    const { get } = await import('svelte/store');
+    vi.mocked(get).mockReturnValue(mockUser);
+
     const getFullList = vi.fn().mockRejectedValue(new Error('Database error'));
     vi.mocked(pb.collection).mockReturnValue({ getFullList } as any);
 
-    await expect(load({} as any)).rejects.toThrow('Database error');
+    await expect(load({ url: { pathname: '/profile' } } as any)).rejects.toThrow('Database error');
   });
 });

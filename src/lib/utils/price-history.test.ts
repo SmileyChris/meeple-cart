@@ -1,66 +1,52 @@
 import { describe, expect, it } from 'vitest';
-import { getLowestHistoricalPrice, getMostRecentPrice } from './price-history';
+import { getLowestHistoricalPrice, getMostRecentPrice, formatPrice, formatTradeValue } from './price-history';
 
-describe('price history utilities', () => {
-  it('returns lowest eligible historical price after three days', () => {
-    const priceHistory = [
-      { price: 260, trade_value: undefined, timestamp: '2024-01-01T10:00:00Z' },
-      { price: 220, trade_value: undefined, timestamp: '2024-01-04T12:00:00Z' },
-      { price: 180, trade_value: undefined, timestamp: '2024-01-06T15:00:00Z' },
-      { price: 170, trade_value: undefined, timestamp: '2024-01-08T15:00:00Z' },
-    ];
-
-    const result = getLowestHistoricalPrice(priceHistory, '2024-01-01T09:00:00Z', 'price');
-
-    expect(result).toBe(180);
-  });
-
-  it('ignores entries within the three-day threshold and missing prices', () => {
-    const priceHistory = [
-      { price: 220, trade_value: undefined, timestamp: '2024-01-01T10:00:00Z' },
-      { price: undefined, trade_value: 210, timestamp: '2024-01-02T12:00:00Z' },
-      { price: 205, trade_value: undefined, timestamp: '2024-01-03T12:00:00Z' },
-    ];
-
-    const result = getLowestHistoricalPrice(priceHistory, '2024-01-01T09:00:00Z', 'price');
-
+/**
+ * DEPRECATED: These tests verify that price history functions are properly stubbed.
+ * Price functionality has moved to offer_templates collection.
+ */
+describe('price history utilities (deprecated)', () => {
+  it('getLowestHistoricalPrice returns null (stubbed)', () => {
+    const result = getLowestHistoricalPrice();
     expect(result).toBeNull();
   });
 
-  it('returns null when not enough history exists', () => {
-    expect(getLowestHistoricalPrice([], '2024-01-01T09:00:00Z', 'price')).toBeNull();
-    expect(
-      getLowestHistoricalPrice(
-        [{ price: 200, trade_value: undefined, timestamp: '2024-01-05T10:00:00Z' }],
-        '2024-01-01T09:00:00Z',
-        'price'
-      )
-    ).toBeNull();
+  it('getMostRecentPrice returns null (stubbed)', () => {
+    const result = getMostRecentPrice();
+    expect(result).toBeNull();
+  });
+});
+
+describe('formatPrice', () => {
+  it('formats prices in cents to dollars', () => {
+    expect(formatPrice(5000)).toBe('$50.00');
+    expect(formatPrice(12345)).toBe('$123.45');
+    expect(formatPrice(100)).toBe('$1.00');
   });
 
-  it('returns most recent previous entry from price history', () => {
-    const result = getMostRecentPrice({
-      id: 'game-1',
-      listing: 'listing-1',
-      price_history: [
-        { price: 200, trade_value: 150, timestamp: '2024-01-01T10:00:00Z' },
-        { price: 180, trade_value: 140, timestamp: '2024-01-05T10:00:00Z' },
-        { price: 170, trade_value: 130, timestamp: '2024-01-10T10:00:00Z' },
-      ],
-    } as any);
-
-    expect(result).toEqual({
-      price: 180,
-      tradeValue: 140,
-    });
+  it('handles null and undefined values', () => {
+    expect(formatPrice(null)).toBe('N/A');
+    expect(formatPrice(undefined)).toBe('N/A');
   });
 
-  it('returns null when there are fewer than two entries', () => {
-    expect(getMostRecentPrice({ price_history: [] } as any)).toBeNull();
-    expect(
-      getMostRecentPrice({
-        price_history: [{ price: 200, trade_value: undefined, timestamp: '2024-01-01T10:00:00Z' }],
-      } as any)
-    ).toBeNull();
+  it('formats zero correctly', () => {
+    expect(formatPrice(0)).toBe('$0.00');
+  });
+});
+
+describe('formatTradeValue', () => {
+  it('formats trade values in cents to dollars with tilde', () => {
+    expect(formatTradeValue(5000)).toBe('~$50.00');
+    expect(formatTradeValue(12345)).toBe('~$123.45');
+    expect(formatTradeValue(100)).toBe('~$1.00');
+  });
+
+  it('handles null and undefined values', () => {
+    expect(formatTradeValue(null)).toBe('N/A');
+    expect(formatTradeValue(undefined)).toBe('N/A');
+  });
+
+  it('formats zero correctly', () => {
+    expect(formatTradeValue(0)).toBe('~$0.00');
   });
 });

@@ -87,15 +87,8 @@ export async function notifyNewListing(pb: PocketBase, listing: ListingRecord, o
       }
 
       // Create notification
-      const listingType =
-        listing.listing_type === 'want'
-          ? 'wanted'
-          : listing.listing_type === 'sell'
-            ? 'for sale'
-            : 'for trade';
-
       await createNotification(pb, user.id, 'new_listing', `New listing in ${listing.location}`, {
-        message: `${ownerName} listed "${listing.title}" ${listingType}`,
+        message: `${ownerName} listed "${listing.title}"`,
         link: `/listings/${listing.id}`,
         listingId: listing.id,
       });

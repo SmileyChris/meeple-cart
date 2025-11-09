@@ -12,8 +12,6 @@
   interface GameEntry {
     title: string;
     condition: string;
-    price: string;
-    trade_value: string;
     notes: string;
     bgg_id: string;
     can_post: boolean;
@@ -22,11 +20,8 @@
   let listingValues = $derived(
     form?.values ?? {
       title: '',
-      listing_type: data.defaults.listing_type,
       summary: '',
       location: '',
-      prefer_bundle: false,
-      bundle_discount: '',
     }
   );
 
@@ -68,8 +63,6 @@
         {
           title: '',
           condition: data.defaults.condition,
-          price: '',
-          trade_value: '',
           notes: '',
           bgg_id: '',
           can_post: false,
@@ -120,8 +113,6 @@
       {
         title: '',
         condition: data.defaults.condition,
-        price: '',
-        trade_value: '',
         notes: '',
         bgg_id: '',
         can_post: false,
@@ -187,29 +178,7 @@
             {/if}
           </div>
 
-          <div>
-            <label class="block text-sm font-medium text-secondary" for="listing_type"
-              >Listing type</label
-            >
-            <select
-              class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
-              id="listing_type"
-              name="listing_type"
-              required
-              value={listingValues.listing_type}
-            >
-              {#each data.listingTypes as type (type)}
-                <option value={type}
-                  >{type === 'want'
-                    ? 'Want to Buy'
-                    : type.charAt(0).toUpperCase() + type.slice(1)}</option
-                >
-              {/each}
-            </select>
-            {#if fieldErrors.listing_type}
-              <p class="mt-2 text-sm text-rose-300">{fieldErrors.listing_type}</p>
-            {/if}
-          </div>
+          <!-- Listing type field removed - type now inferred from offer templates -->
 
           <div class="sm:col-span-2">
             <label class="block text-sm font-medium text-secondary">Pickup regions</label>
@@ -305,34 +274,7 @@
           </div>
         </div>
 
-        <div class="grid gap-4 sm:grid-cols-2">
-          <label class="flex items-center gap-2 text-sm text-secondary">
-            <input
-              class="h-4 w-4 rounded border border-subtle bg-surface-body transition-colors"
-              name="prefer_bundle"
-              type="checkbox"
-              checked={listingValues.prefer_bundle}
-            />
-            Prefer bundle deals
-          </label>
-          <div class="sm:col-span-2">
-            <label class="block text-sm font-medium text-secondary" for="bundle_discount"
-              >Bundle discount (%)</label
-            >
-            <input
-              class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
-              id="bundle_discount"
-              name="bundle_discount"
-              placeholder="Optional"
-              inputmode="numeric"
-              pattern="[0-9]*"
-              value={listingValues.bundle_discount}
-            />
-            {#if fieldErrors.bundle_discount}
-              <p class="mt-2 text-sm text-rose-300">{fieldErrors.bundle_discount}</p>
-            {/if}
-          </div>
-        </div>
+        <!-- Bundle preference fields removed - bundles now managed via offer templates -->
       </section>
 
       <section
@@ -458,42 +400,7 @@
                 {/if}
               </div>
 
-              <div>
-                <label class="block text-sm font-medium text-secondary" for="game_{index}_price"
-                  >Price (NZD)</label
-                >
-                <input
-                  class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
-                  id="game_{index}_price"
-                  name="game_{index}_price"
-                  placeholder="Optional"
-                  inputmode="decimal"
-                  bind:value={game.price}
-                />
-                {#if fieldErrors[`game_${index}_price`]}
-                  <p class="mt-2 text-sm text-rose-300">{fieldErrors[`game_${index}_price`]}</p>
-                {/if}
-              </div>
-
-              <div>
-                <label
-                  class="block text-sm font-medium text-secondary"
-                  for="game_{index}_trade_value">Trade value (NZD)</label
-                >
-                <input
-                  class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
-                  id="game_{index}_trade_value"
-                  name="game_{index}_trade_value"
-                  placeholder="Optional"
-                  inputmode="decimal"
-                  bind:value={game.trade_value}
-                />
-                {#if fieldErrors[`game_${index}_trade_value`]}
-                  <p class="mt-2 text-sm text-rose-300">
-                    {fieldErrors[`game_${index}_trade_value`]}
-                  </p>
-                {/if}
-              </div>
+              <!-- Price and trade value fields removed - now managed via offer templates -->
 
               <div>
                 <label class="block text-sm font-medium text-secondary" for="game_{index}_bgg_id"

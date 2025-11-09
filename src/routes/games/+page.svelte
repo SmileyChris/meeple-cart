@@ -9,7 +9,6 @@
   import { browser } from '$app/environment';
   import {
     applyStoredFilters,
-    saveListingTypePreferences,
     saveRegionFilterState,
     saveCanPostState,
     saveGuestRegions,
@@ -17,9 +16,6 @@
     saveConditionPreference,
     saveLastCondition,
     getLastCondition,
-    savePriceRangePreference,
-    saveLastPriceRange,
-    getLastPriceRange,
   } from '$lib/utils/filters';
 
   let { data }: { data: PageData } = $props();
@@ -58,12 +54,6 @@
     return () => document.removeEventListener('click', handleClickOutside);
   });
 
-  const listingTypes = [
-    { value: 'sell', label: 'Sell', icon: '💰' },
-    { value: 'trade', label: 'Trade', icon: '🔄' },
-    { value: 'want', label: 'Want', icon: '🔍' },
-  ];
-
   const conditionOptions = [
     { value: 'mint', label: 'Mint', level: 4 },
     { value: 'excellent', label: 'Excellent', level: 3 },
@@ -76,10 +66,8 @@
   const currentConditionValue = data.filters.condition || '';
   const currentConditionIndex = conditionOptions.findIndex(c => c.value === currentConditionValue);
 
-  // Load last used values from localStorage for defaults (non-reactive)
+  // Load last used condition from localStorage for defaults (non-reactive)
   let lastCondition = 4;
-  let lastMinPrice = '';
-  let lastMaxPrice = '50';
 
   if (browser) {
     const storedCondition = getLastCondition();
@@ -87,22 +75,12 @@
       const idx = conditionOptions.findIndex(c => c.value === storedCondition);
       if (idx >= 0) lastCondition = idx;
     }
-
-    const storedPriceRange = getLastPriceRange();
-    lastMinPrice = storedPriceRange.minPrice;
-    lastMaxPrice = storedPriceRange.maxPrice;
   }
 
   let minConditionLevel = $state(currentConditionIndex >= 0 ? currentConditionIndex : 4); // Default to "any" (well loved)
   let tempConditionLevel = $state(currentConditionIndex >= 0 ? currentConditionIndex : 4); // Temporary value for slider
   let showConditionFilter = $state(false);
-  let showPriceFilter = $state(false);
-  let minPrice = $state(data.filters.minPrice || '');
-  let maxPrice = $state(data.filters.maxPrice || '');
-  let tempMinPrice = $state(data.filters.minPrice || '');
-  let tempMaxPrice = $state(data.filters.maxPrice || '');
   let conditionFilterRef: HTMLDivElement | null = $state(null);
-  let priceFilterRef: HTMLDivElement | null = $state(null);
   let searchValue = $state(data.filters.search ?? '');
   let searchTimeout: ReturnType<typeof setTimeout> | null = $state(null);
 
@@ -119,63 +97,6 @@
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
   });
-
-  // Close price filter dropdown when clicking outside
-  $effect(() => {
-    if (!browser || !showPriceFilter) return;
-
-    function handleClickOutside(event: MouseEvent) {
-      if (priceFilterRef && !priceFilterRef.contains(event.target as Node)) {
-        showPriceFilter = false;
-      }
-    }
-
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
-  });
-
-  function toggleListingType(type: string) {
-    const url = new URL($page.url);
-    const currentTypes = data.selectedTypes;
-
-    let newTypes: string[];
-    if (currentTypes.includes(type)) {
-      newTypes = currentTypes.filter((t) => t !== type);
-    } else {
-      newTypes = [...currentTypes, type];
-    }
-
-    // If deselecting the last one, select all three instead
-    if (newTypes.length === 0 || newTypes.length === 3) {
-      // All selected - remove all type params
-      url.searchParams.delete('sell');
-      url.searchParams.delete('trade');
-      url.searchParams.delete('want');
-
-      // Remove from localStorage (default state)
-      if (browser) {
-        saveListingTypePreferences([]);
-      }
-    } else {
-      // Set individual params for disabled types
-      ['sell', 'trade', 'want'].forEach((t) => {
-        if (newTypes.includes(t)) {
-          url.searchParams.delete(t);
-        } else {
-          url.searchParams.set(t, 'false');
-        }
-      });
-
-      // Save to localStorage
-      if (browser) {
-        saveListingTypePreferences(newTypes);
-      }
-    }
-
-    url.searchParams.delete('page'); // Reset to page 1 when filtering
-    // eslint-disable-next-line svelte/no-navigation-without-resolve
-    goto(url);
-  }
 
   function toggleMyRegions() {
     const url = new URL($page.url);
@@ -278,49 +199,6 @@
     goto(url);
   }
 
-  function applyPriceFilter() {
-    const url = new URL($page.url);
-
-    if (minPrice) {
-      url.searchParams.set('minPrice', minPrice);
-    } else {
-      url.searchParams.delete('minPrice');
-    }
-
-    if (maxPrice) {
-      url.searchParams.set('maxPrice', maxPrice);
-    } else {
-      url.searchParams.delete('maxPrice');
-    }
-
-    // Save to localStorage
-    if (browser) {
-      savePriceRangePreference(minPrice, maxPrice);
-    }
-
-    url.searchParams.delete('page');
-    showPriceFilter = false;
-    // eslint-disable-next-line svelte/no-navigation-without-resolve
-    goto(url);
-  }
-
-  function clearPriceFilter() {
-    minPrice = '';
-    maxPrice = '';
-    const url = new URL($page.url);
-    url.searchParams.delete('minPrice');
-    url.searchParams.delete('maxPrice');
-
-    if (browser) {
-      savePriceRangePreference('', '');
-    }
-
-    url.searchParams.delete('page');
-    showPriceFilter = false;
-    // eslint-disable-next-line svelte/no-navigation-without-resolve
-    goto(url);
-  }
-
   function loadMore() {
     const url = new URL($page.url);
     url.searchParams.set('page', String(data.pagination.page + 1));
@@ -418,26 +296,6 @@
 
       <!-- Filter Controls -->
       <div class="flex flex-wrap items-center justify-center gap-8">
-        <!-- Listing Type Checkboxes -->
-        <div class="flex flex-wrap justify-center gap-4">
-          {#each listingTypes as type (type.value)}
-            <button
-              type="button"
-              class={`btn-filter flex items-center gap-2 px-4 py-2 text-sm font-medium ${data.selectedTypes.includes(type.value) ? 'active' : ''}`}
-              onclick={() => toggleListingType(type.value)}
-            >
-              <input
-                type="checkbox"
-                checked={data.selectedTypes.includes(type.value)}
-                readonly
-                class="pointer-events-none h-4 w-4 rounded border-subtle accent-[var(--accent)]"
-              />
-              <span>{type.icon}</span>
-              <span>{type.label}</span>
-            </button>
-          {/each}
-        </div>
-
         <!-- Region Filters -->
         <div class="flex flex-wrap items-center justify-center gap-3 text-sm">
           {#if $currentUser}
@@ -631,134 +489,6 @@
                     class="btn-primary w-full px-4 py-2 text-sm font-medium"
                   >
                     {tempConditionLevel === 4 ? 'Clear' : 'Apply'}
-                  </button>
-                </div>
-              </div>
-            {/if}
-          </div>
-        </div>
-
-        <!-- Price Filter -->
-        <div class="flex flex-wrap items-center justify-center gap-3 text-sm">
-          <div class="relative flex items-center gap-2" bind:this={priceFilterRef}>
-            <span class="text-lg">💵</span>
-            {#if minPrice || maxPrice}
-              <button
-                type="button"
-                onclick={() => {
-                  tempMinPrice = minPrice;
-                  tempMaxPrice = maxPrice;
-                  showPriceFilter = !showPriceFilter;
-                }}
-                class={`btn-filter flex cursor-pointer items-center gap-2 px-4 py-2 font-medium ${showPriceFilter ? 'open' : 'active'}`}
-              >
-                <input
-                  type="checkbox"
-                  checked={true}
-                  readonly
-                  class="pointer-events-none h-4 w-4 rounded border-subtle accent-[var(--accent)]"
-                />
-                <span>
-                  {#if minPrice && maxPrice}
-                    ${minPrice} - ${maxPrice}
-                  {:else if minPrice}
-                    From ${minPrice}
-                  {:else}
-                    Up to ${maxPrice}
-                  {/if}
-                </span>
-              </button>
-            {:else}
-              <button
-                type="button"
-                onclick={() => {
-                  // Use last selected prices as defaults when opening
-                  tempMinPrice = minPrice || lastMinPrice;
-                  tempMaxPrice = maxPrice || lastMaxPrice;
-                  showPriceFilter = !showPriceFilter;
-                }}
-                class={`btn-filter px-4 py-2 font-medium ${showPriceFilter ? 'open' : ''}`}
-              >
-                Any price
-              </button>
-            {/if}
-
-            {#if showPriceFilter}
-              <div
-                class="absolute left-0 top-full z-10 mt-2 w-72 rounded-lg border border-subtle bg-surface-card p-4 shadow-lg"
-              >
-                <div class="mb-3 flex items-center justify-between">
-                  <h3 class="text-sm font-semibold text-primary">Set price range</h3>
-                  {#if tempMinPrice || tempMaxPrice}
-                    <button
-                      type="button"
-                      onclick={(e) => {
-                        e.stopPropagation();
-                        tempMinPrice = '';
-                        tempMaxPrice = '';
-                        minPrice = '';
-                        maxPrice = '';
-                        clearPriceFilter();
-                      }}
-                      class="text-xs text-muted hover:text-accent"
-                    >
-                      Clear
-                    </button>
-                  {/if}
-                </div>
-
-                <div class="space-y-3">
-                  <div class="grid grid-cols-2 gap-3">
-                    <div>
-                      <label class="block text-xs font-medium text-secondary mb-1" for="minPrice">
-                        Minimum
-                      </label>
-                      <input
-                        id="minPrice"
-                        type="number"
-                        min="0"
-                        step="1"
-                        placeholder="Min"
-                        bind:value={tempMinPrice}
-                        oninput={(e) => {
-                          const val = (e.target as HTMLInputElement).value;
-                          if (val && tempMaxPrice && parseFloat(val) > parseFloat(tempMaxPrice)) {
-                            tempMaxPrice = val;
-                          }
-                        }}
-                        class="w-full rounded-lg border border-subtle bg-surface-card-alt px-3 py-2 text-sm text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
-                      />
-                    </div>
-                    <div>
-                      <label class="block text-xs font-medium text-secondary mb-1" for="maxPrice">
-                        Maximum
-                      </label>
-                      <input
-                        id="maxPrice"
-                        type="number"
-                        min={tempMinPrice || "0"}
-                        step="1"
-                        placeholder="Max"
-                        bind:value={tempMaxPrice}
-                        class="w-full rounded-lg border border-subtle bg-surface-card-alt px-3 py-2 text-sm text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
-                      />
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onclick={() => {
-                      minPrice = tempMinPrice;
-                      maxPrice = tempMaxPrice;
-                      applyPriceFilter();
-
-                      // Save last used prices to localStorage
-                      if (browser && (tempMinPrice || tempMaxPrice)) {
-                        saveLastPriceRange(tempMinPrice, tempMaxPrice);
-                      }
-                    }}
-                    class="btn-primary w-full px-4 py-2 text-sm font-medium"
-                  >
-                    Apply
                   </button>
                 </div>
               </div>

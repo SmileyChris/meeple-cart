@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { PageData } from './$types';
   import StatusHistory from '$lib/components/StatusHistory.svelte';
+  import { pb } from '$lib/pocketbase';
 
   let { data }: { data: PageData } = $props();
 
@@ -10,8 +11,6 @@
   let addFormValues = $state({
     title: '',
     condition: 'excellent',
-    price: '',
-    trade_value: '',
     notes: '',
     bgg_id: '',
     can_post: false,
@@ -23,8 +22,6 @@
       Object.assign(addFormValues, {
         title: '',
         condition: 'excellent',
-        price: '',
-        trade_value: '',
         notes: '',
         bgg_id: '',
         can_post: false,
@@ -142,33 +139,7 @@
                 </select>
               </div>
 
-              <div>
-                <label class="block text-sm font-medium text-secondary" for="new_price"
-                  >Price (NZD)</label
-                >
-                <input
-                  class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
-                  id="new_price"
-                  name="price"
-                  placeholder="Optional"
-                  inputmode="decimal"
-                  bind:value={addFormValues.price}
-                />
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium text-secondary" for="new_trade_value"
-                  >Trade value (NZD)</label
-                >
-                <input
-                  class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
-                  id="new_trade_value"
-                  name="trade_value"
-                  placeholder="Optional"
-                  inputmode="decimal"
-                  bind:value={addFormValues.trade_value}
-                />
-              </div>
+              <!-- Note: Price and trade value removed - now handled via offer_templates -->
 
               <div>
                 <label class="block text-sm font-medium text-secondary" for="new_bgg_id"
@@ -348,12 +319,7 @@
                       <span class={getStatusColor(game.status)}
                         >• {game.status.charAt(0).toUpperCase() + game.status.slice(1)}</span
                       >
-                      {#if game.price}
-                        <span>• Price: ${game.price.toFixed(2)} NZD</span>
-                      {/if}
-                      {#if game.trade_value}
-                        <span>• Trade Value: ${game.trade_value.toFixed(2)} NZD</span>
-                      {/if}
+                      <!-- Note: Price and trade_value display removed - now in offer_templates -->
                       {#if game.bgg_id}
                         <span>• BGG ID: {game.bgg_id}</span>
                       {/if}
@@ -417,6 +383,142 @@
             {/if}
           </section>
         {/each}
+      </div>
+
+      <!-- Offer Templates Section -->
+      <div class="space-y-6">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xl font-semibold">
+            Offer Templates ({data.templates.length})
+          </h2>
+          <a
+            href="/listings/{data.listing.id}/templates/new"
+            class="rounded-lg border border-emerald-500 px-4 py-2 text-sm font-medium text-emerald-300 transition hover:bg-emerald-500/10"
+          >
+            + Create Template
+          </a>
+        </div>
+
+        {#if data.templates.length === 0}
+          <div class="rounded-xl border border-dashed border-subtle bg-surface-card p-8 text-center transition-colors">
+            <div class="text-4xl opacity-20">📋</div>
+            <p class="mt-4 text-sm text-muted">
+              No offer templates yet. Create templates to let buyers know what you're willing to accept.
+            </p>
+            <a
+              href="/listings/{data.listing.id}/templates/new"
+              class="mt-4 inline-block text-sm text-accent hover:underline"
+            >
+              Create your first template →
+            </a>
+          </div>
+        {:else}
+          <div class="space-y-4">
+            {#each data.templates as template (template.id)}
+              <section class="rounded-xl border border-subtle bg-surface-card p-6 transition-colors">
+                <div class="space-y-3">
+                  <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                      <h3 class="text-lg font-semibold text-primary">
+                        {template.display_name || 'Unnamed template'}
+                      </h3>
+                      <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted">
+                        <span class="flex items-center gap-1">
+                          {#if template.template_type === 'cash_only'}
+                            💰 Cash only
+                          {:else if template.template_type === 'trade_only'}
+                            🔄 Trade only
+                          {:else}
+                            💰🔄 Cash or trade
+                          {/if}
+                        </span>
+                        {#if template.cash_amount}
+                          <span>
+                            • ${(template.cash_amount / 100).toFixed(2)} NZD
+                            {#if template.open_to_lower_offers}(OBO){/if}
+                          </span>
+                        {/if}
+                        <span class={template.status === 'active' ? 'text-emerald-400' : 'text-muted'}>
+                          • {template.status.charAt(0).toUpperCase() + template.status.slice(1)}
+                        </span>
+                      </div>
+
+                      {#if template.expand?.items && Array.isArray(template.expand.items)}
+                        <div class="mt-3">
+                          <span class="text-xs font-medium text-secondary">Items included:</span>
+                          <div class="mt-1 flex flex-wrap gap-2">
+                            {#each template.expand.items as item}
+                              <span class="rounded-full bg-surface-body px-2 py-1 text-xs text-muted">
+                                {item.title}
+                              </span>
+                            {/each}
+                          </div>
+                        </div>
+                      {/if}
+
+                      {#if template.trade_for_items && template.trade_for_items.length > 0}
+                        <div class="mt-3">
+                          <span class="text-xs font-medium text-secondary">Wants in trade:</span>
+                          <div class="mt-1 flex flex-wrap gap-2">
+                            {#each template.trade_for_items as wantedItem}
+                              <span class="rounded-full bg-surface-body px-2 py-1 text-xs text-muted">
+                                {wantedItem.title}
+                                {#if wantedItem.bgg_id}(BGG {wantedItem.bgg_id}){/if}
+                              </span>
+                            {/each}
+                          </div>
+                        </div>
+                      {/if}
+
+                      {#if template.notes}
+                        <p class="mt-3 text-sm text-muted">{template.notes}</p>
+                      {/if}
+                    </div>
+
+                    <div class="flex gap-2">
+                      {#if template.status === 'active'}
+                        <button
+                          class="text-sm text-muted transition hover:text-secondary"
+                          type="button"
+                          onclick={async () => {
+                            if (confirm('Withdraw this template? It will no longer be visible to buyers.')) {
+                              try {
+                                await pb.collection('offer_templates').update(template.id, { status: 'withdrawn' });
+                                window.location.reload();
+                              } catch (err) {
+                                console.error('Failed to withdraw template:', err);
+                                alert('Failed to withdraw template');
+                              }
+                            }
+                          }}
+                        >
+                          Withdraw
+                        </button>
+                      {/if}
+                      <button
+                        class="text-sm text-rose-400 transition hover:text-rose-300"
+                        type="button"
+                        onclick={async () => {
+                          if (confirm('Delete this template permanently?')) {
+                            try {
+                              await pb.collection('offer_templates').delete(template.id);
+                              window.location.reload();
+                            } catch (err) {
+                              console.error('Failed to delete template:', err);
+                              alert('Failed to delete template');
+                            }
+                          }
+                        }}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            {/each}
+          </div>
+        {/if}
       </div>
 
       <StatusHistory statusHistory={data.statusHistory} />
