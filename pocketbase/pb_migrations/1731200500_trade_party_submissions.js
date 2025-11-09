@@ -106,18 +106,7 @@ migrate(
         name: 'status',
         required: true,
         maxSelect: 1,
-        values: ['pending', 'approved', 'matched', 'shipped', 'completed', 'cancelled'],
-      })
-    );
-
-    collection.fields.add(
-      new RelationField({
-        name: 'matched_with',
-        required: false,
-        collectionId: '', // Self-reference - will be set after creation
-        cascadeDelete: false,
-        minSelect: 0,
-        maxSelect: 1,
+        values: ['pending', 'approved', 'rejected'],
       })
     );
 
@@ -128,16 +117,7 @@ migrate(
     collection.listRule = '@request.auth.id != ""';
     collection.viewRule = '@request.auth.id != ""';
 
-    const saved = app.save(collection);
-
-    // Update self-reference for matched_with
-    const matchedWithField = saved.fields.getByName('matched_with');
-    if (matchedWithField) {
-      matchedWithField.collectionId = saved.id;
-      app.save(saved);
-    }
-
-    return saved;
+    return app.save(collection);
   },
   (app) => {
     const collection = app.findCollectionByNameOrId('trade_party_submissions');

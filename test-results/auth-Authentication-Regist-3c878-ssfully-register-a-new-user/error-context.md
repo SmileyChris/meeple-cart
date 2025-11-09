@@ -1,0 +1,90 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - link "Meeple Cart Meeple Cart" [ref=e6] [cursor=pointer]:
+        - /url: /
+        - img "Meeple Cart" [ref=e7] [cursor=pointer]
+        - generic [ref=e8] [cursor=pointer]: Meeple Cart
+      - navigation [ref=e9]:
+        - button "Switch to dark mode" [ref=e10]:
+          - generic [ref=e11]: ☀️
+          - generic [ref=e12]: Light
+        - link "Log in" [ref=e13] [cursor=pointer]:
+          - /url: /login
+        - link "Create account" [ref=e14] [cursor=pointer]:
+          - /url: /register
+    - navigation [ref=e15]:
+      - generic [ref=e18]:
+        - link "Activity Feed" [ref=e19] [cursor=pointer]:
+          - /url: /
+          - img [ref=e20] [cursor=pointer]
+          - text: Activity Feed
+        - link "Games" [ref=e22] [cursor=pointer]:
+          - /url: /games
+          - img [ref=e23] [cursor=pointer]
+          - text: Games
+        - link "🎁 Gift Cascades" [ref=e25] [cursor=pointer]:
+          - /url: /cascades
+        - link "💬 Discussions" [ref=e26] [cursor=pointer]:
+          - /url: /discussions
+        - link "🛒 Group Buys" [ref=e27]:
+          - /url: /group-buys
+        - link "🎉 Trade Parties" [ref=e28]:
+          - /url: /trade-parties
+  - generic [ref=e30]:
+    - generic [ref=e31]:
+      - heading "Create your account" [level=1] [ref=e32]
+      - paragraph [ref=e33]: Sign up with an email address to start trading.
+    - generic [ref=e35]:
+      - generic [ref=e36]:
+        - generic [ref=e37]: Full name
+        - textbox "Full name" [ref=e38]: TestUser1762657351883
+      - generic [ref=e39]:
+        - generic [ref=e40]: Email
+        - textbox "Email" [ref=e41]: test-1762657351883@example.com
+      - generic [ref=e42]:
+        - generic [ref=e43]: Password
+        - textbox "Password" [ref=e44]: testpassword123
+        - paragraph [ref=e45]: Use at least 10 characters.
+      - generic [ref=e46]:
+        - generic [ref=e47]: Confirm password
+        - textbox "Confirm password" [ref=e48]: testpassword123
+      - paragraph [ref=e49]: Unable to create account, please check the details and try again.
+      - button "Sign up" [ref=e50]
+    - generic [ref=e51]:
+      - paragraph [ref=e52]: Already registered?
+      - link "Log in" [ref=e53] [cursor=pointer]:
+        - /url: /login
+  - contentinfo [ref=e54]:
+    - img "Kiwi meeple" [ref=e55]
+    - generic [ref=e56]:
+      - generic [ref=e57]:
+        - generic [ref=e58]:
+          - heading "About Meeple Cart" [level=3] [ref=e59]
+          - paragraph [ref=e60]: Trade, sell, or gift games with fellow enthusiasts across Aotearoa.
+          - link "more →" [ref=e61] [cursor=pointer]:
+            - /url: /about
+        - generic [ref=e62]:
+          - heading "Quick Links" [level=3] [ref=e63]
+          - navigation [ref=e64]:
+            - link "Help & FAQ" [ref=e65] [cursor=pointer]:
+              - /url: /help
+            - link "Community Guidelines" [ref=e66] [cursor=pointer]:
+              - /url: /guidelines
+        - generic [ref=e67]:
+          - heading "Legal" [level=3] [ref=e68]
+          - navigation [ref=e69]:
+            - link "Terms & Privacy" [ref=e70] [cursor=pointer]:
+              - /url: /terms
+            - link "Contact" [ref=e71] [cursor=pointer]:
+              - /url: /contact
+      - generic [ref=e73]:
+        - paragraph [ref=e74]: © 2025 Meeple Cart. Made with 💚 in Aotearoa New Zealand.
+        - link "GitHub" [ref=e76] [cursor=pointer]:
+          - /url: https://github.com/smileychris/meeple-cart
+          - img [ref=e77] [cursor=pointer]
+          - text: GitHub
+```
