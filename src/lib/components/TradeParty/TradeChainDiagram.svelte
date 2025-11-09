@@ -10,6 +10,10 @@
 
   // Build a map of user -> user trades to visualize the chain
   let tradeFlow = $derived(() => {
+    if (!matches || matches.length === 0) {
+      return [];
+    }
+
     const flow: Array<{
       from: string;
       to: string;
@@ -22,19 +26,19 @@
       const fromUser =
         match.expand?.giving_user?.display_name ||
         match.expand?.giving_user?.username ||
-        'Unknown';
+        'Unknown User';
       const toUser =
         match.expand?.receiving_user?.display_name ||
         match.expand?.receiving_user?.username ||
-        'Unknown';
-      const game = match.expand?.giving_submission?.title || 'Unknown';
+        'Unknown User';
+      const game = match.expand?.giving_submission?.title || 'Unknown Game';
 
       flow.push({
         from: fromUser,
         to: toUser,
         game,
         isCurrentUser: match.giving_user === currentUserId || match.receiving_user === currentUserId,
-        position: match.chain_position,
+        position: match.chain_position || 0,
       });
     }
 

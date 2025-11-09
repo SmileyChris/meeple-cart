@@ -15,9 +15,18 @@
 
   // Group matches by chain_id
   let matchesByChain = $derived(() => {
+    if (!matches || matches.length === 0) {
+      return {};
+    }
+
     const chains: Record<string, TradePartyMatchRecord[]> = {};
 
     for (const match of matches) {
+      if (!match.chain_id) {
+        console.warn('Match missing chain_id:', match);
+        continue;
+      }
+
       if (!chains[match.chain_id]) {
         chains[match.chain_id] = [];
       }
@@ -95,11 +104,12 @@
 
       await pb.collection('trade_party_matches').update(matchId, updateData);
 
-      // Reload matches
+      // Reload matches to show updated status
       await loadMatches();
     } catch (err: any) {
       console.error('Failed to update match status:', err);
-      alert('Failed to update status. Please try again.');
+      const errorMessage = err.message || 'Failed to update status';
+      alert(`Error: ${errorMessage}. Please try again.`);
     }
   }
 
@@ -125,12 +135,18 @@
   <div class="rounded-lg border border-red-500/30 bg-red-500/10 p-6">
     <p class="text-sm text-red-200">{error}</p>
   </div>
-{:else if my Matches.length === 0}
+{:else if myMatches.length === 0}
   <div class="rounded-lg border border-subtle bg-surface-card p-8 text-center">
+    <div class="mb-3 text-4xl">📭</div>
     <p class="text-lg text-secondary">No matches found for you in this party</p>
     <p class="mt-2 text-sm text-muted">
-      You may not have been matched in this round, or the algorithm hasn't run yet.
+      This could mean:
     </p>
+    <ul class="mt-2 space-y-1 text-sm text-muted">
+      <li>• The algorithm hasn't run yet</li>
+      <li>• You weren't matched with other participants</li>
+      <li>• No suitable trade chains were possible with your submissions</li>
+    </ul>
   </div>
 {:else}
   <div class="space-y-6">
@@ -210,18 +226,32 @@
                     <button
                       onclick={() => handleMarkShipped(match.id)}
                       class="rounded-lg border border-accent bg-accent px-4 py-2 text-sm font-semibold text-surface-body transition hover:bg-accent/90"
+                      title="Mark this game as shipped to the recipient"
                     >
                       Mark as Shipped
                     </button>
+                    <p class="flex items-center text-xs text-muted">
+                      💡 Ship your game to complete your part of the trade
+                    </p>
                   {/if}
 
                   {#if myRole === 'receiving' && match.status === 'shipping'}
                     <button
                       onclick={() => handleMarkReceived(match.id)}
                       class="rounded-lg border border-emerald-500 bg-emerald-500 px-4 py-2 text-sm font-semibold text-surface-body transition hover:bg-emerald-500/90"
+                      title="Confirm you have received this game"
                     >
                       Mark as Received
                     </button>
+                    <p class="flex items-center text-xs text-muted">
+                      📦 Game is on its way to you!
+                    </p>
+                  {/if}
+
+                  {#if myRole === 'receiving' && match.status === 'pending'}
+                    <p class="flex items-center text-xs text-muted">
+                      ⏳ Waiting for sender to ship...
+                    </p>
                   {/if}
 
                   {#if match.status === 'completed'}

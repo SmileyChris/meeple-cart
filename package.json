@@ -51,6 +51,7 @@
     "vitest": "^3.2.4"
   },
   "dependencies": {
+    "js-md5": "^0.8.3",
     "marked": "^16.4.1",
     "pocketbase": "^0.26.2"
   }

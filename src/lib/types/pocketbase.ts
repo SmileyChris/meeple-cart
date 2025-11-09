@@ -255,3 +255,77 @@ export interface VerificationPairRecord extends RecordModel {
     verified?: UserRecord;
   };
 }
+
+// Trade Party Collections
+
+export interface TradePartyRecord extends RecordModel {
+  name: string;
+  description: string;
+  organizer: string;
+  status: 'planning' | 'submissions' | 'want_lists' | 'matching' | 'matching_complete' | 'execution' | 'completed';
+  submission_opens: string;
+  submission_closes: string;
+  want_list_opens: string;
+  want_list_closes: string;
+  algorithm_runs_at?: string;
+  execution_deadline?: string;
+  max_games_per_user?: number;
+  allow_no_trade: boolean;
+  regional_restriction?: string;
+  shipping_rules?: string;
+  participant_count: number;
+  game_count: number;
+  successful_matches: number;
+  expand?: {
+    organizer?: UserRecord;
+  };
+}
+
+export interface TradePartySubmissionRecord extends RecordModel {
+  trade_party: string;
+  user: string;
+  title: string;
+  bgg_id?: string;
+  condition: 'mint' | 'like_new' | 'good' | 'fair' | 'poor';
+  description?: string;
+  photos?: string[];
+  ship_from_region?: string;
+  will_ship_to?: string[];
+  shipping_notes?: string;
+  status: 'pending' | 'approved' | 'rejected';
+  expand?: {
+    trade_party?: TradePartyRecord;
+    user?: UserRecord;
+  };
+}
+
+export interface TradePartyWantListRecord extends RecordModel {
+  my_submission: string;
+  wanted_submission?: string;
+  preference_rank: number;
+  expand?: {
+    my_submission?: TradePartySubmissionRecord;
+    wanted_submission?: TradePartySubmissionRecord;
+  };
+}
+
+export interface TradePartyMatchRecord extends RecordModel {
+  trade_party: string;
+  chain_id: string;
+  chain_position: number;
+  giving_submission: string;
+  receiving_submission: string;
+  giving_user: string;
+  receiving_user: string;
+  status: 'pending' | 'shipping' | 'completed' | 'disputed';
+  shipped_at?: string;
+  received_at?: string;
+  tracking_number?: string;
+  expand?: {
+    trade_party?: TradePartyRecord;
+    giving_submission?: TradePartySubmissionRecord;
+    receiving_submission?: TradePartySubmissionRecord;
+    giving_user?: UserRecord;
+    receiving_user?: UserRecord;
+  };
+}
