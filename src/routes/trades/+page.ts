@@ -5,6 +5,9 @@ import { pb, currentUser } from '$lib/pocketbase';
 import { get } from 'svelte/store';
 
 export const load: PageLoad = async ({ url }) => {
+  // Wait for auth to initialize on fresh page loads
+  await currentUser.init();
+
   const user = get(currentUser);
 
   if (!user) {
