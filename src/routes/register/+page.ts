@@ -17,7 +17,7 @@ export const load: PageLoad = async () => {
         // Validate the auth is actually valid by trying to refresh
         await pb.collection('users').authRefresh();
         // Auth is valid, redirect to profile
-        redirect(302, '/profile');
+        throw redirect(302, '/profile');
       } catch (e) {
         // Check if it's a SvelteKit redirect error (has status and location properties)
         if (e && typeof e === 'object' && 'status' in e && 'location' in e) {

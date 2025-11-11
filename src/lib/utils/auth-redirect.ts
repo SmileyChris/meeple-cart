@@ -5,5 +5,5 @@ import { redirect } from '@sveltejs/kit';
  * @param pathname The current pathname to return to after login
  */
 export function redirectToLogin(pathname: string): never {
-  redirect(302, `/login?next=${encodeURIComponent(pathname)}`);
+  throw redirect(302, `/login?next=${encodeURIComponent(pathname)}`);
 }
