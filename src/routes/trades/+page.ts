@@ -25,7 +25,7 @@ export const load: PageLoad = async ({ url }) => {
   const trades = await pb.collection('trades').getFullList<TradeRecord>({
     filter: `(buyer = "${user.id}" || seller = "${user.id}") && (${statusFilter})`,
     expand: 'listing,buyer,seller',
-    sort: '-created',
+    sort: '-id', // trades table doesn't have a created field, sorting by id instead
   });
 
   // Count trades by status
