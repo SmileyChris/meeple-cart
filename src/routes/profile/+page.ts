@@ -11,9 +11,10 @@ export const load: PageLoad = async ({ url }) => {
   }
 
   // Fetch user's listings
+  // Note: listings table doesn't have a created field, sorting by id instead (newer ids come later)
   const listings = await pb.collection('listings').getFullList({
     filter: `owner = "${user.id}"`,
-    sort: '-created',
+    sort: '-id',
   });
 
   return {
