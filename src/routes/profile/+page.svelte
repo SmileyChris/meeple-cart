@@ -20,12 +20,12 @@
   let shareLinkCopied = $state(false);
   let shareTextCopied = $state(false);
 
-  // Form fields
-  let displayName = $state(profile.display_name);
-  let location = $state(profile.location || '');
-  let bio = $state(profile.bio || '');
-  let preferredContact = $state(profile.preferred_contact);
-  let preferredRegions = $state<string[]>(profile.preferred_regions || []);
+  // Form fields - initialize from current profile values
+  let displayName = $state(data.profile.display_name);
+  let location = $state(data.profile.location || '');
+  let bio = $state(data.profile.bio || '');
+  let preferredContact = $state(data.profile.preferred_contact);
+  let preferredRegions = $state<string[]>(data.profile.preferred_regions || []);
 
   // Island selection logic
   let northIslandChecked = $derived(
@@ -357,7 +357,7 @@ View full details: ${generateShareUrl(listing.id)}`;
     </div>
 
     <div class="sm:col-span-2">
-      <label class="block text-sm font-medium text-secondary">Preferred regions</label>
+      <div class="block text-sm font-medium text-secondary">Preferred regions</div>
       <p class="mt-1 text-xs text-muted">
         Select your favorite regions to automatically filter listings when you visit the browse
         page.
@@ -440,16 +440,23 @@ View full details: ${generateShareUrl(listing.id)}`;
 {#if showShareModal && selectedListingForShare}
   <div
     class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+    role="button"
+    tabindex="0"
     onclick={() => (showShareModal = false)}
+    onkeydown={(e) => e.key === 'Escape' && (showShareModal = false)}
   >
     <div
       class="max-w-lg w-full rounded-xl border border-subtle bg-surface-panel p-6 shadow-elevated"
+      role="dialog"
+      tabindex="-1"
       onclick={(e) => e.stopPropagation()}
+      onkeydown={(e) => e.stopPropagation()}
     >
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-xl font-semibold text-primary">Share Listing</h2>
         <button
           type="button"
+          aria-label="Close modal"
           onclick={() => (showShareModal = false)}
           class="text-muted hover:text-primary transition"
         >
@@ -471,9 +478,10 @@ View full details: ${generateShareUrl(listing.id)}`;
       <!-- Share Link -->
       <div class="space-y-4">
         <div>
-          <label class="block text-sm font-medium text-secondary mb-2">Share Link</label>
+          <label for="share-url" class="block text-sm font-medium text-secondary mb-2">Share Link</label>
           <div class="flex gap-2">
             <input
+              id="share-url"
               type="text"
               readonly
               value={generateShareUrl(selectedListingForShare.id)}
@@ -492,10 +500,11 @@ View full details: ${generateShareUrl(listing.id)}`;
 
         <!-- Share Text -->
         <div>
-          <label class="block text-sm font-medium text-secondary mb-2">
+          <label for="share-text" class="block text-sm font-medium text-secondary mb-2">
             Formatted Text for Facebook
           </label>
           <textarea
+            id="share-text"
             readonly
             value={generateShareText(selectedListingForShare)}
             rows="6"
