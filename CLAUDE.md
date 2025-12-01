@@ -138,19 +138,64 @@ src/
 - `pocketbase/schema/pb_schema.json` - Complete schema (11 collections)
 - `pocketbase/pb_migrations/` - Migration scripts (auto-applied via PocketBase)
 
-**Collections You'll Use Most:**
+**Data Model: listing → offer_template → game(s)**
+
+The platform uses a three-tier model:
 
 ```typescript
-// trades - Core trade workflow
+// listings - Container/grouping owned by user
+{
+  owner: relation(users),
+  title: text,
+  summary: text,
+  location: text,
+  regions: json,  // array of region strings
+  status: 'active' | 'pending' | 'completed' | 'cancelled',
+  photos: file[],
+  views: number,
+  bump_date: date
+}
+
+// offer_templates - The "for sale/trade" unit (what appears in activity feed)
+{
+  listing: relation(listings),
+  owner: relation(users),
+  items: relation(games[]),  // one or more games in this offer
+  display_name: text,        // e.g., "Everdell + Expansions Bundle"
+  cash_amount: number,       // asking price (if selling)
+  open_to_lower_offers: bool,  // "or nearest offer"
+  open_to_trade_offers: bool,  // accepts trades
+  trade_for_items: json,     // what they'd accept in trade
+  can_post: bool,            // can be posted/shipped
+  notes: text,
+  status: 'active' | 'accepted' | 'invalidated' | 'withdrawn'
+}
+
+// items - Individual tradeable items (games, accessories, 3D printed parts, etc.)
+{
+  listing: relation(listings),
+  bgg_id: number,            // optional - 0 for non-game items
+  title: text,               // from BGG or manual entry for other items
+  year: number,
+  condition: 'mint' | 'excellent' | 'good' | 'fair' | 'poor',
+  notes: text,
+  status: 'available' | 'pending' | 'sold' | 'bundled',
+  photo_regions: json
+}
+
+// trades - When a buyer makes an offer on an offer_template
 {
   listing: relation(listings),
   buyer: relation(users),
   seller: relation(users),
-  status: 'initiated' | 'confirmed' | 'shipped' | 'completed' | 'disputed',
-  buyer_rating: number,
-  seller_rating: number,
-  buyer_review: text,
-  seller_review: text,
+  status: 'initiated' | 'confirmed' | 'completed' | 'disputed' | 'cancelled',
+  offer_status: 'pending' | 'accepted' | 'declined' | 'withdrawn',
+  cash_offer_amount: number,
+  requested_items: relation(items[]),
+  shipping_method: 'in_person' | 'shipped' | 'either',
+  offer_message: text,
+  rating: number,
+  review: text,
   completed_date: date
 }
 
@@ -158,17 +203,7 @@ src/
 {
   voucher: relation(users),
   vouchee: relation(users),
-  message: text,
-  created: date
-}
-
-// listings - Already complete
-{
-  title: text,
-  listing_type: 'trade' | 'sell' | 'want',
-  status: 'active' | 'pending' | 'completed' | 'cancelled',
-  owner: relation(users),
-  // ... many more fields
+  message: text
 }
 
 // users - Extended with trade stats
@@ -176,10 +211,15 @@ src/
   display_name: text,
   trade_count: number,
   vouch_count: number,
-  cascade_reputation: number,
-  // ... PocketBase auth fields
+  cascade_reputation: number
 }
 ```
+
+**Common Flows:**
+
+- **Single game:** User adds game with price/terms → creates both `game` and `offer_template` records
+- **Bundle:** User adds multiple games → groups them into one `offer_template` with combined terms
+- **Activity feed:** Shows `offer_templates` with their games, filters on `can_post`, `open_to_trade_offers`, regions
 
 **TypeScript Types:**
 
@@ -189,10 +229,11 @@ src/
 
 ### Key Domain Models
 
-- **Listings**: Marketplace posts owned by users, support trade/sell/want types
-- **Games**: Individual games within listings with condition, pricing, and BGG integration
-- **Trades**: Formal trade records tracking buyer/seller, status, and feedback (⚠️ UI incomplete)
-- **Vouches**: Trust endorsements between users (⚠️ Creation UI missing)
+- **Listings**: Container/grouping owned by users
+- **Offer Templates**: The actual "for sale/trade" unit with price, shipping, and trade terms
+- **Items**: Individual tradeable items (board games with BGG integration, accessories, 3D parts, etc.)
+- **Trades**: Formal trade records tracking buyer/seller, status, and feedback
+- **Vouches**: Trust endorsements between users
 - **Users**: Extended auth records with profile data, trade history, and trust metrics
 
 ---

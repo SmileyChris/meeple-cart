@@ -4,7 +4,7 @@ import type { ItemRecord, ListingRecord } from '$lib/types/listing';
 import { pb, currentUser } from '$lib/pocketbase';
 import { get } from 'svelte/store';
 
-const ITEMS_EXPAND_KEY = 'items(listing)';
+const ITEMS_EXPAND_KEY = 'items_via_listing';
 
 export const load: PageLoad = async ({ params }) => {
   const { id } = params;
@@ -17,7 +17,7 @@ export const load: PageLoad = async ({ params }) => {
 
   try {
     const listing = await pb.collection('listings').getOne<ListingRecord>(id, {
-      expand: 'items(listing)',
+      expand: 'items_via_listing',
     });
 
     // Must be the owner

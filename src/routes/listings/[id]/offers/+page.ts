@@ -31,7 +31,7 @@ export const load: PageLoad = async ({ params }) => {
     const pendingOffers = await pb.collection('trades').getFullList<TradeRecord>({
       filter: `listing = "${id}" && offer_status = "pending"`,
       sort: '-created',
-      expand: 'buyer,requested_items',
+      expand: 'buyer,seller_items,buyer_items',
     });
 
     // Load all games for this listing (for display)

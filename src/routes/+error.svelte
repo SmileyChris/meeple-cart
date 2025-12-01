@@ -19,7 +19,7 @@
   };
 
   let title = $derived(errorTitles[status] || 'Error');
-  let description = $derived(errorDescriptions[status] || message);
+  let description = $derived(status === 500 ? message : (errorDescriptions[status] || message));
 </script>
 
 <svelte:head>

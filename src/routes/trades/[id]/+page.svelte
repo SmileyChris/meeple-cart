@@ -407,18 +407,22 @@
     >
       <h2 class="text-xl font-semibold text-primary">Trade Details</h2>
 
-      <!-- Shipping Method -->
-      {#if trade.shipping_method}
+      <!-- Delivery Method -->
+      {#if trade.delivery_method}
         <div>
-          <h3 class="text-sm font-semibold text-secondary mb-2">Delivery Method</h3>
+          <h3 class="text-sm font-semibold text-secondary mb-2">Delivery</h3>
           <div class="flex items-center gap-2 text-sm text-secondary">
-            {#if trade.shipping_method === 'in_person'}
+            {#if trade.delivery_method === 'in_person'}
               <span class="rounded-full bg-emerald-500/20 px-3 py-1 font-medium text-badge-emerald">
-                📍 In-person meetup
+                🤝 Meet up
               </span>
-            {:else if trade.shipping_method === 'shipped'}
+            {:else if trade.delivery_method === 'post'}
               <span class="rounded-full bg-blue-500/20 px-3 py-1 font-medium text-badge-blue">
-                📦 Shipping
+                📬 Post
+              </span>
+            {:else if trade.delivery_method === 'either'}
+              <span class="rounded-full bg-slate-500/20 px-3 py-1 font-medium text-slate-300">
+                Either
               </span>
             {/if}
           </div>

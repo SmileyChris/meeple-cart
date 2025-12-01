@@ -21,10 +21,20 @@
   let initiatingTrade = $state(false);
   let tradeError = $state<string | null>(null);
   let showTradeForm = $state(false);
+  // What buyer wants from seller
   let selectedGameIds = $state<string[]>([]);
-  let shippingMethod = $state<'in_person' | 'shipped' | 'either'>('either');
+  // What buyer is offering
+  let offerType = $state<'cash' | 'trade' | 'both'>('cash');
   let cashOffer = $state(''); // Cash amount in dollars (will convert to cents)
+  let buyerItemIds = $state<string[]>([]); // Items buyer is offering from their listings
+  let buyerItemsDescription = $state(''); // Free text for items not in system
+  // Delivery
+  let deliveryMethod = $state<'in_person' | 'post' | 'either'>('either');
+  // Message
   let offerMessage = $state(''); // Buyer's message with their offer
+  // Buyer's own items (loaded when form opens)
+  let buyerItems = $state<Array<{ id: string; title: string; condition: string; listingTitle: string }>>([]);
+  let loadingBuyerItems = $state(false);
   let showShareModal = $state(false);
   let shareLinkCopied = $state(false);
   let shareTextCopied = $state(false);
@@ -238,6 +248,41 @@ View full details: ${shareUrl}`;
     }
   }
 
+  async function loadBuyerItems() {
+    if (!$currentUser) return;
+    loadingBuyerItems = true;
+    try {
+      // Load buyer's listings with their items
+      const listings = await pb.collection('listings').getFullList({
+        filter: `owner = "${$currentUser.id}" && status = "active"`,
+        expand: 'items_via_listing',
+      });
+
+      // Flatten items from all listings
+      const items: typeof buyerItems = [];
+      for (const list of listings) {
+        const listItems = list.expand?.items_via_listing;
+        if (Array.isArray(listItems)) {
+          for (const item of listItems) {
+            if (item.status === 'available') {
+              items.push({
+                id: item.id,
+                title: item.title,
+                condition: item.condition,
+                listingTitle: list.title,
+              });
+            }
+          }
+        }
+      }
+      buyerItems = items;
+    } catch (err) {
+      console.error('Failed to load buyer items', err);
+    } finally {
+      loadingBuyerItems = false;
+    }
+  }
+
   async function handleInitiateTrade(e?: Event) {
     e?.preventDefault();
     if (!owner || !$currentUser) return;
@@ -256,12 +301,31 @@ View full details: ${shareUrl}`;
       return;
     }
 
+    // Validate offer - must have cash and/or items
+    const hasCashOffer = cashOffer.trim() && parseFloat(cashOffer) > 0;
+    const hasItemOffer = buyerItemIds.length > 0 || buyerItemsDescription.trim();
+
+    if (offerType === 'cash' && !hasCashOffer) {
+      tradeError = 'Please enter a cash amount';
+      return;
+    }
+
+    if (offerType === 'trade' && !hasItemOffer) {
+      tradeError = 'Please select items to trade or describe what you\'re offering';
+      return;
+    }
+
+    if (offerType === 'both' && !hasCashOffer && !hasItemOffer) {
+      tradeError = 'Please enter a cash amount and/or items to trade';
+      return;
+    }
+
     // Validate cash offer (optional but must be valid if provided)
     let cashAmountCents: number | undefined = undefined;
     if (cashOffer.trim()) {
       const parsed = parseFloat(cashOffer);
       if (isNaN(parsed) || parsed < 0) {
-        tradeError = 'Please enter a valid cash amount (or leave blank)';
+        tradeError = 'Please enter a valid cash amount';
         return;
       }
       cashAmountCents = Math.round(parsed * 100); // Convert to cents
@@ -287,9 +351,11 @@ View full details: ${shareUrl}`;
         seller: owner.id,
         offer_status: 'pending',
         status: 'initiated', // Status for after offer is accepted
-        requested_items: selectedGameIds.length > 0 ? selectedGameIds : undefined,
-        cash_offer_amount: cashAmountCents,
-        shipping_method: shippingMethod,
+        seller_items: selectedGameIds.length > 0 ? selectedGameIds : undefined,
+        buyer_cash_amount: cashAmountCents,
+        buyer_items: buyerItemIds.length > 0 ? buyerItemIds : undefined,
+        buyer_items_description: buyerItemsDescription.trim() || undefined,
+        delivery_method: deliveryMethod,
         offer_message: offerMessage.trim() || undefined,
       });
 
@@ -301,8 +367,11 @@ View full details: ${shareUrl}`;
       if (cashAmountCents) {
         offerDetails.push(`$${(cashAmountCents / 100).toFixed(2)}`);
       }
-      if (selectedGameIds.length > 0) {
-        offerDetails.push(`${selectedGameIds.length} item(s)`);
+      if (buyerItemIds.length > 0) {
+        offerDetails.push(`${buyerItemIds.length} game(s) in trade`);
+      }
+      if (buyerItemsDescription.trim()) {
+        offerDetails.push('trade offer');
       }
 
       await pb.collection('notifications').create({
@@ -520,31 +589,42 @@ View full details: ${shareUrl}`;
       </section>
     {/if}
 
-    <!-- Offer Templates Section -->
-    {#if data.offerTemplates.length > 0}
-      <section class="space-y-6">
-        <div>
-          <h2 class="text-2xl font-semibold text-primary">Available Offers</h2>
-          <p class="text-sm text-muted">
-            The seller has created offer templates showing what they're willing to accept.
-          </p>
-        </div>
+    <!-- Available Offers Section -->
+    <section class="space-y-6">
+      <div>
+        <h2 class="text-2xl font-semibold text-primary">Available Offers</h2>
+        <p class="text-sm text-muted">
+          Items available in this listing with pricing and trade options.
+        </p>
+      </div>
 
-        <div class="grid gap-4 sm:grid-cols-2">
+      {#if data.offerTemplates.length > 0}
+        <div class="space-y-4">
           {#each data.offerTemplates as template (template.id)}
+            {@const templateItems = template.expand?.items ?? []}
+            {@const templateTitle = template.display_name || (templateItems.length === 1 ? templateItems[0]?.title : `${templateItems.length} item bundle`)}
             <article class="rounded-lg border border-subtle bg-surface-panel p-5 transition-colors hover:border-accent/50">
-              <div class="space-y-3">
+              <div class="space-y-4">
+                <!-- Header with title and type -->
                 <div class="flex items-start justify-between gap-3">
-                  <h3 class="text-lg font-semibold text-primary">
-                    {template.display_name || 'Offer template'}
+                  <h3 class="text-xl font-semibold text-primary">
+                    {templateTitle}
                   </h3>
-                  <div class="flex items-center gap-1 text-sm">
-                    {#if template.template_type === 'cash_only'}
-                      <span title="Cash only">💰</span>
-                    {:else if template.template_type === 'trade_only'}
-                      <span title="Trade only">🔄</span>
-                    {:else}
-                      <span title="Cash or trade">💰🔄</span>
+                  <div class="flex flex-wrap items-center gap-2">
+                    {#if template.can_post}
+                      <span class="rounded-full border border-subtle bg-surface-card-alt px-2 py-0.5 text-xs text-secondary" title="Can be posted">
+                        📬 Can post
+                      </span>
+                    {/if}
+                    {#if template.open_to_trade_offers}
+                      <span class="rounded-full border border-subtle bg-surface-card-alt px-2 py-0.5 text-xs text-secondary" title="Open to trade offers">
+                        🔄 Trades
+                      </span>
+                    {/if}
+                    {#if template.will_consider_split && templateItems.length > 1}
+                      <span class="rounded-full border border-amber-500/50 bg-amber-500/10 px-2 py-0.5 text-xs text-amber-300" title="Will consider selling items separately">
+                        ✂️ May split
+                      </span>
                     {/if}
                   </div>
                 </div>
@@ -557,214 +637,89 @@ View full details: ${shareUrl}`;
                       <span class="text-sm font-normal text-muted">(or nearest offer)</span>
                     {/if}
                   </div>
+                {:else if template.open_to_trade_offers}
+                  <div class="text-lg font-semibold text-emerald-400">
+                    Trade only
+                  </div>
                 {/if}
 
-                <!-- Items included -->
-                {#if template.expand?.items && Array.isArray(template.expand.items)}
-                  <div>
-                    <div class="text-xs font-medium text-secondary">Includes:</div>
-                    <div class="mt-1 flex flex-wrap gap-1.5">
-                      {#each template.expand.items as item}
-                        <span class="rounded-full bg-surface-body px-2 py-0.5 text-xs text-muted">
-                          {item.title}
-                        </span>
-                      {/each}
-                    </div>
+                <!-- Items included with full details -->
+                {#if templateItems.length > 0}
+                  <div class="space-y-3">
+                    {#each templateItems as item (item.id)}
+                      <div
+                        id="game-{item.id}"
+                        class="rounded-lg border border-subtle bg-surface-body p-4 {item.status === 'pending' ? 'border-amber-500/50' : item.status === 'sold' ? 'opacity-60' : ''}"
+                      >
+                        <div class="flex flex-wrap items-start justify-between gap-3">
+                          <div class="space-y-1">
+                            <div class="flex items-center gap-2">
+                              <span class="font-semibold text-primary">{item.title}</span>
+                              {#if item.bgg_id}
+                                <a
+                                  href="https://boardgamegeek.com/boardgame/{item.bgg_id}"
+                                  target="_blank"
+                                  rel="noopener"
+                                  class="text-xs text-emerald-300 hover:text-emerald-200"
+                                  onclick={(e) => e.stopPropagation()}
+                                >
+                                  BGG →
+                                </a>
+                              {/if}
+                            </div>
+                            <div class="flex flex-wrap gap-2 text-xs">
+                              <span class="rounded-full border border-subtle bg-surface-card-alt px-2 py-0.5 text-secondary">
+                                {conditionBadges[item.condition]}
+                              </span>
+                              <span class={`rounded-full border px-2 py-0.5 ${statusTone[item.status]}`}>
+                                {statusLabels[item.status]}
+                              </span>
+                              {#if item.year}
+                                <span class="rounded-full border border-subtle bg-surface-card-alt px-2 py-0.5 text-secondary">
+                                  {item.year}
+                                </span>
+                              {/if}
+                            </div>
+                          </div>
+                        </div>
+                        {#if item.notes}
+                          <p class="mt-2 text-sm text-muted">{item.notes}</p>
+                        {/if}
+                      </div>
+                    {/each}
                   </div>
                 {/if}
 
                 <!-- Trade items wanted -->
                 {#if template.trade_for_items && template.trade_for_items.length > 0}
-                  <div>
-                    <div class="text-xs font-medium text-secondary">Wants in trade:</div>
-                    <div class="mt-1 space-y-1">
-                      {#each template.trade_for_items.slice(0, 3) as wantedItem}
-                        <div class="text-sm text-muted">
-                          • {wantedItem.title}
-                          {#if wantedItem.bgg_id}
-                            <span class="text-xs">(BGG {wantedItem.bgg_id})</span>
-                          {/if}
-                        </div>
+                  <div class="rounded-lg border border-dashed border-subtle bg-surface-body p-3">
+                    <div class="text-xs font-medium text-secondary mb-2">Looking for in trade:</div>
+                    <div class="flex flex-wrap gap-2">
+                      {#each template.trade_for_items as wantedItem}
+                        <span class="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-300">
+                          {wantedItem.title}
+                        </span>
                       {/each}
-                      {#if template.trade_for_items.length > 3}
-                        <div class="text-xs text-muted">
-                          +{template.trade_for_items.length - 3} more...
-                        </div>
-                      {/if}
                     </div>
                   </div>
                 {/if}
 
-                <!-- Options -->
-                <div class="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted">
-                  {#if template.open_to_shipping_negotiation}
-                    <span title="Open to shipping negotiation">📦 Shipping flexible</span>
-                  {/if}
-                  {#if template.open_to_trade_offers && template.template_type === 'cash_only'}
-                    <span title="Also open to trade offers">🔄 Trade offers OK</span>
-                  {/if}
-                </div>
-
                 <!-- Notes -->
                 {#if template.notes}
-                  <p class="text-sm text-muted italic">{template.notes}</p>
+                  <p class="text-sm text-muted italic border-t border-subtle pt-3">{template.notes}</p>
                 {/if}
               </div>
             </article>
           {/each}
         </div>
-
-        <div class="rounded-lg border border-subtle bg-surface-card p-4">
-          <p class="text-sm text-secondary">
-            💡 <strong>Tip:</strong> Contact the seller to discuss these offers or propose your own.
-            Scroll down to use the "Send Message" or "Propose Trade" buttons.
-          </p>
+      {:else}
+        <div class="rounded-lg border border-dashed border-subtle bg-surface-body p-6 text-center text-sm text-muted">
+          No offers have been created for this listing yet.
         </div>
-      </section>
-    {/if}
+      {/if}
+    </section>
 
-    <section
-      class="grid gap-8 lg:grid-cols-[2fr_1fr]"
-    >
-      <div class="space-y-6">
-        <div>
-          <h2 class="text-2xl font-semibold text-primary">Items in this listing</h2>
-          <p class="text-sm text-muted">
-            Condition, pricing, and trade preferences for each item included.
-          </p>
-        </div>
-
-        {#if games.length > 0}
-          <div class="space-y-4">
-            {#each games as game (game.id)}
-              <article
-                id="game-{game.id}"
-                class="space-y-4 rounded-lg border border-subtle transition-colors p-5 {game.status === 'pending' ? 'bg-amber-500/5' : game.status === 'sold' ? 'bg-surface-panel/50 opacity-75' : 'bg-surface-panel'}"
-              >
-                <header class="space-y-2">
-                  <div class="flex flex-wrap items-center justify-between gap-3">
-                    <h3 class="text-xl font-semibold text-primary">{game.title}</h3>
-                    {#if game.bggUrl}
-                      <!-- eslint-disable svelte/no-navigation-without-resolve -->
-                      <a
-                        class="text-sm font-medium text-emerald-300 transition hover:text-emerald-200"
-                        href={game.bggUrl}
-                        target="_blank"
-                        rel="external noopener"
-                      >
-                        View on BGG
-                      </a>
-                      <!-- eslint-enable svelte/no-navigation-without-resolve -->
-                    {/if}
-                  </div>
-                  <div class="flex flex-wrap gap-2 text-xs font-semibold">
-                    <span
-                      class="inline-flex items-center rounded-full border border-subtle bg-surface-card-alt px-2 py-1 text-secondary"
-                    >
-                      {conditionBadges[game.condition]}
-                    </span>
-                    <span
-                      class={`inline-flex items-center rounded-full border px-2 py-1 ${statusTone[game.status]}`}
-                    >
-                      {statusLabels[game.status]}
-                    </span>
-                    {#if game.year !== null}
-                      <span
-                        class="inline-flex items-center rounded-full border border-subtle bg-surface-card-alt px-2 py-1 text-secondary"
-                      >
-                        Published {game.year}
-                      </span>
-                    {/if}
-                    {#if game.can_post}
-                      <span
-                        class="inline-flex items-center rounded-full border border-subtle bg-surface-card-alt px-2 py-1 text-secondary"
-                      >
-                        🚚 Can post
-                      </span>
-                    {/if}
-                  </div>
-                  {#if conditionDescriptions[game.condition]}
-                    <p class="text-xs text-muted">{conditionDescriptions[game.condition]}</p>
-                  {/if}
-                </header>
-
-                <dl class="grid gap-3 text-sm sm:grid-cols-2">
-                  {#if listing.listing_type === 'sell' && game.price !== null}
-                    <div>
-                      <dt class="text-muted">Price</dt>
-                      <dd class="text-lg font-semibold">
-                        {#if game.previousPrice !== null && game.previousPrice > game.price}
-                          <span class="text-muted line-through">
-                            {toCurrency(game.previousPrice) ??
-                              `${game.previousPrice.toFixed(2)} NZD`}
-                          </span>
-                          <span class="ml-2 text-emerald-200">
-                            {toCurrency(game.price) ?? `${game.price.toFixed(2)} NZD`}
-                          </span>
-                        {:else}
-                          <span class="text-emerald-200">
-                            {toCurrency(game.price) ?? `${game.price.toFixed(2)} NZD`}
-                          </span>
-                        {/if}
-                      </dd>
-                    </div>
-                  {/if}
-                  {#if listing.listing_type === 'trade' && game.tradeValue !== null}
-                    <div>
-                      <dt class="text-muted">Trade value</dt>
-                      <dd class="text-lg font-semibold">
-                        {#if game.previousTradeValue !== null && game.previousTradeValue > game.tradeValue}
-                          <span class="text-muted line-through">
-                            {toCurrency(game.previousTradeValue) ??
-                              `${game.previousTradeValue.toFixed(2)} NZD`}
-                          </span>
-                          <span class="ml-2 text-emerald-200">
-                            {toCurrency(game.tradeValue) ?? `${game.tradeValue.toFixed(2)} NZD`}
-                          </span>
-                        {:else}
-                          <span class="text-emerald-200">
-                            {toCurrency(game.tradeValue) ?? `${game.tradeValue.toFixed(2)} NZD`}
-                          </span>
-                        {/if}
-                      </dd>
-                    </div>
-                  {/if}
-                  {#if listing.listing_type === 'want' && game.price !== null}
-                    <div>
-                      <dt class="text-muted">Max price</dt>
-                      <dd class="text-lg font-semibold">
-                        <span class="text-emerald-200">
-                          {toCurrency(game.price) ?? `${game.price.toFixed(2)} NZD`}
-                        </span>
-                      </dd>
-                    </div>
-                  {/if}
-                  {#if (listing.listing_type === 'sell' && game.price === null) || (listing.listing_type === 'trade' && game.tradeValue === null) || (listing.listing_type === 'want' && game.price === null)}
-                    <div class="sm:col-span-2">
-                      <dt class="text-muted">Negotiable</dt>
-                      <dd class="text-sm text-secondary">Price to be discussed with the trader.</dd>
-                    </div>
-                  {/if}
-                </dl>
-
-                {#if game.notes}
-                  <div>
-                    <h4 class="text-sm font-semibold text-secondary">Seller notes</h4>
-                    <p class="mt-2 whitespace-pre-line text-sm text-secondary">{game.notes}</p>
-                  </div>
-                {/if}
-              </article>
-            {/each}
-          </div>
-        {:else}
-          <div
-            class="rounded-lg border border-dashed border-subtle bg-surface-body transition-colors/50 p-6 text-sm text-muted"
-          >
-            The seller has not added individual item details yet.
-          </div>
-        {/if}
-      </div>
-
+    <section class="space-y-4">
       <aside
         class="space-y-4 rounded-lg border border-subtle bg-surface-panel transition-colors p-5 text-sm text-secondary"
       >
@@ -833,12 +788,14 @@ View full details: ${shareUrl}`;
               {#if !showTradeForm}
                 <button
                   type="button"
-                  onclick={() => {
+                  onclick={async () => {
                     showTradeForm = true;
                     // Pre-select all available games
                     selectedGameIds = games
                       .filter((g) => g.status === 'available')
                       .map((g) => g.id);
+                    // Load buyer's items for trade offers
+                    await loadBuyerItems();
                   }}
                   class="w-full rounded-lg border border-emerald-500 bg-emerald-500 px-4 py-2 font-semibold text-[var(--accent-contrast)] shadow-[0_10px_25px_rgba(16,185,129,0.25)] transition hover:bg-emerald-400"
                 >
@@ -847,202 +804,225 @@ View full details: ${shareUrl}`;
               {:else}
                 <form
                   onsubmit={handleInitiateTrade}
-                  class="space-y-4 rounded-lg border border-subtle bg-surface-card p-4"
+                  class="space-y-5 rounded-lg border border-subtle bg-surface-card p-4"
                 >
-                  <h4 class="font-semibold text-primary">Make an Offer</h4>
+                  <h4 class="font-semibold text-primary text-lg">Make an Offer</h4>
 
                   {#if tradeError}
                     <Alert type="error">{tradeError}</Alert>
                   {/if}
 
+                  <!-- SECTION 1: What you want -->
                   {#if games.length > 0}
-                    <!-- Game Selection -->
-                    <div class="space-y-2">
-                      <label class="block text-sm font-medium text-secondary">
-                        Select games you want ({selectedGameIds.length} selected)
-                      </label>
+                    <div class="space-y-3">
+                      <div class="flex items-center gap-2 border-b border-subtle pb-2">
+                        <span class="text-lg">🎯</span>
+                        <h5 class="font-medium text-secondary">What you want</h5>
+                      </div>
                       <div
-                        class="max-h-64 space-y-2 overflow-y-auto rounded-lg border border-subtle bg-surface-body p-3"
+                        class="max-h-48 space-y-1 overflow-y-auto rounded-lg border border-subtle bg-surface-body p-2"
                       >
                         {#each games as game (game.id)}
                           <label
-                            class="flex cursor-pointer items-start gap-3 rounded-lg p-2 transition hover:bg-surface-ghost {game.status !==
-                            'available'
-                              ? 'opacity-50'
-                              : ''}"
+                            class="flex cursor-pointer items-center gap-2 rounded p-2 transition hover:bg-surface-ghost {game.status !== 'available' ? 'opacity-50' : ''}"
                           >
                             <input
                               type="checkbox"
-                              value={game.id}
                               checked={selectedGameIds.includes(game.id)}
                               disabled={game.status !== 'available'}
                               onchange={(e) => {
-                                const checked = e.currentTarget.checked;
-                                if (checked) {
+                                if (e.currentTarget.checked) {
                                   selectedGameIds = [...selectedGameIds, game.id];
                                 } else {
                                   selectedGameIds = selectedGameIds.filter((id) => id !== game.id);
                                 }
                               }}
-                              class="mt-1 h-4 w-4 rounded border-subtle bg-surface-body text-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-0"
+                              class="h-4 w-4 rounded border-subtle text-emerald-500 focus:ring-emerald-500"
                             />
-                            <div class="flex-1">
-                              <div class="font-medium text-primary">{game.title}</div>
-                              <div class="text-xs text-muted">
-                                {conditionBadges[game.condition]}
-                                {#if game.price}
-                                  · {toCurrency(game.price)}
-                                {:else if game.tradeValue}
-                                  · Value: {toCurrency(game.tradeValue)}
-                                {/if}
-                                {#if game.can_post}
-                                  · 🚚 Can post
-                                {/if}
-                                {#if game.status !== 'available'}
-                                  · {game.status}
-                                {/if}
-                              </div>
-                            </div>
+                            <span class="flex-1 text-sm text-primary">{game.title}</span>
+                            <span class="text-xs text-muted">{conditionBadges[game.condition]}</span>
                           </label>
                         {/each}
                       </div>
+                      <p class="text-xs text-muted">{selectedGameIds.length} item{selectedGameIds.length !== 1 ? 's' : ''} selected</p>
                     </div>
                   {/if}
 
-                  <!-- Cash Offer (Optional) -->
-                  <div class="space-y-2">
-                    <label for="cash-offer" class="block text-sm font-medium text-secondary">
-                      Cash offer (optional)
-                    </label>
-                    <div class="relative">
-                      <span
-                        class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-muted"
-                        >$</span
-                      >
-                      <input
-                        id="cash-offer"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        bind:value={cashOffer}
-                        placeholder="0.00"
-                        class="w-full rounded-lg border border-subtle bg-surface-body pl-7 pr-3 py-2 text-primary placeholder-muted transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-0"
-                      />
+                  <!-- SECTION 2: What you're offering -->
+                  <div class="space-y-3">
+                    <div class="flex items-center gap-2 border-b border-subtle pb-2">
+                      <span class="text-lg">🤝</span>
+                      <h5 class="font-medium text-secondary">What you're offering</h5>
                     </div>
-                    <p class="text-xs text-muted">Enter amount in NZD, or leave blank</p>
-                  </div>
 
-                  <!-- Shipping Method Selection -->
-                  <div class="space-y-2">
-                    <label class="block text-sm font-medium text-secondary">
-                      Preferred shipping method
-                    </label>
-                    <div class="space-y-2">
-                      <label
-                        class="flex cursor-pointer items-center gap-3 rounded-lg border border-subtle bg-surface-body p-3 transition hover:bg-surface-ghost {shippingMethod ===
-                        'in_person'
-                          ? 'border-emerald-500 bg-emerald-500/10'
-                          : ''}"
+                    <!-- Offer Type Tabs -->
+                    <div class="flex gap-1 rounded-lg bg-surface-body p-1">
+                      <button
+                        type="button"
+                        onclick={() => (offerType = 'cash')}
+                        class="flex-1 rounded-md px-3 py-2 text-sm font-medium transition {offerType === 'cash' ? 'bg-emerald-500 text-[var(--accent-contrast)]' : 'text-secondary hover:text-primary'}"
                       >
-                        <input
-                          type="radio"
-                          name="shipping_method"
-                          value="in_person"
-                          checked={shippingMethod === 'in_person'}
-                          onchange={() => (shippingMethod = 'in_person')}
-                          class="h-4 w-4 border-subtle bg-surface-body text-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-0"
-                        />
-                        <div class="flex-1">
-                          <div class="font-medium text-primary">In-person meetup</div>
-                          <div class="text-xs text-muted">Arrange to meet locally</div>
+                        💰 Cash
+                      </button>
+                      <button
+                        type="button"
+                        onclick={() => (offerType = 'trade')}
+                        class="flex-1 rounded-md px-3 py-2 text-sm font-medium transition {offerType === 'trade' ? 'bg-emerald-500 text-[var(--accent-contrast)]' : 'text-secondary hover:text-primary'}"
+                      >
+                        🔄 Trade
+                      </button>
+                      <button
+                        type="button"
+                        onclick={() => (offerType = 'both')}
+                        class="flex-1 rounded-md px-3 py-2 text-sm font-medium transition {offerType === 'both' ? 'bg-emerald-500 text-[var(--accent-contrast)]' : 'text-secondary hover:text-primary'}"
+                      >
+                        💱 Both
+                      </button>
+                    </div>
+
+                    <!-- Cash Amount (shown for cash or both) -->
+                    {#if offerType === 'cash' || offerType === 'both'}
+                      <div class="space-y-1">
+                        <label for="cash-offer" class="text-sm text-secondary">Cash amount (NZD)</label>
+                        <div class="relative">
+                          <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-muted">$</span>
+                          <input
+                            id="cash-offer"
+                            type="number"
+                            step="1"
+                            min="0"
+                            bind:value={cashOffer}
+                            placeholder="0"
+                            class="w-full rounded-lg border border-subtle bg-surface-body pl-7 pr-3 py-2 text-primary placeholder-muted transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
+                          />
                         </div>
-                      </label>
-                      <label
-                        class="flex cursor-pointer items-center gap-3 rounded-lg border border-subtle bg-surface-body p-3 transition hover:bg-surface-ghost {shippingMethod ===
-                        'shipped'
-                          ? 'border-emerald-500 bg-emerald-500/10'
-                          : ''}"
-                      >
-                        <input
-                          type="radio"
-                          name="shipping_method"
-                          value="shipped"
-                          checked={shippingMethod === 'shipped'}
-                          onchange={() => (shippingMethod = 'shipped')}
-                          disabled={!canPostSelectedGames}
-                          class="h-4 w-4 border-subtle bg-surface-body text-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-0"
-                        />
-                        <div class="flex-1">
-                          <div class="font-medium text-primary">
-                            📮 Shipping
-                            {#if !canPostSelectedGames}
-                              <span class="text-xs text-muted"
-                                >(not available for selected games)</span
-                              >
-                            {/if}
+                      </div>
+                    {/if}
+
+                    <!-- Trade Items (shown for trade or both) -->
+                    {#if offerType === 'trade' || offerType === 'both'}
+                      <div class="space-y-2">
+                        <label class="text-sm text-secondary">Your games to trade</label>
+
+                        {#if loadingBuyerItems}
+                          <p class="text-sm text-muted py-2">Loading your games...</p>
+                        {:else if buyerItems.length > 0}
+                          <div class="max-h-36 space-y-1 overflow-y-auto rounded-lg border border-subtle bg-surface-body p-2">
+                            {#each buyerItems as item (item.id)}
+                              <label class="flex cursor-pointer items-center gap-2 rounded p-2 transition hover:bg-surface-ghost">
+                                <input
+                                  type="checkbox"
+                                  checked={buyerItemIds.includes(item.id)}
+                                  onchange={(e) => {
+                                    if (e.currentTarget.checked) {
+                                      buyerItemIds = [...buyerItemIds, item.id];
+                                    } else {
+                                      buyerItemIds = buyerItemIds.filter((id) => id !== item.id);
+                                    }
+                                  }}
+                                  class="h-4 w-4 rounded border-subtle text-emerald-500 focus:ring-emerald-500"
+                                />
+                                <span class="flex-1 text-sm text-primary">{item.title}</span>
+                                <span class="text-xs text-muted">{item.condition}</span>
+                              </label>
+                            {/each}
                           </div>
-                          <div class="text-xs text-muted">Seller posts to you</div>
+                          {#if buyerItemIds.length > 0}
+                            <p class="text-xs text-emerald-400">{buyerItemIds.length} game{buyerItemIds.length !== 1 ? 's' : ''} selected to trade</p>
+                          {/if}
+                        {:else}
+                          <p class="text-xs text-muted py-2">You don't have any active listings with available items.</p>
+                        {/if}
+
+                        <!-- Free text for items not in system -->
+                        <div class="pt-2">
+                          <label for="buyer-items-desc" class="text-xs text-muted">Or describe what you're offering:</label>
+                          <textarea
+                            id="buyer-items-desc"
+                            bind:value={buyerItemsDescription}
+                            placeholder="e.g., Catan + Seafarers expansion, excellent condition"
+                            rows="2"
+                            maxlength="500"
+                            class="mt-1 w-full resize-none rounded-lg border border-subtle bg-surface-body px-3 py-2 text-sm text-primary placeholder-muted transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
+                          />
                         </div>
-                      </label>
-                      <label
-                        class="flex cursor-pointer items-center gap-3 rounded-lg border border-subtle bg-surface-body p-3 transition hover:bg-surface-ghost {shippingMethod ===
-                        'either'
-                          ? 'border-emerald-500 bg-emerald-500/10'
-                          : ''}"
-                      >
-                        <input
-                          type="radio"
-                          name="shipping_method"
-                          value="either"
-                          checked={shippingMethod === 'either'}
-                          onchange={() => (shippingMethod = 'either')}
-                          class="h-4 w-4 border-subtle bg-surface-body text-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-0"
-                        />
-                        <div class="flex-1">
-                          <div class="font-medium text-primary">Either method</div>
-                          <div class="text-xs text-muted">Flexible - can arrange either way</div>
-                        </div>
-                      </label>
-                    </div>
+                      </div>
+                    {/if}
                   </div>
 
-                  <!-- Offer Message (Optional) -->
+                  <!-- SECTION 3: Delivery -->
+                  <div class="space-y-3">
+                    <div class="flex items-center gap-2 border-b border-subtle pb-2">
+                      <span class="text-lg">📦</span>
+                      <h5 class="font-medium text-secondary">Delivery</h5>
+                    </div>
+                    <div class="flex gap-2">
+                      <button
+                        type="button"
+                        onclick={() => (deliveryMethod = 'in_person')}
+                        class="flex-1 rounded-lg border px-3 py-2 text-sm transition {deliveryMethod === 'in_person' ? 'border-emerald-500 bg-emerald-500/10 text-emerald-300' : 'border-subtle text-secondary hover:border-emerald-500/50'}"
+                      >
+                        🤝 Meet up
+                      </button>
+                      <button
+                        type="button"
+                        onclick={() => (deliveryMethod = 'post')}
+                        disabled={!canPostSelectedGames}
+                        class="flex-1 rounded-lg border px-3 py-2 text-sm transition {deliveryMethod === 'post' ? 'border-emerald-500 bg-emerald-500/10 text-emerald-300' : 'border-subtle text-secondary hover:border-emerald-500/50'} disabled:opacity-50 disabled:cursor-not-allowed"
+                        title={!canPostSelectedGames ? 'Seller has not enabled posting for these items' : ''}
+                      >
+                        📬 Post
+                      </button>
+                      <button
+                        type="button"
+                        onclick={() => (deliveryMethod = 'either')}
+                        class="flex-1 rounded-lg border px-3 py-2 text-sm transition {deliveryMethod === 'either' ? 'border-emerald-500 bg-emerald-500/10 text-emerald-300' : 'border-subtle text-secondary hover:border-emerald-500/50'}"
+                      >
+                        Either
+                      </button>
+                    </div>
+                    {#if !canPostSelectedGames && deliveryMethod !== 'in_person'}
+                      <p class="text-xs text-amber-400">Note: Posting may not be available for all selected items</p>
+                    {/if}
+                  </div>
+
+                  <!-- SECTION 4: Message -->
                   <div class="space-y-2">
-                    <label for="offer-message" class="block text-sm font-medium text-secondary">
-                      Message to seller (optional)
-                    </label>
+                    <label for="offer-message" class="text-sm text-secondary">Message (optional)</label>
                     <textarea
                       id="offer-message"
                       bind:value={offerMessage}
                       placeholder="Hi! I'm interested in your listing..."
-                      rows="3"
+                      rows="2"
                       maxlength="1000"
-                      class="w-full resize-none rounded-lg border border-subtle bg-surface-body px-3 py-2 text-primary placeholder-muted transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-0"
+                      class="w-full resize-none rounded-lg border border-subtle bg-surface-body px-3 py-2 text-sm text-primary placeholder-muted transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
                     />
-                    <p class="text-xs text-muted">{offerMessage.length}/1000 characters</p>
                   </div>
 
                   <!-- Action Buttons -->
-                  <div class="flex gap-2">
+                  <div class="flex gap-2 pt-2">
                     <button
                       type="submit"
                       disabled={initiatingTrade || selectedGameIds.length === 0}
-                      class="flex-1 rounded-lg border border-emerald-500 bg-emerald-500 px-4 py-2 font-semibold text-[var(--accent-contrast)] shadow-[0_10px_25px_rgba(16,185,129,0.25)] transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
+                      class="flex-1 rounded-lg bg-emerald-500 px-4 py-2.5 font-semibold text-[var(--accent-contrast)] shadow-[0_10px_25px_rgba(16,185,129,0.25)] transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      {initiatingTrade ? 'Submitting offer...' : 'Submit Offer'}
+                      {initiatingTrade ? 'Submitting...' : 'Submit Offer'}
                     </button>
                     <button
                       type="button"
                       onclick={() => {
                         showTradeForm = false;
                         selectedGameIds = [];
+                        offerType = 'cash';
                         cashOffer = '';
+                        buyerItemIds = [];
+                        buyerItemsDescription = '';
+                        deliveryMethod = 'either';
                         offerMessage = '';
-                        shippingMethod = 'either';
                         tradeError = null;
                       }}
                       disabled={initiatingTrade}
-                      class="rounded-lg border border-subtle px-4 py-2 font-semibold text-secondary transition hover:bg-surface-ghost disabled:cursor-not-allowed disabled:opacity-50"
+                      class="rounded-lg border border-subtle px-4 py-2.5 font-medium text-secondary transition hover:bg-surface-ghost disabled:opacity-50"
                     >
                       Cancel
                     </button>

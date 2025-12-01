@@ -1,11 +1,6 @@
 import { PUBLIC_POCKETBASE_URL } from '$env/static/public';
 import type { PageLoad } from './$types';
-import type {
-  ListingFilters,
-  ListingRecord,
-  ListingType,
-} from '$lib/types/listing';
-import { LISTING_TYPES } from '$lib/types/listing';
+import type { ListingRecord, OfferFilters } from '$lib/types/listing';
 import type { UserRecord, ItemRecord } from '$lib/types/pocketbase';
 import type { ActivityItem } from '$lib/types/activity';
 import { currentUser } from '$lib/pocketbase';
@@ -92,9 +87,6 @@ export const load: PageLoad = async ({ fetch, url, depends }) => {
   // Build filters for items collection
   const filters: string[] = ['listing.status = "active"'];
 
-  // Note: listing_type field no longer exists - type filtering removed
-  // In future, could filter by offer template type instead
-
   // Filter by regions if any are selected
   if (regions.length > 0) {
     const regionFilters = regions
@@ -119,19 +111,17 @@ export const load: PageLoad = async ({ fetch, url, depends }) => {
       const minIndex = conditionOrder.indexOf(condition);
       if (minIndex >= 0) {
         const allowedConditions = conditionOrder.slice(minIndex);
-        const conditionFilters = allowedConditions.map(c => `condition = "${c}"`).join(' || ');
+        const conditionFilters = allowedConditions.map((c) => `condition = "${c}"`).join(' || ');
         filters.push(`(${conditionFilters})`);
       }
     }
   }
 
-  // Note: Price filtering removed - price is now in offer_templates, not items
-
-  const filtersState: ListingFilters = {
-    type: '', // listing_type field no longer exists
+  const filtersState: OfferFilters = {
     regions: regions.length > 0 ? regions : undefined,
     search: search || undefined,
     condition: condition || undefined,
+    canPost: canPostFilter || undefined,
   };
 
   const baseUrl = (PUBLIC_POCKETBASE_URL || FALLBACK_BASE_URL).replace(/\/$/, '');
@@ -181,13 +171,10 @@ export const load: PageLoad = async ({ fetch, url, depends }) => {
         return {
           id: item.id,
           activityType: 'listing' as const,
-          type: 'sell' as ListingType, // Default type since listing_type removed
           gameTitle: item.title,
           listingTitle: listing.title,
           bggId,
           condition: item.condition,
-          price: null, // Price now in offer_templates
-          tradeValue: null, // Trade value now in offer_templates
           timestamp: item.created,
           userName: owner?.display_name ?? null,
           userId: owner?.id ?? null,
@@ -197,13 +184,13 @@ export const load: PageLoad = async ({ fetch, url, depends }) => {
           listingHref: `/listings/${listing.id}`,
           thumbnail,
           listingRegions: Array.isArray(listing.regions) ? listing.regions : [],
-          canPost: false, // can_post field removed from schema
         };
       });
 
     // Client-side filters for regions
     if (myRegionsFilter && regions.length > 0) {
       activities = activities.filter((activity) => {
+        if (activity.activityType !== 'listing') return true;
         return activity.listingRegions.some((region) => regions.includes(region));
       });
     }

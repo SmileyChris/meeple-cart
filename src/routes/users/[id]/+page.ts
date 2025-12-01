@@ -32,21 +32,21 @@ export const load: PageLoad = async ({ params }) => {
           status: item.status,
           bggId: item.bgg_id,
           bggUrl: item.bgg_id ? `https://boardgamegeek.com/boardgame/${item.bgg_id}` : null,
-          price: item.price,
-          tradeValue: item.trade_value,
-          canPost: item.can_post || false,
+          // Note: price, tradeValue, canPost now in offer_templates
         }));
 
         return {
           id: listing.id,
           title: listing.title,
-          listingType: listing.listing_type,
+          listingType: 'sell' as const, // listing_type field removed from schema
           summary: listing.summary || '',
           location: listing.location,
           regions: listing.regions || null,
           created: listing.created,
           ownerName: listing.expand?.owner?.display_name || null,
           ownerId: listing.owner,
+          ownerJoinedDate: listing.expand?.owner?.created || null,
+          ownerVouchedTrades: listing.expand?.owner?.vouch_count || 0,
           coverImage: listing.photos?.[0]
             ? pb.files.getUrl(listing, listing.photos[0], { thumb: '400x300' })
             : null,
@@ -92,9 +92,9 @@ export const load: PageLoad = async ({ params }) => {
     const averageRating =
       reviews.length > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length : null;
 
-    // Calculate vouched trades count (unique trades that resulted in vouches)
-    // A vouched trade is when THIS user received a vouch from a trading partner
-    const vouchedTradesCount = vouches.length; // Each vouch represents a vouched trade
+    // Use the stored vouch_count from profile for consistency with ListingCard
+    // (ListingCard uses owner.vouch_count, not a count of fetched vouches)
+    const vouchedTradesCount = profile.vouch_count || 0;
 
     return {
       profile,

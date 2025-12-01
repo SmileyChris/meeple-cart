@@ -14,9 +14,9 @@ async function verify() {
   const templates = await pb.collection('offer_templates').getList(1, 1);
   console.log(`✓ Offer templates created: ${templates.totalItems}`);
 
-  // Count wanted threads
+  // Count wanted threads (by category)
   const wantedThreads = await pb.collection('discussion_threads').getList(1, 1, {
-    filter: 'thread_type = "wanted"',
+    filter: 'category.slug = "wanted"',
   });
   console.log(`✓ Wanted threads created: ${wantedThreads.totalItems}`);
 

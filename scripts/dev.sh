@@ -25,7 +25,7 @@ cleanup() {
 }
 trap cleanup EXIT INT TERM
 
-"${PB_BIN}" serve --dir "${PB_DATA_DIR}" &
+"${PB_BIN}" serve --dev --dir "${PB_DATA_DIR}" &
 PB_PID=$!
 
 echo "PocketBase running (PID ${PB_PID}). Starting SvelteKit dev server..."

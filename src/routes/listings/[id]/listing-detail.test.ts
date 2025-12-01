@@ -43,7 +43,7 @@ const baseListing = {
       id: 'user123',
       display_name: 'Chris',
     },
-    'items(listing)': [
+    'items_via_listing': [
       {
         id: 'game1',
         title: 'Gloomhaven',
@@ -83,7 +83,7 @@ describe('listing detail client-side load', () => {
     const result = await load({ params: { id: 'listing123' } } as any);
 
     expect(getOne).toHaveBeenCalledWith('listing123', {
-      expand: 'owner,items(listing)',
+      expand: 'owner,items_via_listing',
     });
 
     expect(result.listing).toMatchObject({

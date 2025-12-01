@@ -10,13 +10,13 @@ export const load: PageLoad = async ({ url }) => {
   const search = url.searchParams.get('search');
 
   let filter = '';
-  let sort = '-pinned,-created'; // Pinned threads first, then newest
+  let sort = '-is_pinned,-id'; // Pinned threads first, then newest (id is chronological)
 
   // Tab logic
   if (tab === 'top') {
-    sort = '-pinned,-reply_count';
+    sort = '-is_pinned,-reply_count';
   } else if (tab === 'wanted') {
-    filter = 'thread_type = "wanted"';
+    filter = 'category.slug = "wanted"';
   } else if (tab === 'unanswered') {
     filter = 'reply_count = 0';
   }

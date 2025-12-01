@@ -9,7 +9,7 @@ describe('home page load function', () => {
   it('placeholder - home page load needs new tests', () => {
     // TODO: Write tests for current +page.ts implementation
     // Current implementation:
-    // - Fetches listings with items(listing) expansion
+    // - Fetches listings with items_via_listing expansion
     // - No longer has listing_type field
     // - Client-side filtering by regions
     expect(true).toBe(true);

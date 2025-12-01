@@ -1,6 +1,8 @@
 <script lang="ts">
   import type { PageData } from './$types';
-  import ListingCard from '$lib/components/ListingCard.svelte';
+  import OfferCard from '$lib/components/OfferCard.svelte';
+  import DiscussionCard from '$lib/components/DiscussionCard.svelte';
+  import CascadeCard from '$lib/components/CascadeCard.svelte';
   import RegionSelector from '$lib/components/RegionSelector.svelte';
   import { goto, invalidate } from '$app/navigation';
   import { page } from '$app/stores';
@@ -9,25 +11,12 @@
   import { NORTH_ISLAND_REGIONS, SOUTH_ISLAND_REGIONS } from '$lib/constants/regions';
   import { browser } from '$app/environment';
   import {
-    applyStoredFilters,
-    saveListingTypePreferences,
     saveRegionFilterState,
-    saveCanPostState,
     saveGuestRegions,
     getGuestRegions,
   } from '$lib/utils/filters';
 
   let { data }: { data: PageData } = $props();
-
-  // Apply saved preferences on mount if no params in URL
-  $effect(() => {
-    if (!browser) return;
-
-    const newUrl = applyStoredFilters($page.url, $currentUser);
-    if (newUrl) {
-      goto(newUrl, { replaceState: true });
-    }
-  });
 
   // Load preferred regions from localStorage for non-logged-in users
   let guestRegions = $state<string[]>(browser ? getGuestRegions() : []);
@@ -53,12 +42,6 @@
     return () => document.removeEventListener('click', handleClickOutside);
   });
 
-  const listingTypes = [
-    { value: 'sell', label: 'Sell', icon: '💰' },
-    { value: 'trade', label: 'Trade', icon: '🔄' },
-    { value: 'want', label: 'Want', icon: '🔍' },
-  ];
-
   type TimeGroup = 'today' | 'yesterday' | 'this-week' | 'older';
 
   const groupLabels: Record<TimeGroup, string> = {
@@ -75,18 +58,18 @@
     older: '📦',
   };
 
-  // Group listings by time period
-  let groupedListings = $derived.by(() => {
-    const groups: Record<TimeGroup, typeof data.listings> = {
+  // Group activity items by time period
+  let groupedActivity = $derived.by(() => {
+    const groups: Record<TimeGroup, typeof data.activity> = {
       today: [],
       yesterday: [],
       'this-week': [],
       older: [],
     };
 
-    data.listings.forEach((listing) => {
-      const group = getTimeGroup(listing.created);
-      groups[group].push(listing);
+    data.activity.forEach((item) => {
+      const group = getTimeGroup(item.created);
+      groups[group].push(item);
     });
 
     return groups;
@@ -95,68 +78,29 @@
   // Determine which groups have items (in order)
   let groupsToShow = $derived(
     (['today', 'yesterday', 'this-week', 'older'] as const).filter(
-      (group) => groupedListings[group].length > 0
+      (group) => groupedActivity[group].length > 0
     )
   );
-
-  function toggleListingType(type: string) {
-    const url = new URL($page.url);
-    const currentTypes = data.selectedTypes;
-
-    let newTypes: string[];
-    if (currentTypes.includes(type)) {
-      newTypes = currentTypes.filter((t) => t !== type);
-    } else {
-      newTypes = [...currentTypes, type];
-    }
-
-    // If deselecting the last one, select all three instead
-    if (newTypes.length === 0 || newTypes.length === 3) {
-      // All selected - remove all type params
-      url.searchParams.delete('sell');
-      url.searchParams.delete('trade');
-      url.searchParams.delete('want');
-
-      // Remove from localStorage (default state)
-      if (browser) {
-        saveListingTypePreferences([]);
-      }
-    } else {
-      // Set individual params for disabled types
-      ['sell', 'trade', 'want'].forEach((t) => {
-        if (newTypes.includes(t)) {
-          url.searchParams.delete(t);
-        } else {
-          url.searchParams.set(t, 'false');
-        }
-      });
-
-      // Save to localStorage
-      if (browser) {
-        saveListingTypePreferences(newTypes);
-      }
-    }
-
-    url.searchParams.delete('page'); // Reset to page 1 when filtering
-    // eslint-disable-next-line svelte/no-navigation-without-resolve
-    goto(url);
-  }
 
   function toggleCanPost() {
     const url = new URL($page.url);
     if (data.canPostFilter) {
       url.searchParams.delete('canPost');
-      if (browser) {
-        saveCanPostState(false);
-      }
     } else {
       url.searchParams.set('canPost', 'true');
-      if (browser) {
-        saveCanPostState(true);
-      }
     }
     url.searchParams.delete('page');
-    // eslint-disable-next-line svelte/no-navigation-without-resolve
+    goto(url, { replaceState: true });
+  }
+
+  function toggleOpenToTrades() {
+    const url = new URL($page.url);
+    if (data.openToTradesFilter) {
+      url.searchParams.delete('openToTrades');
+    } else {
+      url.searchParams.set('openToTrades', 'true');
+    }
+    url.searchParams.delete('page');
     goto(url, { replaceState: true });
   }
 
@@ -173,7 +117,7 @@
     } else {
       // Add region params for each preferred region
       url.searchParams.delete('region');
-      regionsToUse.forEach(region => {
+      regionsToUse.forEach((region) => {
         url.searchParams.append('region', region);
       });
       if (browser) {
@@ -181,20 +125,18 @@
       }
     }
     url.searchParams.delete('page');
-    // eslint-disable-next-line svelte/no-navigation-without-resolve
     goto(url, { replaceState: true });
   }
 
   function loadMore() {
     const url = new URL($page.url);
     url.searchParams.set('page', String(data.currentPage + 1));
-    // eslint-disable-next-line svelte/no-navigation-without-resolve
     goto(url, { keepFocus: true });
   }
 
   async function toggleGuestRegion(regionValue: string) {
     const wasEmpty = guestRegions.length === 0;
-    const allRegions = [...NORTH_ISLAND_REGIONS, ...SOUTH_ISLAND_REGIONS].map(r => r.value);
+    const allRegions = [...NORTH_ISLAND_REGIONS, ...SOUTH_ISLAND_REGIONS].map((r) => r.value);
 
     if (guestRegions.includes(regionValue)) {
       guestRegions = guestRegions.filter((r) => r !== regionValue);
@@ -258,26 +200,22 @@
 <main class="bg-surface-body px-6 py-16 text-primary transition-colors sm:px-8">
   <div class="mx-auto max-w-5xl space-y-8">
     <!-- Filter Controls -->
-    <div class="flex flex-wrap items-center justify-center gap-8">
-      <!-- Listing Type Checkboxes -->
-      <div class="flex flex-wrap justify-center gap-4">
-        {#each listingTypes as type (type.value)}
-          <button
-            type="button"
-            class={`btn-filter flex items-center gap-2 px-4 py-2 text-sm font-medium ${data.selectedTypes.includes(type.value) ? 'active' : ''}`}
-            onclick={() => toggleListingType(type.value)}
-          >
-            <input
-              type="checkbox"
-              checked={data.selectedTypes.includes(type.value)}
-              readonly
-              class="pointer-events-none h-4 w-4 rounded border-subtle accent-[var(--accent)]"
-            />
-            <span>{type.icon}</span>
-            <span>{type.label}</span>
-          </button>
-        {/each}
-      </div>
+    <div class="flex flex-wrap items-center justify-center gap-4">
+      <!-- Open to Trades filter -->
+      <button
+        type="button"
+        class={`btn-filter flex items-center gap-2 px-4 py-2 text-sm font-medium ${data.openToTradesFilter ? 'active' : ''}`}
+        onclick={toggleOpenToTrades}
+      >
+        <input
+          type="checkbox"
+          checked={data.openToTradesFilter}
+          readonly
+          class="pointer-events-none h-4 w-4 rounded border-subtle accent-[var(--accent)]"
+        />
+        <span>🔄</span>
+        <span>open to trades</span>
+      </button>
 
       <!-- Region Filters -->
       <div class="flex flex-wrap items-center justify-center gap-3 text-sm">
@@ -352,27 +290,27 @@
             />
           </div>
         {/if}
-
-        <!-- Can Post filter (only show when regions are selected) -->
-        {#if ($currentUser && data.hasPreferredRegions) || (!$currentUser && guestRegions.length > 0)}
-          <label
-            class={`btn-ghost flex items-center gap-2 px-4 py-2 text-sm font-medium transition-all ${data.canPostFilter && data.myRegionsFilter ? 'border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent-strong)]' : ''} ${!data.myRegionsFilter ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
-          >
-            <input
-              type="checkbox"
-              checked={data.canPostFilter}
-              disabled={!data.myRegionsFilter}
-              onchange={toggleCanPost}
-              class="h-4 w-4 rounded border-subtle accent-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-50"
-            />
-            <span>Or Can Post</span>
-          </label>
-        {/if}
       </div>
+
+      <!-- Can Post filter (after region) -->
+      <button
+        type="button"
+        class={`btn-filter flex items-center gap-2 px-4 py-2 text-sm font-medium ${data.canPostFilter ? 'active' : ''}`}
+        onclick={toggleCanPost}
+      >
+        <input
+          type="checkbox"
+          checked={data.canPostFilter}
+          readonly
+          class="pointer-events-none h-4 w-4 rounded border-subtle accent-[var(--accent)]"
+        />
+        <span>📬</span>
+        <span>or can post</span>
+      </button>
     </div>
 
     <!-- Timeline View -->
-    {#if data.listings.length === 0}
+    {#if data.activity.length === 0}
       <div
         class="mx-auto max-w-md rounded-2xl border-2 border-dashed border-subtle bg-surface-card p-12 text-center transition-colors"
       >
@@ -402,10 +340,16 @@
               </div>
             </div>
 
-            <!-- Listings grid -->
+            <!-- Activity grid -->
             <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {#each groupedListings[group] as listing (listing.id)}
-                <ListingCard {listing} userPreferredRegions={data.userPreferredRegions} />
+              {#each groupedActivity[group] as item (item.id)}
+                {#if item.itemType === 'offer'}
+                  <OfferCard offer={item} userPreferredRegions={data.userPreferredRegions} />
+                {:else if item.itemType === 'discussion'}
+                  <DiscussionCard thread={item} />
+                {:else if item.itemType === 'cascade'}
+                  <CascadeCard cascade={item} />
+                {/if}
               {/each}
             </div>
           </div>
@@ -421,7 +365,7 @@
     {/if}
 
     <!-- Pagination Info -->
-    {#if data.listings.length > 0}
+    {#if data.activity.length > 0}
       <p class="text-center text-sm text-muted">
         Page {data.currentPage} of {data.totalPages}
       </p>

@@ -25,7 +25,7 @@ export const load: PageLoad = async ({ params }) => {
       .collection('discussion_replies')
       .getList<DiscussionReplyRecord>(1, 200, {
         filter: `thread = "${id}"`,
-        sort: 'created',
+        sort: 'id',
         expand: 'author,quoted_reply.author',
       });
 

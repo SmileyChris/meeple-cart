@@ -45,24 +45,30 @@ type SeedGame = {
   bggId?: number;
   year?: number;
   condition: 'mint' | 'excellent' | 'good' | 'fair' | 'poor';
-  price?: number;
-  tradeValue?: number;
   notes?: string;
   status?: 'available' | 'pending' | 'sold' | 'bundled';
+  // Offer properties (create an offer_template for this game)
+  cashAmount?: number; // NZD cents (new format)
+  price?: number; // Legacy: NZD dollars (will be converted to cents)
+  tradeValue?: number; // Legacy: used as cashAmount if no cashAmount
+  openToLowerOffers?: boolean;
+  openToTradeOffers?: boolean;
   canPost?: boolean;
+  tradeFor?: string; // What they'd accept in trade (text description)
 };
 
 type SeedListing = {
   ownerEmail: string;
   title: string;
   summary: string;
-  listingType: 'trade' | 'sell' | 'want';
   location: string;
   regions: string[];
-  preferBundle: boolean;
-  bundleDiscount?: number;
   daysAgo: number;
   games: SeedGame[];
+  // Legacy fields (ignored)
+  listingType?: 'trade' | 'sell' | 'want';
+  preferBundle?: boolean;
+  bundleDiscount?: number;
 };
 
 type SeedVouch = {
@@ -70,6 +76,12 @@ type SeedVouch = {
   voucheeEmail: string;
   message: string;
   daysAgo: number;
+};
+
+type SeedWantedItem = {
+  title: string;
+  bgg_id?: number;
+  max_price?: number; // in cents
 };
 
 type SeedDiscussionThread = {
@@ -80,6 +92,9 @@ type SeedDiscussionThread = {
   listingTitle?: string; // If present, link to this listing
   pinned?: boolean;
   replies: SeedDiscussionReply[];
+  // For wanted discussions (item-linked)
+  threadType?: 'discussion' | 'wanted';
+  wantedItems?: SeedWantedItem[];
 };
 
 type SeedDiscussionReply = {
@@ -199,12 +214,9 @@ const demoListings: SeedListing[] = [
     ownerEmail: 'demo-alex@meeplecart.test',
     title: 'Wellington euro trade bundle - Large collection',
     summary:
-      'Mix of medium-heavy euros ready for the next table. Prefer bundle swaps but open to offers. Moving to smaller space, need to downsize!',
-    listingType: 'trade',
+      'Mix of medium-heavy euros ready for the next table. Open to trades or offers. Moving to smaller space, need to downsize!',
     location: 'CBD or Newtown',
     regions: ['wellington'],
-    preferBundle: true,
-    bundleDiscount: 15,
     daysAgo: 2,
     games: [
       {
@@ -212,81 +224,102 @@ const demoListings: SeedListing[] = [
         bggId: 199792,
         year: 2018,
         condition: 'excellent',
-        tradeValue: 95,
         notes: "Collector's Edition with metal coins and wooden berries.",
+        cashAmount: 9500, // $95
+        openToTradeOffers: true,
+        openToLowerOffers: true,
         canPost: true,
+        tradeFor: 'Brass Birmingham, Spirit Island, or similar weight euros',
       },
       {
         title: 'Great Western Trail (2nd ed.)',
         bggId: 341169,
         year: 2021,
         condition: 'good',
-        tradeValue: 75,
         notes: 'Sleeved cards; minor shelf wear on box corners.',
+        cashAmount: 7500,
+        openToTradeOffers: true,
+        openToLowerOffers: false,
       },
       {
         title: 'Viticulture Essential Edition',
         bggId: 183394,
         year: 2015,
         condition: 'excellent',
-        tradeValue: 80,
         notes: 'Includes Tuscany expansion. All components in great shape.',
+        cashAmount: 8000,
+        openToTradeOffers: true,
+        canPost: true,
       },
       {
         title: 'Terraforming Mars',
         bggId: 167791,
         year: 2016,
         condition: 'good',
-        tradeValue: 70,
         notes: 'Base game with player mats. Cards are sleeved.',
+        cashAmount: 7000,
+        openToTradeOffers: true,
+        openToLowerOffers: true,
       },
       {
         title: 'Scythe',
         bggId: 169786,
         year: 2016,
         condition: 'excellent',
-        tradeValue: 85,
         notes: 'Metal coins included. Some minor box wear.',
+        cashAmount: 8500,
+        openToTradeOffers: true,
+        canPost: true,
       },
       {
         title: 'Concordia',
         bggId: 124361,
         year: 2013,
         condition: 'good',
-        tradeValue: 65,
         notes: 'Classic euro, well-loved but complete.',
+        cashAmount: 6500,
+        openToTradeOffers: true,
+        openToLowerOffers: true,
       },
       {
         title: 'A Feast for Odin',
         bggId: 177736,
         year: 2016,
         condition: 'excellent',
-        tradeValue: 110,
         notes: 'All pieces punched and organized. Heavy game!',
+        cashAmount: 11000,
+        openToTradeOffers: true,
+        canPost: true,
       },
       {
         title: 'Caverna',
         bggId: 102794,
         year: 2013,
         condition: 'good',
-        tradeValue: 90,
         notes: 'Lots of wooden pieces, all accounted for.',
+        cashAmount: 9000,
+        openToTradeOffers: true,
       },
       {
         title: 'Gaia Project',
         bggId: 220308,
         year: 2017,
         condition: 'excellent',
-        tradeValue: 100,
         notes: 'Brain burner! In excellent condition.',
+        cashAmount: 10000,
+        openToTradeOffers: true,
+        canPost: true,
       },
       {
         title: 'Underwater Cities',
         bggId: 247763,
         year: 2018,
         condition: 'mint',
-        tradeValue: 75,
         notes: 'Played once, basically new.',
+        cashAmount: 7500,
+        openToTradeOffers: true,
+        openToLowerOffers: true,
+        canPost: true,
       },
     ],
   },
@@ -295,10 +328,8 @@ const demoListings: SeedListing[] = [
     title: 'Auckland family night sale - Big collection clearout',
     summary:
       'Family-friendly lineup that we have outgrown. Priced to move, can post nationwide. Some already sold!',
-    listingType: 'sell',
     location: 'North Shore area',
     regions: ['auckland'],
-    preferBundle: false,
     daysAgo: 5,
     games: [
       {
@@ -1353,6 +1384,93 @@ const demoDiscussions: SeedDiscussionThread[] = [
       },
     ],
   },
+
+  // Wanted discussions (item-linked) - these appear in activity feed
+  {
+    authorEmail: 'demo-lisa@meeplecart.test',
+    title: 'Looking for Wingspan + Oceania expansion',
+    content:
+      "Hi everyone! I'm searching for a copy of Wingspan, ideally with the Oceania expansion. Happy to buy or trade.\n\nI'm in Wellington but can pay for shipping if needed. Condition should be good or better - mainly want complete components.\n\nI have some games I could trade if you're interested:\n- Everdell (excellent condition)\n- Parks (played twice)\n- Photosynthesis\n\nLet me know what you have!",
+    daysAgo: 2,
+    threadType: 'wanted',
+    wantedItems: [
+      { title: 'Wingspan', bgg_id: 266192, max_price: 8000 },
+      { title: 'Wingspan: Oceania Expansion', bgg_id: 300580, max_price: 4000 },
+    ],
+    replies: [
+      {
+        authorEmail: 'demo-bella@meeplecart.test',
+        content:
+          "I have a copy of base Wingspan I might be willing to part with! It's in great condition. Don't have Oceania though. Would you be interested in just the base game?",
+        hoursAfterThread: 4,
+      },
+      {
+        authorEmail: 'demo-lisa@meeplecart.test',
+        content:
+          "Yes definitely interested! I can always find the expansion separately. What are you looking for - cash or trade?",
+        hoursAfterThread: 6,
+      },
+      {
+        authorEmail: 'demo-bella@meeplecart.test',
+        content:
+          "Parks caught my eye actually! Want to DM me and we can work out the details?",
+        hoursAfterThread: 8,
+      },
+    ],
+  },
+  {
+    authorEmail: 'demo-james@meeplecart.test',
+    title: 'WTB: Spirit Island + expansions',
+    content:
+      "Looking to buy Spirit Island and any expansions. This is my white whale - been wanting to try it for ages!\n\nBased in Auckland, prefer local pickup but can do shipping.\n\nBudget is flexible for good condition copies. Branch & Claw and Jagged Earth especially wanted.",
+    daysAgo: 5,
+    threadType: 'wanted',
+    wantedItems: [
+      { title: 'Spirit Island', bgg_id: 162886 },
+      { title: 'Spirit Island: Branch & Claw', bgg_id: 193065 },
+      { title: 'Spirit Island: Jagged Earth', bgg_id: 276136 },
+    ],
+    replies: [
+      {
+        authorEmail: 'demo-kiran@meeplecart.test',
+        content:
+          "Great taste! Spirit Island is amazing. I don't have a spare copy but just wanted to say it's worth the hunt. The expansions add so much replayability.",
+        hoursAfterThread: 3,
+      },
+      {
+        authorEmail: 'demo-tom@meeplecart.test',
+        content:
+          "I have base Spirit Island I'm considering selling. It's in excellent condition, only played a handful of times. No expansions though. Would $80 work?",
+        hoursAfterThread: 12,
+      },
+      {
+        authorEmail: 'demo-james@meeplecart.test',
+        content:
+          "That sounds great Tom! I'll DM you. Happy to start with the base game.",
+        hoursAfterThread: 14,
+      },
+    ],
+  },
+  {
+    authorEmail: 'demo-sarah@meeplecart.test',
+    title: 'ISO: Ark Nova - will pay well!',
+    content:
+      "Desperately seeking Ark Nova! Missed the reprint and really want to play this one.\n\nWilling to pay above retail for a good condition copy. Located in Dunedin but happy to cover shipping costs.\n\nAlso interested in the Marine Worlds expansion if anyone has both!",
+    daysAgo: 1,
+    threadType: 'wanted',
+    wantedItems: [
+      { title: 'Ark Nova', bgg_id: 342942, max_price: 15000 },
+      { title: 'Ark Nova: Marine Worlds', bgg_id: 368966 },
+    ],
+    replies: [
+      {
+        authorEmail: 'demo-maya@meeplecart.test',
+        content:
+          "I saw someone selling Ark Nova on the Facebook group last week - might be worth checking there too! Good luck with the search.",
+        hoursAfterThread: 2,
+      },
+    ],
+  },
 ];
 
 const escapeFilterValue = (value: string): string => {
@@ -1445,16 +1563,14 @@ const recreateListing = async (
   const createdDate = new Date();
   createdDate.setDate(createdDate.getDate() - seed.daysAgo);
 
+  // Create listing (container only - no listing_type, shipping_available, etc.)
   const payload: Record<string, unknown> = {
     owner: ownerRecord.id,
     title: seed.title,
     summary: seed.summary,
-    listing_type: seed.listingType,
     status: 'active',
     location: seed.location,
     regions: seed.regions,
-    prefer_bundle: seed.preferBundle,
-    bundle_discount: seed.bundleDiscount ?? null,
     views: Math.floor(Math.random() * 150) + 10,
   };
 
@@ -1463,7 +1579,9 @@ const recreateListing = async (
   // Update created timestamp to backdate the listing
   await userPb.collection('listings').update(listing.id, { created: createdDate.toISOString() });
 
+  // Create games and offer_templates for each game
   for (const game of seed.games) {
+    // Create the game/item record
     const gamePayload: Record<string, unknown> = {
       listing: listing.id,
       title: game.title,
@@ -1479,26 +1597,48 @@ const recreateListing = async (
       gamePayload.year = game.year;
     }
 
-    if (typeof game.price === 'number') {
-      gamePayload.price = game.price;
-    }
-
-    if (typeof game.tradeValue === 'number') {
-      gamePayload.trade_value = game.tradeValue;
-    }
-
     if (game.notes) {
       gamePayload.notes = game.notes;
-    }
-
-    if (typeof game.canPost === 'boolean') {
-      gamePayload.can_post = game.canPost;
     }
 
     const itemRecord = await userPb.collection('items').create(gamePayload);
 
     // Backdate item creation
     await userPb.collection('items').update(itemRecord.id, { created: createdDate.toISOString() });
+
+    // Create an offer_template for this game
+    // Handle legacy fields: price (dollars) -> cashAmount (cents)
+    const cashAmount = game.cashAmount ??
+      (typeof game.price === 'number' ? game.price * 100 : null) ??
+      (typeof game.tradeValue === 'number' ? game.tradeValue * 100 : null);
+    const canPost = game.canPost ?? false;
+
+    // Infer openToTradeOffers from listing type or tradeValue presence
+    const openToTradeOffers = game.openToTradeOffers ??
+      (typeof game.tradeValue === 'number') ?? false;
+
+    const offerPayload: Record<string, unknown> = {
+      listing: listing.id,
+      owner: ownerRecord.id,
+      items: [itemRecord.id],
+      status: 'active',
+      open_to_lower_offers: game.openToLowerOffers ?? false,
+      open_to_trade_offers: openToTradeOffers,
+      can_post: canPost,
+    };
+
+    if (typeof cashAmount === 'number') {
+      offerPayload.cash_amount = cashAmount;
+    }
+
+    if (game.tradeFor) {
+      offerPayload.trade_for_items = [{ title: game.tradeFor }];
+    }
+
+    const offerRecord = await userPb.collection('offer_templates').create(offerPayload);
+
+    // Backdate offer creation
+    await userPb.collection('offer_templates').update(offerRecord.id, { created: createdDate.toISOString() });
   }
 
   userPb.authStore.clear();
@@ -1530,8 +1670,8 @@ const addRandomReactions = async (
         listing: listingId,
         emoji: randomEmoji,
       });
-    } catch (error) {
-      // Ignore duplicate errors (unique constraint)
+    } catch {
+      // Ignore errors - collection may not exist or duplicate constraint
     }
   }
 };
@@ -1605,19 +1745,34 @@ const createDiscussionThread = async (
   }
 
   try {
-    // Authenticate as the author (required by createRule)
+    // Authenticate as the author first (required for category lookup and createRule)
     await pb.collection('users').authWithPassword(seed.authorEmail, userPassword);
 
+    // Get the appropriate category based on thread type
+    const threadType = seed.threadType ?? 'discussion';
+    let categoryId: string;
+    const categories = await pb.collection('discussion_categories').getFullList();
+    // Use 'wanted' category for wanted threads, 'game-talk' for general discussions
+    const targetSlug = threadType === 'wanted' ? 'wanted' : 'game-talk';
+    const targetCategory = categories.find((c) => c.slug === targetSlug);
+    if (!targetCategory) {
+      console.warn(`⚠ ${targetSlug} category not found, skipping discussion`);
+      return null;
+    }
+    categoryId = targetCategory.id;
+
+    const isWanted = threadType === 'wanted';
     const thread = await pb.collection('discussion_threads').create({
       author: authorRecord.id,
       title: seed.title,
       content: seed.content,
-      listing: listingId,
-      pinned: seed.pinned ?? false,
-      locked: false,
+      category: categoryId,
+      is_pinned: seed.pinned === true,
+      is_locked: false,
       view_count: Math.floor(Math.random() * 50) + 5,
       reply_count: seed.replies.length,
-      last_reply_at: seed.replies.length > 0 ? null : threadDate.toISOString(),
+      listing: listingId,
+      ...(isWanted && seed.wantedItems ? { wanted_items: seed.wantedItems } : {}),
     });
 
     try {
@@ -1675,10 +1830,7 @@ const createDiscussionThread = async (
     return thread;
   } catch (error: any) {
     pb.authStore.clear();
-    console.warn(`⚠ Failed to create discussion: ${error}`);
-    if (error.response?.data) {
-      console.warn(`  Details: ${JSON.stringify(error.response.data)}`);
-    }
+    console.warn(`⚠ Failed to create discussion "${seed.title}": ${error}`);
     return null;
   }
 };
@@ -1691,7 +1843,14 @@ const clearAllListings = async (): Promise<void> => {
   // Get counts before deleting
   const items = await pb.collection('items').getFullList();
   const listings = await pb.collection('listings').getFullList();
-  const reactions = await pb.collection('reactions').getFullList();
+
+  // Try to get reactions (collection may not exist)
+  let reactions: RecordModel[] = [];
+  try {
+    reactions = await pb.collection('reactions').getFullList();
+  } catch {
+    // Reactions collection doesn't exist, skip
+  }
 
   // Delete reactions first (they reference listings)
   for (const reaction of reactions) {

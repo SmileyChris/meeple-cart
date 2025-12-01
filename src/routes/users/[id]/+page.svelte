@@ -60,6 +60,7 @@
           joinedDate={profile.joined_date}
           vouchedTrades={vouchedTradesCount}
           size="large"
+          clickable={true}
         />
       </div>
       <p class="text-center text-base text-secondary sm:text-left sm:text-lg">

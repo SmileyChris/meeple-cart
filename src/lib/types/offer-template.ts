@@ -61,7 +61,6 @@ export interface OfferTemplateDetail extends OfferTemplateRecord {
 // Wanted Post Types (Discussion Threads)
 // ============================================
 
-export type ThreadType = 'discussion' | 'wanted';
 export type WantedOfferType = 'buying' | 'trading' | 'either';
 
 export interface WantedItem {
@@ -75,7 +74,7 @@ export interface DiscussionThreadWithWanted extends RecordModel {
   content: string;
   author: string;
   listing?: string;
-  thread_type: ThreadType;
+  category: string; // Use category slug 'wanted' to identify wanted posts
   wanted_items?: WantedItem[];
   wanted_offer_type?: WantedOfferType;
   pinned?: boolean;

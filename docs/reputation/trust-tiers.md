@@ -23,13 +23,13 @@ Currently, Meeple Cart shows trade counts and vouch counts, but doesn't prominen
 
 Users are automatically assigned to one of five trust levels based on account age and activity:
 
-| Level           | Icon | Criteria                          | Description                                     |
-| --------------- | ---- | --------------------------------- | ----------------------------------------------- |
-| **New** (flag)  | 🆕   | 0 vouched trades                  | Brand new member, highest caution advised       |
-| **Seedling**    | 🌱   | 1 vouched trade                   | First vouched trade completed                   |
-| **Growing**     | 🪴   | 30+ days old AND 2 vouched trades | Building reputation with community feedback     |
-| **Established** | 🌳   | 5 vouched trades                  | Experienced trader with proven positive history |
-| **Trusted**     | ⭐   | 1+ year old AND 8 vouched trades  | Highly trusted, long-term community member      |
+| Level           | Icon | Criteria                           | Description                                     |
+| --------------- | ---- | ---------------------------------- | ----------------------------------------------- |
+| **New** (flag)  | 🆕   | 0 vouched trades                   | Brand new member, highest caution advised       |
+| **Seedling**    | 🌱   | 1 vouched trade                    | First vouched trade completed                   |
+| **Growing**     | 🪴   | 30+ days old AND 2 vouched trades  | Building reputation with community feedback     |
+| **Established** | 🌳   | 90+ days old AND 5 vouched trades  | Experienced trader with proven positive history |
+| **Trusted**     | ⭐   | 1+ year old AND 8 vouched trades   | Highly trusted, long-term community member      |
 
 ### Tier Calculation Logic
 
@@ -39,7 +39,7 @@ vouched_trades = count of unique trades where user received a vouch
 IF age >= 365 days AND vouched_trades >= 8
   → Trusted
 
-ELSE IF vouched_trades >= 5
+ELSE IF age >= 90 days AND vouched_trades >= 5
   → Established
 
 ELSE IF age >= 30 days AND vouched_trades >= 2
@@ -492,8 +492,8 @@ async function getTrustTier(user: UserRecord, vouchedTrades: number): Promise<Tr
   // Trusted: 1+ year AND 8 vouched trades
   if (age >= 365 && vouchedTrades >= 8) return 'trusted';
 
-  // Established: 5 vouched trades
-  if (vouchedTrades >= 5) return 'established';
+  // Established: 90+ days AND 5 vouched trades
+  if (age >= 90 && vouchedTrades >= 5) return 'established';
 
   // Growing: 30+ days AND 2 vouched trades
   if (age >= 30 && vouchedTrades >= 2) return 'growing';

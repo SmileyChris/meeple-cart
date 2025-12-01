@@ -59,7 +59,7 @@ describe('discussions page load', () => {
 
     expect(threadsCollection.getList).toHaveBeenCalledWith(1, 20, {
       filter: undefined,
-      sort: '-pinned,-created',
+      sort: '-is_pinned,-id',
       expand: 'author,category',
     });
     expect(categoriesCollection.getFullList).toHaveBeenCalledWith({
@@ -91,7 +91,7 @@ describe('discussions page load', () => {
 
     expect(threadsCollection.getList).toHaveBeenCalledWith(1, 20, {
       filter: 'category.slug = "general"',
-      sort: '-pinned,-created',
+      sort: '-is_pinned,-id',
       expand: 'author,category',
     });
   });
@@ -116,7 +116,7 @@ describe('discussions page load', () => {
 
     expect(threadsCollection.getList).toHaveBeenCalledWith(1, 20, {
       filter: 'tags ~ "beginner" && tags ~ "trading"',
-      sort: '-pinned,-created',
+      sort: '-is_pinned,-id',
       expand: 'author,category',
     });
   });
@@ -141,7 +141,7 @@ describe('discussions page load', () => {
 
     expect(threadsCollection.getList).toHaveBeenCalledWith(1, 20, {
       filter: undefined,
-      sort: '-pinned,-reply_count',
+      sort: '-is_pinned,-reply_count',
       expand: 'author,category',
     });
   });
@@ -165,8 +165,8 @@ describe('discussions page load', () => {
     await load({ url } as any);
 
     expect(threadsCollection.getList).toHaveBeenCalledWith(1, 20, {
-      filter: 'thread_type = "wanted"',
-      sort: '-pinned,-created',
+      filter: 'category.slug = "wanted"',
+      sort: '-is_pinned,-id',
       expand: 'author,category',
     });
   });
@@ -191,7 +191,7 @@ describe('discussions page load', () => {
 
     expect(threadsCollection.getList).toHaveBeenCalledWith(1, 20, {
       filter: '(title ~ "gloomhaven" || content ~ "gloomhaven")',
-      sort: '-pinned,-created',
+      sort: '-is_pinned,-id',
       expand: 'author,category',
     });
   });

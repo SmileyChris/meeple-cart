@@ -89,7 +89,11 @@
     }
   }
 
-  async function toggleReaction(emoji: DiscussionReactionEmoji, targetType: 'thread' | 'reply', targetId?: string) {
+  async function toggleReaction(
+    emoji: DiscussionReactionEmoji,
+    targetType: 'thread' | 'reply',
+    targetId?: string
+  ) {
     if (!$currentUser) {
       goto('/login');
       return;
@@ -100,18 +104,20 @@
         // Check if user already reacted with this emoji
         if (userThreadReaction === emoji) {
           // Remove reaction
-          const existing = await pb.collection('discussion_reactions').getFirstListItem(
-            `thread = "${thread.id}" && user = "${$currentUser.id}" && emoji = "${emoji}"`
-          );
+          const existing = await pb
+            .collection('discussion_reactions')
+            .getFirstListItem(
+              `thread = "${thread.id}" && user = "${$currentUser.id}" && emoji = "${emoji}"`
+            );
           await pb.collection('discussion_reactions').delete(existing.id);
           threadReactions[emoji]--;
           userThreadReaction = undefined;
         } else {
           // Remove old reaction if exists
           if (userThreadReaction) {
-            const existing = await pb.collection('discussion_reactions').getFirstListItem(
-              `thread = "${thread.id}" && user = "${$currentUser.id}"`
-            );
+            const existing = await pb
+              .collection('discussion_reactions')
+              .getFirstListItem(`thread = "${thread.id}" && user = "${$currentUser.id}"`);
             await pb.collection('discussion_reactions').delete(existing.id);
             threadReactions[userThreadReaction]--;
           }
@@ -129,9 +135,11 @@
 
         if (currentReaction === emoji) {
           // Remove reaction
-          const existing = await pb.collection('discussion_reactions').getFirstListItem(
-            `reply = "${targetId}" && user = "${$currentUser.id}" && emoji = "${emoji}"`
-          );
+          const existing = await pb
+            .collection('discussion_reactions')
+            .getFirstListItem(
+              `reply = "${targetId}" && user = "${$currentUser.id}" && emoji = "${emoji}"`
+            );
           await pb.collection('discussion_reactions').delete(existing.id);
           const counts = replyReactions.get(targetId);
           if (counts) counts[emoji]--;
@@ -139,9 +147,9 @@
         } else {
           // Remove old reaction if exists
           if (currentReaction) {
-            const existing = await pb.collection('discussion_reactions').getFirstListItem(
-              `reply = "${targetId}" && user = "${$currentUser.id}"`
-            );
+            const existing = await pb
+              .collection('discussion_reactions')
+              .getFirstListItem(`reply = "${targetId}" && user = "${$currentUser.id}"`);
             await pb.collection('discussion_reactions').delete(existing.id);
             const counts = replyReactions.get(targetId);
             if (counts) (counts as any)[currentReaction]--;
@@ -164,7 +172,10 @@
 
   function handleQuote(reply: DiscussionReplyRecord) {
     quotedReply = reply;
-    const quotedText = reply.content.split('\n').map(line => `> ${line}`).join('\n');
+    const quotedText = reply.content
+      .split('\n')
+      .map((line) => `> ${line}`)
+      .join('\n');
     const authorName = reply.expand?.author?.display_name ?? 'Unknown';
     replyContent = `${quotedText}\n\n@${authorName} `;
 
@@ -185,7 +196,7 @@
       return;
     }
 
-    if (thread.locked) {
+    if (thread.is_locked) {
       error = 'This thread is locked and cannot receive new replies';
       return;
     }
@@ -268,21 +279,22 @@
               class="inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm font-medium"
               style="background-color: {category.color}15; color: {category.color}"
             >
-              {category.icon} {category.name}
+              {category.icon}
+              {category.name}
             </span>
           </div>
         {/if}
 
         <div class="mb-2 flex items-center gap-3">
           <h1 class="text-3xl font-bold text-primary">{thread.title}</h1>
-          {#if thread.pinned}
+          {#if thread.is_pinned}
             <span
               class="rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-semibold text-emerald-200"
             >
               📌 Pinned
             </span>
           {/if}
-          {#if thread.locked}
+          {#if thread.is_locked}
             <span
               class="rounded-full bg-amber-500/20 px-3 py-1 text-xs font-semibold text-amber-200"
             >
@@ -355,7 +367,8 @@
         {@const count = threadReactions[emoji]}
         <button
           onclick={() => toggleReaction(emoji, 'thread')}
-          class="flex items-center gap-1 rounded-full border px-3 py-1 text-sm transition {userThreadReaction === emoji
+          class="flex items-center gap-1 rounded-full border px-3 py-1 text-sm transition {userThreadReaction ===
+          emoji
             ? 'border-accent bg-accent/20 text-accent'
             : 'border-subtle bg-surface-body text-secondary hover:border-accent hover:bg-surface-hover'}"
         >
@@ -454,7 +467,7 @@
 
   <!-- Reply Form -->
   {#if $currentUser}
-    {#if thread.locked}
+    {#if thread.is_locked}
       <div class="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-center">
         <p class="text-amber-200">🔒 This thread is locked and cannot receive new replies.</p>
       </div>

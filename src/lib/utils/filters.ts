@@ -4,10 +4,10 @@ import type { UserRecord } from '$lib/types/pocketbase';
  * Centralized localStorage keys for filter preferences
  */
 export const FILTER_STORAGE_KEYS = {
-  listingTypes: 'preferredListingTypes',
   regionFilter: 'preferredRegionFilter',
-  canPost: 'preferredCanPost',
   guestRegions: 'guestPreferredRegions',
+  canPost: 'preferredCanPost',
+  openToTrades: 'preferredOpenToTrades',
   condition: 'preferredCondition',
   priceRange: 'preferredPriceRange',
   lastCondition: 'lastCondition',
@@ -23,11 +23,9 @@ export function applyStoredFilters(
   currentUser?: UserRecord | null
 ): URL | null {
   const hasAnyParams =
-    currentUrl.searchParams.has('sell') ||
-    currentUrl.searchParams.has('trade') ||
-    currentUrl.searchParams.has('want') ||
-    currentUrl.searchParams.has('region') ||
     currentUrl.searchParams.has('canPost') ||
+    currentUrl.searchParams.has('openToTrades') ||
+    currentUrl.searchParams.has('region') ||
     currentUrl.searchParams.has('page');
 
   if (hasAnyParams) {
@@ -37,27 +35,22 @@ export function applyStoredFilters(
   const newUrl = new URL(currentUrl);
   let needsRedirect = false;
 
-  // Apply saved listing types
-  const savedTypes = localStorage.getItem(FILTER_STORAGE_KEYS.listingTypes);
-  if (savedTypes) {
-    try {
-      const types = JSON.parse(savedTypes);
-      if (Array.isArray(types) && types.length > 0 && types.length < 3) {
-        ['sell', 'trade', 'want'].forEach((t) => {
-          if (!types.includes(t)) {
-            newUrl.searchParams.set(t, 'false');
-          }
-        });
-        needsRedirect = true;
-      }
-    } catch {
-      // Ignore invalid data
-    }
+  // Apply saved canPost filter
+  const savedCanPost = localStorage.getItem(FILTER_STORAGE_KEYS.canPost);
+  if (savedCanPost === 'true') {
+    newUrl.searchParams.set('canPost', 'true');
+    needsRedirect = true;
+  }
+
+  // Apply saved openToTrades filter
+  const savedOpenToTrades = localStorage.getItem(FILTER_STORAGE_KEYS.openToTrades);
+  if (savedOpenToTrades === 'true') {
+    newUrl.searchParams.set('openToTrades', 'true');
+    needsRedirect = true;
   }
 
   // Apply saved region filter
   const savedRegionFilter = localStorage.getItem(FILTER_STORAGE_KEYS.regionFilter);
-  const savedCanPost = localStorage.getItem(FILTER_STORAGE_KEYS.canPost);
 
   if (savedRegionFilter === 'true') {
     let regionsToApply: string[] = [];
@@ -80,25 +73,10 @@ export function applyStoredFilters(
         newUrl.searchParams.append('region', region);
       });
       needsRedirect = true;
-
-      if (savedCanPost === 'true') {
-        newUrl.searchParams.set('canPost', 'true');
-      }
     }
   }
 
   return needsRedirect ? newUrl : null;
-}
-
-/**
- * Save listing type preferences to localStorage
- */
-export function saveListingTypePreferences(types: string[]): void {
-  if (types.length === 0 || types.length === 3) {
-    localStorage.removeItem(FILTER_STORAGE_KEYS.listingTypes);
-  } else {
-    localStorage.setItem(FILTER_STORAGE_KEYS.listingTypes, JSON.stringify(types));
-  }
 }
 
 /**
@@ -113,6 +91,13 @@ export function saveRegionFilterState(enabled: boolean): void {
  */
 export function saveCanPostState(enabled: boolean): void {
   localStorage.setItem(FILTER_STORAGE_KEYS.canPost, String(enabled));
+}
+
+/**
+ * Save open to trades filter state to localStorage
+ */
+export function saveOpenToTradesState(enabled: boolean): void {
+  localStorage.setItem(FILTER_STORAGE_KEYS.openToTrades, String(enabled));
 }
 
 /**

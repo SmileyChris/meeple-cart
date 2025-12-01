@@ -1,9 +1,11 @@
 import { PUBLIC_POCKETBASE_URL } from '$env/static/public';
+import { browser } from '$app/environment';
 import type { PageLoad } from './$types';
-import type { ListingPreview, ListingRecord } from '$lib/types/listing';
-import type { UserRecord, ItemRecord } from '$lib/types/pocketbase';
+import type { OfferPreview, ListingRecord } from '$lib/types/listing';
+import type { UserRecord, ItemRecord, OfferTemplateRecord, DiscussionThreadRecord } from '$lib/types/pocketbase';
+import type { CascadeRecord } from '$lib/types/cascade';
 
-const ACTIVITY_LIMIT = 50;
+const ACTIVITY_LIMIT = 40;
 const FALLBACK_BASE_URL = 'http://127.0.0.1:8090';
 
 type PocketBaseListResponse<T> = {
@@ -38,19 +40,17 @@ export const load: PageLoad = async ({ fetch, url, parent, depends }) => {
   // Get current user from parent layout (need this early)
   const { currentUser } = await parent();
 
-  // Get types filter - check individual params, default to all three
-  const allTypes = ['sell', 'trade', 'want'];
-  const selectedTypes = allTypes.filter(type => url.searchParams.get(type) !== 'false');
-
+  // Get filter states from URL params
   const canPostFilter = url.searchParams.get('canPost') === 'true';
+  const openToTradesFilter = url.searchParams.get('openToTrades') === 'true';
 
   // Get regions from URL params
   const urlRegions = url.searchParams.getAll('region');
   const myRegionsFilter = urlRegions.length > 0;
 
-  // Get guest regions from localStorage if not logged in
+  // Get guest regions from localStorage if in browser and not logged in
   let guestRegions: string[] = [];
-  if (typeof window !== 'undefined' && !currentUser) {
+  if (browser && !currentUser) {
     const stored = localStorage.getItem('guestPreferredRegions');
     if (stored) {
       try {
@@ -61,23 +61,31 @@ export const load: PageLoad = async ({ fetch, url, parent, depends }) => {
     }
   }
 
-  // Build filter - always include active status
+  // Build filter for offer_templates
   const filters = ['status = "active"'];
 
-  // Note: listing_type field removed from schema
-  // Type filtering would need to be done via offer_templates in future
+  // Filter by can_post if enabled
+  if (canPostFilter) {
+    filters.push('can_post = true');
+  }
 
-  const activityParams = new URLSearchParams({
+  // Filter by open_to_trade_offers if enabled
+  if (openToTradesFilter) {
+    filters.push('open_to_trade_offers = true');
+  }
+
+  const offersParams = new URLSearchParams({
     page,
     perPage: String(ACTIVITY_LIMIT),
     sort: '-created',
-    expand: 'owner,items(listing)',
+    expand: 'listing,listing.owner,owner,items',
     filter: filters.join(' && '),
   });
 
   try {
-    const response = await fetch(
-      `${baseUrl}/api/collections/listings/records?${activityParams.toString()}`,
+    // Fetch offer_templates (the main activity feed items)
+    const offersResponse = await fetch(
+      `${baseUrl}/api/collections/offer_templates/records?${offersParams.toString()}`,
       {
         headers: {
           accept: 'application/json',
@@ -85,16 +93,18 @@ export const load: PageLoad = async ({ fetch, url, parent, depends }) => {
       }
     );
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch activity: ${response.status} ${response.statusText}`);
+    if (!offersResponse.ok) {
+      throw new Error(`Failed to fetch offers: ${offersResponse.status} ${offersResponse.statusText}`);
     }
 
-    const result = (await response.json()) as PocketBaseListResponse<ListingRecord>;
+    const offersResult = (await offersResponse.json()) as PocketBaseListResponse<OfferTemplateRecord>;
 
-    let listings: ListingPreview[] = result.items.map((item) => {
-      const owner = item.expand?.owner as UserRecord | undefined;
-      const games = Array.isArray(item.expand?.['items(listing)'])
-        ? (item.expand?.['items(listing)'] as ItemRecord[]).map((itemRecord) => {
+    // Transform offer_templates into OfferPreview format
+    let offers: OfferPreview[] = offersResult.items.map((offerTemplate) => {
+      const listing = offerTemplate.expand?.listing as ListingRecord | undefined;
+      const owner = (offerTemplate.expand?.owner || listing?.expand?.owner) as UserRecord | undefined;
+      const items = Array.isArray(offerTemplate.expand?.items)
+        ? (offerTemplate.expand?.items as ItemRecord[]).map((itemRecord) => {
             const bggId = typeof itemRecord.bgg_id === 'number' ? itemRecord.bgg_id : null;
             return {
               id: itemRecord.id,
@@ -103,65 +113,140 @@ export const load: PageLoad = async ({ fetch, url, parent, depends }) => {
               status: itemRecord.status,
               bggId,
               bggUrl: bggId ? `https://boardgamegeek.com/boardgame/${bggId}` : null,
-              price: null, // Price now in offer_templates
-              tradeValue: null, // Trade value now in offer_templates
-              canPost: false, // can_post removed from schema
             };
           })
         : [];
+
+      // Get cover image from the listing's photos
       const coverImage =
-        Array.isArray(item.photos) && item.photos.length > 0
-          ? buildFileUrl(baseUrl, item, item.photos[0], '800x600')
+        listing && Array.isArray(listing.photos) && listing.photos.length > 0
+          ? buildFileUrl(baseUrl, listing, listing.photos[0], '800x600')
           : null;
 
       return {
-        id: item.id,
-        title: item.title,
-        listingType: 'sell', // Default since listing_type removed
-        summary: item.summary ?? '',
-        location: item.location ?? null,
-        regions: Array.isArray(item.regions) ? item.regions : null,
-        created: item.created,
+        id: offerTemplate.id,
+        displayName: offerTemplate.display_name || null,
+        cashAmount: offerTemplate.cash_amount || null,
+        openToLowerOffers: offerTemplate.open_to_lower_offers,
+        openToTradeOffers: offerTemplate.open_to_trade_offers,
+        willConsiderSplit: offerTemplate.will_consider_split ?? false,
+        canPost: offerTemplate.can_post,
+        tradeForItems: offerTemplate.trade_for_items || null,
+        status: offerTemplate.status,
+        created: offerTemplate.created,
+        location: listing?.location ?? null,
+        regions: listing && Array.isArray(listing.regions) ? listing.regions : null,
         ownerName: owner?.display_name ?? null,
         ownerId: owner?.id ?? null,
         ownerJoinedDate: owner?.created ?? null,
         ownerVouchedTrades: typeof owner?.vouch_count === 'number' ? owner.vouch_count : 0,
+        games: items,
         coverImage,
-        href: `/listings/${item.id}`,
-        games,
+        href: `/listings/${listing?.id || offerTemplate.listing}`,
       };
     });
 
-    // Client-side filters
+    // Client-side region filter
     if (myRegionsFilter && urlRegions.length > 0) {
-      listings = listings.filter((listing) => {
-        return listing.regions && listing.regions.some((region) => urlRegions.includes(region));
+      offers = offers.filter((offer) => {
+        // Match if offer is in a selected region OR can post (when canPost filter enabled)
+        const inRegion = offer.regions && offer.regions.some((region) => urlRegions.includes(region));
+        const canPostToRegion = canPostFilter && offer.canPost;
+        return inRegion || canPostToRegion;
       });
     }
 
+    // Fetch discussions - only wanted category discussions
+    // Listing-linked discussions live within the listing page
+    // General discussions live in the discussions section
+    const discussionParams = new URLSearchParams({
+      page: '1',
+      perPage: String(ACTIVITY_LIMIT),
+      sort: '-created',
+      expand: 'author,category',
+      filter: 'category.slug = "wanted"',
+    });
+
+    const discussionsResponse = await fetch(
+      `${baseUrl}/api/collections/discussion_threads/records?${discussionParams.toString()}`,
+      {
+        headers: {
+          accept: 'application/json',
+        },
+      }
+    );
+
+    let discussions: DiscussionThreadRecord[] = [];
+    if (discussionsResponse.ok) {
+      const discussionsResult = (await discussionsResponse.json()) as PocketBaseListResponse<DiscussionThreadRecord>;
+      discussions = discussionsResult.items;
+    }
+
+    // Fetch active gift cascades
+    const cascadeParams = new URLSearchParams({
+      page: '1',
+      perPage: String(ACTIVITY_LIMIT),
+      sort: '-created',
+      expand: 'current_game,current_holder',
+      filter: 'status = "accepting_entries" || status = "selecting_winner"',
+    });
+
+    const cascadesResponse = await fetch(
+      `${baseUrl}/api/collections/cascades/records?${cascadeParams.toString()}`,
+      {
+        headers: {
+          accept: 'application/json',
+        },
+      }
+    );
+
+    let cascades: CascadeRecord[] = [];
+    if (cascadesResponse.ok) {
+      const cascadesResult = (await cascadesResponse.json()) as PocketBaseListResponse<CascadeRecord>;
+      cascades = cascadesResult.items;
+    }
+
+    // Combine all activity types into a unified array
+    type ActivityItem =
+      | (OfferPreview & { itemType: 'offer' })
+      | (DiscussionThreadRecord & { itemType: 'discussion' })
+      | (CascadeRecord & { itemType: 'cascade' });
+
+    const activity: ActivityItem[] = [
+      ...offers.map((o) => ({ ...o, itemType: 'offer' as const })),
+      ...discussions.map((d) => ({ ...d, itemType: 'discussion' as const })),
+      ...cascades.map((c) => ({ ...c, itemType: 'cascade' as const })),
+    ];
+
+    // Sort by created date descending
+    activity.sort((a, b) => new Date(b.created).getTime() - new Date(a.created).getTime());
+
     return {
-      listings,
+      activity,
       loadError: false as const,
-      currentPage: result.page,
-      totalPages: result.totalPages,
-      hasMore: result.page < result.totalPages,
-      selectedTypes,
+      currentPage: offersResult.page,
+      totalPages: offersResult.totalPages,
+      hasMore: offersResult.page < offersResult.totalPages,
       canPostFilter,
+      openToTradesFilter,
       myRegionsFilter,
-      userPreferredRegions: currentUser?.preferred_regions || guestRegions.length > 0 ? guestRegions : null,
+      // For logged-in users, use their preferred regions
+      // For guests, use localStorage regions (available when running in browser)
+      userPreferredRegions: currentUser?.preferred_regions ?? (guestRegions.length > 0 ? guestRegions : null),
+      // Check if user has preferred regions configured (profile or localStorage)
       hasPreferredRegions: Boolean(currentUser?.preferred_regions?.length || guestRegions.length > 0),
     };
   } catch (error) {
     console.error('Failed to load activity', error);
 
     return {
-      listings: [],
+      activity: [],
       loadError: true as const,
       currentPage: 1,
       totalPages: 1,
       hasMore: false,
-      selectedTypes: ['sell', 'trade', 'want'],
       canPostFilter: false,
+      openToTradesFilter: false,
       myRegionsFilter: false,
       userPreferredRegions: null,
       hasPreferredRegions: false,

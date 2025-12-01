@@ -30,27 +30,36 @@
     poor: '📦 Poor',
   };
 
-  function formatShippingMethod(method?: string): string {
+  function formatDeliveryMethod(method?: string): string {
     if (!method) return 'Not specified';
     switch (method) {
       case 'in_person':
-        return 'In-person meetup';
-      case 'shipped':
-        return 'Shipping only';
+        return 'Meet up';
+      case 'post':
+        return 'Post';
       case 'either':
-        return 'Either method';
+        return 'Either';
       default:
         return method;
     }
   }
 
-  function getRequestedGamesForOffer(offer: TradeRecord) {
-    if (!offer.requested_items || !offer.expand?.requested_items) {
+  function getSellerItemsForOffer(offer: TradeRecord) {
+    if (!offer.seller_items || !offer.expand?.seller_items) {
       return [];
     }
-    return Array.isArray(offer.expand.requested_items)
-      ? offer.expand.requested_items
-      : [offer.expand.requested_items];
+    return Array.isArray(offer.expand.seller_items)
+      ? offer.expand.seller_items
+      : [offer.expand.seller_items];
+  }
+
+  function getBuyerItemsForOffer(offer: TradeRecord) {
+    if (!offer.buyer_items || !offer.expand?.buyer_items) {
+      return [];
+    }
+    return Array.isArray(offer.expand.buyer_items)
+      ? offer.expand.buyer_items
+      : [offer.expand.buyer_items];
   }
 
   async function handleAcceptOffer(offerId: string) {
@@ -244,8 +253,9 @@
       <div class="space-y-4">
         {#each pendingOffers as offer (offer.id)}
           {@const buyer = offer.expand?.buyer}
-          {@const requestedGames = getRequestedGamesForOffer(offer)}
-          {@const cashAmount = offer.cash_offer_amount}
+          {@const sellerItems = getSellerItemsForOffer(offer)}
+          {@const buyerItems = getBuyerItemsForOffer(offer)}
+          {@const cashAmount = offer.buyer_cash_amount}
           {@const isProcessing = processingOfferId === offer.id}
           {@const isDeclining = decliningOfferId === offer.id}
 
@@ -295,14 +305,14 @@
                 </div>
               {/if}
 
-              <!-- Requested Items -->
-              {#if requestedGames.length > 0}
+              <!-- What buyer wants (your items) -->
+              {#if sellerItems.length > 0}
                 <div>
                   <div class="text-sm font-medium text-secondary">
-                    Wants ({requestedGames.length} item{requestedGames.length !== 1 ? 's' : ''})
+                    Wants from you ({sellerItems.length} item{sellerItems.length !== 1 ? 's' : ''})
                   </div>
                   <ul class="mt-2 space-y-1">
-                    {#each requestedGames as game}
+                    {#each sellerItems as game}
                       <li class="flex items-start gap-2 text-sm">
                         <span class="text-muted">•</span>
                         <div>
@@ -317,11 +327,35 @@
                 </div>
               {/if}
 
-              <!-- Shipping Method -->
+              <!-- What buyer is offering (their items) -->
+              {#if buyerItems.length > 0 || offer.buyer_items_description}
+                <div>
+                  <div class="text-sm font-medium text-emerald-400">
+                    🔄 Offering in trade
+                  </div>
+                  {#if buyerItems.length > 0}
+                    <ul class="mt-2 space-y-1">
+                      {#each buyerItems as item}
+                        <li class="flex items-start gap-2 text-sm">
+                          <span class="text-emerald-400">•</span>
+                          <span class="font-medium text-primary">{item.title}</span>
+                        </li>
+                      {/each}
+                    </ul>
+                  {/if}
+                  {#if offer.buyer_items_description}
+                    <p class="mt-2 text-sm text-muted italic">
+                      {offer.buyer_items_description}
+                    </p>
+                  {/if}
+                </div>
+              {/if}
+
+              <!-- Delivery Method -->
               <div>
-                <span class="text-sm font-medium text-secondary">Shipping preference:</span>
+                <span class="text-sm font-medium text-secondary">Delivery:</span>
                 <span class="ml-2 text-sm text-primary">
-                  {formatShippingMethod(offer.shipping_method)}
+                  {formatDeliveryMethod(offer.delivery_method)}
                 </span>
               </div>
 

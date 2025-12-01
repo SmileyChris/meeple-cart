@@ -21,6 +21,8 @@
     showTooltip?: boolean;
     /** Show border */
     showBorder?: boolean;
+    /** Make badge clickable (links to trust-levels page) */
+    clickable?: boolean;
     /** Custom class names */
     class?: string;
   }
@@ -32,6 +34,7 @@
     showLabel = true,
     showTooltip = true,
     showBorder = true,
+    clickable = false,
     class: className = '',
   }: Props = $props();
 
@@ -56,14 +59,28 @@
   );
 </script>
 
-<span
-  class="inline-flex items-center rounded-full {showBorder ? `border ${tierInfo.styles.border}` : ''} {tierInfo.styles.background} {tierInfo.styles.text} {sizeClasses} {className}"
-  title={showTooltip ? tooltipText : undefined}
-  role="status"
-  aria-label="Trust tier: {tierInfo.label}"
->
-  <span class={iconSize} aria-hidden="true">{tierInfo.icon}</span>
-  {#if showLabel}
-    <span class="font-medium">{badgeText}</span>
-  {/if}
-</span>
+{#if clickable}
+  <a
+    href="/trust-levels"
+    class="inline-flex items-center rounded-full {showBorder ? `border ${tierInfo.styles.border}` : ''} {tierInfo.styles.background} {tierInfo.styles.text} {sizeClasses} {className} hover:opacity-80 transition-opacity cursor-pointer"
+    title={showTooltip ? `${tooltipText} Click to learn more.` : undefined}
+    aria-label="Trust tier: {tierInfo.label}. Click to learn more about trust levels."
+  >
+    <span class={iconSize} aria-hidden="true">{tierInfo.icon}</span>
+    {#if showLabel}
+      <span class="font-medium">{badgeText}</span>
+    {/if}
+  </a>
+{:else}
+  <span
+    class="inline-flex items-center rounded-full {showBorder ? `border ${tierInfo.styles.border}` : ''} {tierInfo.styles.background} {tierInfo.styles.text} {sizeClasses} {className}"
+    title={showTooltip ? tooltipText : undefined}
+    role="status"
+    aria-label="Trust tier: {tierInfo.label}"
+  >
+    <span class={iconSize} aria-hidden="true">{tierInfo.icon}</span>
+    {#if showLabel}
+      <span class="font-medium">{badgeText}</span>
+    {/if}
+  </span>
+{/if}

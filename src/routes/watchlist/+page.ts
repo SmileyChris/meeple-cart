@@ -36,7 +36,7 @@ export const load: PageLoad = async () => {
             : null;
 
         // Count items for this listing
-        const gameCount = listing.expand?.['items(listing)']?.length ?? 0;
+        const gameCount = listing.expand?.['items_via_listing']?.length ?? 0;
 
         return {
           watchlistId: reaction.id, // Use reaction ID

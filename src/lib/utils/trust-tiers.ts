@@ -30,9 +30,9 @@ export function getAccountAgeDays(joinedDate: string | Date): number {
 /**
  * Calculate trust tier based on account age and vouched trades
  *
- * Tier logic (from trust-tiers.md):
+ * Tier logic:
  * - Trusted: 1+ year (365 days) AND 8+ vouched trades
- * - Established: 5+ vouched trades
+ * - Established: 90+ days AND 5+ vouched trades
  * - Growing: 30+ days AND 2+ vouched trades
  * - Seedling: 1+ vouched trades
  * - New: 0 vouched trades (warning state)
@@ -43,8 +43,8 @@ export function getTrustTier(accountAgeDays: number, vouchedTrades: number): Tru
     return 'trusted';
   }
 
-  // Established: 5 vouched trades
-  if (vouchedTrades >= 5) {
+  // Established: 90+ days AND 5 vouched trades
+  if (accountAgeDays >= 90 && vouchedTrades >= 5) {
     return 'established';
   }
 
@@ -284,11 +284,21 @@ export function getNextTierProgress(
           needed: 5,
           met: vouchedTrades >= 5,
         },
+        {
+          label: 'Account age',
+          current: accountAgeDays,
+          needed: 90,
+          met: accountAgeDays >= 90,
+        },
       ],
       message:
-        vouchedTrades >= 5
+        vouchedTrades >= 5 && accountAgeDays >= 90
           ? "You've reached Established!"
-          : `Get ${5 - vouchedTrades} more vouched trade${5 - vouchedTrades === 1 ? '' : 's'} to reach Established!`,
+          : vouchedTrades >= 5
+            ? `Wait ${90 - accountAgeDays} more days to reach Established!`
+            : accountAgeDays >= 90
+              ? `Get ${5 - vouchedTrades} more vouched trade${5 - vouchedTrades === 1 ? '' : 's'} to reach Established!`
+              : `Get ${5 - vouchedTrades} more vouched trade${5 - vouchedTrades === 1 ? '' : 's'} AND wait ${90 - accountAgeDays} more days!`,
     },
     established: {
       nextTier: 'trusted',

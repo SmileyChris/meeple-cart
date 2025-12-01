@@ -1,15 +1,11 @@
-import type { ListingType } from './listing';
-
 /**
- * Represents a listing activity item
+ * Represents a listing activity item (a game in an offer)
  */
 export interface ListingActivity {
   /** Unique identifier (game ID) */
   id: string;
   /** Type of activity */
   activityType: 'listing';
-  /** Type of listing activity (trade, sell, want) */
-  type: ListingType;
   /** Game title */
   gameTitle: string;
   /** Optional listing title (for context when showing games) */
@@ -18,10 +14,6 @@ export interface ListingActivity {
   bggId: number | null;
   /** Game condition */
   condition: 'mint' | 'excellent' | 'good' | 'fair' | 'poor';
-  /** Price (for sell listings) */
-  price: number | null;
-  /** Trade value (for trade listings) */
-  tradeValue: number | null;
   /** When this game was created/listed */
   timestamp: string;
   /** User who created the listing */
@@ -38,6 +30,8 @@ export interface ListingActivity {
   listingHref: string;
   /** Optional thumbnail image */
   thumbnail: string | null;
+  /** Listing regions for filtering */
+  listingRegions: string[];
 }
 
 /**

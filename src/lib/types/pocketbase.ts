@@ -3,6 +3,9 @@ import type { RecordModel } from 'pocketbase';
 // Re-export BGG types
 export type { BggInfoRecord } from './bgg';
 
+// Note: ListingRecord is defined in ./listing.ts to avoid circular imports
+// Import it from '$lib/types/listing' when needed
+
 export interface UserRecord extends RecordModel {
   display_name: string;
   location?: string;
@@ -30,7 +33,7 @@ export type AuthenticatedUser = UserRecord | null;
 
 export type OfferStatus = 'pending' | 'accepted' | 'declined' | 'withdrawn';
 export type TradeStatus = 'initiated' | 'confirmed' | 'completed' | 'disputed' | 'cancelled';
-export type ShippingMethod = 'in_person' | 'shipped' | 'either';
+export type DeliveryMethod = 'in_person' | 'post' | 'either';
 
 export interface ItemRecord extends RecordModel {
   listing: string;
@@ -49,18 +52,18 @@ export interface ItemRecord extends RecordModel {
 export interface OfferTemplateRecord extends RecordModel {
   listing: string;
   owner: string;
-  items: string[]; // Item IDs
-  template_type: 'cash_only' | 'trade_only' | 'cash_or_trade';
-  cash_amount?: number; // NZD cents
-  trade_for_items?: Array<{ title: string; bgg_id?: number }>;
-  open_to_lower_offers: boolean;
-  open_to_shipping_negotiation: boolean;
-  open_to_trade_offers: boolean;
+  items: string[]; // Game/Item IDs included in this offer
+  display_name?: string; // e.g., "Everdell + Expansions Bundle"
+  cash_amount?: number; // NZD cents (asking price if selling)
+  trade_for_items?: Array<{ title: string; bgg_id?: number }>; // What they'd accept in trade
+  open_to_lower_offers: boolean; // "or nearest offer"
+  open_to_trade_offers: boolean; // Accepts trades
+  will_consider_split: boolean; // Will consider selling individual items from bundle
+  can_post: boolean; // Can be posted/shipped
   status: 'active' | 'accepted' | 'invalidated' | 'withdrawn';
-  display_name?: string;
   notes?: string;
   expand?: {
-    listing?: RecordModel;
+    listing?: RecordModel; // Use RecordModel to avoid circular import (ListingRecord in listing.ts)
     owner?: UserRecord;
     items?: ItemRecord[];
   };
@@ -73,9 +76,14 @@ export interface TradeRecord extends RecordModel {
   // Offer-related fields
   offer_status: OfferStatus;
   offer_template?: string; // Reference to accepted offer template
-  cash_offer_amount?: number; // NZD cents
-  requested_items?: string[]; // Item IDs the buyer wants
-  shipping_method?: ShippingMethod;
+  // What buyer wants from seller
+  seller_items?: string[]; // Item IDs buyer wants from seller's listing
+  // What buyer is offering
+  buyer_cash_amount?: number; // NZD cents buyer is offering
+  buyer_items?: string[]; // Item IDs buyer is offering from their own listings
+  buyer_items_description?: string; // Free text description of items (if not in system)
+  // Delivery
+  delivery_method?: DeliveryMethod;
   offer_message?: string; // Buyer's message with their offer
   declined_reason?: string; // Seller's reason for declining
   // Trade status (post-acceptance)
@@ -87,7 +95,8 @@ export interface TradeRecord extends RecordModel {
     listing?: RecordModel;
     buyer?: UserRecord;
     seller?: UserRecord;
-    requested_items?: ItemRecord[];
+    seller_items?: ItemRecord[];
+    buyer_items?: ItemRecord[];
     offer_template?: OfferTemplateRecord;
   };
 }
@@ -128,13 +137,12 @@ export interface DiscussionThreadRecord extends RecordModel {
   content: string;
   author: string;
   category: string; // Relation to discussion_categories
-  thread_type: 'discussion' | 'wanted';
   tags?: string[]; // Array of tag strings
   wanted_items?: Array<{ title: string; bgg_id?: number; max_price?: number }>;
   wanted_offer_type?: 'buying' | 'trading' | 'either';
   listing?: string; // Optional - links discussion to a specific listing
-  pinned?: boolean;
-  locked?: boolean;
+  is_pinned?: boolean;
+  is_locked?: boolean;
   view_count: number;
   reply_count: number;
   last_reply_at?: string;

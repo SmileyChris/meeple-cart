@@ -211,6 +211,46 @@ Create a purpose-built platform that reduces friction in the game trading proces
 
 ---
 
+## Data Model
+
+The platform uses a three-tier model for listings:
+
+### listing → offer → game(s)
+
+**listings** (container/grouping)
+A listing is simply a container owned by a user that groups their games and offers together.
+- Owner, title, summary, location, regions
+- Photos (listing-level images)
+- Status: active | pending | completed | cancelled
+
+**offers** (the "for sale/trade" unit)
+An offer defines the terms for selling or trading one or more games. This is what appears in the activity feed and what buyers interact with.
+- Links to a listing and specifies which game(s) are included
+- `cash_amount`: asking price (if selling)
+- `open_to_lower_offers`: accepts "or nearest offer"
+- `open_to_trade_offers`: accepts trades
+- `trade_for_items`: what they'd accept in trade (BGG IDs or descriptions)
+- `can_post`: whether this offer can be posted/shipped
+- Status: active | accepted | invalidated | withdrawn
+
+**items** (individual tradeable items)
+An item describes a single physical item with its condition and details. Items can be board games (with BGG integration) or other tradeable items like accessories, 3D printed components, or gaming furniture.
+- BGG integration (optional): bgg_id, title, year - auto-populated when selecting a board game from BGG search
+- Title: game name (from BGG) or custom item name for non-game items
+- Condition: mint | excellent | good | fair | poor
+- Notes (what's included, condition details)
+- Status: available | pending | sold
+
+### Common Flows
+
+**Single item (most common):** User adds an item with price/terms → system creates both an item record and an offer record linking them.
+
+**Bundle:** User adds multiple items, then groups them into a single offer with combined terms.
+
+**Activity feed:** Shows offers (not listings or items directly). Each offer card displays its item(s), price, and terms. Filters apply to offer fields (can_post, open_to_trades, region).
+
+---
+
 ## Feature Requirements
 
 ### Phase 1: Core Trading (MVP)
@@ -224,22 +264,21 @@ Create a purpose-built platform that reduces friction in the game trading proces
 
 **Listing Management**
 
-- Create single game listings
+- Add games with offer terms (price, shipping, trade preferences)
+- Option to bundle multiple games into a single offer
 - Upload multiple photos
 - Condition grading (BGG standard)
-- Trade/sell/want designation
-- Support stand-alone "Want to Buy" listings with desired price range or preferred trades
-- Listing state management (private, listed, pending, sold) with private listings only visible to the owner
-- Location setting (suburb/city)
-- Text description field
+- Support "Want to Buy" requests via discussion system (Wanted category)
+- Offer state management (active, accepted, invalidated, withdrawn)
+- Location and region settings
 
 **Discovery**
 
-- Browse active listings
+- Browse active offers (activity feed)
 - Search by game title
-- Filter by location, type, condition
-- Sort by date, distance, price
-- Dedicated view for active want-to-buy posts
+- Filter by region, can ship, open to trades, condition
+- Sort by date, price
+- Dedicated view for Wanted posts (discussion system)
 - Basic pagination
 
 **Communication**

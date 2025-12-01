@@ -190,7 +190,8 @@
             <option value="">All Categories</option>
             {#each categories as category}
               <option value={category.slug}>
-                {category.icon} {category.name}
+                {category.icon}
+                {category.name}
               </option>
             {/each}
           </select>
@@ -208,7 +209,8 @@
                 onclick={() => setCategory(null)}
                 class="inline-flex items-center gap-1 rounded-full border border-subtle bg-surface-card px-3 py-1 text-sm font-medium text-secondary hover:border-accent"
               >
-                {cat.icon} {cat.name}
+                {cat.icon}
+                {cat.name}
                 <span class="text-muted">×</span>
               </button>
             {/if}
@@ -224,7 +226,7 @@
                   params.delete('tag');
                 }
                 // Re-add all except the one being removed
-                allTags.filter(t => t !== tag).forEach(t => params.append('tag', t));
+                allTags.filter((t) => t !== tag).forEach((t) => params.append('tag', t));
                 params.delete('page');
                 goto(url.toString());
               }}
@@ -288,22 +290,23 @@
                       class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium"
                       style="background-color: {category.color}15; color: {category.color}"
                     >
-                      {category.icon} {category.name}
+                      {category.icon}
+                      {category.name}
                     </span>
                   </div>
                 {/if}
 
                 <div class="mb-1 flex items-center gap-2">
-                  {#if thread.pinned}
+                  {#if thread.is_pinned}
                     <span class="text-sm">📌</span>
                   {/if}
-                  {#if thread.thread_type === 'wanted'}
+                  {#if thread.expand?.category?.slug === 'wanted'}
                     <span class="text-sm">🔍</span>
                   {/if}
                   <h2 class="text-lg font-semibold text-primary hover:text-accent">
                     {thread.title}
                   </h2>
-                  {#if thread.locked}
+                  {#if thread.is_locked}
                     <span
                       class="rounded-full bg-amber-500/20 px-2 py-0.5 text-xs font-semibold text-badge-amber"
                     >
@@ -317,7 +320,7 @@
                 </p>
 
                 <!-- Wanted Items Preview -->
-                {#if thread.thread_type === 'wanted' && thread.wanted_items && thread.wanted_items.length > 0}
+                {#if thread.expand?.category?.slug === 'wanted' && thread.wanted_items && thread.wanted_items.length > 0}
                   <div class="mt-2 text-xs text-muted">
                     <span class="font-medium">Looking for:</span>
                     {thread.wanted_items

@@ -1,15 +1,30 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
-  import type { ActionData, PageData } from './$types';
+  import type { PageData } from './$types';
   import {
     NORTH_ISLAND_REGIONS,
     SOUTH_ISLAND_REGIONS,
     getIslandRegions,
   } from '$lib/constants/regions';
+  import BggSearch from '$lib/components/BggSearch.svelte';
+  import type { BggSearchItem } from '$lib/types/bgg';
 
-  let { data, form }: { data: PageData; form?: ActionData } = $props();
+  // Form state (for validation errors and rehydration)
+  interface FormState {
+    message?: string;
+    values?: { title: string; summary: string; location: string };
+    regions?: string[];
+    games?: GameEntry[];
+    fieldErrors?: Record<string, string>;
+  }
+
+  let { data }: { data: PageData } = $props();
+  let form = $state<FormState | undefined>(undefined);
+
+  type ItemType = 'board_game' | 'other';
 
   interface GameEntry {
+    itemType: ItemType;
     title: string;
     condition: string;
     notes: string;
@@ -61,6 +76,7 @@
     form?.games ??
       ([
         {
+          itemType: 'board_game',
           title: '',
           condition: data.defaults.condition,
           notes: '',
@@ -111,6 +127,7 @@
     games = [
       ...games,
       {
+        itemType: 'board_game',
         title: '',
         condition: data.defaults.condition,
         notes: '',
@@ -119,6 +136,19 @@
       },
     ];
   };
+
+  function handleBggSelect(index: number, game: BggSearchItem) {
+    games[index].title = game.name.value;
+    games[index].bgg_id = String(game.id);
+  }
+
+  function setItemType(index: number, type: ItemType) {
+    games[index].itemType = type;
+    // Clear BGG data when switching to "other"
+    if (type === 'other') {
+      games[index].bgg_id = '';
+    }
+  }
 
   const removeGame = (index: number) => {
     games = games.filter((_, i) => i !== index);
@@ -330,8 +360,8 @@
       <div class="space-y-6">
         <div class="flex items-center justify-between">
           <div class="space-y-1">
-            <h2 class="text-xl font-semibold text-primary">Games</h2>
-            <p class="text-sm text-muted">Add one or more games to this listing.</p>
+            <h2 class="text-xl font-semibold text-primary">Items</h2>
+            <p class="text-sm text-muted">Add one or more items to this listing. Board games can be linked to BoardGameGeek for additional info.</p>
           </div>
           <button
             class="rounded-lg border border-emerald-500 px-4 py-2 text-sm font-medium text-emerald-300 transition hover:bg-emerald-500/10"
@@ -347,7 +377,7 @@
             class="space-y-6 rounded-xl border border-subtle bg-surface-card transition-colors p-6"
           >
             <div class="flex items-center justify-between">
-              <h3 class="text-lg font-medium text-primary">Game {index + 1}</h3>
+              <h3 class="text-lg font-medium text-primary">Item {index + 1}</h3>
               {#if games.length > 1}
                 <button
                   class="text-sm text-rose-400 transition hover:text-rose-300"
@@ -359,20 +389,87 @@
               {/if}
             </div>
 
+            <!-- Item type toggle -->
+            <div class="flex gap-2">
+              <button
+                type="button"
+                class="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition {game.itemType === 'board_game'
+                  ? 'bg-emerald-500/20 text-emerald-300 ring-1 ring-emerald-500'
+                  : 'bg-surface-body text-secondary hover:bg-surface-card-alt'}"
+                onclick={() => setItemType(index, 'board_game')}
+              >
+                <span>🎲</span>
+                <span>Board Game</span>
+              </button>
+              <button
+                type="button"
+                class="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition {game.itemType === 'other'
+                  ? 'bg-emerald-500/20 text-emerald-300 ring-1 ring-emerald-500'
+                  : 'bg-surface-body text-secondary hover:bg-surface-card-alt'}"
+                onclick={() => setItemType(index, 'other')}
+              >
+                <span>📦</span>
+                <span>Other Item</span>
+              </button>
+            </div>
+
+            <!-- Hidden field to store item type -->
+            <input type="hidden" name="game_{index}_item_type" value={game.itemType} />
+
             <div class="grid gap-6 sm:grid-cols-2">
+              <!-- Title input - different based on item type -->
               <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-secondary" for="game_{index}_title"
-                  >Game title</label
-                >
-                <input
-                  class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
-                  id="game_{index}_title"
-                  name="game_{index}_title"
-                  placeholder="Eg: Gloomhaven"
-                  required
-                  maxlength="200"
-                  bind:value={game.title}
-                />
+                {#if game.itemType === 'board_game'}
+                  <label class="block text-sm font-medium text-secondary">Search BoardGameGeek</label>
+                  <p class="mt-1 text-xs text-muted">
+                    Find your game to auto-fill details and link to BGG
+                  </p>
+                  <div class="mt-2">
+                    <BggSearch
+                      placeholder="Search for a board game..."
+                      onSelect={(bggGame) => handleBggSelect(index, bggGame)}
+                    />
+                  </div>
+                  <!-- Show selected game info -->
+                  {#if game.bgg_id}
+                    <div class="mt-2 flex items-center gap-2 rounded-lg bg-emerald-500/10 px-3 py-2 text-sm">
+                      <span class="text-emerald-300">✓</span>
+                      <span class="font-medium text-primary">{game.title}</span>
+                      <span class="text-muted">(BGG #{game.bgg_id})</span>
+                      <button
+                        type="button"
+                        class="ml-auto text-muted hover:text-primary"
+                        onclick={() => {
+                          games[index].title = '';
+                          games[index].bgg_id = '';
+                        }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  {/if}
+                  <!-- Hidden inputs to store BGG data -->
+                  <input type="hidden" name="game_{index}_title" value={game.title} />
+                  <input type="hidden" name="game_{index}_bgg_id" value={game.bgg_id} />
+                {:else}
+                  <label class="block text-sm font-medium text-secondary" for="game_{index}_title"
+                    >Item title</label
+                  >
+                  <p class="mt-1 text-xs text-muted">
+                    Eg: "3D printed Catan tiles" or "Kallax board game shelf"
+                  </p>
+                  <input
+                    class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+                    id="game_{index}_title"
+                    name="game_{index}_title"
+                    placeholder="Enter item name"
+                    required
+                    maxlength="200"
+                    bind:value={game.title}
+                  />
+                  <!-- Hidden empty bgg_id for non-game items -->
+                  <input type="hidden" name="game_{index}_bgg_id" value="" />
+                {/if}
                 {#if fieldErrors[`game_${index}_title`]}
                   <p class="mt-2 text-sm text-rose-300">{fieldErrors[`game_${index}_title`]}</p>
                 {/if}
@@ -400,36 +497,21 @@
                 {/if}
               </div>
 
-              <!-- Price and trade value fields removed - now managed via offer templates -->
-
-              <div>
-                <label class="block text-sm font-medium text-secondary" for="game_{index}_bgg_id"
-                  >BoardGameGeek ID</label
-                >
-                <input
-                  class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
-                  id="game_{index}_bgg_id"
-                  name="game_{index}_bgg_id"
-                  placeholder="Optional"
-                  inputmode="numeric"
-                  pattern="[0-9]*"
-                  bind:value={game.bgg_id}
-                />
-                {#if fieldErrors[`game_${index}_bgg_id`]}
-                  <p class="mt-2 text-sm text-rose-300">{fieldErrors[`game_${index}_bgg_id`]}</p>
-                {/if}
-              </div>
+              <!-- Empty cell for grid alignment -->
+              <div></div>
 
               <div class="sm:col-span-2">
                 <label class="block text-sm font-medium text-secondary" for="game_{index}_notes"
-                  >Copy notes</label
+                  >Notes</label
                 >
                 <textarea
                   class="mt-2 min-h-[120px] w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
                   id="game_{index}_notes"
                   name="game_{index}_notes"
                   maxlength="2000"
-                  placeholder="Mention wear, missing components, or house-rule kits."
+                  placeholder={game.itemType === 'board_game'
+                    ? 'Mention wear, missing components, or included expansions.'
+                    : 'Describe the item, materials, dimensions, or any relevant details.'}
                   bind:value={game.notes}
                 />
               </div>
@@ -442,7 +524,7 @@
                     name="game_{index}_can_post"
                     bind:checked={game.can_post}
                   />
-                  🚚 Can post (available for courier/postal delivery)
+                  📬 Can post (available for courier/postal delivery)
                 </label>
               </div>
             </div>
@@ -462,7 +544,7 @@
           class="rounded-lg bg-emerald-500 px-4 py-2 font-semibold text-[var(--accent-contrast)] transition hover:bg-emerald-400"
           type="submit"
         >
-          Publish listing {games.length > 1 ? `with ${games.length} games` : ''}
+          Publish listing {games.length > 1 ? `with ${games.length} items` : ''}
         </button>
         <!-- eslint-enable svelte/no-navigation-without-resolve -->
       </div>
