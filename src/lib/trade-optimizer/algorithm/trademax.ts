@@ -88,7 +88,7 @@ class MetricUsersTrading {
 	}
 
 	calculate(cycles: Vertex[][]) {
-		let users = new Set<string>();
+		let users = new Set<string | null>();
 
 		for (let cycle of cycles) for (let vert of cycle) users.add(vert.user);
 
@@ -212,17 +212,17 @@ class Vertex {
 	edges: Edge[]
 
 	minimumInCost: number
-	twin: Vertex
+	twin!: Vertex
 	mark: number
 	match: Vertex | null
 	matchCost: number
 	from: Vertex | null
 	price: number
-	heapEntry: Entry
+	heapEntry!: Entry
 	component: number
 	used: boolean
 
-	savedMatch: Vertex
+	savedMatch: Vertex | null
 	savedMatchCost: number
 
 	dirty: boolean
@@ -238,13 +238,13 @@ class Vertex {
 		this.edges = [];
 
 		this.minimumInCost = Number.MAX_SAFE_INTEGER;
-		this.twin = null;
+		// twin is set after construction in addVertex
 		this.mark = 0;
 		this.match = null;
 		this.matchCost = 0;
 		this.from = null;
 		this.price = 0;
-		this.heapEntry = null;
+		// heapEntry is set when inserted into heap
 		this.component = 0;
 		this.used = false;
 
@@ -347,12 +347,12 @@ class Graph {
 	}
 
 	getEdge(receiver: Vertex, sender: Vertex) {
-		return receiver.edgeMap[sender];
+		return receiver.edgeMap[sender.name];
 	}
 
 	freeze() {
-		this.receivers = this.receiverList;
-		this.senders = this.senderList;
+		this.receivers = this.receiverList!;
+		this.senders = this.senderList!;
 
 		this.receiverList = this.senderList = null;
 
@@ -366,7 +366,7 @@ class Graph {
 		this.timestamp++;
 	}
 
-	visitReceivers(receiver) {
+	visitReceivers(receiver: Vertex) {
 		receiver.mark = this.timestamp;
 		for (let edge of receiver.edges) {
 			let v = edge.sender.twin;
@@ -375,7 +375,7 @@ class Graph {
 		this.finished.push(receiver.twin);
 	}
 
-	visitSenders(sender) {
+	visitSenders(sender: Vertex) {
 		sender.mark = this.timestamp;
 		for (let edge of sender.edges) {
 			let v = edge.receiver.twin;
@@ -385,7 +385,7 @@ class Graph {
 		sender.twin.component = this.component;
 	}
 
-	removeBadEdges(v) {
+	removeBadEdges(v: Vertex) {
 		let newedges = [];
 
 		for (let edge of v.edges) {
@@ -512,10 +512,10 @@ class Graph {
 
 			let sender = this.sinkFrom;
 			while (sender != null) {
-				let receiver = sender.from;
+				let receiver = sender.from!;
 
 				if (sender.match != null) sender.match.match = null;
-				if (receiver?.match != null) receiver.match.match = null;
+				if (receiver.match != null) receiver.match.match = null;
 
 				sender.match = receiver;
 				receiver.match = sender;
@@ -549,7 +549,7 @@ class Graph {
 			while (v.mark != this.timestamp) {
 				v.mark = this.timestamp;
 				cycle.push(v);
-				v = v.match.twin;
+				v = v.match!.twin;
 			}
 			cycles.push(cycle);
 		}
@@ -569,7 +569,7 @@ class Graph {
 
 	nextInt(bound: number) {
 		++this.rngcount;
-		let r = this.random.nextInt(bound);
+		let r = this.random!.nextInt(bound);
 		//this.randomSequence.push(bound + "/" + r);
 		return r;
 	}
@@ -590,9 +590,9 @@ class Graph {
 
 	elideDummies() {
 		for (let v of this.receivers) {
-			while (v.match.isDummy && v.match != v.twin) {
-				let dummySender = v.match;
-				let nextSender = dummySender.twin.match;
+			while (v.match!.isDummy && v.match != v.twin) {
+				let dummySender = v.match!;
+				let nextSender = dummySender.twin.match!;
 				v.match = nextSender;
 				nextSender.match = v;
 				dummySender.match = dummySender.twin;
@@ -674,7 +674,7 @@ class Graph {
 
 		for (let i = 0; i < this.receivers.length; i++) {
 			let v = this.receivers[i];
-			let e = v.edgeMap[v.match];
+			let e = v.edgeMap[v.match!.name];
 			//if( v.match != v.twin )
 			//  tradeCount++;
 			totalCost += e.cost;
@@ -691,7 +691,7 @@ class Graph {
 			let currentCost = 0;
 			let edgeSet = [];
 			for (let v of this.receivers) {
-				let e = v.edgeMap[v.match];
+				let e = v.edgeMap[v.match!.name];
 				edgeSet.push(e);
 				currentCost += e.cost;
 				if (e.status != EdgeStatus.REQUIRED) e.status = EdgeStatus.OPTIONAL;
@@ -753,7 +753,7 @@ class Graph {
 			newEdges = 0;
 			let edgeSet = new Array(V);
 			for (let v of this.receivers) {
-				let e = v.edgeMap[v.match];
+				let e = v.edgeMap[v.match!.name];
 				if (e.status == EdgeStatus.UNKNOWN) {
 					e.status = EdgeStatus.OPTIONAL;
 					e.cost++;
@@ -771,7 +771,7 @@ class Graph {
 		else this.tm.outputln('');
 	}
 
-	markEdgesForbiddenIfNotRequired(v) {
+	markEdgesForbiddenIfNotRequired(v: Vertex) {
 		for (let e of v.edges) if (e.status != EdgeStatus.REQUIRED) e.status = EdgeStatus.FORBIDDEN;
 	}
 
@@ -868,13 +868,13 @@ class Graph {
 		}
 
 		for (let v of this.receivers) {
-			let matchCost = v.edgeMap[v.match].cost;
-			v.matchCost = v.match.matchCost = matchCost;
+			let matchCost = v.edgeMap[v.match!.name].cost;
+			v.matchCost = v.match!.matchCost = matchCost;
 		}
 	}
 }
 
-type InputFunc = () => string
+type InputFunc = () => string | null
 type OutputFunc = (s: string, newline: boolean) => void
 type ProgressFunc = (iteration: number, iterations: number, bestMetricStr: string, tradeCount: number) => void
 type FatalFunc = (s: string) => void
@@ -1012,7 +1012,7 @@ export class TradeMaximizer {
 		)
 			this.outputln('Warning: using priorities with the non-default metric is normally worthless');
 
-		let hash = md5.create();
+		let hash = (md5 as any).create();
 		for (let wset of wantLists) {
 			for (let w of wset) {
 				hash.update(' ');
@@ -1032,7 +1032,7 @@ export class TradeMaximizer {
 
 		let startTime = Date.now();
 
-		if (this.iterations > 1 && this.progress) this.progress(0, this.iterations, '', '');
+		if (this.iterations > 1 && this.progress) this.progress(0, this.iterations, '', 0);
 
 		this.graph.shrink(this.shrinkLevel, this.shrinkVerbose);
 
@@ -1540,15 +1540,15 @@ for( let i = 0 ; i < this.graph.receivers.length ; i++ ) {
 			sumOfSquares += size * size;
 			groupSizes.push(size);
 			for (let v of cycle) {
-				loops.push(this.pad(this.show(v)) + ' receives ' + this.show(v.match.twin));
+				loops.push(this.pad(this.show(v)) + ' receives ' + this.show(v.match!.twin));
 				summary.push(
 					this.pad(this.show(v)) +
 					' receives ' +
-					this.pad(this.show(v.match.twin)) +
+					this.pad(this.show(v.match!.twin)) +
 					' and sends to ' +
-					this.show(v.twin.match)
+					this.show(v.twin.match!)
 				);
-				alltrades.push(this.show(v) + ' receives ' + this.show(v.match.twin));
+				alltrades.push(this.show(v) + ' receives ' + this.show(v.match!.twin));
 				totalCost += v.matchCost;
 			}
 			loops.push('');
@@ -1556,7 +1556,7 @@ for( let i = 0 ; i < this.graph.receivers.length ; i++ ) {
 
 		let resultChecksum = null;
 
-		let hash = md5.create();
+		let hash = (md5 as any).create();
 		for (let trade of alltrades.sort()) {
 			hash.update(trade);
 			hash.update('\n');
