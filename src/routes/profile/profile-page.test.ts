@@ -13,6 +13,7 @@ vi.mock('$lib/pocketbase', () => ({
   },
   currentUser: {
     subscribe: vi.fn(),
+    init: vi.fn().mockResolvedValue(undefined),
   },
 }));
 
@@ -91,7 +92,7 @@ describe('profile client-side load', () => {
 
     expect(getFullList).toHaveBeenCalledWith({
       filter: `owner = "user123"`,
-      sort: '-created',
+      sort: '-id',
     });
 
     expect(result.profile).toEqual(mockUser);

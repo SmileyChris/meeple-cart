@@ -34,10 +34,14 @@ describe('Trust Tier System', () => {
       expect(getTrustTier(30, 1)).toBe('seedling'); // Only 1 vouch
     });
 
-    it('returns "established" for 5+ vouched trades', () => {
-      expect(getTrustTier(0, 5)).toBe('established');
-      expect(getTrustTier(30, 5)).toBe('established');
+    it('returns "established" for 90+ days AND 5+ vouched trades', () => {
+      expect(getTrustTier(90, 5)).toBe('established');
+      expect(getTrustTier(100, 5)).toBe('established');
       expect(getTrustTier(200, 7)).toBe('established');
+
+      // Not established if missing either requirement
+      expect(getTrustTier(89, 5)).toBe('growing'); // Not 90 days yet
+      expect(getTrustTier(90, 4)).toBe('growing'); // Only 4 vouches
     });
 
     it('returns "trusted" for 365+ days AND 8+ vouched trades', () => {
@@ -54,8 +58,11 @@ describe('Trust Tier System', () => {
       // 365 days + 8 vouches = trusted (not established)
       expect(getTrustTier(365, 8)).toBe('trusted');
 
-      // 5 vouches but only 20 days = established (not growing)
-      expect(getTrustTier(20, 5)).toBe('established');
+      // 5 vouches but only 20 days = seedling (not enough days for growing or established)
+      expect(getTrustTier(20, 5)).toBe('seedling');
+
+      // 90+ days + 5 vouches = established (not growing)
+      expect(getTrustTier(90, 5)).toBe('established');
     });
   });
 
@@ -209,8 +216,11 @@ describe('Trust Tier System', () => {
       const progress = getNextTierProgress('growing', 50, 3);
       expect(progress).toBeTruthy();
       expect(progress?.nextTier).toBe('established');
-      expect(progress?.requirements).toHaveLength(1);
+      expect(progress?.requirements).toHaveLength(2);
+      expect(progress?.requirements[0].label).toBe('Vouched trades');
       expect(progress?.requirements[0].needed).toBe(5);
+      expect(progress?.requirements[1].label).toBe('Account age');
+      expect(progress?.requirements[1].needed).toBe(90);
     });
 
     it('shows progress from established to trusted', () => {

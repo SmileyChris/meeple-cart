@@ -125,10 +125,13 @@ describe('cascade detail load', () => {
         {
           id: 'history-1',
           generation: 2,
-          completed_at: '2024-04-20T12:00:00Z',
+          event_type: 'passed',
+          event_date: '2024-04-20T12:00:00Z',
+          created: '2024-04-20T12:00:00Z',
+          notes: null,
           expand: {
-            from_user: { display_name: 'Sam' },
-            to_user: { display_name: 'Jamie' },
+            actor: { display_name: 'Sam' },
+            related_user: { display_name: 'Jamie' },
           },
         },
       ],
@@ -165,9 +168,11 @@ describe('cascade detail load', () => {
       {
         id: 'history-1',
         generation: 2,
-        fromUser: 'Sam',
-        toUser: 'Jamie',
-        completedAt: '2024-04-20T12:00:00Z',
+        eventType: 'passed',
+        eventDate: '2024-04-20T12:00:00Z',
+        actorName: 'Sam',
+        relatedUserName: 'Jamie',
+        notes: null,
       },
     ]);
     expect(result.userEntry).toBeNull();
