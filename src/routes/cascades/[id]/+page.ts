@@ -40,16 +40,18 @@ export const load: PageLoad = async ({ params }) => {
     // Fetch cascade history
     const historyResult = await pb.collection('cascade_history').getList(1, 20, {
       filter: `cascade = "${id}"`,
-      expand: 'from_user,to_user',
+      expand: 'actor,related_user',
       sort: '-created',
     });
 
     const history = historyResult.items.map((item: any) => ({
       id: item.id,
       generation: item.generation,
-      fromUser: item.expand?.from_user?.display_name || 'Unknown',
-      toUser: item.expand?.to_user?.display_name || 'Unknown',
-      completedAt: item.completed_at,
+      eventType: item.event_type,
+      eventDate: item.event_date || item.created,
+      actorName: item.expand?.actor?.display_name || 'Unknown',
+      relatedUserName: item.expand?.related_user?.display_name || null,
+      notes: item.notes,
     }));
 
     // Check if user has entered

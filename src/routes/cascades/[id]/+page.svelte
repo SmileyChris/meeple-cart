@@ -21,6 +21,7 @@
   let isSubmitting = $state(false);
   let showFullHistory = $state(false);
   let error = $state<string | null>(null);
+  let successMessage = $state<string | null>(null);
 
   async function handleEnter(e: Event) {
     e.preventDefault();
@@ -392,17 +393,17 @@
         <!-- Entry Actions -->
         {#if cascade.status === 'accepting_entries'}
           <div class="rounded-xl border border-subtle bg-surface-card p-6 transition-colors">
-            {#if form?.success}
+            {#if successMessage}
               <div
                 class="rounded-lg border border-emerald-500 bg-emerald-500/10 p-4 text-emerald-200 mb-4"
               >
-                {form.message}
+                {successMessage}
               </div>
             {/if}
 
-            {#if form?.error}
+            {#if error}
               <div class="rounded-lg border border-rose-500 bg-rose-500/10 p-4 text-rose-200 mb-4">
-                {form.error}
+                {error}
               </div>
             {/if}
 
