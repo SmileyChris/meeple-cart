@@ -16,7 +16,7 @@ const setupModule = async (browser: boolean) => {
     },
   }));
 
-  const module = await import('./+page.ts');
+  const module = await import('./+page');
 
   return { load: module.load };
 };

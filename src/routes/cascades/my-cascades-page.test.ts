@@ -45,7 +45,7 @@ describe('my cascades page load', () => {
   });
 
   it('redirects guests to login', async () => {
-    const { load } = await import('./my-cascades/+page.ts');
+    const { load } = await import('./my-cascades/+page');
     const { get } = await import('svelte/store');
     vi.mocked(get).mockReturnValue(null);
 
@@ -57,7 +57,7 @@ describe('my cascades page load', () => {
   });
 
   it('returns entered, won, and started cascades with user stats', async () => {
-    const { load } = await import('./my-cascades/+page.ts');
+    const { load } = await import('./my-cascades/+page');
     const { get } = await import('svelte/store');
     vi.mocked(get).mockReturnValue({
       id: 'user-1',
@@ -116,7 +116,7 @@ describe('my cascades page load', () => {
       },
     ]);
 
-    const result = await load({ url: { pathname: '/cascades/my-cascades' } } as any);
+    const result = (await load({ url: { pathname: '/cascades/my-cascades' } } as any))!;
 
     expect(result.enteredCascades).toEqual([
       {
@@ -158,14 +158,14 @@ describe('my cascades page load', () => {
   });
 
   it('returns fallback when data fetching fails', async () => {
-    const { load } = await import('./my-cascades/+page.ts');
+    const { load } = await import('./my-cascades/+page');
     const { get } = await import('svelte/store');
     vi.mocked(get).mockReturnValue({ id: 'user-1' });
 
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     entriesCollection.getFullList.mockRejectedValue(new Error('db failed'));
 
-    const result = await load({ url: { pathname: '/cascades/my-cascades' } } as any);
+    const result = (await load({ url: { pathname: '/cascades/my-cascades' } } as any))!;
 
     expect(result).toEqual({
       enteredCascades: [],

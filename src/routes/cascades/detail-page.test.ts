@@ -55,7 +55,7 @@ describe('cascade detail load', () => {
   });
 
   it('returns cascade details with entries and eligibility info for authenticated user', async () => {
-    const { load } = await import('./[id]/+page.ts');
+    const { load } = await import('./[id]/+page');
     const { get } = await import('svelte/store');
 
     vi.mocked(get).mockReturnValue({
@@ -134,7 +134,7 @@ describe('cascade detail load', () => {
       ],
     });
 
-    const result = await load({ params: { id: 'cascade-1' } } as any);
+    const result = (await load({ params: { id: 'cascade-1' } } as any))!;
 
     expect(result.cascade).toMatchObject({
       id: 'cascade-1',
@@ -176,7 +176,7 @@ describe('cascade detail load', () => {
   });
 
   it('returns guest eligibility message when user is not authenticated', async () => {
-    const { load } = await import('./[id]/+page.ts');
+    const { load } = await import('./[id]/+page');
     const { get } = await import('svelte/store');
 
     vi.mocked(get).mockReturnValue(null);
@@ -202,14 +202,14 @@ describe('cascade detail load', () => {
     entriesCollection.getList.mockResolvedValueOnce({ items: [] });
     historyCollection.getList.mockResolvedValue({ items: [] });
 
-    const result = await load({ params: { id: 'cascade-1' } } as any);
+    const result = (await load({ params: { id: 'cascade-1' } } as any))!;
 
     expect(result.canEnter).toBe(false);
     expect(result.eligibilityMessage).toBe('Log in to enter this cascade');
   });
 
   it('throws 404 when cascade data is incomplete', async () => {
-    const { load } = await import('./[id]/+page.ts');
+    const { load } = await import('./[id]/+page');
     const { get } = await import('svelte/store');
     vi.mocked(get).mockReturnValue({ id: 'user-1', can_enter_cascades: true });
 

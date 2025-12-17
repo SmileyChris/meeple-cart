@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { load } from './+page.ts';
+import { load } from './+page';
 import * as pocketbaseModule from '$lib/pocketbase';
 
 // Mock the pocketbase module
@@ -42,8 +42,8 @@ describe('profile client-side load', () => {
 
   it('redirects to login when user is not authenticated', async () => {
     const { pb } = pocketbaseModule;
-    pb.authStore.isValid = false;
-    pb.authStore.model = null;
+    (pb.authStore as any).isValid = false;
+    (pb.authStore as any).model = null;
 
     await expect(load({ url: { pathname: '/profile' } } as any)).rejects.toMatchObject({
       message: 'REDIRECT',
@@ -54,8 +54,8 @@ describe('profile client-side load', () => {
 
   it('redirects to login when auth store has no user model', async () => {
     const { pb } = pocketbaseModule;
-    pb.authStore.isValid = true;
-    pb.authStore.model = null;
+    (pb.authStore as any).isValid = true;
+    (pb.authStore as any).model = null;
 
     await expect(load({ url: { pathname: '/profile' } } as any)).rejects.toMatchObject({
       message: 'REDIRECT',
@@ -77,8 +77,8 @@ describe('profile client-side load', () => {
     ];
 
     const { pb } = pocketbaseModule;
-    pb.authStore.isValid = true;
-    pb.authStore.model = mockUser;
+    (pb.authStore as any).isValid = true;
+    (pb.authStore as any).model = mockUser;
 
     // Mock the get function to return the user
     const { get } = await import('svelte/store');
@@ -87,7 +87,7 @@ describe('profile client-side load', () => {
     const getFullList = vi.fn().mockResolvedValue(mockListings);
     vi.mocked(pb.collection).mockReturnValue({ getFullList } as any);
 
-    const result = await load({ url: { pathname: '/profile' } } as any);
+    const result = (await load({ url: { pathname: '/profile' } } as any))!;
 
     expect(getFullList).toHaveBeenCalledWith({
       filter: `owner = "user123"`,
@@ -102,8 +102,8 @@ describe('profile client-side load', () => {
     const mockUser = { id: 'user123', display_name: 'Chris' };
 
     const { pb } = pocketbaseModule;
-    pb.authStore.isValid = true;
-    pb.authStore.model = mockUser;
+    (pb.authStore as any).isValid = true;
+    (pb.authStore as any).model = mockUser;
 
     // Mock the get function to return the user
     const { get } = await import('svelte/store');

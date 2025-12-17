@@ -24,7 +24,7 @@ const setupModule = async (browser: boolean, redirectMessage = 'Redirect') => {
   }));
   vi.doMock('@sveltejs/kit', () => ({ redirect: redirectMock }));
 
-  const module = await import('./+page.ts');
+  const module = await import('./+page');
   return { load: module.load, redirectMock };
 };
 
@@ -67,7 +67,7 @@ describe('register page load', () => {
     }));
     vi.doMock('@sveltejs/kit', () => ({ redirect: redirectMock }));
 
-    const module = await import('./+page.ts');
+    const module = await import('./+page');
     localStorage.setItem('pocketbase_auth', JSON.stringify({ token: 'abc123' }));
 
     await expect(module.load({} as any)).rejects.toMatchObject({

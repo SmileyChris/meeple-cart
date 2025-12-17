@@ -26,7 +26,7 @@ describe('discussions page load', () => {
   });
 
   it('loads threads and categories with default parameters', async () => {
-    const { load } = await import('./+page.ts');
+    const { load } = await import('./+page');
 
     const mockThreads = {
       items: [
@@ -55,7 +55,7 @@ describe('discussions page load', () => {
       searchParams: new URLSearchParams(),
     };
 
-    const result = await load({ url } as any);
+    const result = (await load({ url } as any))!;
 
     expect(threadsCollection.getList).toHaveBeenCalledWith(1, 20, {
       filter: undefined,
@@ -72,7 +72,7 @@ describe('discussions page load', () => {
   });
 
   it('filters by category when category slug is provided', async () => {
-    const { load } = await import('./+page.ts');
+    const { load } = await import('./+page');
 
     threadsCollection.getList.mockResolvedValue({
       items: [],
@@ -97,7 +97,7 @@ describe('discussions page load', () => {
   });
 
   it('filters by multiple tags with AND logic', async () => {
-    const { load } = await import('./+page.ts');
+    const { load } = await import('./+page');
 
     threadsCollection.getList.mockResolvedValue({
       items: [],
@@ -122,7 +122,7 @@ describe('discussions page load', () => {
   });
 
   it('changes sort order for top tab', async () => {
-    const { load } = await import('./+page.ts');
+    const { load } = await import('./+page');
 
     threadsCollection.getList.mockResolvedValue({
       items: [],
@@ -147,7 +147,7 @@ describe('discussions page load', () => {
   });
 
   it('filters for wanted threads when tab is wanted', async () => {
-    const { load } = await import('./+page.ts');
+    const { load } = await import('./+page');
 
     threadsCollection.getList.mockResolvedValue({
       items: [],
@@ -172,7 +172,7 @@ describe('discussions page load', () => {
   });
 
   it('searches in title and content when search param is provided', async () => {
-    const { load } = await import('./+page.ts');
+    const { load } = await import('./+page');
 
     threadsCollection.getList.mockResolvedValue({
       items: [],
@@ -197,7 +197,7 @@ describe('discussions page load', () => {
   });
 
   it('returns empty data when loading fails', async () => {
-    const { load } = await import('./+page.ts');
+    const { load } = await import('./+page');
 
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     threadsCollection.getList.mockRejectedValue(new Error('Database error'));
@@ -206,7 +206,7 @@ describe('discussions page load', () => {
       searchParams: new URLSearchParams(),
     };
 
-    const result = await load({ url } as any);
+    const result = (await load({ url } as any))!;
 
     expect(consoleSpy).toHaveBeenCalledWith('Failed to load discussions', expect.any(Error));
     expect(result.threads).toEqual({ items: [], page: 1, perPage: 20, totalItems: 0, totalPages: 0 });

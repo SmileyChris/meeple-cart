@@ -19,7 +19,7 @@ vi.mock('@sveltejs/kit', () => ({
 
 describe('logout page load', () => {
   it('returns empty object without logging out', async () => {
-    const module = await import('./+page.ts');
+    const module = await import('./+page');
 
     // The logout page load just returns empty object
     // Actual logout happens when user confirms on the page

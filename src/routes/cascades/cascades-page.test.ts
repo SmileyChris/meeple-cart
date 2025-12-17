@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi, afterEach } from 'vitest';
-import { load } from './+page.ts';
+import { load } from './+page';
 
 const envMock = { url: 'https://pb.example' };
 
@@ -99,12 +99,12 @@ describe('cascades listing load', () => {
       return createJsonResponse(responsePayload, { status: 200 });
     });
 
-    const result = await load({
+    const result = (await load({
       fetch: fetchMock as any,
       url: new URL(
         'https://meeple.cart/cascades?page=2&status=accepting_entries&region=wellington&sort=entries'
       ),
-    } as any);
+    } as any))!;
 
     expect(capturedUrl).not.toBeNull();
     const filter = capturedUrl!.searchParams.get('filter');

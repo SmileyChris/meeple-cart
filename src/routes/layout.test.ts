@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { prerender, ssr } from './+layout.ts';
+import { prerender, ssr } from './+layout';
 
 describe('root layout config', () => {
   it('disables prerender and ssr for the app shell', () => {

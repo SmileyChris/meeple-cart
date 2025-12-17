@@ -50,7 +50,7 @@ describe('discussions new page load', () => {
   });
 
   it('redirects unauthenticated users to login', async () => {
-    const { load } = await import('./+page.ts');
+    const { load } = await import('./+page');
     const { get } = await import('svelte/store');
     vi.mocked(get).mockReturnValue(null);
 
@@ -65,7 +65,7 @@ describe('discussions new page load', () => {
   });
 
   it('loads categories without listing when no listing param provided', async () => {
-    const { load } = await import('./+page.ts');
+    const { load } = await import('./+page');
     const { get } = await import('svelte/store');
     vi.mocked(get).mockReturnValue({ id: 'user-1' });
 
@@ -82,7 +82,7 @@ describe('discussions new page load', () => {
       searchParams: new URLSearchParams(),
     };
 
-    const result = await load({ url } as any);
+    const result = (await load({ url } as any))!;
 
     expect(categoriesCollection.getFullList).toHaveBeenCalledWith({
       filter: 'enabled = true',
@@ -93,7 +93,7 @@ describe('discussions new page load', () => {
   });
 
   it('loads listing and categories when listing param provided', async () => {
-    const { load } = await import('./+page.ts');
+    const { load } = await import('./+page');
     const { get } = await import('svelte/store');
     vi.mocked(get).mockReturnValue({ id: 'user-1' });
 
@@ -116,7 +116,7 @@ describe('discussions new page load', () => {
       searchParams: new URLSearchParams('listing=listing-1'),
     };
 
-    const result = await load({ url } as any);
+    const result = (await load({ url } as any))!;
 
     expect(listingsCollection.getOne).toHaveBeenCalledWith('listing-1', {
       expand: 'owner',
@@ -126,7 +126,7 @@ describe('discussions new page load', () => {
   });
 
   it('continues without listing when loading listing fails', async () => {
-    const { load } = await import('./+page.ts');
+    const { load } = await import('./+page');
     const { get } = await import('svelte/store');
     vi.mocked(get).mockReturnValue({ id: 'user-1' });
 
@@ -144,7 +144,7 @@ describe('discussions new page load', () => {
       searchParams: new URLSearchParams('listing=listing-1'),
     };
 
-    const result = await load({ url } as any);
+    const result = (await load({ url } as any))!;
 
     expect(consoleSpy).toHaveBeenCalledWith('Failed to load listing:', expect.any(Error));
     expect(result.listing).toBeNull();

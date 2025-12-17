@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { load } from './+page.ts';
+import { load } from './+page';
 import * as pocketbaseModule from '$lib/pocketbase';
 
 // Mock modules
@@ -80,7 +80,7 @@ describe('listing detail client-side load', () => {
     );
     vi.mocked(get).mockReturnValue(null); // No user watching
 
-    const result = await load({ params: { id: 'listing123' } } as any);
+    const result = (await load({ params: { id: 'listing123' } } as any))!;
 
     expect(getOne).toHaveBeenCalledWith('listing123', {
       expand: 'owner,items_via_listing',

@@ -48,7 +48,7 @@ describe('cascade create load', () => {
   });
 
   it('redirects unauthenticated users to login', async () => {
-    const { load } = await import('./create/+page.ts');
+    const { load } = await import('./create/+page');
     const { get } = await import('svelte/store');
     vi.mocked(get).mockReturnValue(null);
 
@@ -60,7 +60,7 @@ describe('cascade create load', () => {
   });
 
   it('returns available games filtered by active cascades', async () => {
-    const { load } = await import('./create/+page.ts');
+    const { load } = await import('./create/+page');
     const { get } = await import('svelte/store');
     vi.mocked(get).mockReturnValue({ id: 'user-1' });
 
@@ -88,7 +88,7 @@ describe('cascade create load', () => {
 
     cascadesCollection.getFullList.mockResolvedValue([{ current_game: 'game-2' }]);
 
-    const result = await load({ url: { pathname: '/cascades/create' } } as any);
+    const result = (await load({ url: { pathname: '/cascades/create' } } as any))!;
 
     expect(listingsCollection.getFullList).toHaveBeenCalledWith({
       filter: 'owner = "user-1" && status = "active"',
@@ -110,27 +110,27 @@ describe('cascade create load', () => {
   });
 
   it('returns empty array when user has no eligible listings', async () => {
-    const { load } = await import('./create/+page.ts');
+    const { load } = await import('./create/+page');
     const { get } = await import('svelte/store');
     vi.mocked(get).mockReturnValue({ id: 'user-1' });
 
     listingsCollection.getFullList.mockResolvedValue([]);
 
-    const result = await load({ url: { pathname: '/cascades/create' } } as any);
+    const result = (await load({ url: { pathname: '/cascades/create' } } as any))!;
 
     expect(result.availableGames).toEqual([]);
     expect(itemsCollection.getFullList).not.toHaveBeenCalled();
   });
 
   it('returns fallback when loading fails', async () => {
-    const { load } = await import('./create/+page.ts');
+    const { load } = await import('./create/+page');
     const { get } = await import('svelte/store');
     vi.mocked(get).mockReturnValue({ id: 'user-1' });
 
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     listingsCollection.getFullList.mockRejectedValue(new Error('db down'));
 
-    const result = await load({ url: { pathname: '/cascades/create' } } as any);
+    const result = (await load({ url: { pathname: '/cascades/create' } } as any))!;
 
     expect(consoleSpy).toHaveBeenCalledWith(
       'Failed to load available games for cascade',
