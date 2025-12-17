@@ -110,6 +110,11 @@ export interface ReactionRecord extends RecordModel {
   emoji: ReactionEmoji;
   expand?: {
     user?: UserRecord;
+    listing?: RecordModel & {
+      expand?: {
+        owner?: UserRecord;
+      };
+    };
   };
 }
 

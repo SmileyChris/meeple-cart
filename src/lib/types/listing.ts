@@ -5,6 +5,9 @@ import type { PhotoRegion } from './photo-region';
 // Re-export ItemRecord for backwards compatibility
 export type { ItemRecord } from './pocketbase';
 
+// Listing type for display purposes (deprecated in database, but used in UI)
+export type ListingType = 'trade' | 'sell' | 'want';
+
 /**
  * ListingRecord - Container/grouping owned by user
  *

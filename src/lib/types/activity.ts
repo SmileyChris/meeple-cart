@@ -6,6 +6,8 @@ export interface ListingActivity {
   id: string;
   /** Type of activity */
   activityType: 'listing';
+  /** Listing type (trade/sell/want) - for display purposes */
+  type?: 'trade' | 'sell' | 'want';
   /** Game title */
   gameTitle: string;
   /** Optional listing title (for context when showing games) */
