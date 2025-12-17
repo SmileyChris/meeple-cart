@@ -24,7 +24,7 @@ export const load: PageLoad = async ({ url }) => {
       message: notification.message,
       link: notification.link,
       read: notification.read,
-      created: notification.created,
+      timestamp: notification.created,
     }));
 
     const unreadCount = notifications.filter((n) => !n.read).length;

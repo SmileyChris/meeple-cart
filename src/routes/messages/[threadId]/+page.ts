@@ -36,10 +36,12 @@ export const load: PageLoad = async ({ params, url }) => {
     const otherUser = messagesResult.find(
       (m) => m.expand?.sender?.id === otherUserId || m.expand?.recipient?.id === otherUserId
     );
-    const otherUserData =
-      otherUser?.expand?.sender?.id === otherUserId
-        ? otherUser.expand.sender
-        : otherUser?.expand?.recipient;
+    const otherUserExpand = otherUser?.expand;
+    const otherUserData = otherUserExpand
+      ? (otherUserExpand.sender?.id === otherUserId
+          ? otherUserExpand.sender
+          : otherUserExpand.recipient)
+      : null;
 
     // Map messages to MessageItem format
     const messages: MessageItem[] = messagesResult.map((message) => ({
@@ -61,6 +63,11 @@ export const load: PageLoad = async ({ params, url }) => {
       await pb.collection('messages').update(message.id, { read: true });
     }
 
+    // Build thumbnail URL if listing has photos
+    const thumbnailUrl = listing && Array.isArray(listing.photos) && listing.photos.length > 0
+      ? `http://127.0.0.1:8090/api/files/${listing.collectionName}/${listing.id}/${listing.photos[0]}?thumb=100x100`
+      : null;
+
     return {
       messages,
       otherUser: otherUserData
@@ -73,6 +80,8 @@ export const load: PageLoad = async ({ params, url }) => {
         ? {
             id: listing.id,
             title: listing.title,
+            thumbnail: thumbnailUrl,
+            href: `/listings/${listing.id}`,
           }
         : null,
       threadId,

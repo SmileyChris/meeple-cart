@@ -124,7 +124,10 @@ describe('my cascades page load', () => {
         name: 'Meeple Madness',
         status: 'accepting_entries',
         deadline: '2024-05-05T12:00:00Z',
+        generation: 0,
+        entryCount: 0,
         gameTitle: 'Gloomhaven',
+        gameCondition: 'Unknown',
         holderName: 'Chris',
         isWinner: false,
       },
@@ -134,7 +137,13 @@ describe('my cascades page load', () => {
         id: 'cascade-2',
         name: 'Terraforming Express',
         status: 'in_transit',
+        deadline: undefined,
+        generation: 0,
+        entryCount: 0,
         gameTitle: 'Terraforming Mars',
+        gameCondition: 'Unknown',
+        holderName: 'You',
+        isWinner: true,
       },
     ]);
     expect(result.startedCascades).toEqual([
@@ -146,6 +155,9 @@ describe('my cascades page load', () => {
         entryCount: 12,
         deadline: '2024-05-10T12:00:00Z',
         gameTitle: 'Azul',
+        gameCondition: 'Unknown',
+        holderName: 'You',
+        isWinner: false,
       },
     ]);
     expect(result.stats).toEqual({

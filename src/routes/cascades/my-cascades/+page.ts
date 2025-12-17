@@ -28,7 +28,10 @@ export const load: PageLoad = async ({ url }) => {
         name: cascade?.name,
         status: cascade?.status,
         deadline: cascade?.entry_deadline,
+        generation: cascade?.generation ?? 0,
+        entryCount: cascade?.entry_count ?? 0,
         gameTitle: game?.title || 'Unknown Game',
+        gameCondition: game?.condition || 'Unknown',
         holderName: holder?.display_name || 'Unknown',
         isWinner: entry.is_winner,
       };
@@ -49,7 +52,13 @@ export const load: PageLoad = async ({ url }) => {
         id: cascade?.id,
         name: cascade?.name,
         status: cascade?.status,
+        deadline: cascade?.entry_deadline,
+        generation: cascade?.generation ?? 0,
+        entryCount: cascade?.entry_count ?? 0,
         gameTitle: game?.title || 'Unknown Game',
+        gameCondition: game?.condition || 'Unknown',
+        holderName: 'You',
+        isWinner: true,
       };
     });
 
@@ -67,10 +76,13 @@ export const load: PageLoad = async ({ url }) => {
         id: cascade.id,
         name: cascade.name,
         status: cascade.status,
-        generation: cascade.generation,
-        entryCount: cascade.entry_count,
+        generation: cascade.generation ?? 0,
+        entryCount: cascade.entry_count ?? 0,
         deadline: cascade.entry_deadline,
         gameTitle: game?.title || 'Unknown Game',
+        gameCondition: game?.condition || 'Unknown',
+        holderName: 'You',
+        isWinner: false,
       };
     });
 

@@ -2,6 +2,7 @@ import { pb, currentUser } from '$lib/pocketbase';
 import { error } from '@sveltejs/kit';
 import { get } from 'svelte/store';
 import type { PageLoad } from './$types';
+import type { RecordModel } from 'pocketbase';
 
 export const load: PageLoad = async ({ params }) => {
   const { id } = params;
@@ -13,8 +14,8 @@ export const load: PageLoad = async ({ params }) => {
 
     // Load user's submissions for this party (if logged in)
     const user = get(currentUser);
-    let mySubmissions = [];
-    let allSubmissions = [];
+    let mySubmissions: RecordModel[] = [];
+    let allSubmissions: RecordModel[] = [];
 
     if (user) {
       try {

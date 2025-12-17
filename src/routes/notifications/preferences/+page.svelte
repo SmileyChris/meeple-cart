@@ -1,11 +1,21 @@
 <script lang="ts">
-  import type { PageData, ActionData } from './$types';
+  import type { PageData } from './$types';
   import { enhance } from '$app/forms';
   import Alert from '$lib/components/Alert.svelte';
 
-  let { data, form }: { data: PageData; form: ActionData } = $props();
+  // Note: ActionData not available in client-side only mode
+  // TODO: Convert form to client-side PocketBase calls
+  let { data, form }: { data: PageData; form?: { success?: boolean; error?: string } } = $props();
 
-  let prefs = $derived(data.preferences);
+  let prefs = $derived(data.preferences ?? {
+    watched_regions: [],
+    max_distance_km: null,
+    email_frequency: 'instant',
+    in_app_digest: 'instant',
+    notify_new_listings: true,
+    notify_price_drops: false,
+    notify_new_messages: true,
+  });
 </script>
 
 <svelte:head>
