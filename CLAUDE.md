@@ -5,8 +5,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 🎯 Current Focus: MVP Implementation
 
 **Primary Guide:** [spec/mvp-plan.md](./spec/mvp-plan.md)
-**Status:** 70% complete, 3 weeks to MVP launch
-**Current Sprint:** Week 1 - Core Trade Flow
+**Status:** 90% complete, 1 week to MVP launch
+**Current Sprint:** Week 3 - Browse/Discovery + Final Polish
 
 ### What You're Building
 
@@ -16,9 +16,9 @@ Meeple Cart is a board game trading platform for New Zealand. The **database sch
 
 1. Implement the trade workflow following the day-by-day plan in [spec/mvp-plan.md](./spec/mvp-plan.md):
 
-1. **Week 1 (Days 1-5):** Trade initiation → confirmation → completion
-2. **Week 2 (Days 6-10):** Feedback system (ratings, reviews, vouches)
-3. **Week 3 (Days 11-15):** Browse/search pages + launch prep
+1. **Completed:** Trade workflow (initiation → confirmation → completion) is fully implemented with granular statuses and notification system.
+2. **Current:** Feedback system (ratings, reviews, vouches) is implemented.
+3. **Next:** Finalizing Browse/search pages + launch prep.
 
 ### Before You Start
 
@@ -183,20 +183,24 @@ The platform uses a three-tier model:
   photo_regions: json
 }
 
-// trades - When a buyer makes an offer on an offer_template
+// trades - Formal trade record tracking buyer/seller, status, and feedback
 {
   listing: relation(listings),
   buyer: relation(users),
   seller: relation(users),
-  status: 'initiated' | 'confirmed' | 'completed' | 'disputed' | 'cancelled',
-  offer_status: 'pending' | 'accepted' | 'declined' | 'withdrawn',
-  cash_offer_amount: number,
-  requested_items: relation(items[]),
-  shipping_method: 'in_person' | 'shipped' | 'either',
+  seller_items: relation(items[]),
+  buyer_items: relation(items[]),
+  buyer_cash_amount: number,
+  buyer_items_description: text,
   offer_message: text,
+  offer_status: 'pending' | 'accepted' | 'declined' | 'withdrawn',
+  status: 'initiated' | 'accepted' | 'shipped' | 'received' | 'completed' | 'disputed' | 'cancelled',
+  tracking_number: text,
+  shipped_at: date,
+  received_at: date,
+  completed_date: date,
   rating: number,
-  review: text,
-  completed_date: date
+  review: text
 }
 
 // vouches - Trust system

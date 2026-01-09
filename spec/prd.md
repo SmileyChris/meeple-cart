@@ -239,7 +239,7 @@ An item describes a single physical item with its condition and details. Items c
 - Title: game name (from BGG) or custom item name for non-game items
 - Condition: mint | excellent | good | fair | poor
 - Notes (what's included, condition details)
-- Status: available | pending | sold
+- Status: available | pending | sold | bundled
 
 ### Common Flows
 
@@ -290,10 +290,10 @@ An item describes a single physical item with its condition and details. Items c
 
 **Trade Flow**
 
-- Initiate trade discussion
-- Mark listing as pending
-- Confirm trade completion
-- Basic feedback (thumbs up/down)
+- Initiate trade with item selection (seller and buyer items)
+- Mark listing as pending upon acceptance
+- Granular status tracking (initiated, accepted, shipped, received, completed)
+- Detailed feedback (1-5 star rating and review text)
 - Transition listings between private, listed, pending, and sold states with clear state history for the owner
 
 ### Phase 2: Trust & Efficiency
@@ -378,8 +378,8 @@ An item describes a single physical item with its condition and details. Items c
 
 1. From the `My Listings` dashboard, user sees grouped cards by state (`Private`, `Listed`, `Pending`, `Sold`).
 2. User can edit a `Private` listing and choose `Publish`, triggering validation before transitioning to `Listed`.
-3. When a trade conversation reaches agreement, user taps `Mark as Pending`; the system logs timestamp and surfaces fulfillment checklist.
-4. After completion, user selects `Mark as Sold`, adds optional buyer feedback, and the listing archives to the `Sold` bucket while remaining visible in trade history.
+3. When a trade conversation reaches agreement, user accepts the offer; the system logs timestamps for acceptance, shipping, and receipt.
+4. After completion, user adds rating (1-5 stars) and review, and the listing and associated items are automatically marked as sold.
 5. At any stage, user can revert to `Private` (draft) or back to `Listed`, with a visible state history timeline for context.
 
 ### Flow: Respond to a Want-to-Buy Request

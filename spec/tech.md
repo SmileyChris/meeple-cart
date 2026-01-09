@@ -73,10 +73,19 @@ trades {
   listing: relation
   buyer: relation
   seller: relation
-  status: select (initiated/confirmed/completed/disputed)
+  seller_items: relation (multiple)
+  buyer_items: relation (multiple)
+  buyer_cash_amount: number
+  buyer_items_description: text
+  offer_message: text
+  offer_status: select (pending/accepted/declined)
+  status: select (initiated/accepted/shipped/received/completed/disputed/cancelled)
+  tracking_number: string
+  shipped_at: date
+  received_at: date
+  completed_date: date
   rating: number
   review: text
-  completed_date: date
 }
 
 vouches {
