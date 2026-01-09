@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 🎯 Current Focus: MVP Implementation
 
-**Primary Guide:** [MVP_IMPLEMENTATION_PLAN.md](./MVP_IMPLEMENTATION_PLAN.md)
+**Primary Guide:** [spec/mvp-plan.md](./spec/mvp-plan.md)
 **Status:** 70% complete, 3 weeks to MVP launch
 **Current Sprint:** Week 1 - Core Trade Flow
 
@@ -14,7 +14,7 @@ Meeple Cart is a board game trading platform for New Zealand. The **database sch
 
 ### Your Mission
 
-Implement the trade workflow following the day-by-day plan in MVP_IMPLEMENTATION_PLAN.md:
+1. Implement the trade workflow following the day-by-day plan in [spec/mvp-plan.md](./spec/mvp-plan.md):
 
 1. **Week 1 (Days 1-5):** Trade initiation → confirmation → completion
 2. **Week 2 (Days 6-10):** Feedback system (ratings, reviews, vouches)
@@ -22,7 +22,7 @@ Implement the trade workflow following the day-by-day plan in MVP_IMPLEMENTATION
 
 ### Before You Start
 
-1. Read [MVP_IMPLEMENTATION_PLAN.md](./MVP_IMPLEMENTATION_PLAN.md) sections:
+1. Read [spec/mvp-plan.md](./spec/mvp-plan.md) sections:
    - Executive Summary (understand the gap)
    - Current week's goals (know what to build)
    - Specific day's tasks (detailed implementation steps)
@@ -245,7 +245,7 @@ The platform uses a three-tier model:
 Each day in the MVP plan follows this pattern:
 
 1. **Morning:**
-   - Read the day's section in MVP_IMPLEMENTATION_PLAN.md
+   - Read the day's section in [spec/mvp-plan.md](./spec/mvp-plan.md)
    - Review acceptance criteria
    - Check referenced files exist
 
@@ -678,7 +678,7 @@ console.log('Expanded buyer:', trade.expand?.buyer);
 
 ## Next Steps
 
-1. **Start Implementation:** Begin with Day 1 in [MVP_IMPLEMENTATION_PLAN.md](./MVP_IMPLEMENTATION_PLAN.md)
+1. **Start Implementation:** Begin with Day 1 in [spec/mvp-plan.md](./spec/mvp-plan.md)
 2. **Reference Detailed Specs:** Check [spec/trade-flow-gaps.md](./spec/trade-flow-gaps.md) for code examples
 3. **Test Continuously:** Use two-browser setup to test as different users
 4. **Commit Often:** Small, focused commits with clear messages

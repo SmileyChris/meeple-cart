@@ -78,7 +78,7 @@ The `just dev` recipe handles everything:
 
 ### 📅 Coming Next (3-Week Plan)
 
-See **[MVP_IMPLEMENTATION_PLAN.md](./MVP_IMPLEMENTATION_PLAN.md)** for detailed roadmap.
+See **[spec/mvp-plan.md](./spec/mvp-plan.md)** for detailed roadmap.
 
 **Week 1:** Complete trade workflow (initiate → confirm → complete)
 **Week 2:** Feedback & trust system (ratings, reviews, vouches)
@@ -139,10 +139,11 @@ meeple/
 │   ├── migrations_backup/   # Historical migrations
 │   ├── schema/              # pb_schema.json snapshot
 │   └── README.md            # Backend usage notes
-├── spec/                    # Feature specifications (6 docs)
+├── spec/                    # Feature specifications & migration docs
+│   ├── migration/           # Migration guides and status
+│   ├── reports/             # Progress and status reports
+│   └── ...                  # Original specifications
 ├── docs/                    # Architecture & system docs
-├── scripts/                 # Development scripts
-└── tests/                   # E2E tests (Playwright)
 ```
 
 ---
@@ -198,14 +199,15 @@ npm run seed:demo     # Seed demo data (from scripts/seed-demo-data.ts)
 
 ## 📖 Documentation
 
-| Document                                                       | Description                                    |
-| -------------------------------------------------------------- | ---------------------------------------------- |
-| **[MVP_IMPLEMENTATION_PLAN.md](./MVP_IMPLEMENTATION_PLAN.md)** | **Start here** - 3-week roadmap to launch      |
-| [CLAUDE.md](./CLAUDE.md)                                       | Development setup & commands for AI assistants |
-| [spec/prd.md](./spec/prd.md)                                   | Product requirements & original vision         |
-| [spec/trade-flow-gaps.md](./spec/trade-flow-gaps.md)           | Detailed implementation specs for trade flow   |
-| [docs/trust-and-vouches.md](./docs/trust-and-vouches.md)       | Trust system documentation                     |
-| [docs/listings.md](./docs/listings.md)                         | Listing lifecycle & mechanics                  |
+| Document                                             | Description                                    |
+| ---------------------------------------------------- | ---------------------------------------------- |
+| **[spec/mvp-plan.md](./spec/mvp-plan.md)**           | **Start here** - 3-week roadmap to launch      |
+| [CLAUDE.md](./CLAUDE.md)                             | Development setup & commands for AI assistants |
+| [spec/prd.md](./spec/prd.md)                         | Product requirements & original vision         |
+| [spec/trade-flow-gaps.md](./spec/trade-flow-gaps.md) | Detailed implementation specs for trade flow   |
+| [spec/migration/guide.md](./spec/migration/guide.md) | **Database Setup Guide**                       |
+| [docs/trust-and-vouches.md](./docs/trust-and-vouches.md) | Trust system documentation                     |
+| [docs/listings.md](./docs/listings.md)               | Listing lifecycle & mechanics                  |
 
 ---
 
@@ -222,14 +224,14 @@ npm run seed:demo     # Seed demo data (from scripts/seed-demo-data.ts)
 **Next Week:** Feedback & trust system
 **Week After:** Browse/search + launch prep
 
-Track progress in [MVP_IMPLEMENTATION_PLAN.md](./MVP_IMPLEMENTATION_PLAN.md)
+Track progress in [spec/mvp-plan.md](./spec/mvp-plan.md)
 
 ---
 
 ## 🤝 Contributing
 
 1. Read [CLAUDE.md](./CLAUDE.md) for setup & conventions
-2. Check [MVP_IMPLEMENTATION_PLAN.md](./MVP_IMPLEMENTATION_PLAN.md) for current priorities
+2. Check [spec/mvp-plan.md](./spec/mvp-plan.md) for current priorities
 3. Create feature branch: `feat/your-feature-name`
 4. Follow existing code style (Prettier enforced)
 5. Write tests for new features
@@ -300,4 +302,4 @@ See [GitHub Issues](./issues) for full list.
 
 ---
 
-**Ready to contribute?** Start with [MVP_IMPLEMENTATION_PLAN.md](./MVP_IMPLEMENTATION_PLAN.md) 🚀
+**Ready to contribute?** Start with [spec/mvp-plan.md](./spec/mvp-plan.md) 🚀
