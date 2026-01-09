@@ -36,13 +36,13 @@ export function buildInput(
   lines.push('');
 
   // Want list entries
-  // Format: (username) wanted_submission_id : offering_submission_id
+  // Format: (userId) wanted_submission_id : offering_submission_id
   for (const want of wantLists) {
-    const username = want.expand?.my_submission?.expand?.user?.username ?? 'unknown';
+    const userId = want.expand?.my_submission?.expand?.user?.id ?? 'unknown';
     const wantedId = want.wanted_submission;
     const offeredId = want.my_submission;
 
-    lines.push(`(${username}) ${wantedId} : ${offeredId}`);
+    lines.push(`(${userId}) ${wantedId} : ${offeredId}`);
   }
 
   return lines.join('\n');

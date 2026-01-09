@@ -1,7 +1,7 @@
 /// <reference path="../pb_data/types.d.ts" />
 migrate((app) => {
   // Get the auto-created users collection
-  const users = app.findCollectionByNameOrId('users');
+  const users = app.findCollectionByNameOrId("users");
 
   // Add custom fields using proper field type constructors
   users.fields.add(new TextField({
@@ -120,7 +120,7 @@ migrate((app) => {
   app.save(users);
 }, (app) => {
   // Rollback: remove custom fields from users collection
-  const users = app.findCollectionByNameOrId('users');
+  const users = app.findCollectionByNameOrId("users");
 
   // Remove fields by name
   const fieldNames = [

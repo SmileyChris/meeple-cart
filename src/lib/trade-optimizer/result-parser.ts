@@ -67,15 +67,13 @@ export function parseResults(
         submission,
       });
 
-      // Track participants (use user IDs, not usernames)
+      // Track participants (now using user IDs directly from output)
       const givingUserId = submission.expand?.user?.id || givingUser;
-      const receivingUserId = receivingUser; // This comes from the output
+      const receivingUserId = receivingUser;
 
       if (!currentChain.participants.includes(givingUserId)) {
         currentChain.participants.push(givingUserId);
       }
-      // Note: receivingUser from output is username, need to look it up
-      // For now, we'll track it but this needs improvement
       if (!currentChain.participants.includes(receivingUserId)) {
         currentChain.participants.push(receivingUserId);
       }

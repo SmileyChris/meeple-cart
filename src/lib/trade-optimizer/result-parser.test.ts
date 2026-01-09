@@ -35,7 +35,7 @@ bob receives sub1 from alice
     expect(chains).toHaveLength(1);
     expect(chains[0].chainNumber).toBe(1);
     expect(chains[0].trades).toHaveLength(2);
-    expect(chains[0].participants).toContain('alice');
+    expect(chains[0].participants).toContain('alice_id');
     expect(chains[0].participants).toContain('bob_id');
   });
 

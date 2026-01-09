@@ -3,10 +3,7 @@ migrate((app) => {
   const collection = app.findCollectionByNameOrId('discussion_threads');
 
   // Remove the thread_type field - it's redundant with category
-  const threadTypeField = collection.fields.find(f => f.name === 'thread_type');
-  if (threadTypeField) {
-    collection.fields.remove(threadTypeField);
-  }
+  collection.fields.removeByName('thread_type');
 
   // Remove the index on thread_type
   collection.indexes = collection.indexes.filter(idx => !idx.includes('thread_type'));

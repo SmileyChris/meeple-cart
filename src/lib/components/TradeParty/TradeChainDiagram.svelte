@@ -1,12 +1,21 @@
-<script lang="ts">
-  import type { TradePartyMatchRecord } from '$lib/types/pocketbase';
+  import type { TradePartyMatchRecord, TradeRecord, UserRecord, TradePartySubmissionRecord } from '$lib/types/pocketbase';
+  import type { TradePartyContextRecord } from '$lib/types/trade-party-context';
 
   interface Props {
-    matches: TradePartyMatchRecord[];
+    matches: (TradePartyMatchRecord | TradePartyContextRecord)[];
     currentUserId: string;
+    isDraft?: boolean;
   }
 
-  let { matches, currentUserId }: Props = $props();
+  let { matches, currentUserId, isDraft }: Props = $props();
+
+  // Helper to get name from user or record, handles anonymization
+  function getName(userIndex: number, userRecord?: UserRecord): string {
+    if (isDraft) {
+      return `Participant ${String.fromCharCode(65 + userIndex)}`; // A, B, C...
+    }
+    return userRecord?.display_name || userRecord?.username || 'Unknown User';
+  }
 
   // Build a map of user -> user trades to visualize the chain
   let tradeFlow = $derived(() => {
@@ -22,22 +31,38 @@
       position: number;
     }> = [];
 
-    for (const match of matches) {
-      const fromUser =
-        match.expand?.giving_user?.display_name ||
-        match.expand?.giving_user?.username ||
-        'Unknown User';
-      const toUser =
-        match.expand?.receiving_user?.display_name ||
-        match.expand?.receiving_user?.username ||
-        'Unknown User';
-      const game = match.expand?.giving_submission?.title || 'Unknown Game';
+    for (let i = 0; i < matches.length; i++) {
+      const match = matches[i];
+      
+      let fromUserRecord: UserRecord | undefined;
+      let toUserRecord: UserRecord | undefined;
+      let gameTitle = 'Unknown Game';
+      let givingUserId = '';
+      let receivingUserId = '';
+
+      // Handle both legacy MatchRecord and new ContextRecord
+      if ('giving_user' in match) {
+        // Legacy/Finalized MatchRecord
+        fromUserRecord = match.expand?.giving_user as UserRecord;
+        toUserRecord = match.expand?.receiving_user as UserRecord;
+        gameTitle = match.expand?.giving_submission?.title || 'Unknown Game';
+        givingUserId = match.giving_user;
+        receivingUserId = match.receiving_user;
+      } else {
+        // New ContextRecord
+        const trade = match.expand?.trade as TradeRecord;
+        fromUserRecord = trade?.expand?.seller;
+        toUserRecord = trade?.expand?.buyer;
+        gameTitle = (match.expand?.giving_submission as TradePartySubmissionRecord)?.title || 'Unknown Game';
+        givingUserId = trade?.seller || '';
+        receivingUserId = trade?.buyer || '';
+      }
 
       flow.push({
-        from: fromUser,
-        to: toUser,
-        game,
-        isCurrentUser: match.giving_user === currentUserId || match.receiving_user === currentUserId,
+        from: getName(i, fromUserRecord),
+        to: getName((i + 1) % matches.length, toUserRecord),
+        game: gameTitle,
+        isCurrentUser: givingUserId === currentUserId || receivingUserId === currentUserId,
         position: match.chain_position || 0,
       });
     }

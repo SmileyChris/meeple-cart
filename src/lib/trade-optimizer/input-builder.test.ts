@@ -8,23 +8,23 @@ describe('buildInput', () => {
       {
         id: 'sub1',
         title: 'Wingspan',
-        user: 'alice',
+        user: 'alice_id',
         trade_party: 'party1',
         condition: 'like_new',
         status: 'approved',
         expand: {
-          user: { id: 'alice', username: 'alice', display_name: 'Alice' } as any,
+          user: { id: 'alice_id', username: 'alice', display_name: 'Alice' } as any,
         },
       } as any,
       {
         id: 'sub2',
         title: 'Gloomhaven',
-        user: 'bob',
+        user: 'bob_id',
         trade_party: 'party1',
         condition: 'good',
         status: 'approved',
         expand: {
-          user: { id: 'bob', username: 'bob', display_name: 'Bob' } as any,
+          user: { id: 'bob_id', username: 'bob', display_name: 'Bob' } as any,
         },
       } as any,
     ];
@@ -39,7 +39,7 @@ describe('buildInput', () => {
           my_submission: {
             ...submissions[0],
             expand: {
-              user: { id: 'alice', username: 'alice' } as any,
+              user: { id: 'alice_id', username: 'alice' } as any,
             },
           } as any,
         },
@@ -54,7 +54,7 @@ describe('buildInput', () => {
     expect(input).toContain('sub1 Wingspan');
     expect(input).toContain('sub2 Gloomhaven');
     expect(input).toContain('!END-OFFICIAL-NAMES');
-    expect(input).toContain('(alice) sub2 : sub1');
+    expect(input).toContain('(alice_id) sub2 : sub1');
   });
 
   it('escapes special characters in titles', () => {
@@ -81,9 +81,9 @@ describe('buildInput', () => {
 
   it('handles multiple want list entries for same submission', () => {
     const submissions: TradePartySubmissionRecord[] = [
-      { id: 'sub1', title: 'Game A', user: 'alice' } as any,
-      { id: 'sub2', title: 'Game B', user: 'bob' } as any,
-      { id: 'sub3', title: 'Game C', user: 'charlie' } as any,
+      { id: 'sub1', title: 'Game A', user: 'alice_id', expand: { user: { id: 'alice_id' } } } as any,
+      { id: 'sub2', title: 'Game B', user: 'bob_id', expand: { user: { id: 'bob_id' } } } as any,
+      { id: 'sub3', title: 'Game C', user: 'charlie_id', expand: { user: { id: 'charlie_id' } } } as any,
     ];
 
     const wantLists: TradePartyWantListRecord[] = [
@@ -94,7 +94,7 @@ describe('buildInput', () => {
         preference_rank: 1,
         expand: {
           my_submission: {
-            expand: { user: { username: 'alice' } as any },
+            expand: { user: { id: 'alice_id' } as any },
           } as any,
         },
       } as any,
@@ -105,7 +105,7 @@ describe('buildInput', () => {
         preference_rank: 2,
         expand: {
           my_submission: {
-            expand: { user: { username: 'alice' } as any },
+            expand: { user: { id: 'alice_id' } as any },
           } as any,
         },
       } as any,
@@ -114,15 +114,15 @@ describe('buildInput', () => {
     const input = buildInput(submissions, wantLists);
 
     // Both want entries should be present
-    expect(input).toContain('(alice) sub2 : sub1');
-    expect(input).toContain('(alice) sub3 : sub1');
+    expect(input).toContain('(alice_id) sub2 : sub1');
+    expect(input).toContain('(alice_id) sub3 : sub1');
   });
 
   it('handles circular trades (A wants B, B wants C, C wants A)', () => {
     const submissions: TradePartySubmissionRecord[] = [
-      { id: 'sub1', title: 'Game A', user: 'alice' } as any,
-      { id: 'sub2', title: 'Game B', user: 'bob' } as any,
-      { id: 'sub3', title: 'Game C', user: 'charlie' } as any,
+      { id: 'sub1', title: 'Game A', user: 'alice_id', expand: { user: { id: 'alice_id' } } } as any,
+      { id: 'sub2', title: 'Game B', user: 'bob_id', expand: { user: { id: 'bob_id' } } } as any,
+      { id: 'sub3', title: 'Game C', user: 'charlie_id', expand: { user: { id: 'charlie_id' } } } as any,
     ];
 
     const wantLists: TradePartyWantListRecord[] = [
@@ -133,7 +133,7 @@ describe('buildInput', () => {
         preference_rank: 1,
         expand: {
           my_submission: {
-            expand: { user: { username: 'alice' } as any },
+            expand: { user: { id: 'alice_id' } as any },
           } as any,
         },
       } as any,
@@ -144,7 +144,7 @@ describe('buildInput', () => {
         preference_rank: 1,
         expand: {
           my_submission: {
-            expand: { user: { username: 'bob' } as any },
+            expand: { user: { id: 'bob_id' } as any },
           } as any,
         },
       } as any,
@@ -155,7 +155,7 @@ describe('buildInput', () => {
         preference_rank: 1,
         expand: {
           my_submission: {
-            expand: { user: { username: 'charlie' } as any },
+            expand: { user: { id: 'charlie_id' } as any },
           } as any,
         },
       } as any,
@@ -163,9 +163,9 @@ describe('buildInput', () => {
 
     const input = buildInput(submissions, wantLists);
 
-    expect(input).toContain('(alice) sub2 : sub1');
-    expect(input).toContain('(bob) sub3 : sub2');
-    expect(input).toContain('(charlie) sub1 : sub3');
+    expect(input).toContain('(alice_id) sub2 : sub1');
+    expect(input).toContain('(bob_id) sub3 : sub2');
+    expect(input).toContain('(charlie_id) sub1 : sub3');
   });
 
   it('handles empty submissions and want lists', () => {
