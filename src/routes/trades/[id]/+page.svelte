@@ -32,9 +32,14 @@
   let vouchError = $state<string | null>(null);
   let submittingVouch = $state(false);
 
+  let trackingNumber = $state(trade.tracking_number || '');
+  let showTrackingInput = $state(false);
+
   const statusLabels: Record<string, string> = {
-    initiated: 'Initiated',
-    confirmed: 'Confirmed',
+    initiated: 'Offer Pending',
+    accepted: 'Accepted',
+    shipped: 'Shipped',
+    received: 'Received',
     completed: 'Completed',
     disputed: 'Disputed',
     cancelled: 'Cancelled',
@@ -42,7 +47,9 @@
 
   const statusColors: Record<string, string> = {
     initiated: 'border-amber-500/80 bg-amber-500/10 text-badge-amber',
-    confirmed: 'border-sky-500/80 bg-sky-500/10 text-badge-sky',
+    accepted: 'border-sky-500/80 bg-sky-500/10 text-badge-sky',
+    shipped: 'border-blue-500/80 bg-blue-500/10 text-badge-blue',
+    received: 'border-indigo-500/80 bg-indigo-500/10 text-badge-indigo',
     completed: 'border-emerald-500/80 bg-emerald-500/10 text-badge-emerald',
     disputed: 'border-rose-500/80 bg-rose-500/10 text-badge-rose',
     cancelled: 'border-slate-500/80 bg-slate-500/10 text-slate-400',
@@ -53,14 +60,23 @@
     processing = true;
 
     try {
-      const updatedTrade = await pb.collection('trades').update<TradeRecord>(trade.id, {
-        status: newStatus,
-      });
+      const data: Partial<TradeRecord> = { status: newStatus };
+      if (newStatus === 'shipped') {
+        data.shipped_at = new Date().toISOString();
+        data.tracking_number = trackingNumber.trim() || undefined;
+      } else if (newStatus === 'received') {
+        data.received_at = new Date().toISOString();
+      }
+
+      const updatedTrade = await pb.collection('trades').update<TradeRecord>(trade.id, data);
 
       // If completing trade, update listing and increment trade counts
       if (newStatus === 'completed') {
         await completeTradeFlow();
       }
+
+      // Send notifications based on status change
+      await sendStatusNotification(newStatus);
 
       trade = updatedTrade;
       await invalidate('app:trade');
@@ -72,12 +88,65 @@
     }
   }
 
+  async function sendStatusNotification(status: string) {
+    let title = '';
+    let message = '';
+    let type = 'new_message';
+    let recipientId = '';
+
+    switch (status) {
+      case 'shipped':
+        title = 'Trade shipped!';
+        message = `${seller.display_name} has marked the items as shipped for "${listing.title}"`;
+        if (trackingNumber.trim()) message += `. Tracking: ${trackingNumber.trim()}`;
+        type = 'trade_shipped';
+        recipientId = buyer.id;
+        break;
+      case 'received':
+        title = 'Items received!';
+        message = `${buyer.display_name} confirmed they received the items for "${listing.title}"`;
+        type = 'trade_received';
+        recipientId = seller.id;
+        break;
+      case 'completed':
+        title = 'Trade completed!';
+        message = `Your trade for "${listing.title}" is officially complete!`;
+        type = 'trade_completed';
+        // We notify both in completeTradeFlow
+        return;
+      case 'disputed':
+        title = 'Trade disputed';
+        message = `${$currentUser?.display_name} reported an issue with the trade for "${listing.title}"`;
+        type = 'new_message';
+        recipientId = otherParty.id;
+        break;
+      default:
+        return;
+    }
+
+    if (recipientId) {
+      await pb.collection('notifications').create({
+        user: recipientId,
+        type,
+        title,
+        message,
+        link: `/trades/${trade.id}`,
+        read: false,
+      });
+    }
+  }
+
   async function completeTradeFlow() {
     try {
       // Update listing status
       const oldStatus = listing.status;
       await pb.collection('listings').update(listing.id, {
         status: 'completed',
+      });
+
+      // Update trade with completed date
+      await pb.collection('trades').update(trade.id, {
+        completed_date: new Date().toISOString(),
       });
 
       // Log status change
@@ -89,24 +158,35 @@
         $currentUser!.id
       );
 
-      // Update only selected games to sold (or all if no games specified)
-      if (trade.games && trade.games.length > 0) {
-        // Mark only selected games as sold
-        for (const gameId of trade.games) {
-          await pb.collection('items').update(gameId, {
+      // Mark seller items as sold
+      if (trade.seller_items && trade.seller_items.length > 0) {
+        for (const itemId of trade.seller_items) {
+          await pb.collection('items').update(itemId, {
             status: 'sold',
           });
         }
       } else {
-        // Legacy: mark all games as sold if no specific games selected
-        const games = await pb.collection('items').getFullList({
+        // Legacy: mark all games as sold if no specific items selected
+        const items = await pb.collection('items').getFullList({
           filter: `listing = "${listing.id}"`,
         });
 
-        for (const game of games) {
-          await pb.collection('items').update(game.id, {
+        for (const item of items) {
+          await pb.collection('items').update(item.id, {
             status: 'sold',
           });
+        }
+      }
+
+      // Mark buyer items as sold if any
+      if (trade.buyer_items && trade.buyer_items.length > 0) {
+        for (const itemId of trade.buyer_items) {
+          await pb
+            .collection('items')
+            .update(itemId, {
+              status: 'sold',
+            })
+            .catch((err) => console.warn(`Failed to mark buyer item ${itemId} as sold`, err));
         }
       }
 
@@ -122,7 +202,7 @@
       // Send completion notifications
       await pb.collection('notifications').create({
         user: buyer.id,
-        type: 'new_message',
+        type: 'trade_completed',
         title: 'Trade completed!',
         message: `Your trade with ${seller.display_name} for "${listing.title}" is complete.`,
         link: `/trades/${trade.id}`,
@@ -131,7 +211,7 @@
 
       await pb.collection('notifications').create({
         user: seller.id,
-        type: 'new_message',
+        type: 'trade_completed',
         title: 'Trade completed!',
         message: `Your trade with ${buyer.display_name} for "${listing.title}" is complete.`,
         link: `/trades/${trade.id}`,
@@ -144,11 +224,15 @@
   }
 
   function handleConfirmReceipt() {
-    updateTradeStatus('confirmed');
+    updateTradeStatus('received');
   }
 
   function handleMarkShipped() {
-    updateTradeStatus('confirmed');
+    if (listing.shipping_available && !trackingNumber.trim() && !showTrackingInput) {
+      showTrackingInput = true;
+      return;
+    }
+    updateTradeStatus('shipped');
   }
 
   function handleCompleteTrade() {
@@ -190,7 +274,7 @@
       // Send notification to other party
       await pb.collection('notifications').create({
         user: otherParty.id,
-        type: 'new_message',
+        type: 'trade_cancelled',
         title: 'Trade cancelled',
         message: `${$currentUser?.display_name} cancelled the trade for "${listing.title}"`,
         link: `/listings/${listing.id}`,
@@ -229,10 +313,10 @@
       feedbackReview = '';
       await invalidate('app:trade');
 
-      // Optionally notify the other party
+      // Notify the other party
       await pb.collection('notifications').create({
         user: otherParty.id,
-        type: 'new_message',
+        type: 'trade_completed',
         title: 'Received feedback',
         message: `${$currentUser?.display_name} left you a ${feedbackRating}-star review`,
         link: `/trades/${trade.id}`,
@@ -326,58 +410,78 @@
     <!-- Trade Progress Timeline -->
     <section class="rounded-xl border border-subtle bg-surface-card transition-colors p-6">
       <h2 class="text-xl font-semibold text-primary mb-4">Trade Progress</h2>
-      <ol class="space-y-3 text-sm">
+      <ol class="space-y-4 text-sm">
+        <!-- 1. Accepted -->
         <li
-          class={`flex items-center gap-3 ${trade.status === 'initiated' || trade.status === 'confirmed' || trade.status === 'completed' ? 'text-emerald-300' : 'text-muted'}`}
+          class={`flex items-center gap-3 ${['accepted', 'shipped', 'received', 'completed'].includes(trade.status) ? 'text-emerald-300' : 'text-muted'}`}
         >
           <span
-            class={`flex h-8 w-8 items-center justify-center rounded-full border ${trade.status === 'initiated' || trade.status === 'confirmed' || trade.status === 'completed' ? 'border-emerald-500 bg-emerald-500/20' : 'border-subtle bg-surface-panel'}`}
+            class={`flex h-8 w-8 items-center justify-center rounded-full border ${['accepted', 'shipped', 'received', 'completed'].includes(trade.status) ? 'border-emerald-500 bg-emerald-500/20' : 'border-subtle bg-surface-panel'}`}
           >
-            {#if trade.status === 'initiated' || trade.status === 'confirmed' || trade.status === 'completed'}
-              ✓
-            {:else}
-              1
-            {/if}
+            {['accepted', 'shipped', 'received', 'completed'].includes(trade.status) ? '✓' : '1'}
           </span>
-          <span>Trade initiated - {formatDate(trade.created)}</span>
+          <div class="flex flex-col">
+            <span class="font-medium">Offer Accepted</span>
+            {#if trade.updated && trade.status !== 'initiated'}
+              <span class="text-xs opacity-70">{formatDate(trade.updated)}</span>
+            {/if}
+          </div>
         </li>
 
+        <!-- 2. Shipped -->
         <li
-          class={`flex items-center gap-3 ${trade.status === 'confirmed' || trade.status === 'completed' ? 'text-emerald-300' : 'text-muted'}`}
+          class={`flex items-center gap-3 ${['shipped', 'received', 'completed'].includes(trade.status) ? 'text-emerald-300' : 'text-muted'}`}
         >
           <span
-            class={`flex h-8 w-8 items-center justify-center rounded-full border ${trade.status === 'confirmed' || trade.status === 'completed' ? 'border-emerald-500 bg-emerald-500/20' : 'border-subtle bg-surface-panel'}`}
+            class={`flex h-8 w-8 items-center justify-center rounded-full border ${['shipped', 'received', 'completed'].includes(trade.status) ? 'border-emerald-500 bg-emerald-500/20' : 'border-subtle bg-surface-panel'}`}
           >
-            {#if trade.status === 'confirmed' || trade.status === 'completed'}
-              ✓
-            {:else}
-              2
-            {/if}
+            {['shipped', 'received', 'completed'].includes(trade.status) ? '✓' : '2'}
           </span>
-          <span
-            >Seller confirmed - {trade.status === 'confirmed' || trade.status === 'completed'
-              ? formatDate(trade.updated)
-              : 'Pending'}</span
-          >
+          <div class="flex flex-col">
+            <span class="font-medium">Items Shipped / Handed Over</span>
+            {#if trade.shipped_at}
+              <span class="text-xs opacity-70">{formatDate(trade.shipped_at)}</span>
+              {#if trade.tracking_number}
+                <span class="text-xs font-mono bg-surface-panel px-1 rounded mt-1"
+                  >Track: {trade.tracking_number}</span
+                >
+              {/if}
+            {/if}
+          </div>
         </li>
 
+        <!-- 3. Received -->
+        <li
+          class={`flex items-center gap-3 ${['received', 'completed'].includes(trade.status) ? 'text-emerald-300' : 'text-muted'}`}
+        >
+          <span
+            class={`flex h-8 w-8 items-center justify-center rounded-full border ${['received', 'completed'].includes(trade.status) ? 'border-emerald-500 bg-emerald-500/20' : 'border-subtle bg-surface-panel'}`}
+          >
+            {['received', 'completed'].includes(trade.status) ? '✓' : '3'}
+          </span>
+          <div class="flex flex-col">
+            <span class="font-medium">Receipt Confirmed</span>
+            {#if trade.received_at}
+              <span class="text-xs opacity-70">{formatDate(trade.received_at)}</span>
+            {/if}
+          </div>
+        </li>
+
+        <!-- 4. Completed -->
         <li
           class={`flex items-center gap-3 ${trade.status === 'completed' ? 'text-emerald-300' : 'text-muted'}`}
         >
           <span
             class={`flex h-8 w-8 items-center justify-center rounded-full border ${trade.status === 'completed' ? 'border-emerald-500 bg-emerald-500/20' : 'border-subtle bg-surface-panel'}`}
           >
-            {#if trade.status === 'completed'}
-              ✓
-            {:else}
-              3
-            {/if}
+            {trade.status === 'completed' ? '✓' : '4'}
           </span>
-          <span
-            >Trade completed - {trade.status === 'completed' && trade.completed_date
-              ? formatDate(trade.completed_date)
-              : 'Pending'}</span
-          >
+          <div class="flex flex-col">
+            <span class="font-medium">Trade Completed</span>
+            {#if trade.status === 'completed' && trade.completed_date}
+              <span class="text-xs opacity-70">{formatDate(trade.completed_date)}</span>
+            {/if}
+          </div>
         </li>
       </ol>
     </section>
@@ -428,37 +532,94 @@
           </div>
         </div>
       {/if}
-
-      <!-- Selected Games -->
-      {#if trade.games && trade.games.length > 0}
-        <div>
-          <h3 class="text-sm font-semibold text-secondary mb-2">
-            Games in this trade ({trade.games.length})
-          </h3>
-          <div class="space-y-2">
-            {#if trade.expand?.games}
-              {#each trade.expand.games as game}
-                <div class="rounded-lg border border-subtle bg-surface-body p-3 text-sm">
-                  <div class="font-medium text-primary">{game.title}</div>
-                  <div class="mt-1 text-xs text-muted">
-                    {game.condition}
-                    {#if game.price}
-                      · ${game.price}
-                    {:else if game.trade_value}
-                      · Value: ${game.trade_value}
-                    {/if}
+      <!-- Items being traded -->
+      <div class="grid gap-6 md:grid-cols-2">
+        <!-- Selected Items from Seller -->
+        {#if trade.seller_items && trade.seller_items.length > 0}
+          <div>
+            <h3 class="text-sm font-semibold text-secondary mb-2">
+              Items from {seller.display_name} ({trade.seller_items.length})
+            </h3>
+            <div class="space-y-2">
+              {#if trade.expand?.seller_items}
+                {#each trade.expand.seller_items as item}
+                  <div class="rounded-lg border border-subtle bg-surface-body p-3 text-sm">
+                    <div class="font-medium text-primary">{item.title}</div>
+                    <div class="mt-1 text-xs text-muted">
+                      {item.condition}
+                      {#if item.price}
+                        · ${item.price}
+                      {:else if item.trade_value}
+                        · Value: ${item.trade_value}
+                      {/if}
+                    </div>
                   </div>
-                </div>
-              {/each}
-            {:else}
-              <p class="text-sm text-muted">{trade.games.length} game(s) selected</p>
-            {/if}
+                {/each}
+              {:else}
+                <p class="text-sm text-muted">{trade.seller_items.length} item(s) selected</p>
+              {/if}
+            </div>
           </div>
+        {:else}
+          <div>
+            <h3 class="text-sm font-semibold text-secondary mb-2">Items</h3>
+            <p class="text-sm text-muted">All items in the listing</p>
+          </div>
+        {/if}
+
+        <!-- Items from Buyer -->
+        {#if trade.buyer_items && trade.buyer_items.length > 0}
+          <div>
+            <h3 class="text-sm font-semibold text-secondary mb-2">
+              Items from {buyer.display_name} ({trade.buyer_items.length})
+            </h3>
+            <div class="space-y-2">
+              {#if trade.expand?.buyer_items}
+                {#each trade.expand.buyer_items as item}
+                  <div class="rounded-lg border border-subtle bg-surface-body p-3 text-sm">
+                    <div class="font-medium text-primary">{item.title}</div>
+                    <div class="mt-1 text-xs text-muted">
+                      {item.condition}
+                    </div>
+                  </div>
+                {/each}
+              {:else}
+                <p class="text-sm text-muted">{trade.buyer_items.length} item(s) selected</p>
+              {/if}
+            </div>
+          </div>
+        {/if}
+      </div>
+
+      <!-- Cash Amount -->
+      {#if trade.buyer_cash_amount}
+        <div class="border-t border-subtle pt-4">
+          <h3 class="text-sm font-semibold text-secondary mb-1">Cash Offer</h3>
+          <p class="text-lg font-bold text-emerald-400">
+            ${(trade.buyer_cash_amount / 100).toFixed(2)}
+          </p>
         </div>
-      {:else}
-        <div>
-          <h3 class="text-sm font-semibold text-secondary mb-2">Items</h3>
-          <p class="text-sm text-muted">All items in the listing</p>
+      {/if}
+
+      <!-- Buyer's Notes/Description -->
+      {#if trade.buyer_items_description}
+        <div class="border-t border-subtle pt-4">
+          <h3 class="text-sm font-semibold text-secondary mb-2">Offer Details</h3>
+          <p
+            class="text-sm text-secondary whitespace-pre-line bg-surface-body p-3 rounded-lg border border-subtle"
+          >
+            {trade.buyer_items_description}
+          </p>
+        </div>
+      {/if}
+
+      <!-- Offer Message -->
+      {#if trade.offer_message}
+        <div class="border-t border-subtle pt-4">
+          <h3 class="text-sm font-semibold text-secondary mb-2">Message</h3>
+          <p class="text-sm text-muted italic">
+            "{trade.offer_message}"
+          </p>
         </div>
       {/if}
     </section>
@@ -473,61 +634,86 @@
         <Alert type="error">{actionError}</Alert>
       {/if}
 
-      <div class="flex flex-wrap gap-3">
-        {#if isSeller && trade.status === 'initiated'}
-          <button
-            onclick={handleMarkShipped}
-            disabled={processing}
-            class="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {processing ? 'Processing...' : 'Confirm & Mark as Shipped'}
-          </button>
+      <div class="flex flex-col gap-4">
+        {#if showTrackingInput}
+          <div class="space-y-2 rounded-lg bg-surface-panel p-4 border border-subtle">
+            <label for="tracking" class="block text-sm font-medium text-secondary">
+              Tracking Number (optional)
+            </label>
+            <input
+              id="tracking"
+              type="text"
+              bind:value={trackingNumber}
+              placeholder="e.g. NZ Post 12345678"
+              class="w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary focus:border-emerald-500 focus:outline-none"
+            />
+            <div class="flex gap-2">
+              <button onclick={handleMarkShipped} disabled={processing} class="btn-primary">
+                Confirm Dispatch
+              </button>
+              <button onclick={() => (showTrackingInput = false)} class="btn-secondary">
+                Cancel
+              </button>
+            </div>
+          </div>
         {/if}
 
-        {#if isBuyer && trade.status === 'confirmed'}
-          <button
-            onclick={handleConfirmReceipt}
-            disabled={processing}
-            class="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {processing ? 'Processing...' : 'Confirm Receipt'}
-          </button>
-        {/if}
+        <div class="flex flex-wrap gap-3">
+          {#if isSeller && trade.status === 'accepted'}
+            <button
+              onclick={handleMarkShipped}
+              disabled={processing || showTrackingInput}
+              class="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {processing ? 'Processing...' : 'Mark as Shipped'}
+            </button>
+          {/if}
 
-        {#if trade.status === 'confirmed'}
-          <button
-            onclick={handleCompleteTrade}
-            disabled={processing}
-            class="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {processing ? 'Processing...' : '✓ Complete Trade'}
-          </button>
-        {/if}
+          {#if isBuyer && trade.status === 'shipped'}
+            <button
+              onclick={handleConfirmReceipt}
+              disabled={processing}
+              class="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {processing ? 'Processing...' : 'Confirm Receipt'}
+            </button>
+          {/if}
 
-        {#if trade.status !== 'completed' && trade.status !== 'disputed' && trade.status !== 'cancelled'}
-          <button
-            onclick={handleDisputeTrade}
-            disabled={processing}
-            class="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {processing ? 'Processing...' : 'Report Issue'}
-          </button>
-        {/if}
+          {#if trade.status === 'received'}
+            <button
+              onclick={handleCompleteTrade}
+              disabled={processing}
+              class="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {processing ? 'Processing...' : '✓ Complete Trade'}
+            </button>
+          {/if}
 
-        {#if trade.status !== 'completed' && trade.status !== 'cancelled'}
-          <button
-            onclick={handleCancelTrade}
-            disabled={processing}
-            class="rounded-lg border border-slate-500 bg-slate-500/10 px-4 py-2 font-semibold text-slate-300 transition hover:bg-slate-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {processing ? 'Processing...' : 'Cancel Trade'}
-          </button>
-        {/if}
+          {#if !['completed', 'disputed', 'cancelled'].includes(trade.status)}
+            <button
+              onclick={handleDisputeTrade}
+              disabled={processing}
+              class="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {processing ? 'Processing...' : 'Report Issue'}
+            </button>
+          {/if}
+
+          {#if trade.status !== 'completed' && trade.status !== 'cancelled'}
+            <button
+              onclick={handleCancelTrade}
+              disabled={processing}
+              class="rounded-lg border border-slate-500 bg-slate-500/10 px-4 py-2 font-semibold text-slate-300 transition hover:bg-slate-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {processing ? 'Processing...' : 'Cancel Trade'}
+            </button>
+          {/if}
+        </div>
+
+        <p class="text-xs text-muted">
+          Both parties must confirm the trade is complete before it's finalized.
+        </p>
       </div>
-
-      <p class="text-xs text-muted">
-        Both parties must confirm the trade is complete before it's finalized.
-      </p>
     </section>
 
     <!-- Trader Info -->

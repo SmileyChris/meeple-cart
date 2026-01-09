@@ -15,9 +15,9 @@ export const load: PageLoad = async ({ params, url }) => {
   const { id } = params;
 
   try {
-    // Fetch trade with expanded relations including games
+    // Fetch trade with expanded relations including items
     const trade = await pb.collection('trades').getOne<TradeRecord>(id, {
-      expand: 'listing,buyer,seller,games',
+      expand: 'listing,buyer,seller,seller_items,buyer_items',
     });
 
     // Verify user is a participant

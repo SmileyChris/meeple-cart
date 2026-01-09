@@ -32,7 +32,14 @@ export interface UserRecord extends RecordModel {
 export type AuthenticatedUser = UserRecord | null;
 
 export type OfferStatus = 'pending' | 'accepted' | 'declined' | 'withdrawn';
-export type TradeStatus = 'initiated' | 'confirmed' | 'completed' | 'disputed' | 'cancelled';
+export type TradeStatus =
+  | 'initiated'
+  | 'accepted'
+  | 'shipped'
+  | 'received'
+  | 'completed'
+  | 'disputed'
+  | 'cancelled';
 export type DeliveryMethod = 'in_person' | 'post' | 'either';
 
 export interface ItemRecord extends RecordModel {
@@ -90,6 +97,9 @@ export interface TradeRecord extends RecordModel {
   status: TradeStatus;
   rating?: number;
   review?: string;
+  shipped_at?: string;
+  received_at?: string;
+  tracking_number?: string;
   completed_date?: string;
   expand?: {
     listing?: RecordModel;

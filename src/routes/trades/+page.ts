@@ -18,7 +18,7 @@ export const load: PageLoad = async ({ url }) => {
 
   let statusFilter = '';
   if (filter === 'active') {
-    statusFilter = 'status = "initiated" || status = "confirmed"';
+    statusFilter = 'status = "initiated" || status = "accepted" || status = "shipped" || status = "received"';
   } else if (filter === 'completed') {
     statusFilter = 'status = "completed"';
   } else if (filter === 'disputed') {
@@ -28,7 +28,7 @@ export const load: PageLoad = async ({ url }) => {
   const trades = await pb.collection('trades').getFullList<TradeRecord>({
     filter: `(buyer = "${user.id}" || seller = "${user.id}") && (${statusFilter})`,
     expand: 'listing,buyer,seller',
-    sort: '-id', // trades table doesn't have a created field, sorting by id instead
+    sort: '-created',
   });
 
   // Count trades by status
@@ -38,7 +38,7 @@ export const load: PageLoad = async ({ url }) => {
   });
 
   const activeTrades = allTrades.filter(
-    (t) => t.status === 'initiated' || t.status === 'confirmed'
+    (t) => ['initiated', 'accepted', 'shipped', 'received'].includes(t.status)
   ).length;
   const completedTrades = allTrades.filter((t) => t.status === 'completed').length;
   const disputedTrades = allTrades.filter((t) => t.status === 'disputed').length;

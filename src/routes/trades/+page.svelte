@@ -11,17 +11,23 @@
   let counts = $derived(data.counts);
 
   const statusLabels: Record<string, string> = {
-    initiated: 'Initiated',
-    confirmed: 'In Progress',
+    initiated: 'Offer Pending',
+    accepted: 'Accepted',
+    shipped: 'Shipped',
+    received: 'Received',
     completed: 'Completed',
     disputed: 'Disputed',
+    cancelled: 'Cancelled',
   };
 
   const statusColors: Record<string, string> = {
     initiated: 'border-amber-500/80 bg-amber-500/10 text-amber-200',
-    confirmed: 'border-sky-500/80 bg-sky-500/10 text-sky-200',
+    accepted: 'border-sky-500/80 bg-sky-500/10 text-sky-200',
+    shipped: 'border-blue-500/80 bg-blue-500/10 text-blue-200',
+    received: 'border-indigo-500/80 bg-indigo-500/10 text-indigo-200',
     completed: 'border-emerald-500/80 bg-emerald-500/10 text-emerald-200',
     disputed: 'border-rose-500/80 bg-rose-500/10 text-rose-200',
+    cancelled: 'border-slate-500/80 bg-slate-500/10 text-slate-300',
   };
 
   function getOtherParty(trade: TradeRecord): UserRecord {

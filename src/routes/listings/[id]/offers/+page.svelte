@@ -81,9 +81,10 @@
     successMessage = null;
 
     try {
-      // 1. Update this offer to 'accepted'
+      // 1. Update this offer to 'accepted' and set trade status to 'accepted'
       await pb.collection('trades').update(offerId, {
         offer_status: 'accepted',
+        status: 'accepted',
       });
 
       // 2. Auto-decline all other pending offers for this listing
@@ -99,7 +100,7 @@
         if (buyer) {
           await pb.collection('notifications').create({
             user: buyer.id,
-            type: 'new_message', // TODO: add 'offer_declined' type
+            type: 'offer_declined',
             title: 'Offer declined',
             message: `Your offer for "${listing.title}" was declined (seller accepted another offer)`,
             link: `/trades/${offer.id}`,
@@ -123,7 +124,7 @@
       if (buyer) {
         await pb.collection('notifications').create({
           user: buyer.id,
-          type: 'new_message', // TODO: add 'offer_accepted' type
+          type: 'offer_accepted',
           title: 'Offer accepted!',
           message: `${$currentUser.display_name} accepted your offer for "${listing.title}"`,
           link: `/trades/${offerId}`,
@@ -168,7 +169,7 @@
       if (buyer) {
         await pb.collection('notifications').create({
           user: buyer.id,
-          type: 'new_message', // TODO: add 'offer_declined' type
+          type: 'offer_declined',
           title: 'Offer declined',
           message: `${$currentUser.display_name} declined your offer for "${listing.title}"${declineReason.trim() ? `: ${declineReason.trim()}` : ''}`,
           link: `/trades/${offerId}`,

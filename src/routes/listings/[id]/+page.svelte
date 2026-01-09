@@ -33,7 +33,9 @@
   // Message
   let offerMessage = $state(''); // Buyer's message with their offer
   // Buyer's own items (loaded when form opens)
-  let buyerItems = $state<Array<{ id: string; title: string; condition: string; listingTitle: string }>>([]);
+  let buyerItems = $state<
+    Array<{ id: string; title: string; condition: string; listingTitle: string }>
+  >([]);
   let loadingBuyerItems = $state(false);
   let showShareModal = $state(false);
   let shareLinkCopied = $state(false);
@@ -311,7 +313,7 @@ View full details: ${shareUrl}`;
     }
 
     if (offerType === 'trade' && !hasItemOffer) {
-      tradeError = 'Please select items to trade or describe what you\'re offering';
+      tradeError = "Please select items to trade or describe what you're offering";
       return;
     }
 
@@ -376,7 +378,7 @@ View full details: ${shareUrl}`;
 
       await pb.collection('notifications').create({
         user: owner.id,
-        type: 'new_message', // TODO: add 'offer_received' type
+        type: 'offer_received',
         title: `New offer from ${$currentUser.display_name}`,
         message: `${$currentUser.display_name} made an offer for "${listing.title}"${offerDetails.length > 0 ? `: ${offerDetails.join(' + ')}` : ''}`,
         link: `/listings/${listing.id}/offers`,
@@ -602,8 +604,14 @@ View full details: ${shareUrl}`;
         <div class="space-y-4">
           {#each data.offerTemplates as template (template.id)}
             {@const templateItems = template.expand?.items ?? []}
-            {@const templateTitle = template.display_name || (templateItems.length === 1 ? templateItems[0]?.title : `${templateItems.length} item bundle`)}
-            <article class="rounded-lg border border-subtle bg-surface-panel p-5 transition-colors hover:border-accent/50">
+            {@const templateTitle =
+              template.display_name ||
+              (templateItems.length === 1
+                ? templateItems[0]?.title
+                : `${templateItems.length} item bundle`)}
+            <article
+              class="rounded-lg border border-subtle bg-surface-panel p-5 transition-colors hover:border-accent/50"
+            >
               <div class="space-y-4">
                 <!-- Header with title and type -->
                 <div class="flex items-start justify-between gap-3">
@@ -612,17 +620,26 @@ View full details: ${shareUrl}`;
                   </h3>
                   <div class="flex flex-wrap items-center gap-2">
                     {#if template.can_post}
-                      <span class="rounded-full border border-subtle bg-surface-card-alt px-2 py-0.5 text-xs text-secondary" title="Can be posted">
+                      <span
+                        class="rounded-full border border-subtle bg-surface-card-alt px-2 py-0.5 text-xs text-secondary"
+                        title="Can be posted"
+                      >
                         📬 Can post
                       </span>
                     {/if}
                     {#if template.open_to_trade_offers}
-                      <span class="rounded-full border border-subtle bg-surface-card-alt px-2 py-0.5 text-xs text-secondary" title="Open to trade offers">
+                      <span
+                        class="rounded-full border border-subtle bg-surface-card-alt px-2 py-0.5 text-xs text-secondary"
+                        title="Open to trade offers"
+                      >
                         🔄 Trades
                       </span>
                     {/if}
                     {#if template.will_consider_split && templateItems.length > 1}
-                      <span class="rounded-full border border-amber-500/50 bg-amber-500/10 px-2 py-0.5 text-xs text-amber-300" title="Will consider selling items separately">
+                      <span
+                        class="rounded-full border border-amber-500/50 bg-amber-500/10 px-2 py-0.5 text-xs text-amber-300"
+                        title="Will consider selling items separately"
+                      >
                         ✂️ May split
                       </span>
                     {/if}
@@ -638,9 +655,7 @@ View full details: ${shareUrl}`;
                     {/if}
                   </div>
                 {:else if template.open_to_trade_offers}
-                  <div class="text-lg font-semibold text-emerald-400">
-                    Trade only
-                  </div>
+                  <div class="text-lg font-semibold text-emerald-400">Trade only</div>
                 {/if}
 
                 <!-- Items included with full details -->
@@ -649,7 +664,12 @@ View full details: ${shareUrl}`;
                     {#each templateItems as item (item.id)}
                       <div
                         id="game-{item.id}"
-                        class="rounded-lg border border-subtle bg-surface-body p-4 {item.status === 'pending' ? 'border-amber-500/50' : item.status === 'sold' ? 'opacity-60' : ''}"
+                        class="rounded-lg border border-subtle bg-surface-body p-4 {item.status ===
+                        'pending'
+                          ? 'border-amber-500/50'
+                          : item.status === 'sold'
+                            ? 'opacity-60'
+                            : ''}"
                       >
                         <div class="flex flex-wrap items-start justify-between gap-3">
                           <div class="space-y-1">
@@ -668,14 +688,20 @@ View full details: ${shareUrl}`;
                               {/if}
                             </div>
                             <div class="flex flex-wrap gap-2 text-xs">
-                              <span class="rounded-full border border-subtle bg-surface-card-alt px-2 py-0.5 text-secondary">
+                              <span
+                                class="rounded-full border border-subtle bg-surface-card-alt px-2 py-0.5 text-secondary"
+                              >
                                 {conditionBadges[item.condition]}
                               </span>
-                              <span class={`rounded-full border px-2 py-0.5 ${statusTone[item.status]}`}>
+                              <span
+                                class={`rounded-full border px-2 py-0.5 ${statusTone[item.status]}`}
+                              >
                                 {statusLabels[item.status]}
                               </span>
                               {#if item.year}
-                                <span class="rounded-full border border-subtle bg-surface-card-alt px-2 py-0.5 text-secondary">
+                                <span
+                                  class="rounded-full border border-subtle bg-surface-card-alt px-2 py-0.5 text-secondary"
+                                >
                                   {item.year}
                                 </span>
                               {/if}
@@ -696,7 +722,9 @@ View full details: ${shareUrl}`;
                     <div class="text-xs font-medium text-secondary mb-2">Looking for in trade:</div>
                     <div class="flex flex-wrap gap-2">
                       {#each template.trade_for_items as wantedItem}
-                        <span class="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-300">
+                        <span
+                          class="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-300"
+                        >
                           {wantedItem.title}
                         </span>
                       {/each}
@@ -706,14 +734,18 @@ View full details: ${shareUrl}`;
 
                 <!-- Notes -->
                 {#if template.notes}
-                  <p class="text-sm text-muted italic border-t border-subtle pt-3">{template.notes}</p>
+                  <p class="text-sm text-muted italic border-t border-subtle pt-3">
+                    {template.notes}
+                  </p>
                 {/if}
               </div>
             </article>
           {/each}
         </div>
       {:else}
-        <div class="rounded-lg border border-dashed border-subtle bg-surface-body p-6 text-center text-sm text-muted">
+        <div
+          class="rounded-lg border border-dashed border-subtle bg-surface-body p-6 text-center text-sm text-muted"
+        >
           No offers have been created for this listing yet.
         </div>
       {/if}
@@ -729,12 +761,7 @@ View full details: ${shareUrl}`;
           <div class="space-y-4">
             <p class="text-sm text-muted">Sign in to send a message to this trader.</p>
             <!-- eslint-disable svelte/no-navigation-without-resolve -->
-            <a
-              class="btn-secondary w-full"
-              href="/login"
-            >
-              Sign in to message
-            </a>
+            <a class="btn-secondary w-full" href="/login"> Sign in to message </a>
             <!-- eslint-enable svelte/no-navigation-without-resolve -->
           </div>
         {:else if owner && $currentUser.id === owner.id}
@@ -824,7 +851,10 @@ View full details: ${shareUrl}`;
                       >
                         {#each games as game (game.id)}
                           <label
-                            class="flex cursor-pointer items-center gap-2 rounded p-2 transition hover:bg-surface-ghost {game.status !== 'available' ? 'opacity-50' : ''}"
+                            class="flex cursor-pointer items-center gap-2 rounded p-2 transition hover:bg-surface-ghost {game.status !==
+                            'available'
+                              ? 'opacity-50'
+                              : ''}"
                           >
                             <input
                               type="checkbox"
@@ -840,11 +870,14 @@ View full details: ${shareUrl}`;
                               class="h-4 w-4 rounded border-subtle text-emerald-500 focus:ring-emerald-500"
                             />
                             <span class="flex-1 text-sm text-primary">{game.title}</span>
-                            <span class="text-xs text-muted">{conditionBadges[game.condition]}</span>
+                            <span class="text-xs text-muted">{conditionBadges[game.condition]}</span
+                            >
                           </label>
                         {/each}
                       </div>
-                      <p class="text-xs text-muted">{selectedGameIds.length} item{selectedGameIds.length !== 1 ? 's' : ''} selected</p>
+                      <p class="text-xs text-muted">
+                        {selectedGameIds.length} item{selectedGameIds.length !== 1 ? 's' : ''} selected
+                      </p>
                     </div>
                   {/if}
 
@@ -860,21 +893,30 @@ View full details: ${shareUrl}`;
                       <button
                         type="button"
                         onclick={() => (offerType = 'cash')}
-                        class="flex-1 rounded-md px-3 py-2 text-sm font-medium transition {offerType === 'cash' ? 'bg-emerald-500 text-[var(--accent-contrast)]' : 'text-secondary hover:text-primary'}"
+                        class="flex-1 rounded-md px-3 py-2 text-sm font-medium transition {offerType ===
+                        'cash'
+                          ? 'bg-emerald-500 text-[var(--accent-contrast)]'
+                          : 'text-secondary hover:text-primary'}"
                       >
                         💰 Cash
                       </button>
                       <button
                         type="button"
                         onclick={() => (offerType = 'trade')}
-                        class="flex-1 rounded-md px-3 py-2 text-sm font-medium transition {offerType === 'trade' ? 'bg-emerald-500 text-[var(--accent-contrast)]' : 'text-secondary hover:text-primary'}"
+                        class="flex-1 rounded-md px-3 py-2 text-sm font-medium transition {offerType ===
+                        'trade'
+                          ? 'bg-emerald-500 text-[var(--accent-contrast)]'
+                          : 'text-secondary hover:text-primary'}"
                       >
                         🔄 Trade
                       </button>
                       <button
                         type="button"
                         onclick={() => (offerType = 'both')}
-                        class="flex-1 rounded-md px-3 py-2 text-sm font-medium transition {offerType === 'both' ? 'bg-emerald-500 text-[var(--accent-contrast)]' : 'text-secondary hover:text-primary'}"
+                        class="flex-1 rounded-md px-3 py-2 text-sm font-medium transition {offerType ===
+                        'both'
+                          ? 'bg-emerald-500 text-[var(--accent-contrast)]'
+                          : 'text-secondary hover:text-primary'}"
                       >
                         💱 Both
                       </button>
@@ -883,9 +925,14 @@ View full details: ${shareUrl}`;
                     <!-- Cash Amount (shown for cash or both) -->
                     {#if offerType === 'cash' || offerType === 'both'}
                       <div class="space-y-1">
-                        <label for="cash-offer" class="text-sm text-secondary">Cash amount (NZD)</label>
+                        <label for="cash-offer" class="text-sm text-secondary"
+                          >Cash amount (NZD)</label
+                        >
                         <div class="relative">
-                          <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-muted">$</span>
+                          <span
+                            class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-muted"
+                            >$</span
+                          >
                           <input
                             id="cash-offer"
                             type="number"
@@ -907,9 +954,13 @@ View full details: ${shareUrl}`;
                         {#if loadingBuyerItems}
                           <p class="text-sm text-muted py-2">Loading your games...</p>
                         {:else if buyerItems.length > 0}
-                          <div class="max-h-36 space-y-1 overflow-y-auto rounded-lg border border-subtle bg-surface-body p-2">
+                          <div
+                            class="max-h-36 space-y-1 overflow-y-auto rounded-lg border border-subtle bg-surface-body p-2"
+                          >
                             {#each buyerItems as item (item.id)}
-                              <label class="flex cursor-pointer items-center gap-2 rounded p-2 transition hover:bg-surface-ghost">
+                              <label
+                                class="flex cursor-pointer items-center gap-2 rounded p-2 transition hover:bg-surface-ghost"
+                              >
                                 <input
                                   type="checkbox"
                                   checked={buyerItemIds.includes(item.id)}
@@ -928,15 +979,22 @@ View full details: ${shareUrl}`;
                             {/each}
                           </div>
                           {#if buyerItemIds.length > 0}
-                            <p class="text-xs text-emerald-400">{buyerItemIds.length} game{buyerItemIds.length !== 1 ? 's' : ''} selected to trade</p>
+                            <p class="text-xs text-emerald-400">
+                              {buyerItemIds.length} game{buyerItemIds.length !== 1 ? 's' : ''} selected
+                              to trade
+                            </p>
                           {/if}
                         {:else}
-                          <p class="text-xs text-muted py-2">You don't have any active listings with available items.</p>
+                          <p class="text-xs text-muted py-2">
+                            You don't have any active listings with available items.
+                          </p>
                         {/if}
 
                         <!-- Free text for items not in system -->
                         <div class="pt-2">
-                          <label for="buyer-items-desc" class="text-xs text-muted">Or describe what you're offering:</label>
+                          <label for="buyer-items-desc" class="text-xs text-muted"
+                            >Or describe what you're offering:</label
+                          >
                           <textarea
                             id="buyer-items-desc"
                             bind:value={buyerItemsDescription}
@@ -960,7 +1018,10 @@ View full details: ${shareUrl}`;
                       <button
                         type="button"
                         onclick={() => (deliveryMethod = 'in_person')}
-                        class="flex-1 rounded-lg border px-3 py-2 text-sm transition {deliveryMethod === 'in_person' ? 'border-emerald-500 bg-emerald-500/10 text-emerald-300' : 'border-subtle text-secondary hover:border-emerald-500/50'}"
+                        class="flex-1 rounded-lg border px-3 py-2 text-sm transition {deliveryMethod ===
+                        'in_person'
+                          ? 'border-emerald-500 bg-emerald-500/10 text-emerald-300'
+                          : 'border-subtle text-secondary hover:border-emerald-500/50'}"
                       >
                         🤝 Meet up
                       </button>
@@ -968,27 +1029,39 @@ View full details: ${shareUrl}`;
                         type="button"
                         onclick={() => (deliveryMethod = 'post')}
                         disabled={!canPostSelectedGames}
-                        class="flex-1 rounded-lg border px-3 py-2 text-sm transition {deliveryMethod === 'post' ? 'border-emerald-500 bg-emerald-500/10 text-emerald-300' : 'border-subtle text-secondary hover:border-emerald-500/50'} disabled:opacity-50 disabled:cursor-not-allowed"
-                        title={!canPostSelectedGames ? 'Seller has not enabled posting for these items' : ''}
+                        class="flex-1 rounded-lg border px-3 py-2 text-sm transition {deliveryMethod ===
+                        'post'
+                          ? 'border-emerald-500 bg-emerald-500/10 text-emerald-300'
+                          : 'border-subtle text-secondary hover:border-emerald-500/50'} disabled:opacity-50 disabled:cursor-not-allowed"
+                        title={!canPostSelectedGames
+                          ? 'Seller has not enabled posting for these items'
+                          : ''}
                       >
                         📬 Post
                       </button>
                       <button
                         type="button"
                         onclick={() => (deliveryMethod = 'either')}
-                        class="flex-1 rounded-lg border px-3 py-2 text-sm transition {deliveryMethod === 'either' ? 'border-emerald-500 bg-emerald-500/10 text-emerald-300' : 'border-subtle text-secondary hover:border-emerald-500/50'}"
+                        class="flex-1 rounded-lg border px-3 py-2 text-sm transition {deliveryMethod ===
+                        'either'
+                          ? 'border-emerald-500 bg-emerald-500/10 text-emerald-300'
+                          : 'border-subtle text-secondary hover:border-emerald-500/50'}"
                       >
                         Either
                       </button>
                     </div>
                     {#if !canPostSelectedGames && deliveryMethod !== 'in_person'}
-                      <p class="text-xs text-amber-400">Note: Posting may not be available for all selected items</p>
+                      <p class="text-xs text-amber-400">
+                        Note: Posting may not be available for all selected items
+                      </p>
                     {/if}
                   </div>
 
                   <!-- SECTION 4: Message -->
                   <div class="space-y-2">
-                    <label for="offer-message" class="text-sm text-secondary">Message (optional)</label>
+                    <label for="offer-message" class="text-sm text-secondary"
+                      >Message (optional)</label
+                    >
                     <textarea
                       id="offer-message"
                       bind:value={offerMessage}
@@ -1093,10 +1166,7 @@ View full details: ${shareUrl}`;
     <section class="mt-12">
       <div class="mb-6 flex items-center justify-between">
         <h2 class="text-2xl font-bold text-primary">Discussion</h2>
-        <a
-          href="/discussions/new?listing={listing.id}"
-          class="btn-secondary"
-        >
+        <a href="/discussions/new?listing={listing.id}" class="btn-secondary">
           Start a Discussion
         </a>
       </div>
