@@ -115,7 +115,7 @@
 
             <div class="border-t border-subtle bg-surface-body px-6 py-3 text-xs text-muted">
               <div class="flex justify-between">
-                <span>Ends {new Date(party.submission_end).toLocaleDateString()}</span>
+                <span>Ends {new Date(party.submission_closes).toLocaleDateString()}</span>
                 {#if party.matching_finalized_at}
                   <span>Matched {new Date(party.matching_finalized_at).toLocaleDateString()}</span>
                 {/if}

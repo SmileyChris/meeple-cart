@@ -38,10 +38,20 @@ if [[ -x "${BINARY_PATH}" ]]; then
 else
   echo "Downloading PocketBase ${VERSION}..." >&2
   curl -fsSL "${URL}" -o "${TMP_DIR}/${ARCHIVE}"
-  unzip -q "${TMP_DIR}/${ARCHIVE}" pocketbase -d "${TMP_DIR}"
+  if command -v unzip >/dev/null 2>&1; then
+    unzip -q "${TMP_DIR}/${ARCHIVE}" pocketbase -d "${TMP_DIR}"
+  else
+    # Fallback for Windows environments where unzip might be missing but powershell is available
+    # Convert WSL path to Windows path for powershell
+    WIN_ZIP_PATH=$(wslpath -w "${TMP_DIR}/${ARCHIVE}")
+    WIN_DEST_PATH=$(wslpath -w "${TMP_DIR}")
+    powershell.exe -Command "Expand-Archive -Path '${WIN_ZIP_PATH}' -DestinationPath '${WIN_DEST_PATH}' -Force"
+  fi
   mv "${TMP_DIR}/pocketbase" "${BINARY_PATH}"
   chmod +x "${BINARY_PATH}"
   echo "PocketBase ${VERSION} installed" >&2
 fi
 
-ln -sfn "pocketbase-${VERSION}" "${LINK_PATH}"
+# Handle the symbolic link more carefully
+rm -rf "${LINK_PATH}"
+ln -s "pocketbase-${VERSION}" "${LINK_PATH}"

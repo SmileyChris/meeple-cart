@@ -10,7 +10,7 @@
   });
 
   let name = $state('');
-  let description = $state('');
+  let isPublic = $state(true);
   let isSubmitting = $state(false);
   let error = $state('');
 
@@ -25,9 +25,10 @@
     try {
       const party = await pb.collection('trade_parties').create({
         name,
-        description,
+        is_public: isPublic,
         organizer: $currentUser.id,
         status: 'planning',
+        description: '', // Default empty description, can be edited later
         // Set default dates (organizer can update later)
         submission_opens: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 1 week from now
         submission_closes: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString(), // 3 weeks from now
@@ -67,9 +68,7 @@
   <!-- Header -->
   <div class="mb-8">
     <h1 class="mb-2 text-3xl font-bold text-primary">Start a Trade Party</h1>
-    <p class="text-secondary">
-      Organize a smart multi-way trade event for the community
-    </p>
+    <p class="text-secondary">Organize a smart multi-way trade event for the community</p>
   </div>
 
   <!-- Under Construction Notice -->
@@ -79,7 +78,8 @@
       <div>
         <p class="font-semibold text-amber-200">Under Construction</p>
         <p class="mt-1 text-sm text-amber-300/80">
-          Basic party creation is available. More features (dates, settings, submissions) coming soon!
+          Basic party creation is available. More features (dates, settings, submissions) coming
+          soon!
         </p>
       </div>
     </div>
@@ -114,30 +114,50 @@
         </p>
       </div>
 
-      <!-- Description -->
+      <!-- Visibility -->
       <div>
-        <label for="description" class="mb-2 block text-sm font-medium text-primary">
-          Description <span class="text-red-400">*</span>
-        </label>
-        <textarea
-          id="description"
-          bind:value={description}
-          required
-          minlength="20"
-          rows="6"
-          placeholder="Describe the trade party: who can participate, any regional restrictions, shipping expectations, etc."
-          class="w-full rounded-lg border border-subtle bg-surface-body px-4 py-2 text-primary placeholder-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
-        ></textarea>
-        <p class="mt-1 text-xs text-muted">
-          Include important details like regional restrictions, shipping costs, and deadlines
-        </p>
+        <label class="mb-2 block text-sm font-medium text-primary"> Party Visibility </label>
+        <div class="grid grid-cols-2 gap-4">
+          <button
+            type="button"
+            onclick={() => (isPublic = true)}
+            class="flex items-center justify-between rounded-lg border p-4 transition-all {isPublic
+              ? 'border-accent bg-accent/10ring-2 ring-accent/20'
+              : 'border-subtle bg-surface-body hover:border-accent/40'}"
+          >
+            <div class="text-left">
+              <p class="font-semibold {isPublic ? 'text-accent' : 'text-primary'}">Public Party</p>
+              <p class="text-xs text-muted">Visible to everyone</p>
+            </div>
+            {#if isPublic}
+              <span class="text-accent text-xl">✓</span>
+            {/if}
+          </button>
+          <button
+            type="button"
+            onclick={() => (isPublic = false)}
+            class="flex items-center justify-between rounded-lg border p-4 transition-all {!isPublic
+              ? 'border-accent bg-accent/10 ring-2 ring-accent/20'
+              : 'border-subtle bg-surface-body hover:border-accent/40'}"
+          >
+            <div class="text-left">
+              <p class="font-semibold {!isPublic ? 'text-accent' : 'text-primary'}">
+                Private Party
+              </p>
+              <p class="text-xs text-muted">Only via private link</p>
+            </div>
+            {#if !isPublic}
+              <span class="text-accent text-xl">✓</span>
+            {/if}
+          </button>
+        </div>
       </div>
 
       <!-- Info about what happens next -->
       <div class="rounded-lg border border-blue-500/30 bg-blue-500/10 p-4">
         <p class="text-sm text-blue-200">
-          <strong>After creating:</strong> You'll be able to configure dates, settings, and share a private link
-          with participants. The party will be in "Planning" mode until you're ready to open submissions.
+          <strong>After creating:</strong> You'll be able to configure dates, settings, and share a private
+          link with participants. The party will be in "Planning" mode until you're ready to open submissions.
         </p>
       </div>
     </div>
@@ -149,7 +169,7 @@
       </a>
       <button
         type="submit"
-        disabled={isSubmitting || name.length < 3 || description.length < 20}
+        disabled={isSubmitting || name.length < 3}
         class="rounded-lg border border-accent bg-accent px-6 py-2 font-semibold text-surface-body transition hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isSubmitting ? 'Creating...' : 'Create Trade Party'}
@@ -164,7 +184,9 @@
     </h3>
     <div class="space-y-3">
       <div class="flex items-start gap-3">
-        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-sm font-bold text-emerald-200">
+        <div
+          class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-sm font-bold text-emerald-200"
+        >
           1
         </div>
         <div>
@@ -175,7 +197,9 @@
         </div>
       </div>
       <div class="flex items-start gap-3">
-        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-500/20 text-sm font-bold text-blue-200">
+        <div
+          class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-500/20 text-sm font-bold text-blue-200"
+        >
           2
         </div>
         <div>
@@ -186,7 +210,9 @@
         </div>
       </div>
       <div class="flex items-start gap-3">
-        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-purple-500/20 text-sm font-bold text-purple-200">
+        <div
+          class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-purple-500/20 text-sm font-bold text-purple-200"
+        >
           3
         </div>
         <div>
@@ -197,7 +223,9 @@
         </div>
       </div>
       <div class="flex items-start gap-3">
-        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-500/20 text-sm font-bold text-amber-200">
+        <div
+          class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-500/20 text-sm font-bold text-amber-200"
+        >
           4
         </div>
         <div>
