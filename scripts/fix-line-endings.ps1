@@ -1,7 +1,8 @@
 $files = @(
     "scripts/dev.sh",
     "scripts/download-pocketbase.sh",
-    "scripts/clean-migration.sh"
+    "scripts/clean-migration.sh",
+    "Justfile"
 )
 
 foreach ($file in $files) {
