@@ -70,7 +70,6 @@
       </a>
       <!-- eslint-disable svelte/no-navigation-without-resolve -->
       <nav class="flex items-center gap-3 text-sm">
-        <ThemeToggle />
         {#if $currentUser}
           <NotificationBell unreadCount={unreadNotifications} {currentPath} />
           <a class="btn-primary" href="/listings/new"> New listing </a>

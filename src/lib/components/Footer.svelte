@@ -1,5 +1,6 @@
 <script>
   import WaddlingMeeple from './WaddlingMeeple.svelte';
+  import ThemeToggle from './ThemeToggle.svelte';
 </script>
 
 <footer class="relative border-t border-subtle bg-surface-panel transition-colors">
@@ -46,11 +47,19 @@
 
     <!-- Bottom Bar -->
     <div class="mt-8 border-t border-subtle pt-8">
-      <div class="flex flex-col items-center justify-between gap-4 text-sm text-muted sm:flex-row">
-        <p>
-          © {new Date().getFullYear()} Meeple Cart. Made with 💚 in Aotearoa New Zealand.
-        </p>
-        <div class="flex items-center gap-4">
+      <div class="grid grid-cols-1 items-center gap-6 text-sm text-muted sm:grid-cols-3">
+        <!-- Left: Theme Toggle -->
+        <div class="flex justify-center sm:justify-start">
+          <ThemeToggle />
+        </div>
+
+        <!-- Center: Made with Love -->
+        <div class="text-center">
+          <p>Made with 💚 in Aotearoa New Zealand.</p>
+        </div>
+
+        <!-- Right: GitHub -->
+        <div class="flex justify-center sm:justify-end">
           <a
             href="https://github.com/smileychris/meeple-cart"
             target="_blank"

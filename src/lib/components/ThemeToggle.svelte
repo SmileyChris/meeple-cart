@@ -38,9 +38,9 @@
 >
   {#if theme === 'dark'}
     <span aria-hidden="true">🌙</span>
-    <span class="hidden sm:inline text-sm font-medium">Dark</span>
+    <span class="text-sm font-medium">Dark Mode</span>
   {:else}
     <span aria-hidden="true">☀️</span>
-    <span class="hidden sm:inline text-sm font-medium">Light</span>
+    <span class="text-sm font-medium">Light Mode</span>
   {/if}
 </button>
