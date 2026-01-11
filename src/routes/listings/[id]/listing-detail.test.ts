@@ -38,6 +38,7 @@ const baseListing = {
   status: 'active',
   created: '2024-01-01T12:00:00Z',
   photos: ['photo1.jpg'],
+  collectionName: 'listings',
   expand: {
     owner: {
       id: 'user123',
@@ -69,9 +70,30 @@ describe('listing detail client-side load', () => {
     const { pb } = pocketbaseModule;
     const { get } = await import('svelte/store');
 
-    const getOne = vi.fn().mockResolvedValue(baseListing);
-    const getFullList = vi.fn().mockResolvedValue([]);
-    vi.mocked(pb.collection).mockReturnValue({ getOne, getFullList } as any);
+    // Create mocks for each collection call
+    const listingGetOne = vi.fn().mockResolvedValue(baseListing);
+    const reactionsGetFullList = vi.fn().mockResolvedValue([]);
+    const tradesGetList = vi.fn().mockResolvedValue({ items: [], totalItems: 0 });
+    const offerTemplatesGetFullList = vi.fn().mockResolvedValue([]);
+    const discussionThreadsGetList = vi.fn().mockResolvedValue({ items: [], totalItems: 0 });
+
+    vi.mocked(pb.collection).mockImplementation((collectionName) => {
+      switch (collectionName) {
+        case 'listings':
+          return { getOne: listingGetOne } as any;
+        case 'reactions':
+          return { getFullList: reactionsGetFullList } as any;
+        case 'trades':
+          return { getList: tradesGetList } as any;
+        case 'offer_templates':
+          return { getFullList: offerTemplatesGetFullList } as any;
+        case 'discussion_threads':
+          return { getList: discussionThreadsGetList } as any;
+        default:
+          return {} as any;
+      }
+    });
+
     vi.mocked(pb.files.getUrl).mockImplementation(
       (_record, file, options?) =>
         new URL(
@@ -82,7 +104,7 @@ describe('listing detail client-side load', () => {
 
     const result = (await load({ params: { id: 'listing123' } } as any))!;
 
-    expect(getOne).toHaveBeenCalledWith('listing123', {
+    expect(listingGetOne).toHaveBeenCalledWith('listing123', {
       expand: 'owner,items_via_listing',
     });
 
@@ -113,17 +135,63 @@ describe('listing detail client-side load', () => {
     expect(result.isWatching).toBe(false);
   });
 
-  // Test temporarily disabled - needs module mock restructuring
-  // The load function now uses reactions collection and has different mocking needs
-  it.skip('checks if authenticated user is watching the listing', async () => {
-    // TODO: Restructure test to properly mock reactions collection
-    expect(true).toBe(true);
+  it('checks if authenticated user is watching the listing', async () => {
+    const { pb } = pocketbaseModule;
+    const { get } = await import('svelte/store');
+
+    const user = { id: 'user456', email: 'test@example.com' };
+    vi.mocked(get).mockReturnValue(user);
+
+    // Mock reactions response indicating the user has reacted
+    const reactions = [
+      { id: 'r1', user: 'user456', listing: 'listing123', emoji: '👀' }
+    ];
+
+    // Create mocks for each collection call
+    const listingGetOne = vi.fn().mockResolvedValue(baseListing);
+    const reactionsGetFullList = vi.fn().mockResolvedValue(reactions);
+    const tradesGetList = vi.fn().mockResolvedValue({ items: [], totalItems: 0 });
+    const offerTemplatesGetFullList = vi.fn().mockResolvedValue([]);
+    const discussionThreadsGetList = vi.fn().mockResolvedValue({ items: [], totalItems: 0 });
+
+    vi.mocked(pb.collection).mockImplementation((collectionName) => {
+      switch (collectionName) {
+        case 'listings':
+          return { getOne: listingGetOne } as any;
+        case 'reactions':
+          return { getFullList: reactionsGetFullList } as any;
+        case 'trades':
+          return { getList: tradesGetList } as any;
+        case 'offer_templates':
+          return { getFullList: offerTemplatesGetFullList } as any;
+        case 'discussion_threads':
+          return { getList: discussionThreadsGetList } as any;
+        default:
+          return {} as any;
+      }
+    });
+
+    const result = (await load({ params: { id: 'listing123' } } as any))!;
+
+    expect(reactionsGetFullList).toHaveBeenCalledWith({
+      filter: `listing = "listing123"`,
+    });
+
+    expect(result.isWatching).toBe(true);
+    expect(result.userReaction).toBe('👀');
+    expect(result.reactionCounts['👀']).toBe(1);
   });
 
   it('throws 500 when listing load fails', async () => {
     const { pb } = pocketbaseModule;
     const getOne = vi.fn().mockRejectedValue(new Error('Not found'));
-    vi.mocked(pb.collection).mockReturnValue({ getOne } as any);
+
+    vi.mocked(pb.collection).mockImplementation((collectionName) => {
+        if (collectionName === 'listings') {
+            return { getOne } as any;
+        }
+        return {} as any;
+    });
 
     // The loader wraps all errors in a 500 status
     await expect(load({ params: { id: 'missing' } } as any)).rejects.toMatchObject({
