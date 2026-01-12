@@ -79,9 +79,7 @@
       // Extract PocketBase error message if available
       let errorMessage = 'Unable to create account, please check the details and try again.';
       
-      if (err?.status === 0) {
-        errorMessage = 'Unable to connect to the server. Please check your internet connection.';
-      } else if (err?.response?.data) {
+      if (err?.response?.data) {
         const data = err.response.data;
         console.error('PocketBase error data:', data);
         if (data.message) {

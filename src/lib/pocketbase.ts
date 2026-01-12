@@ -14,6 +14,32 @@ export const pb = new PocketBase(PB_URL);
 // Disable auto-cancellation for better UX
 pb.autoCancellation(false);
 
+// Store original send method
+const originalSend = pb.send.bind(pb);
+
+// Override send to intercept network errors
+pb.send = async (path, options) => {
+  try {
+    return await originalSend(path, options);
+  } catch (err: any) {
+    // Check for connection errors (status 0)
+    if (err.status === 0) {
+      // Inject friendly message into the error object
+      // The SDK error object has a 'response' property which usually contains data
+      if (!err.response) {
+        err.response = {};
+      }
+      if (!err.response.data) {
+        err.response.data = {};
+      }
+      err.response.data.message = 'Unable to connect to the server. Please check your internet connection and try again.';
+      // We also update the main message for good measure, though validation often uses data.message
+      err.message = 'Unable to connect to the server. Please check your internet connection and try again.';
+    }
+    throw err;
+  }
+};
+
 // Create reactive auth store
 function createAuthStore() {
   const { subscribe, set } = writable<UserRecord | null>(null);
