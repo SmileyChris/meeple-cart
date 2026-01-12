@@ -30,4 +30,4 @@ PB_PID=$!
 
 echo "PocketBase running (PID ${PB_PID}). Starting SvelteKit dev server..."
 
-npm run dev
+npm run dev:vite
