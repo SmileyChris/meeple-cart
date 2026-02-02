@@ -15,9 +15,7 @@
 
       <!-- Header -->
       <div class="space-y-4">
-        <h1 class="text-4xl font-semibold tracking-tight text-primary sm:text-5xl">
-          Site Rules
-        </h1>
+        <h1 class="text-4xl font-semibold tracking-tight text-primary sm:text-5xl">Site Rules</h1>
         <p class="text-lg text-secondary">
           Help us build a safe, welcoming, and trustworthy community for board game enthusiasts
           across Aotearoa.
@@ -230,10 +228,8 @@
               <li class="flex gap-2">
                 <span class="text-accent">2.</span>
                 <span
-                  >Start a discussion in the <a
-                    href="/discussions"
-                    class="text-accent hover:underline">Discussions</a
-                  > section to get community input</span
+                  >Start a chat in the <a href="/chat" class="text-accent hover:underline">Chat</a> section
+                  to get community input</span
                 >
               </li>
               <li class="flex gap-2">

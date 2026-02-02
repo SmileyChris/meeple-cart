@@ -106,7 +106,7 @@ export async function notifyThreadSubscribers(
         type: 'discussion_reply',
         title: `New reply in "${threadTitle}"`,
         message: `${actorName} replied: ${replyPreview.substring(0, 100)}${replyPreview.length > 100 ? '...' : ''}`,
-        link: `/discussions/${threadId}`,
+        link: `/chat/${threadId}`,
         read: false,
       });
     }
@@ -174,7 +174,7 @@ export async function notifyMentionedUsers(
           type: 'discussion_mention',
           title: `${actorName} mentioned you`,
           message: `In discussion "${threadTitle}"`,
-          link: `/discussions/${threadId}`,
+          link: `/chat/${threadId}`,
           read: false,
         });
       } catch (err) {

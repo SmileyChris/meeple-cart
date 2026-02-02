@@ -11,7 +11,7 @@
     updateThreadAfterReply,
     notifyThreadSubscribers,
     notifyMentionedUsers,
-  } from '$lib/utils/discussions';
+  } from '$lib/utils/chat';
   import type {
     DiscussionReactionEmoji,
     DiscussionReactionCounts,
@@ -244,7 +244,7 @@
       // Clear form and reload data
       replyContent = '';
       quotedReply = null;
-      await invalidate('app:discussion');
+      await invalidate('app:chat');
     } catch (err) {
       console.error('Failed to submit reply:', err);
       error = 'Failed to post reply. Please try again.';
@@ -255,14 +255,14 @@
 </script>
 
 <svelte:head>
-  <title>{thread.title} - Discussion - Meeple Cart</title>
+  <title>{thread.title} - Chat - Meeple Cart</title>
   <meta name="description" content={thread.content.substring(0, 160)} />
 </svelte:head>
 
 <div class="container mx-auto px-4 py-8">
   <!-- Breadcrumb -->
   <div class="mb-6 text-sm text-secondary">
-    <a href="/discussions" class="hover:text-primary">Discussions</a>
+    <a href="/chat" class="hover:text-primary">Chat</a>
     <span class="mx-2">/</span>
     <span class="text-primary">{thread.title}</span>
   </div>
@@ -308,7 +308,7 @@
           <div class="mb-3 flex flex-wrap gap-1">
             {#each thread.tags as tag}
               <a
-                href="/discussions?tag={encodeURIComponent(tag)}"
+                href="/chat?tag={encodeURIComponent(tag)}"
                 class="inline-block rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent hover:bg-accent/20"
               >
                 #{tag}
@@ -518,7 +518,7 @@
     {/if}
   {:else}
     <div class="rounded-lg border border-subtle bg-surface-card p-6 text-center">
-      <p class="mb-4 text-secondary">Sign in to reply to this discussion</p>
+      <p class="mb-4 text-secondary">Sign in to reply to this chat</p>
       <a
         href="/login?redirect={$page.url.pathname}"
         class="inline-block rounded-lg border border-emerald-500 bg-emerald-500 px-6 py-2 font-semibold text-surface-body transition hover:bg-emerald-600"

@@ -40,14 +40,6 @@ export const load: PageLoad = async ({ fetch, url, parent, depends }) => {
   // Get current user from parent layout (need this early)
   const { currentUser } = await parent();
 
-  // Get filter states from URL params
-  const canPostFilter = url.searchParams.get('canPost') === 'true';
-  const openToTradesFilter = url.searchParams.get('openToTrades') === 'true';
-
-  // Get regions from URL params
-  const urlRegions = url.searchParams.getAll('region');
-  const myRegionsFilter = urlRegions.length > 0;
-
   // Get guest regions from localStorage if in browser and not logged in
   let guestRegions: string[] = [];
   if (browser && !currentUser) {
@@ -57,6 +49,41 @@ export const load: PageLoad = async ({ fetch, url, parent, depends }) => {
         guestRegions = JSON.parse(stored);
       } catch {
         guestRegions = [];
+      }
+    }
+  }
+
+  // Check if URL has any filter params
+  const hasUrlParams =
+    url.searchParams.has('canPost') ||
+    url.searchParams.has('openToTrades') ||
+    url.searchParams.has('region');
+
+  // Get filter states - from URL if present, otherwise from localStorage
+  let canPostFilter = url.searchParams.get('canPost') === 'true';
+  let openToTradesFilter = url.searchParams.get('openToTrades') === 'true';
+  let urlRegions = url.searchParams.getAll('region');
+  let myRegionsFilter = urlRegions.length > 0;
+
+  // Apply stored preferences if no URL params
+  if (browser && !hasUrlParams) {
+    const storedOpenToTrades = localStorage.getItem('preferredOpenToTrades');
+    if (storedOpenToTrades === 'true') {
+      openToTradesFilter = true;
+    }
+
+    const storedRegionFilter = localStorage.getItem('preferredRegionFilter');
+    if (storedRegionFilter === 'true') {
+      const regionsToUse = currentUser?.preferred_regions ?? guestRegions;
+      if (regionsToUse.length > 0) {
+        urlRegions = regionsToUse;
+        myRegionsFilter = true;
+
+        // Only apply canPost if region filter is active
+        const storedCanPost = localStorage.getItem('preferredCanPost');
+        if (storedCanPost === 'true') {
+          canPostFilter = true;
+        }
       }
     }
   }

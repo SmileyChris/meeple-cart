@@ -3,8 +3,6 @@ import type { PageLoad } from './$types';
 import type { ListingRecord, OfferFilters } from '$lib/types/listing';
 import type { UserRecord, ItemRecord } from '$lib/types/pocketbase';
 import type { ActivityItem } from '$lib/types/activity';
-import { currentUser } from '$lib/pocketbase';
-import { get } from 'svelte/store';
 
 const ACTIVITY_LIMIT = 50;
 const FALLBACK_BASE_URL = 'http://127.0.0.1:8090';
@@ -46,19 +44,14 @@ type ExpandedItemRecord = ItemRecord & {
 
 export const prerender = false;
 
-export const load: PageLoad = async ({ fetch, url, depends }) => {
+export const load: PageLoad = async ({ fetch, url, depends, parent }) => {
   depends('app:games');
 
   const pageParam = Number.parseInt(url.searchParams.get('page') ?? '1', 10);
   const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
 
-  // Get current user's preferred regions
-  const user = get(currentUser);
-
-  // Get regions from URL params (changed from 'regions' to 'region')
-  const urlRegions = url.searchParams.getAll('region');
-  const myRegionsFilter = urlRegions.length > 0;
-  const canPostFilter = url.searchParams.get('canPost') === 'true';
+  // Get current user from parent layout (consistent with activity page)
+  const { currentUser: user } = await parent();
 
   // Get guest regions from localStorage if not logged in
   let guestRegions: string[] = [];
@@ -73,7 +66,35 @@ export const load: PageLoad = async ({ fetch, url, depends }) => {
     }
   }
 
-  // Use URL regions if provided
+  // Check if URL has any filter params (excluding search/condition which are page-specific)
+  const hasUrlParams =
+    url.searchParams.has('canPost') ||
+    url.searchParams.has('region');
+
+  // Get filter states - from URL if present, otherwise from localStorage
+  let urlRegions = url.searchParams.getAll('region');
+  let myRegionsFilter = urlRegions.length > 0;
+  let canPostFilter = url.searchParams.get('canPost') === 'true';
+
+  // Apply stored preferences if no URL params
+  if (typeof window !== 'undefined' && !hasUrlParams) {
+    const storedRegionFilter = localStorage.getItem('preferredRegionFilter');
+    if (storedRegionFilter === 'true') {
+      const regionsToUse = user?.preferred_regions ?? guestRegions;
+      if (regionsToUse.length > 0) {
+        urlRegions = regionsToUse;
+        myRegionsFilter = true;
+
+        // Only apply canPost if region filter is active
+        const storedCanPost = localStorage.getItem('preferredCanPost');
+        if (storedCanPost === 'true') {
+          canPostFilter = true;
+        }
+      }
+    }
+  }
+
+  // Use the resolved regions
   const regions = urlRegions;
 
   const searchParam = url.searchParams.get('search')?.trim() ?? '';

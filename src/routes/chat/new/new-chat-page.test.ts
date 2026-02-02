@@ -31,7 +31,7 @@ vi.mock('$lib/utils/auth-redirect', () => ({
   }),
 }));
 
-describe('discussions new page load', () => {
+describe('chat new page load', () => {
   const listingsCollection = { getOne: vi.fn() };
   const categoriesCollection = { getFullList: vi.fn() };
 
@@ -56,11 +56,11 @@ describe('discussions new page load', () => {
 
     await expect(
       load({
-        url: { pathname: '/discussions/new', search: '', searchParams: new URLSearchParams() },
+        url: { pathname: '/chat/new', search: '', searchParams: new URLSearchParams() },
       } as any)
     ).rejects.toMatchObject({
       status: 302,
-      location: '/login?next=%2Fdiscussions%2Fnew',
+      location: '/login?next=%2Fchat%2Fnew',
     });
   });
 
@@ -77,7 +77,7 @@ describe('discussions new page load', () => {
     categoriesCollection.getFullList.mockResolvedValue(mockCategories);
 
     const url = {
-      pathname: '/discussions/new',
+      pathname: '/chat/new',
       search: '',
       searchParams: new URLSearchParams(),
     };
@@ -111,7 +111,7 @@ describe('discussions new page load', () => {
     categoriesCollection.getFullList.mockResolvedValue(mockCategories);
 
     const url = {
-      pathname: '/discussions/new',
+      pathname: '/chat/new',
       search: '?listing=listing-1',
       searchParams: new URLSearchParams('listing=listing-1'),
     };
@@ -134,12 +134,12 @@ describe('discussions new page load', () => {
       { id: 'cat-1', name: 'General', slug: 'general', order: 1, enabled: true },
     ];
 
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
     listingsCollection.getOne.mockRejectedValue(new Error('Listing not found'));
     categoriesCollection.getFullList.mockResolvedValue(mockCategories);
 
     const url = {
-      pathname: '/discussions/new',
+      pathname: '/chat/new',
       search: '?listing=listing-1',
       searchParams: new URLSearchParams('listing=listing-1'),
     };

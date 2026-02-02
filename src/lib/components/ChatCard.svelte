@@ -2,9 +2,7 @@
   import type { DiscussionThreadRecord } from '$lib/types/pocketbase';
   import BaseCard from './BaseCard.svelte';
 
-  let {
-    thread,
-  }: { thread: DiscussionThreadRecord } = $props();
+  let { thread }: { thread: DiscussionThreadRecord } = $props();
 
   let createdLabel = $derived(
     new Intl.DateTimeFormat('en-NZ', {
@@ -23,13 +21,18 @@
   }
 </script>
 
-<BaseCard href={`/discussions/${thread.id}`} imageUrl={null} imageAlt={thread.title} borderClass="border border-subtle group-hover:border-accent">
+<BaseCard
+  href={`/chat/${thread.id}`}
+  imageUrl={null}
+  imageAlt={thread.title}
+  borderClass="border border-subtle group-hover:border-accent"
+>
   {#snippet header()}
     <div class="flex items-center justify-between text-xs uppercase tracking-wide text-muted">
       <span
         class="rounded-full border border-purple-500 bg-purple-500/10 px-3 py-1 font-semibold text-badge-purple"
       >
-        💬 Discussion
+        💬 Chat
       </span>
       <span>{createdLabel}</span>
     </div>
@@ -65,7 +68,8 @@
             class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium"
             style="background-color: {category.color}15; color: {category.color}"
           >
-            {category.icon} {category.name}
+            {category.icon}
+            {category.name}
           </span>
         </div>
       {/if}

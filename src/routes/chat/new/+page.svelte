@@ -2,7 +2,7 @@
   import { goto } from '$app/navigation';
   import { pb, currentUser } from '$lib/pocketbase';
   import MarkdownEditor from '$lib/components/MarkdownEditor.svelte';
-  import { subscribeToThread } from '$lib/utils/discussions';
+  import { subscribeToThread } from '$lib/utils/chat';
   import type { PageData } from './$types';
 
   let { data }: { data: PageData } = $props();
@@ -23,9 +23,7 @@
   let error = $state('');
 
   // Check if the selected category is "wanted"
-  let isWantedPost = $derived(
-    categories.find((c) => c.id === category)?.slug === 'wanted'
-  );
+  let isWantedPost = $derived(categories.find((c) => c.id === category)?.slug === 'wanted');
 
   function addWantedItem() {
     wantedItems = [...wantedItems, { title: '', bgg_id: '', max_price: '' }];
@@ -104,18 +102,17 @@
 
     try {
       // Prepare wanted items data
-      const validWantedItems =
-        isWantedPost
-          ? wantedItems
-              .filter((item) => item.title.trim())
-              .map((item) => ({
-                title: item.title.trim(),
-                ...(item.bgg_id.trim() ? { bgg_id: parseInt(item.bgg_id, 10) } : {}),
-                ...(item.max_price.trim()
-                  ? { max_price: Math.round(parseFloat(item.max_price) * 100) }
-                  : {}),
-              }))
-          : undefined;
+      const validWantedItems = isWantedPost
+        ? wantedItems
+            .filter((item) => item.title.trim())
+            .map((item) => ({
+              title: item.title.trim(),
+              ...(item.bgg_id.trim() ? { bgg_id: parseInt(item.bgg_id, 10) } : {}),
+              ...(item.max_price.trim()
+                ? { max_price: Math.round(parseFloat(item.max_price) * 100) }
+                : {}),
+            }))
+        : undefined;
 
       // Create thread
       const thread = await pb.collection('discussion_threads').create({
@@ -137,9 +134,9 @@
         await pb.collection('notifications').create({
           user: listing.owner,
           type: 'discussion_reply',
-          title: 'New discussion on your listing',
-          message: `${$currentUser.display_name} started a discussion: "${title.trim()}"`,
-          link: `/discussions/${thread.id}`,
+          title: 'New chat on your listing',
+          message: `${$currentUser.display_name} started a chat: "${title.trim()}"`,
+          link: `/chat/${thread.id}`,
           read: false,
         });
 
@@ -148,31 +145,31 @@
       }
 
       // Redirect to thread
-      goto(`/discussions/${thread.id}`);
+      goto(`/chat/${thread.id}`);
     } catch (err) {
       console.error('Failed to create thread:', err);
-      error = 'Failed to create discussion. Please try again.';
+      error = 'Failed to create chat. Please try again.';
       isSubmitting = false;
     }
   }
 </script>
 
 <svelte:head>
-  <title>New Discussion - Meeple Cart</title>
+  <title>New Chat - Meeple Cart</title>
 </svelte:head>
 
 <div class="container mx-auto max-w-3xl px-4 py-8">
   <!-- Breadcrumb -->
   <div class="mb-6 text-sm text-secondary">
-    <a href="/discussions" class="hover:text-primary">Discussions</a>
+    <a href="/chat" class="hover:text-primary">Chat</a>
     <span class="mx-2">/</span>
-    <span class="text-primary">New Discussion</span>
+    <span class="text-primary">New Chat</span>
   </div>
 
   <!-- Header -->
   <div class="mb-8">
     <h1 class="mb-2 text-3xl font-bold text-primary">
-      {isWantedPost ? 'Post a Wanted Ad' : 'Start a Discussion'}
+      {isWantedPost ? 'Post a Wanted Ad' : 'Start a Chat'}
     </h1>
     <p class="text-secondary">
       {#if listing}
@@ -248,7 +245,7 @@
           {#if isWantedPost}
             Wanted posts let you specify items you're looking for
           {:else}
-            Choose the category that best fits your discussion
+            Choose the category that best fits your chat
           {/if}
         </p>
       </div>
@@ -262,7 +259,7 @@
           type="text"
           id="title"
           bind:value={title}
-          placeholder="What's this discussion about?"
+          placeholder="What's this chat about?"
           maxlength="200"
           class="w-full rounded-lg border border-subtle bg-surface-body px-4 py-2 text-primary placeholder-muted focus:border-accent focus:outline-none"
           required
@@ -447,7 +444,7 @@
       <!-- Actions -->
       <div class="flex items-center justify-between gap-4">
         <a
-          href={listing ? `/listings/${listing.id}` : '/discussions'}
+          href={listing ? `/listings/${listing.id}` : '/chat'}
           class="text-sm text-secondary hover:text-primary"
         >
           Cancel
@@ -457,7 +454,7 @@
           disabled={isSubmitting || !title.trim() || !content.trim()}
           class="rounded-lg border border-emerald-500 bg-emerald-500 px-6 py-2 font-semibold text-surface-body transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {isSubmitting ? 'Creating...' : 'Create Discussion'}
+          {isSubmitting ? 'Creating...' : 'Create Chat'}
         </button>
       </div>
     </form>

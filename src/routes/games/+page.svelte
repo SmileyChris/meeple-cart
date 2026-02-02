@@ -8,7 +8,6 @@
   import { currentUser } from '$lib/pocketbase';
   import { browser } from '$app/environment';
   import {
-    applyStoredFilters,
     saveRegionFilterState,
     saveCanPostState,
     saveGuestRegions,
@@ -20,13 +19,29 @@
 
   let { data }: { data: PageData } = $props();
 
-  // Apply saved preferences on mount if no params in URL
+  // Sync URL with applied filters (from page.ts localStorage reading)
   $effect(() => {
     if (!browser) return;
 
-    const newUrl = applyStoredFilters($page.url, $currentUser);
-    if (newUrl) {
-      goto(newUrl, { replaceState: true });
+    const url = new URL($page.url);
+    let needsUpdate = false;
+
+    // Sync region filter
+    const hasRegionParams = url.searchParams.has('region');
+    if (data.myRegionsFilter && !hasRegionParams) {
+      const regions = $currentUser?.preferred_regions ?? guestRegions;
+      regions.forEach((r) => url.searchParams.append('region', r));
+      needsUpdate = true;
+    }
+
+    // Sync canPost filter (only when region filter is active)
+    if (data.canPostFilter && data.myRegionsFilter && !url.searchParams.has('canPost')) {
+      url.searchParams.set('canPost', 'true');
+      needsUpdate = true;
+    }
+
+    if (needsUpdate) {
+      history.replaceState(history.state, '', url.toString());
     }
   });
 
@@ -99,12 +114,14 @@
   });
 
   function toggleMyRegions() {
-    const url = new URL($page.url);
+    // Use window.location.href to get actual URL (history.replaceState doesn't update $page.url)
+    const url = new URL(browser ? window.location.href : $page.url);
     const regionsToUse = $currentUser?.preferred_regions || guestRegions;
 
     if (data.myRegionsFilter) {
       // Remove all region params
       url.searchParams.delete('region');
+      url.searchParams.delete('canPost');
       if (browser) {
         saveRegionFilterState(false);
       }
@@ -116,11 +133,15 @@
       });
       if (browser) {
         saveRegionFilterState(true);
+        // Restore canPost if it was stored
+        const storedCanPost = localStorage.getItem('preferredCanPost');
+        if (storedCanPost === 'true') {
+          url.searchParams.set('canPost', 'true');
+        }
       }
     }
     url.searchParams.delete('page');
-    // eslint-disable-next-line svelte/no-navigation-without-resolve
-    goto(url, { replaceState: true });
+    goto(url, { replaceState: true, invalidateAll: true });
   }
 
   async function toggleGuestRegion(regionValue: string) {
@@ -232,7 +253,7 @@
   }
 
   function toggleCanPost() {
-    const url = new URL($page.url);
+    const url = new URL(browser ? window.location.href : $page.url);
     if (data.canPostFilter) {
       url.searchParams.delete('canPost');
       if (browser) {
@@ -245,8 +266,7 @@
       }
     }
     url.searchParams.delete('page');
-    // eslint-disable-next-line svelte/no-navigation-without-resolve
-    goto(url, { replaceState: true });
+    goto(url, { replaceState: true, invalidateAll: true });
   }
 </script>
 
@@ -260,8 +280,194 @@
 
 <main class="bg-surface-body px-6 py-8 text-primary transition-colors sm:px-8">
   <div class="mx-auto max-w-5xl space-y-6">
-    <!-- Search Bar -->
-    <div class="space-y-6">
+    <!-- Secondary Nav Tabs -->
+    <div class="space-y-4">
+      <div class="flex flex-wrap items-center gap-2 border-b border-subtle">
+        <!-- All Tab -->
+        <button
+          onclick={() => {
+            if (data.myRegionsFilter) toggleMyRegions();
+          }}
+          class="border-b-2 px-4 py-2 text-sm font-medium transition {!data.myRegionsFilter
+            ? 'border-accent text-accent'
+            : 'border-transparent text-secondary hover:text-primary'}"
+        >
+          All
+        </button>
+
+        <!-- Region Tab -->
+        {#if $currentUser}
+          {#if data.hasPreferredRegions}
+            <button
+              onclick={toggleMyRegions}
+              class="border-b-2 px-4 py-2 text-sm font-medium transition {data.myRegionsFilter
+                ? 'border-accent text-accent'
+                : 'border-transparent text-secondary hover:text-primary'}"
+            >
+              📍 My Regions
+            </button>
+          {:else}
+            <a
+              href="/profile"
+              class="border-b-2 border-transparent px-4 py-2 text-sm font-medium text-muted transition hover:text-primary"
+            >
+              📍 Set up regions
+            </a>
+          {/if}
+        {:else}
+          <!-- Non-logged-in user: Region selector -->
+          <div class="relative" bind:this={regionSelectorRef}>
+            <button
+              onclick={() => {
+                if (guestRegions.length > 0) {
+                  toggleMyRegions();
+                } else {
+                  showRegionSelector = !showRegionSelector;
+                }
+              }}
+              class="border-b-2 px-4 py-2 text-sm font-medium transition {data.myRegionsFilter
+                ? 'border-accent text-accent'
+                : 'border-transparent text-secondary hover:text-primary'}"
+            >
+              📍 {guestRegions.length > 0
+                ? guestRegions.length === 1
+                  ? NORTH_ISLAND_REGIONS.find((r) => r.value === guestRegions[0])?.label ||
+                    SOUTH_ISLAND_REGIONS.find((r) => r.value === guestRegions[0])?.label
+                  : `${guestRegions.length} regions`
+                : 'Filter by region'}
+            </button>
+
+            <!-- Edit regions button when regions are selected -->
+            {#if guestRegions.length > 0}
+              <button
+                onclick={(e) => {
+                  e.stopPropagation();
+                  showRegionSelector = !showRegionSelector;
+                }}
+                class="ml-1 text-muted transition hover:text-primary"
+                title="Edit regions"
+              >
+                ⚙️
+              </button>
+            {/if}
+
+            <RegionSelector
+              bind:guestRegions
+              bind:showRegionSelector
+              onToggleRegion={toggleGuestRegion}
+              onClear={clearGuestRegions}
+            />
+          </div>
+        {/if}
+
+        <!-- Can Post Tab (only when region filter is active) -->
+        {#if data.myRegionsFilter && (($currentUser && data.hasPreferredRegions) || (!$currentUser && guestRegions.length > 0))}
+          <button
+            onclick={toggleCanPost}
+            class="border-b-2 px-4 py-2 text-sm font-medium transition {data.canPostFilter
+              ? 'border-accent text-accent'
+              : 'border-transparent text-secondary hover:text-primary'}"
+          >
+            + Can Post
+          </button>
+        {/if}
+
+        <!-- Condition Filter (dropdown style) -->
+        <div class="relative ml-auto" bind:this={conditionFilterRef}>
+          <button
+            type="button"
+            onclick={() => {
+              tempConditionLevel = minConditionLevel < 4 ? minConditionLevel : lastCondition;
+              showConditionFilter = !showConditionFilter;
+            }}
+            class="flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium transition {minConditionLevel < 4
+              ? 'border-accent text-accent'
+              : 'border-transparent text-secondary hover:text-primary'}"
+          >
+            <span>⭐</span>
+            <span>
+              {#if minConditionLevel === 0}
+                Mint only
+              {:else if minConditionLevel < 4}
+                {conditionOptions[minConditionLevel].label}+
+              {:else}
+                Condition
+              {/if}
+            </span>
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          {#if showConditionFilter}
+            <div
+              class="absolute right-0 top-full z-10 mt-2 w-80 rounded-lg border border-subtle bg-surface-card p-4 shadow-lg"
+            >
+              <div class="mb-3 flex items-center justify-between">
+                <h3 class="text-sm font-semibold text-primary">Minimum condition</h3>
+                {#if tempConditionLevel < 4}
+                  <button
+                    type="button"
+                    onclick={(e) => {
+                      e.stopPropagation();
+                      tempConditionLevel = 4;
+                      minConditionLevel = 4;
+                      updateConditionFilter(4);
+                      showConditionFilter = false;
+                    }}
+                    class="text-xs text-muted hover:text-accent"
+                  >
+                    Clear
+                  </button>
+                {/if}
+              </div>
+
+              <div class="space-y-4">
+                <div class="text-center">
+                  <span class="text-lg font-semibold text-primary">
+                    {#if tempConditionLevel === 0}
+                      Only mint condition
+                    {:else if tempConditionLevel === 4}
+                      Any condition
+                    {:else}
+                      At least {conditionOptions[tempConditionLevel].label.toLowerCase()} condition
+                    {/if}
+                  </span>
+                </div>
+
+                <input
+                  type="range"
+                  min="0"
+                  max="4"
+                  step="1"
+                  bind:value={tempConditionLevel}
+                  class="h-2 w-full cursor-pointer appearance-none rounded-lg accent-[var(--accent)]"
+                  style="background: linear-gradient(to right, var(--accent) 0%, var(--accent) {tempConditionLevel * 25}%, var(--surface-card-alt) {tempConditionLevel * 25}%, var(--surface-card-alt) 100%);"
+                />
+
+                <button
+                  type="button"
+                  onclick={() => {
+                    minConditionLevel = tempConditionLevel;
+                    updateConditionFilter(tempConditionLevel);
+                    showConditionFilter = false;
+
+                    // Save last used condition to localStorage
+                    if (browser && tempConditionLevel < 4) {
+                      saveLastCondition(conditionOptions[tempConditionLevel].value);
+                    }
+                  }}
+                  class="btn-primary w-full px-4 py-2 text-sm font-medium"
+                >
+                  {tempConditionLevel === 4 ? 'Clear' : 'Apply'}
+                </button>
+              </div>
+            </div>
+          {/if}
+        </div>
+      </div>
+
+      <!-- Search Bar -->
       <div class="relative">
         <input
           class="w-full rounded-xl border border-subtle bg-surface-card px-4 py-3.5 pl-11 text-base text-primary shadow-sm transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
@@ -286,210 +492,6 @@
           />
         </svg>
       </div>
-
-      <!-- Filter Controls -->
-      <div class="flex flex-wrap items-center justify-center gap-8">
-        <!-- Region Filters -->
-        <div class="flex flex-wrap items-center justify-center gap-3 text-sm">
-          {#if $currentUser}
-            <!-- Logged-in user: My Regions filter -->
-            {#if data.hasPreferredRegions}
-              <label
-                class={`btn-filter flex cursor-pointer items-center gap-2 px-4 py-2 font-medium ${data.myRegionsFilter ? 'active' : ''}`}
-              >
-                <input
-                  type="checkbox"
-                  checked={data.myRegionsFilter}
-                  onchange={toggleMyRegions}
-                  class="h-4 w-4 rounded border-subtle accent-[var(--accent)]"
-                />
-                <span>📍</span>
-                <span>My Region(s)</span>
-              </label>
-            {:else}
-              <a
-                href="/profile"
-                class="btn-ghost px-4 py-2 text-sm font-medium text-muted hover:text-primary"
-              >
-                📍 Configure my regions
-              </a>
-            {/if}
-          {:else}
-            <!-- Non-logged-in user: Region selector with checkbox and dropdown -->
-            <div class="relative flex items-center gap-2" bind:this={regionSelectorRef}>
-              <span class="text-lg">📍</span>
-              <div
-                class={`btn-filter flex items-center overflow-hidden px-4 py-2 text-sm ${showRegionSelector ? 'open' : data.myRegionsFilter ? 'active' : ''}`}
-              >
-                {#if guestRegions.length > 0}
-                  <label class="flex cursor-pointer items-center gap-2 font-medium">
-                    <input
-                      type="checkbox"
-                      checked={data.myRegionsFilter}
-                      onchange={toggleMyRegions}
-                      class="h-4 w-4 rounded border-subtle accent-[var(--accent)]"
-                    />
-                    <span
-                      >in {guestRegions.length === 1
-                        ? NORTH_ISLAND_REGIONS.find((r) => r.value === guestRegions[0])?.label ||
-                          SOUTH_ISLAND_REGIONS.find((r) => r.value === guestRegions[0])?.label
-                        : `${guestRegions.length} regions`}</span
-                    >
-                  </label>
-                  <div class="mx-3 h-4 w-px bg-subtle"></div>
-                {/if}
-
-                <button
-                  onclick={() => (showRegionSelector = !showRegionSelector)}
-                  class="group font-medium"
-                >
-                  {#if guestRegions.length > 0}
-                    <span
-                      class={`inline-block transition-transform ${showRegionSelector ? 'scale-125 rotate-45' : ''} group-hover:scale-125 group-hover:rotate-45`}
-                      >⚙️</span
-                    >
-                  {:else}
-                    <span>Filter by region</span>
-                  {/if}
-                </button>
-              </div>
-
-              <RegionSelector
-                bind:guestRegions
-                bind:showRegionSelector
-                onToggleRegion={toggleGuestRegion}
-                onClear={clearGuestRegions}
-              />
-            </div>
-          {/if}
-
-          <!-- Can Post filter (only show when regions are selected) -->
-          {#if ($currentUser && data.hasPreferredRegions) || (!$currentUser && guestRegions.length > 0)}
-            <label
-              class={`btn-filter flex items-center gap-2 px-4 py-2 text-sm font-medium ${!data.myRegionsFilter ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'} ${data.canPostFilter && data.myRegionsFilter ? 'active' : ''}`}
-            >
-              <input
-                type="checkbox"
-                checked={data.canPostFilter}
-                disabled={!data.myRegionsFilter}
-                onchange={toggleCanPost}
-                class="h-4 w-4 rounded border-subtle accent-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-50"
-              />
-              <span>Or Can Post</span>
-            </label>
-          {/if}
-        </div>
-
-        <!-- Condition Filter -->
-        <div class="flex flex-wrap items-center justify-center gap-3 text-sm">
-          <div class="relative flex items-center gap-2" bind:this={conditionFilterRef}>
-            <span class="text-lg">⭐</span>
-            {#if minConditionLevel < 4}
-              <button
-                type="button"
-                onclick={() => {
-                  tempConditionLevel = minConditionLevel;
-                  showConditionFilter = !showConditionFilter;
-                }}
-                class={`btn-filter flex cursor-pointer items-center gap-2 px-4 py-2 font-medium ${showConditionFilter ? 'open' : 'active'}`}
-              >
-                <input
-                  type="checkbox"
-                  checked={true}
-                  readonly
-                  class="pointer-events-none h-4 w-4 rounded border-subtle accent-[var(--accent)]"
-                />
-                <span>
-                  {#if minConditionLevel === 0}
-                    Only mint condition
-                  {:else}
-                    At least {conditionOptions[minConditionLevel].label.toLowerCase()} condition
-                  {/if}
-                </span>
-              </button>
-            {:else}
-              <button
-                type="button"
-                onclick={() => {
-                  // Use last selected condition as default when opening
-                  tempConditionLevel = minConditionLevel < 4 ? minConditionLevel : lastCondition;
-                  showConditionFilter = !showConditionFilter;
-                }}
-                class={`btn-filter px-4 py-2 font-medium ${showConditionFilter ? 'open' : ''}`}
-              >
-                Any condition
-              </button>
-            {/if}
-
-            {#if showConditionFilter}
-              <div
-                class="absolute left-0 top-full z-10 mt-2 w-80 rounded-lg border border-subtle bg-surface-card p-4 shadow-lg"
-              >
-                <div class="mb-3 flex items-center justify-between">
-                  <h3 class="text-sm font-semibold text-primary">Minimum condition</h3>
-                  {#if tempConditionLevel < 4}
-                    <button
-                      type="button"
-                      onclick={(e) => {
-                        e.stopPropagation();
-                        tempConditionLevel = 4;
-                        minConditionLevel = 4;
-                        updateConditionFilter(4);
-                        showConditionFilter = false;
-                      }}
-                      class="text-xs text-muted hover:text-accent"
-                    >
-                      Clear
-                    </button>
-                  {/if}
-                </div>
-
-                <div class="space-y-4">
-                  <div class="text-center">
-                    <span class="text-lg font-semibold text-primary">
-                      {#if tempConditionLevel === 0}
-                        Only mint condition
-                      {:else if tempConditionLevel === 4}
-                        Any condition
-                      {:else}
-                        At least {conditionOptions[tempConditionLevel].label.toLowerCase()} condition
-                      {/if}
-                    </span>
-                  </div>
-
-                  <input
-                    type="range"
-                    min="0"
-                    max="4"
-                    step="1"
-                    bind:value={tempConditionLevel}
-                    class="h-2 w-full cursor-pointer appearance-none rounded-lg accent-[var(--accent)]"
-                    style="background: linear-gradient(to right, var(--accent) 0%, var(--accent) {tempConditionLevel * 25}%, var(--surface-card-alt) {tempConditionLevel * 25}%, var(--surface-card-alt) 100%);"
-                  />
-
-                  <button
-                    type="button"
-                    onclick={() => {
-                      minConditionLevel = tempConditionLevel;
-                      updateConditionFilter(tempConditionLevel);
-                      showConditionFilter = false;
-
-                      // Save last used condition to localStorage
-                      if (browser && tempConditionLevel < 4) {
-                        saveLastCondition(conditionOptions[tempConditionLevel].value);
-                      }
-                    }}
-                    class="btn-primary w-full px-4 py-2 text-sm font-medium"
-                  >
-                    {tempConditionLevel === 4 ? 'Clear' : 'Apply'}
-                  </button>
-                </div>
-              </div>
-            {/if}
-          </div>
-        </div>
-      </div>
-
     </div>
 
     <!-- Results -->

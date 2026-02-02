@@ -92,10 +92,10 @@
 </script>
 
 <svelte:head>
-  <title>Discussions · Meeple Cart</title>
+  <title>Chat · Meeple Cart</title>
   <meta
     name="description"
-    content="Connect with the board gaming community in New Zealand. Discuss games, trading tips, and more."
+    content="Connect with the board gaming community in New Zealand. Chat about games, trading tips, and more."
   />
 </svelte:head>
 
@@ -105,10 +105,10 @@
     {#if $currentUser}
       <div class="flex justify-end">
         <a
-          href="/discussions/new"
+          href="/chat/new"
           class="rounded-lg border border-emerald-500 bg-emerald-500 px-4 py-2 font-semibold text-surface-body transition hover:bg-emerald-600"
         >
-          New Discussion
+          New Chat
         </a>
       </div>
     {/if}
@@ -116,7 +116,7 @@
     <!-- Tabs & Filters -->
     <div class="space-y-4">
       <!-- Tabs -->
-      <div class="flex gap-2 border-b border-subtle">
+      <div class="flex flex-wrap items-center gap-2 border-b border-subtle">
         <button
           onclick={() => setTab('latest')}
           class="border-b-2 px-4 py-2 text-sm font-medium transition {currentTab === 'latest'
@@ -149,35 +149,16 @@
         >
           Unanswered
         </button>
-      </div>
 
-      <!-- Search & Category Filter -->
-      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <!-- Search -->
-        <div class="flex flex-1 gap-2">
-          <input
-            type="search"
-            bind:value={searchInput}
-            placeholder="Search discussions..."
-            onkeydown={(e) => e.key === 'Enter' && handleSearch()}
-            class="flex-1 rounded-lg border border-subtle bg-surface-body px-4 py-2 text-sm text-primary placeholder-muted focus:border-accent focus:outline-none"
-          />
-          <button
-            onclick={handleSearch}
-            class="rounded-lg border border-accent bg-accent px-4 py-2 text-sm font-medium text-surface-body hover:opacity-90"
-          >
-            Search
-          </button>
-        </div>
-
-        <!-- Category Dropdown -->
-        <div class="flex items-center gap-2">
-          <label for="category-filter" class="text-sm font-medium text-secondary">Category:</label>
+        <!-- Category Dropdown (right side) -->
+        <div class="relative ml-auto flex items-center gap-2">
           <select
             id="category-filter"
             onchange={(e) => setCategory(e.currentTarget.value || null)}
             value={currentCategory ?? ''}
-            class="rounded-lg border border-subtle bg-surface-body px-3 py-2 text-sm text-primary focus:border-accent focus:outline-none"
+            class="border-b-2 bg-transparent px-4 py-2 text-sm font-medium transition focus:outline-none {currentCategory
+              ? 'border-accent text-accent'
+              : 'border-transparent text-secondary hover:text-primary'}"
           >
             <option value="">All Categories</option>
             {#each categories as category}
@@ -188,6 +169,23 @@
             {/each}
           </select>
         </div>
+      </div>
+
+      <!-- Search -->
+      <div class="flex gap-2">
+        <input
+          type="search"
+          bind:value={searchInput}
+          placeholder="Search chats..."
+          onkeydown={(e) => e.key === 'Enter' && handleSearch()}
+          class="flex-1 rounded-lg border border-subtle bg-surface-body px-4 py-2 text-sm text-primary placeholder-muted focus:border-accent focus:outline-none"
+        />
+        <button
+          onclick={handleSearch}
+          class="rounded-lg border border-accent bg-accent px-4 py-2 text-sm font-medium text-surface-body hover:opacity-90"
+        >
+          Search
+        </button>
       </div>
 
       <!-- Active Filters Display -->
@@ -247,18 +245,18 @@
     <!-- Thread List -->
     {#if threads.length === 0}
       <div class="rounded-xl border border-subtle bg-surface-card p-12 text-center">
-        <p class="text-lg text-secondary">No discussions yet</p>
-        <p class="mt-2 text-sm text-muted">Be the first to start a discussion!</p>
+        <p class="text-lg text-secondary">No chats yet</p>
+        <p class="mt-2 text-sm text-muted">Be the first to start a chat!</p>
         {#if $currentUser}
           <a
-            href="/discussions/new"
+            href="/chat/new"
             class="mt-4 inline-block rounded-lg border border-emerald-500 bg-emerald-500 px-6 py-2 font-semibold text-surface-body transition hover:bg-emerald-600"
           >
-            Start a Discussion
+            Start a Chat
           </a>
         {:else}
           <a
-            href="/login?redirect=/discussions"
+            href="/login?redirect=/chat"
             class="mt-4 inline-block rounded-lg border border-emerald-500 bg-emerald-500 px-6 py-2 font-semibold text-surface-body transition hover:bg-emerald-600"
           >
             Sign In to Start
@@ -269,7 +267,7 @@
       <div class="space-y-3">
         {#each threads as thread (thread.id)}
           <a
-            href="/discussions/{thread.id}"
+            href="/chat/{thread.id}"
             class="block rounded-lg border border-subtle bg-surface-card p-6 transition hover:border-accent"
           >
             <div class="mb-3 flex items-start justify-between gap-4">
@@ -330,7 +328,7 @@
                   <div class="mt-2 flex flex-wrap gap-1">
                     {#each thread.tags.slice(0, 5) as tag}
                       <a
-                        href="/discussions?tag={encodeURIComponent(tag)}"
+                        href="/chat?tag={encodeURIComponent(tag)}"
                         class="inline-block rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent hover:bg-accent/20"
                         onclick={(e) => e.stopPropagation()}
                       >
@@ -391,9 +389,9 @@
     <!-- Sign in prompt for guests -->
     {#if !$currentUser}
       <div class="rounded-lg border border-subtle bg-surface-card p-6 text-center">
-        <p class="mb-4 text-secondary">Sign in to start discussions and reply to threads</p>
+        <p class="mb-4 text-secondary">Sign in to start chats and reply to threads</p>
         <a
-          href="/login?redirect=/discussions"
+          href="/login?redirect=/chat"
           class="inline-block rounded-lg border border-emerald-500 bg-emerald-500 px-6 py-2 font-semibold text-surface-body transition hover:bg-emerald-600"
         >
           Sign In

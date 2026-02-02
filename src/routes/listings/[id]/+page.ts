@@ -58,10 +58,10 @@ export const load: PageLoad = async ({ params }) => {
     const baseUrl = 'http://127.0.0.1:8090';
     const photos = Array.isArray(listing.photos)
       ? listing.photos.map((photo) => ({
-          id: photo,
-          full: `${baseUrl}/api/files/${listing.collectionName}/${listing.id}/${photo}`,
-          thumb: `${baseUrl}/api/files/${listing.collectionName}/${listing.id}/${photo}?thumb=400x300`,
-        }))
+        id: photo,
+        full: `${baseUrl}/api/files/${listing.collectionName}/${listing.id}/${photo}`,
+        thumb: `${baseUrl}/api/files/${listing.collectionName}/${listing.id}/${photo}?thumb=400x300`,
+      }))
       : [];
 
     // Fetch reaction counts and user's reaction
@@ -125,17 +125,17 @@ export const load: PageLoad = async ({ params }) => {
     }
 
     // Load listing-specific discussion threads
-    let discussions: any[] = [];
+    let chats: any[] = [];
     try {
       const threads = await pb.collection('discussion_threads').getList(1, 10, {
         filter: `listing = "${id}"`,
         sort: '-created',
         expand: 'author',
       });
-      discussions = threads.items;
+      chats = threads.items;
     } catch (err) {
-      console.error('Failed to load discussions:', err);
-      // Don't fail the whole page if discussions fail to load
+      console.error('Failed to load chats:', err);
+      // Don't fail the whole page if chats fail to load
     }
 
     // Count pending offers for this listing (only visible to owner)
@@ -172,16 +172,16 @@ export const load: PageLoad = async ({ params }) => {
       userReaction,
       existingTrade,
       offerTemplates,
-      discussions,
+      chats,
       pendingOfferCount,
     };
   } catch (err: any) {
     console.error(`Failed to load listing ${id} at stage ${stage}`, err);
     let debugInfo = '';
     if (stage === 'photos') {
-         // @ts-ignore
-         const l = (await pb.collection('listings').getOne(id).catch(() => ({}))) as any;
-         debugInfo = ` Keys: ${Object.keys(l).join(',')}, CID: ${l.collectionId}, CName: ${l.collectionName}`;
+      // @ts-ignore
+      const l = (await pb.collection('listings').getOne(id).catch(() => ({}))) as any;
+      debugInfo = ` Keys: ${Object.keys(l).join(',')}, CID: ${l.collectionId}, CName: ${l.collectionName}`;
     }
     throw error(500, `Failed at ${stage}: ${err.message || JSON.stringify(err)} ${debugInfo}`);
   }

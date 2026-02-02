@@ -45,7 +45,7 @@
   let owner = $derived(data.owner);
   let games = $derived(data.games);
   let photos = $derived(data.photos ?? []);
-  let discussions = $derived(data.discussions ?? []);
+  let chats = $derived(data.chats ?? []);
   let activePhotoIndex = $state(0);
 
   // Check if any selected games can be posted
@@ -1165,37 +1165,32 @@ View full details: ${shareUrl}`;
     <!-- Discussion Section -->
     <section class="mt-12">
       <div class="mb-6 flex items-center justify-between">
-        <h2 class="text-2xl font-bold text-primary">Discussion</h2>
-        <a href="/discussions/new?listing={listing.id}" class="btn-secondary">
-          Start a Discussion
-        </a>
+        <h2 class="text-2xl font-bold text-primary">Chat about this listing</h2>
+        <a href="/chat/new?listing={listing.id}" class="btn-secondary"> Start a Chat </a>
       </div>
 
-      {#if discussions.length === 0}
+      {#if chats.length === 0}
         <div class="rounded-lg border border-subtle bg-surface-card p-8 text-center">
-          <p class="text-secondary">No discussions yet</p>
+          <p class="text-secondary">No chats yet</p>
           <p class="mt-2 text-sm text-muted">
             Be the first to start a conversation about this listing!
           </p>
-          <a
-            href="/discussions/new?listing={listing.id}"
-            class="btn-primary mt-4 text-base px-8 py-3"
-          >
-            Start Discussion
+          <a href="/chat/new?listing={listing.id}" class="btn-primary mt-4 text-base px-8 py-3">
+            Start Chat
           </a>
         </div>
       {:else}
         <div class="space-y-3">
-          {#each discussions as thread}
+          {#each chats as chat}
             <a
-              href="/discussions/{thread.id}"
+              href="/chat/{chat.id}"
               class="block rounded-lg border border-subtle bg-surface-card p-4 transition hover:border-accent"
             >
               <div class="mb-2 flex items-start justify-between gap-4">
                 <h3 class="font-semibold text-primary hover:text-accent">
-                  {thread.title}
+                  {chat.title}
                 </h3>
-                {#if thread.pinned}
+                {#if chat.pinned}
                   <span
                     class="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-semibold text-emerald-200"
                   >
@@ -1206,27 +1201,25 @@ View full details: ${shareUrl}`;
 
               <div class="flex items-center gap-3 text-xs text-muted">
                 <span class="font-medium text-secondary">
-                  {thread.expand?.author?.display_name ?? 'Unknown'}
+                  {chat.expand?.author?.display_name ?? 'Unknown'}
                 </span>
                 <span>·</span>
                 <span>
-                  {new Date(thread.created).toLocaleDateString('en-NZ', {
+                  {new Date(chat.created).toLocaleDateString('en-NZ', {
                     month: 'short',
                     day: 'numeric',
                   })}
                 </span>
                 <span>·</span>
-                <span>💬 {thread.reply_count} replies</span>
+                <span>💬 {chat.reply_count} replies</span>
               </div>
             </a>
           {/each}
         </div>
 
-        {#if discussions.length >= 10}
+        {#if chats.length >= 10}
           <div class="mt-4 text-center">
-            <a href="/discussions" class="text-sm text-accent hover:underline">
-              View all discussions →
-            </a>
+            <a href="/chat" class="text-sm text-accent hover:underline"> View all chats → </a>
           </div>
         {/if}
       {/if}

@@ -66,7 +66,7 @@ export const load: PageLoad = async ({ url }) => {
       currentSearch: search,
     };
   } catch (err) {
-    console.error('Failed to load discussions', err);
+    console.error('Failed to load chats', err);
     return {
       threads: { items: [], page: 1, perPage: 20, totalItems: 0, totalPages: 0 },
       categories: [],

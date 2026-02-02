@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { PageData } from './$types';
   import OfferCard from '$lib/components/OfferCard.svelte';
-  import DiscussionCard from '$lib/components/DiscussionCard.svelte';
+  import ChatCard from '$lib/components/ChatCard.svelte';
   import CascadeCard from '$lib/components/CascadeCard.svelte';
   import RegionSelector from '$lib/components/RegionSelector.svelte';
   import { goto, invalidate } from '$app/navigation';
@@ -12,11 +12,44 @@
   import { browser } from '$app/environment';
   import {
     saveRegionFilterState,
+    saveCanPostState,
     saveGuestRegions,
     getGuestRegions,
   } from '$lib/utils/filters';
 
   let { data }: { data: PageData } = $props();
+
+  // Sync URL with applied filters (from page.ts localStorage reading)
+  $effect(() => {
+    if (!browser) return;
+
+    const url = new URL($page.url);
+    let needsUpdate = false;
+
+    // Sync region filter
+    const hasRegionParams = url.searchParams.has('region');
+    if (data.myRegionsFilter && !hasRegionParams) {
+      const regions = $currentUser?.preferred_regions ?? guestRegions;
+      regions.forEach((r) => url.searchParams.append('region', r));
+      needsUpdate = true;
+    }
+
+    // Sync canPost filter (only when region filter is active)
+    if (data.canPostFilter && data.myRegionsFilter && !url.searchParams.has('canPost')) {
+      url.searchParams.set('canPost', 'true');
+      needsUpdate = true;
+    }
+
+    // Sync openToTrades filter
+    if (data.openToTradesFilter && !url.searchParams.has('openToTrades')) {
+      url.searchParams.set('openToTrades', 'true');
+      needsUpdate = true;
+    }
+
+    if (needsUpdate) {
+      history.replaceState(history.state, '', url.toString());
+    }
+  });
 
   // Load preferred regions from localStorage for non-logged-in users
   let guestRegions = $state<string[]>(browser ? getGuestRegions() : []);
@@ -82,35 +115,52 @@
     )
   );
 
+  function clearAllFilters() {
+    // Use window.location.href to get actual URL (history.replaceState doesn't update $page.url)
+    const url = new URL(browser ? window.location.href : $page.url);
+    url.searchParams.delete('region');
+    url.searchParams.delete('canPost');
+    url.searchParams.delete('openToTrades');
+    url.searchParams.delete('page');
+    if (browser) {
+      saveRegionFilterState(false);
+      // Don't clear canPost from storage - keep it for when region filter is re-enabled
+    }
+    goto(url, { replaceState: true, invalidateAll: true });
+  }
+
   function toggleCanPost() {
-    const url = new URL($page.url);
+    const url = new URL(browser ? window.location.href : $page.url);
     if (data.canPostFilter) {
       url.searchParams.delete('canPost');
+      if (browser) saveCanPostState(false);
     } else {
       url.searchParams.set('canPost', 'true');
+      if (browser) saveCanPostState(true);
     }
     url.searchParams.delete('page');
-    goto(url, { replaceState: true });
+    goto(url, { replaceState: true, invalidateAll: true });
   }
 
   function toggleOpenToTrades() {
-    const url = new URL($page.url);
+    const url = new URL(browser ? window.location.href : $page.url);
     if (data.openToTradesFilter) {
       url.searchParams.delete('openToTrades');
     } else {
       url.searchParams.set('openToTrades', 'true');
     }
     url.searchParams.delete('page');
-    goto(url, { replaceState: true });
+    goto(url, { replaceState: true, invalidateAll: true });
   }
 
   function toggleMyRegions() {
-    const url = new URL($page.url);
+    const url = new URL(browser ? window.location.href : $page.url);
     const regionsToUse = $currentUser?.preferred_regions || guestRegions;
 
     if (data.myRegionsFilter) {
       // Remove all region params
       url.searchParams.delete('region');
+      url.searchParams.delete('canPost');
       if (browser) {
         saveRegionFilterState(false);
       }
@@ -122,10 +172,15 @@
       });
       if (browser) {
         saveRegionFilterState(true);
+        // Restore canPost if it was stored
+        const storedCanPost = localStorage.getItem('preferredCanPost');
+        if (storedCanPost === 'true') {
+          url.searchParams.set('canPost', 'true');
+        }
       }
     }
     url.searchParams.delete('page');
-    goto(url, { replaceState: true });
+    goto(url, { replaceState: true, invalidateAll: true });
   }
 
   function loadMore() {
@@ -197,115 +252,107 @@
   />
 </svelte:head>
 
-<main class="bg-surface-body px-6 py-16 text-primary transition-colors sm:px-8">
+<main class="bg-surface-body px-6 py-8 text-primary transition-colors sm:px-8">
   <div class="mx-auto max-w-5xl space-y-8">
-    <!-- Filter Controls -->
-    <div class="flex flex-wrap items-center justify-center gap-4">
-      <!-- Open to Trades filter -->
+    <!-- Secondary Nav Tabs -->
+    <div class="flex flex-wrap items-center gap-2 border-b border-subtle">
+      <!-- All Tab -->
       <button
-        type="button"
-        class={`btn-filter flex items-center gap-2 px-4 py-2 text-sm font-medium ${data.openToTradesFilter ? 'active' : ''}`}
-        onclick={toggleOpenToTrades}
+        onclick={clearAllFilters}
+        class="border-b-2 px-4 py-2 text-sm font-medium transition {!data.myRegionsFilter &&
+        !data.openToTradesFilter &&
+        !data.canPostFilter
+          ? 'border-accent text-accent'
+          : 'border-transparent text-secondary hover:text-primary'}"
       >
-        <input
-          type="checkbox"
-          checked={data.openToTradesFilter}
-          readonly
-          class="pointer-events-none h-4 w-4 rounded border-subtle accent-[var(--accent)]"
-        />
-        <span>🔄</span>
-        <span>open to trades</span>
+        All
       </button>
 
-      <!-- Region Filters -->
-      <div class="flex flex-wrap items-center justify-center gap-3 text-sm">
-        {#if $currentUser}
-          <!-- Logged-in user: My Regions filter -->
-          {#if data.hasPreferredRegions}
-            <label
-              class={`btn-filter flex cursor-pointer items-center gap-2 px-4 py-2 font-medium ${data.myRegionsFilter ? 'active' : ''}`}
-            >
-              <input
-                type="checkbox"
-                checked={data.myRegionsFilter}
-                onchange={toggleMyRegions}
-                class="h-4 w-4 rounded border-subtle accent-[var(--accent)]"
-              />
-              <span>📍</span>
-              <span>My Region(s)</span>
-            </label>
-          {:else}
-            <a
-              href="/profile"
-              class="btn-ghost px-4 py-2 text-sm font-medium text-muted hover:text-primary"
-            >
-              📍 Configure my regions
-            </a>
-          {/if}
+      <!-- Region Tab -->
+      {#if $currentUser}
+        {#if data.hasPreferredRegions}
+          <button
+            onclick={toggleMyRegions}
+            class="border-b-2 px-4 py-2 text-sm font-medium transition {data.myRegionsFilter
+              ? 'border-accent text-accent'
+              : 'border-transparent text-secondary hover:text-primary'}"
+          >
+            📍 My Regions
+          </button>
         {:else}
-          <!-- Non-logged-in user: Region selector with checkbox and dropdown -->
-          <div class="relative flex items-center gap-2" bind:this={regionSelectorRef}>
-            <span class="text-lg">📍</span>
-            <div
-              class={`btn-filter flex items-center overflow-hidden px-4 py-2 text-sm ${showRegionSelector ? 'open' : data.myRegionsFilter ? 'active' : ''}`}
-            >
-              {#if guestRegions.length > 0}
-                <label class="flex cursor-pointer items-center gap-2 font-medium">
-                  <input
-                    type="checkbox"
-                    checked={data.myRegionsFilter}
-                    onchange={toggleMyRegions}
-                    class="h-4 w-4 rounded border-subtle accent-[var(--accent)]"
-                  />
-                  <span
-                    >in {guestRegions.length === 1
-                      ? NORTH_ISLAND_REGIONS.find((r) => r.value === guestRegions[0])?.label ||
-                        SOUTH_ISLAND_REGIONS.find((r) => r.value === guestRegions[0])?.label
-                      : `${guestRegions.length} regions`}</span
-                  >
-                </label>
-                <div class="mx-3 h-4 w-px bg-subtle"></div>
-              {/if}
-
-              <button
-                onclick={() => (showRegionSelector = !showRegionSelector)}
-                class="group font-medium"
-              >
-                {#if guestRegions.length > 0}
-                  <span
-                    class={`inline-block transition-transform ${showRegionSelector ? 'scale-125 rotate-45' : ''} group-hover:scale-125 group-hover:rotate-45`}
-                    >⚙️</span
-                  >
-                {:else}
-                  <span>Filter by region</span>
-                {/if}
-              </button>
-            </div>
-
-            <RegionSelector
-              bind:guestRegions
-              bind:showRegionSelector
-              onToggleRegion={toggleGuestRegion}
-              onClear={clearGuestRegions}
-            />
-          </div>
+          <a
+            href="/profile"
+            class="border-b-2 border-transparent px-4 py-2 text-sm font-medium text-muted transition hover:text-primary"
+          >
+            📍 Set up regions
+          </a>
         {/if}
-      </div>
+      {:else}
+        <!-- Non-logged-in user: Region selector -->
+        <div class="relative" bind:this={regionSelectorRef}>
+          <button
+            onclick={() => {
+              if (guestRegions.length > 0) {
+                toggleMyRegions();
+              } else {
+                showRegionSelector = !showRegionSelector;
+              }
+            }}
+            class="border-b-2 px-4 py-2 text-sm font-medium transition {data.myRegionsFilter
+              ? 'border-accent text-accent'
+              : 'border-transparent text-secondary hover:text-primary'}"
+          >
+            📍 {guestRegions.length > 0
+              ? guestRegions.length === 1
+                ? NORTH_ISLAND_REGIONS.find((r) => r.value === guestRegions[0])?.label ||
+                  SOUTH_ISLAND_REGIONS.find((r) => r.value === guestRegions[0])?.label
+                : `${guestRegions.length} regions`
+              : 'Filter by region'}
+          </button>
 
-      <!-- Can Post filter (after region) -->
+          <!-- Edit regions button when regions are selected -->
+          {#if guestRegions.length > 0}
+            <button
+              onclick={(e) => {
+                e.stopPropagation();
+                showRegionSelector = !showRegionSelector;
+              }}
+              class="ml-1 text-muted transition hover:text-primary"
+              title="Edit regions"
+            >
+              ⚙️
+            </button>
+          {/if}
+
+          <RegionSelector
+            bind:guestRegions
+            bind:showRegionSelector
+            onToggleRegion={toggleGuestRegion}
+            onClear={clearGuestRegions}
+          />
+        </div>
+      {/if}
+
+      <!-- Can Post Tab (only when region filter is active) -->
+      {#if data.myRegionsFilter && (($currentUser && data.hasPreferredRegions) || (!$currentUser && guestRegions.length > 0))}
+        <button
+          onclick={toggleCanPost}
+          class="border-b-2 px-4 py-2 text-sm font-medium transition {data.canPostFilter
+            ? 'border-accent text-accent'
+            : 'border-transparent text-secondary hover:text-primary'}"
+        >
+          + Can Post
+        </button>
+      {/if}
+
+      <!-- Open to Trades Tab (right side) -->
       <button
-        type="button"
-        class={`btn-filter flex items-center gap-2 px-4 py-2 text-sm font-medium ${data.canPostFilter ? 'active' : ''}`}
-        onclick={toggleCanPost}
+        onclick={toggleOpenToTrades}
+        class="ml-auto border-b-2 px-4 py-2 text-sm font-medium transition {data.openToTradesFilter
+          ? 'border-accent text-accent'
+          : 'border-transparent text-secondary hover:text-primary'}"
       >
-        <input
-          type="checkbox"
-          checked={data.canPostFilter}
-          readonly
-          class="pointer-events-none h-4 w-4 rounded border-subtle accent-[var(--accent)]"
-        />
-        <span>📬</span>
-        <span>or can post</span>
+        🔄 Open to Trades
       </button>
     </div>
 
@@ -346,7 +393,7 @@
                 {#if item.itemType === 'offer'}
                   <OfferCard offer={item} userPreferredRegions={data.userPreferredRegions} />
                 {:else if item.itemType === 'discussion'}
-                  <DiscussionCard thread={item} />
+                  <ChatCard thread={item} />
                 {:else if item.itemType === 'cascade'}
                   <CascadeCard cascade={item} />
                 {/if}

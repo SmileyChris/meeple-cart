@@ -7,10 +7,11 @@ import type {
   DiscussionReactionRecord,
   DiscussionReactionCounts,
 } from '$lib/types/pocketbase';
-import { isSubscribed } from '$lib/utils/discussions';
+import { isSubscribed } from '$lib/utils/chat';
 import { error } from '@sveltejs/kit';
 
-export const load: PageLoad = async ({ params }) => {
+export const load: PageLoad = async ({ params, depends }) => {
+  depends('app:chat');
   const { id } = params;
   const user = get(currentUser);
 
@@ -106,7 +107,7 @@ export const load: PageLoad = async ({ params }) => {
       userReplyReactions,
     };
   } catch (err: any) {
-    console.error('Failed to load discussion thread:', err);
-    throw error(err.status || 500, err.message || 'Failed to load discussion');
+    console.error('Failed to load chat thread:', err);
+    throw error(err.status || 500, err.message || 'Failed to load chat');
   }
 };

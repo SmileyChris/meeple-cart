@@ -44,7 +44,7 @@
           <p>Meeple Cart is a low-touch, peer-to-peer trading platform. This means:</p>
           <ul class="ml-6 space-y-2 list-disc">
             <li>You trade directly with other community members</li>
-            <li>The community is self-monitoring through ratings, vouches, and discussions</li>
+            <li>The community is self-monitoring through ratings, vouches, and chat</li>
             <li>There's no central support team handling disputes or transactions</li>
             <li>Platform development is open source and community-driven</li>
           </ul>
@@ -88,9 +88,8 @@
                 Try to resolve it directly with the other party through respectful communication
               </li>
               <li>
-                Start a discussion in <a href="/discussions" class="text-accent hover:underline"
-                  >Discussions</a
-                > to get community input and advice
+                Start a chat in the <a href="/chat" class="text-accent hover:underline">Chat</a> to get
+                community input and advice
               </li>
               <li>Leave honest feedback and reviews to help others make informed decisions</li>
             </ol>
@@ -111,16 +110,15 @@
           <div class="space-y-3 text-secondary">
             <p>Have an idea to improve Meeple Cart? We'd love to hear it!</p>
             <p>
-              Share your suggestions in the <a
-                href="/discussions"
-                class="text-accent hover:underline">Discussions</a
+              Share your suggestions in the <a href="/chat" class="text-accent hover:underline"
+                >Chat</a
               > section where the community can discuss and vote on ideas.
             </p>
             <a
-              href="/discussions"
+              href="/chat/new"
               class="mt-4 inline-block rounded-lg border border-emerald-500 bg-emerald-500 px-4 py-2 font-semibold text-surface-body transition hover:bg-emerald-600"
             >
-              Start a Discussion
+              Start a Chat
             </a>
           </div>
         </div>
@@ -185,8 +183,8 @@
         <h2 class="mb-2 text-2xl font-bold text-primary">Community-Powered Platform</h2>
         <p class="text-secondary">
           Meeple Cart thrives because of our community. By helping each other, sharing knowledge in
-          discussions, and maintaining transparency through reviews and ratings, we build a
-          trustworthy trading environment together.
+          chat, and maintaining transparency through reviews and ratings, we build a trustworthy
+          trading environment together.
         </p>
       </div>
     </div>
