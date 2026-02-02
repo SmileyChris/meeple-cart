@@ -25,8 +25,8 @@
           <a href="/help" class="text-sm text-secondary transition hover:text-primary">
             Help & FAQ
           </a>
-          <a href="/guidelines" class="text-sm text-secondary transition hover:text-primary">
-            Community Guidelines
+          <a href="/rules" class="text-sm text-secondary transition hover:text-primary">
+            Site Rules
           </a>
         </nav>
       </div>

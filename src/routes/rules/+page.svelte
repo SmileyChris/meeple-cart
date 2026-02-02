@@ -1,5 +1,5 @@
 <svelte:head>
-  <title>Community Guidelines · Meeple Cart</title>
+  <title>Site Rules · Meeple Cart</title>
   <meta name="description" content="Guidelines for respectful and safe trading on Meeple Cart" />
 </svelte:head>
 
@@ -10,13 +10,13 @@
       <nav class="flex items-center gap-2 text-sm text-muted">
         <a href="/about" class="transition hover:text-secondary">About</a>
         <span>→</span>
-        <span class="text-secondary">Community Guidelines</span>
+        <span class="text-secondary">Site Rules</span>
       </nav>
 
       <!-- Header -->
       <div class="space-y-4">
         <h1 class="text-4xl font-semibold tracking-tight text-primary sm:text-5xl">
-          Community Guidelines
+          Site Rules
         </h1>
         <p class="text-lg text-secondary">
           Help us build a safe, welcoming, and trustworthy community for board game enthusiasts

@@ -258,15 +258,8 @@
   />
 </svelte:head>
 
-<main class="bg-surface-body px-6 py-16 text-primary transition-colors sm:px-8">
-  <div class="mx-auto max-w-5xl space-y-8">
-    <div class="space-y-4">
-      <h1 class="text-4xl font-semibold tracking-tight sm:text-5xl">Games</h1>
-      <p class="max-w-2xl text-base text-secondary sm:text-lg">
-        Search and filter through active listings from Meeple Cart members across New Zealand.
-      </p>
-    </div>
-
+<main class="bg-surface-body px-6 py-8 text-primary transition-colors sm:px-8">
+  <div class="mx-auto max-w-5xl space-y-6">
     <!-- Search Bar -->
     <div class="space-y-6">
       <div class="relative">

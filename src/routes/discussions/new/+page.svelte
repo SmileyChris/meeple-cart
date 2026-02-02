@@ -465,15 +465,15 @@
 
   <!-- Guidelines -->
   <div class="mt-6 rounded-lg border border-subtle bg-surface-body p-4">
-    <h3 class="mb-2 text-sm font-semibold text-primary">Community Guidelines</h3>
+    <h3 class="mb-2 text-sm font-semibold text-primary">Site Rules</h3>
     <ul class="space-y-1 text-xs text-secondary">
       <li>• Be respectful and constructive</li>
       <li>• Stay on topic and relevant to board game trading</li>
       <li>• No spam, self-promotion, or duplicate posts</li>
       <li>• Report any inappropriate content to moderators</li>
     </ul>
-    <a href="/guidelines" class="mt-3 inline-block text-xs text-accent hover:underline">
-      Read full community guidelines →
+    <a href="/rules" class="mt-3 inline-block text-xs text-accent hover:underline">
+      Read full site rules →
     </a>
   </div>
 </div>

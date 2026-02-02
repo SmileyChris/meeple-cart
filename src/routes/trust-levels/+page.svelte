@@ -133,7 +133,7 @@
           <h3 class="font-semibold text-primary">Can I lose my trust level?</h3>
           <p class="text-secondary text-sm mt-1">
             Trust levels are based on your positive history and don't decrease over time. However,
-            serious violations of community guidelines may result in account restrictions.
+            serious violations of site rules may result in account restrictions.
           </p>
         </div>
 

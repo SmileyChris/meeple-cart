@@ -99,27 +99,19 @@
   />
 </svelte:head>
 
-<main class="bg-surface-body px-6 py-16 text-primary transition-colors sm:px-8">
-  <div class="mx-auto max-w-5xl space-y-8">
-    <!-- Header -->
-    <div class="space-y-4">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="text-4xl font-semibold tracking-tight sm:text-5xl">💬 Discussions</h1>
-          <p class="mt-2 text-base text-secondary sm:text-lg">
-            Connect with the board gaming community across Aotearoa
-          </p>
-        </div>
-        {#if $currentUser}
-          <a
-            href="/discussions/new"
-            class="rounded-lg border border-emerald-500 bg-emerald-500 px-4 py-2 font-semibold text-surface-body transition hover:bg-emerald-600"
-          >
-            New Discussion
-          </a>
-        {/if}
+<main class="bg-surface-body px-6 py-8 text-primary transition-colors sm:px-8">
+  <div class="mx-auto max-w-5xl space-y-6">
+    <!-- Header with action -->
+    {#if $currentUser}
+      <div class="flex justify-end">
+        <a
+          href="/discussions/new"
+          class="rounded-lg border border-emerald-500 bg-emerald-500 px-4 py-2 font-semibold text-surface-body transition hover:bg-emerald-600"
+        >
+          New Discussion
+        </a>
       </div>
-    </div>
+    {/if}
 
     <!-- Tabs & Filters -->
     <div class="space-y-4">

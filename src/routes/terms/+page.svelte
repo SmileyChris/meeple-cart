@@ -107,8 +107,8 @@
             <p>You agree to:</p>
             <ul class="ml-6 space-y-1 list-disc">
               <li>
-                Follow our <a href="/guidelines" class="text-accent hover:underline"
-                  >Community Guidelines</a
+                Follow our <a href="/rules" class="text-accent hover:underline"
+                  >Site Rules</a
                 >
               </li>
               <li>Provide accurate descriptions of items</li>
@@ -140,7 +140,7 @@
             </p>
             <p>
               <strong>Removal:</strong> We reserve the right to remove content that violates these terms
-              or community guidelines.
+              or site rules.
             </p>
           </div>
         </div>
@@ -164,7 +164,7 @@
             <p>
               <strong>Disputes:</strong> Users are responsible for resolving disputes amongst
               themselves. See our
-              <a href="/guidelines" class="text-accent hover:underline">Community Guidelines</a> for
+              <a href="/rules" class="text-accent hover:underline">Site Rules</a> for
               guidance.
             </p>
           </div>
@@ -313,7 +313,7 @@
               <strong>By Us:</strong> We may suspend or terminate accounts that:
             </p>
             <ul class="ml-6 space-y-1 list-disc">
-              <li>Violate these terms or community guidelines</li>
+              <li>Violate these terms or site rules</li>
               <li>Engage in fraudulent activity</li>
               <li>Harm the platform or other users</li>
             </ul>

@@ -46,10 +46,10 @@
           </p>
         </a>
         <a
-          href="/guidelines"
+          href="/rules"
           class="rounded-lg border border-subtle bg-surface-card p-4 transition hover:border-accent"
         >
-          <h3 class="mb-1 font-semibold text-primary">Community Guidelines</h3>
+          <h3 class="mb-1 font-semibold text-primary">Site Rules</h3>
           <p class="text-sm text-secondary">
             Learn how to be a great member of the Meeple Cart community
           </p>

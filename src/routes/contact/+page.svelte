@@ -95,8 +95,8 @@
               <li>Leave honest feedback and reviews to help others make informed decisions</li>
             </ol>
             <p class="mt-4 text-sm text-muted">
-              See our <a href="/guidelines#resolving-issues" class="text-accent hover:underline"
-                >Community Guidelines</a
+              See our <a href="/rules#resolving-issues" class="text-accent hover:underline"
+                >Site Rules</a
               > for more on resolving issues.
             </p>
           </div>

@@ -4,6 +4,8 @@
   --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-heading: 'Momo Trust Display', 'Inter', system-ui, sans-serif;
 
+  --color-accent: var(--accent);
+
   --color-listing-trade: light-dark(#059669, #10b981);
   --color-listing-sell: light-dark(#2563eb, #3b82f6);
   --color-listing-want: light-dark(#2563eb, #3b82f6);

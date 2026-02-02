@@ -31,7 +31,7 @@
           In the meantime, check out our <a href="/about" class="text-accent hover:underline"
             >About page</a
           >
-          or <a href="/guidelines" class="text-accent hover:underline">Community Guidelines</a>
+          or <a href="/rules" class="text-accent hover:underline">Site Rules</a>
         </p>
       </div>
     </div>
