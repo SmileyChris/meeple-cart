@@ -1,8 +1,8 @@
 <svelte:head>
-  <title>Community · Meeple Cart</title>
+  <title>Hubs · Meeple Cart</title>
   <meta
     name="description"
-    content="Explore community features on Meeple Cart: Gift Cascades, Trade Parties, and Group Buys."
+    content="Explore Meeple Cart hubs: Gift Cascades, Trade Parties, and Group Buys."
   />
 </svelte:head>
 
@@ -10,8 +10,8 @@
   <div class="mx-auto max-w-3xl space-y-6">
     <!-- Header -->
     <div class="space-y-2">
-      <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">Community Features</h1>
-      <p class="text-secondary">Special ways to trade and share games</p>
+      <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">Hubs</h1>
+      <p class="text-secondary">Independent Meeple Cart hubs for special ways to trade and share games</p>
     </div>
 
     <!-- Feature Cards -->
