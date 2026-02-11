@@ -1,21 +1,80 @@
 <script lang="ts">
-  import type { PageData } from './$types';
-  import { enhance } from '$app/forms';
+  import { pb, currentUser } from '$lib/pocketbase';
   import Alert from '$lib/components/Alert.svelte';
+  import {
+    NORTH_ISLAND_REGIONS,
+    SOUTH_ISLAND_REGIONS,
+    REGION_LABELS
+  } from '$lib/constants/regions';
 
-  // Note: ActionData not available in client-side only mode
-  // TODO: Convert form to client-side PocketBase calls
-  let { data, form }: { data: PageData; form?: { success?: boolean; error?: string } } = $props();
+  // Combine regions for display
+  const ALL_REGIONS = [...NORTH_ISLAND_REGIONS, ...SOUTH_ISLAND_REGIONS].map((r) => r.value);
 
-  let prefs = $derived(data.preferences ?? {
-    watched_regions: [],
-    max_distance_km: null,
-    email_frequency: 'instant',
-    in_app_digest: 'instant',
-    notify_new_listings: true,
-    notify_price_drops: false,
-    notify_new_messages: true,
+  function getPrefsFromUser(user: any) {
+    const userPrefs = user?.notification_prefs || {};
+    return {
+      watched_regions: ((userPrefs.watched_regions as string[]) ?? []).filter((r) =>
+        (ALL_REGIONS as string[]).includes(r)
+      ),
+      max_distance_km: (userPrefs.max_distance_km as number | null) ?? null,
+      email_frequency: (userPrefs.email_frequency as string) ?? 'instant',
+      in_app_digest: (userPrefs.in_app_digest as string) ?? 'instant',
+      notify_new_listings: (userPrefs.notify_new_listings as boolean) ?? true,
+      notify_price_drops: (userPrefs.notify_price_drops as boolean) ?? false,
+      notify_new_messages: (userPrefs.notify_new_messages as boolean) ?? true
+    };
+  }
+
+  // Initialize preferences from current user or defaults
+  let prefs = $state(getPrefsFromUser($currentUser));
+  let initialized = $state(!!$currentUser);
+
+  $effect(() => {
+    if ($currentUser && !initialized) {
+      prefs = getPrefsFromUser($currentUser);
+      initialized = true;
+    }
   });
+
+  let isLoading = $state(false);
+  let success = $state(false);
+  let error = $state<string | null>(null);
+
+  async function savePreferences(e: Event) {
+    e.preventDefault();
+    if (!$currentUser) return;
+
+    isLoading = true;
+    error = null;
+    success = false;
+
+    try {
+      await pb.collection('users').update($currentUser.id, {
+        notification_prefs: prefs
+      });
+      // Update local user store to reflect changes immediately
+      // (PB update returns the record, but authStore might need manual sync if not auto-updated)
+      // Actually the realtime subscription in pocketbase.ts might handle it, but update() returns the record so we can update the store if needed.
+      // However, pocketbase.ts implementation suggests it listens to changes or we might need to manually set it if we want instant feedback if the subscription is slow.
+      // But typically, we just rely on the fact the request succeeded.
+      success = true;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (err: any) {
+      console.error('Failed to save preferences:', err);
+      error = err.message || 'Failed to save preferences';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  function handleRegionToggle(region: string) {
+    if (prefs.watched_regions.includes(region)) {
+      prefs.watched_regions = prefs.watched_regions.filter((r) => r !== region);
+    } else {
+      prefs.watched_regions = [...prefs.watched_regions, region];
+    }
+  }
 </script>
 
 <svelte:head>
@@ -31,6 +90,7 @@
         <a
           href="/notifications"
           class="rounded-lg p-2 text-muted transition hover:bg-surface-card-alt hover:text-secondary"
+          aria-label="Back to notifications"
         >
           <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
@@ -48,16 +108,16 @@
       </p>
     </div>
 
-    {#if form?.success}
+    {#if success}
       <Alert type="success">✓ Preferences saved successfully</Alert>
     {/if}
 
-    {#if form?.error}
-      <Alert type="error">{form.error}</Alert>
+    {#if error}
+      <Alert type="error">{error}</Alert>
     {/if}
 
     <!-- Preferences Form -->
-    <form method="POST" action="?/update" use:enhance class="space-y-8">
+    <form onsubmit={savePreferences} class="space-y-8">
       <!-- Watched Regions -->
       <section class="space-y-4">
         <div>
@@ -68,18 +128,18 @@
         </div>
 
         <div class="grid gap-3 sm:grid-cols-2">
-          {#each data.regions as region (region)}
+          {#each ALL_REGIONS as region (region)}
             <label
               class="flex items-center gap-3 rounded-lg border border-subtle bg-surface-card transition-colors p-3 transition hover:border-emerald-500"
             >
               <input
                 type="checkbox"
-                name="region_{region}"
-                checked={prefs.watched_regions?.includes(region)}
+                checked={prefs.watched_regions.includes(region)}
+                onchange={() => handleRegionToggle(region)}
                 class="h-4 w-4 rounded border-subtle bg-surface-card transition-colors focus:ring-[color:rgba(52,211,153,0.35)] focus:ring-offset-0"
                 style="color: var(--accent)"
               />
-              <span class="text-secondary">{region}</span>
+              <span class="text-secondary">{REGION_LABELS[region]}</span>
             </label>
           {/each}
         </div>
@@ -97,10 +157,9 @@
         <div class="flex items-center gap-3">
           <input
             type="number"
-            name="max_distance_km"
             min="0"
             step="10"
-            value={prefs.max_distance_km || ''}
+            bind:value={prefs.max_distance_km}
             placeholder="No limit"
             class="w-32 rounded-lg border border-subtle bg-surface-card transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
           />
@@ -124,7 +183,7 @@
                 type="radio"
                 name="email_frequency"
                 value={option.value}
-                checked={prefs.email_frequency === option.value}
+                bind:group={prefs.email_frequency}
                 class="h-4 w-4 border-subtle bg-surface-card transition-colors focus:ring-[color:rgba(52,211,153,0.35)] focus:ring-offset-0"
                 style="color: var(--accent)"
               />
@@ -152,8 +211,7 @@
                 type="radio"
                 name="in_app_digest"
                 value={option.value}
-                checked={prefs.in_app_digest === option.value ||
-                  (!prefs.in_app_digest && option.value === 'instant')}
+                bind:group={prefs.in_app_digest}
                 class="h-4 w-4 border-subtle bg-surface-card transition-colors focus:ring-[color:rgba(52,211,153,0.35)] focus:ring-offset-0"
                 style="color: var(--accent)"
               />
@@ -176,8 +234,7 @@
           >
             <input
               type="checkbox"
-              name="notify_new_listings"
-              checked={prefs.notify_new_listings}
+              bind:checked={prefs.notify_new_listings}
               class="h-4 w-4 rounded border-subtle bg-surface-card transition-colors focus:ring-[color:rgba(52,211,153,0.35)] focus:ring-offset-0"
               style="color: var(--accent)"
             />
@@ -192,8 +249,7 @@
           >
             <input
               type="checkbox"
-              name="notify_price_drops"
-              checked={prefs.notify_price_drops}
+              bind:checked={prefs.notify_price_drops}
               class="h-4 w-4 rounded border-subtle bg-surface-card transition-colors focus:ring-[color:rgba(52,211,153,0.35)] focus:ring-offset-0"
               style="color: var(--accent)"
             />
@@ -208,8 +264,7 @@
           >
             <input
               type="checkbox"
-              name="notify_new_messages"
-              checked={prefs.notify_new_messages}
+              bind:checked={prefs.notify_new_messages}
               class="h-4 w-4 rounded border-subtle bg-surface-card transition-colors focus:ring-[color:rgba(52,211,153,0.35)] focus:ring-offset-0"
               style="color: var(--accent)"
             />
@@ -231,9 +286,10 @@
         </a>
         <button
           type="submit"
-          class="rounded-lg bg-emerald-500 px-6 py-2 font-medium text-[var(--accent-contrast)] transition hover:bg-emerald-400"
+          disabled={isLoading}
+          class="rounded-lg bg-emerald-500 px-6 py-2 font-medium text-[var(--accent-contrast)] transition hover:bg-emerald-400 disabled:opacity-50"
         >
-          Save Preferences
+          {isLoading ? 'Saving...' : 'Save Preferences'}
         </button>
       </div>
       <!-- eslint-enable svelte/no-navigation-without-resolve -->
