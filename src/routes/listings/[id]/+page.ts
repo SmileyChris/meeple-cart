@@ -50,7 +50,7 @@ export const load: PageLoad = async ({ params }) => {
         previousTradeValue: null,
         listingCreated: listing.created,
         priceHistory: undefined,
-        canPost: false,
+        can_post: item.can_post ?? false,
       };
     });
 
@@ -58,10 +58,10 @@ export const load: PageLoad = async ({ params }) => {
     const baseUrl = 'http://127.0.0.1:8090';
     const photos = Array.isArray(listing.photos)
       ? listing.photos.map((photo) => ({
-        id: photo,
-        full: `${baseUrl}/api/files/${listing.collectionName}/${listing.id}/${photo}`,
-        thumb: `${baseUrl}/api/files/${listing.collectionName}/${listing.id}/${photo}?thumb=400x300`,
-      }))
+          id: photo,
+          full: `${baseUrl}/api/files/${listing.collectionName}/${listing.id}/${photo}`,
+          thumb: `${baseUrl}/api/files/${listing.collectionName}/${listing.id}/${photo}?thumb=400x300`,
+        }))
       : [];
 
     // Fetch reaction counts and user's reaction
@@ -163,7 +163,7 @@ export const load: PageLoad = async ({ params }) => {
     }
 
     return {
-      listing: { ...listing, listing_type: listingType },
+      listing: { ...listing, created: listing.created, listing_type: listingType },
       owner: owner || null,
       games: formattedItems,
       photos,
@@ -180,7 +180,10 @@ export const load: PageLoad = async ({ params }) => {
     let debugInfo = '';
     if (stage === 'photos') {
       // @ts-ignore
-      const l = (await pb.collection('listings').getOne(id).catch(() => ({}))) as any;
+      const l = (await pb
+        .collection('listings')
+        .getOne(id)
+        .catch(() => ({}))) as any;
       debugInfo = ` Keys: ${Object.keys(l).join(',')}, CID: ${l.collectionId}, CName: ${l.collectionName}`;
     }
     throw error(500, `Failed at ${stage}: ${err.message || JSON.stringify(err)} ${debugInfo}`);

@@ -1,3 +1,4 @@
+<script lang="ts">
   import { pb, currentUser } from '$lib/pocketbase';
   import type { TradePartyRecord, TradeRecord } from '$lib/types/pocketbase';
   import type { TradePartyContextRecord } from '$lib/types/trade-party-context';
@@ -44,7 +45,7 @@
   // Calculate my involvements
   let myContextRecords = $derived(() => {
     if (!$currentUser) return [];
-    return contextRecords.filter(c => {
+    return contextRecords.filter((c) => {
       const trade = c.expand?.trade as TradeRecord | undefined;
       if (!trade) return false;
       return trade.buyer === $currentUser.id || trade.seller === $currentUser.id;
@@ -63,12 +64,14 @@
 
       // Fetch context records (includes draft and non-draft)
       // Expand chain to get trade and participants
-      contextRecords = await pb.collection('trade_party_context').getFullList<TradePartyContextRecord>({
-        filter: `party = "${partyId}"`,
-        expand: 'trade,giving_submission,receiving_submission,trade.buyer,trade.seller',
-        sort: 'chain_id,chain_position',
-        $autoCancel: false
-      });
+      contextRecords = await pb
+        .collection('trade_party_context')
+        .getFullList<TradePartyContextRecord>({
+          filter: `party = "${partyId}"`,
+          expand: 'trade,giving_submission,receiving_submission,trade.buyer,trade.seller',
+          sort: 'chain_id,chain_position',
+          $autoCancel: false,
+        });
     } catch (err: any) {
       console.error('Failed to load matches:', err);
       error = err.message || 'Failed to load matches';
@@ -78,7 +81,11 @@
   }
 
   async function handleFinalize() {
-    if (!confirm('Are you sure you want to finalize these matches? This will notify all participants and reveal identities.')) {
+    if (
+      !confirm(
+        'Are you sure you want to finalize these matches? This will notify all participants and reveal identities.'
+      )
+    ) {
       return;
     }
 
@@ -87,13 +94,13 @@
       // We'll call a server action or use the PB SDK if we have the finalizeTradeMatching exported
       // For now, let's assume we use an endpoint or just direct PB updates if allowed
       // In a real app, this should be a secure server-side call.
-      
-      // Temporary: Since I added finalizeTradeMatching to runner.ts, I'll assume 
+
+      // Temporary: Since I added finalizeTradeMatching to runner.ts, I'll assume
       // there's a way to call it. Usually this would be via an API route.
       const response = await fetch(`/api/trade-parties/${partyId}/finalize`, {
-        method: 'POST'
+        method: 'POST',
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to finalize matches');
       }
@@ -109,7 +116,7 @@
 
   function getStatusColor(status: string, isDraft?: boolean) {
     if (isDraft) return 'bg-purple-500/20 text-purple-200';
-    
+
     switch (status) {
       case 'initiated':
       case 'pending':
@@ -141,9 +148,7 @@
   <div class="rounded-lg border border-subtle bg-surface-card p-8 text-center">
     <div class="mb-3 text-4xl">📭</div>
     <p class="text-lg text-secondary">No matches found for this party</p>
-    <p class="mt-2 text-sm text-muted">
-      This could mean:
-    </p>
+    <p class="mt-2 text-sm text-muted">This could mean:</p>
     <ul class="mt-2 space-y-1 text-sm text-muted">
       <li>• The algorithm hasn't run yet</li>
       <li>• No suitable trade chains were possible with the current submissions</li>
@@ -158,7 +163,8 @@
           <div>
             <h4 class="font-semibold text-purple-200">Matching Results (Preview)</h4>
             <p class="text-sm text-purple-200/70">
-              Review weights and chains before making them official. Participants currently see anonymized results.
+              Review weights and chains before making them official. Participants currently see
+              anonymized results.
             </p>
           </div>
           <div class="flex gap-3">
@@ -192,17 +198,23 @@
 
     <!-- Group by Chain -->
     {#each Object.entries(chains()) as [chainId, chainRecords]}
-      {@const isMyChain = myContextRecords.some(r => r.chain_id === chainId)}
+      {@const isMyChain = myContextRecords().some((r) => r.chain_id === chainId)}
       {@const isDraft = chainRecords[0]?.is_draft}
-      
+
       <!-- Only show my chains if not organizer and not public preview -->
       {#if isOrganizer || !isDraft || isMyChain}
-        <div class="rounded-lg border border-subtle bg-surface-card p-6 {isDraft ? 'border-purple-500/30 shadow-[0_0_15px_-5px_rgba(168,85,247,0.2)]' : ''}">
+        <div
+          class="rounded-lg border border-subtle bg-surface-card p-6 {isDraft
+            ? 'border-purple-500/30 shadow-[0_0_15px_-5px_rgba(168,85,247,0.2)]'
+            : ''}"
+        >
           <div class="mb-4 flex items-center justify-between">
             <div class="flex items-center gap-2">
               <h4 class="font-semibold text-primary">Trade Chain {chainId.split('_').pop()}</h4>
               {#if isDraft}
-                <span class="rounded bg-purple-500/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-purple-200">
+                <span
+                  class="rounded bg-purple-500/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-purple-200"
+                >
                   Draft Preview
                 </span>
               {/if}
@@ -211,10 +223,10 @@
           </div>
 
           <!-- Trade Chain Visualization -->
-          <TradeChainDiagram 
-            matches={chainRecords} 
-            currentUserId={$currentUser?.id || ''} 
-            isDraft={isDraft}
+          <TradeChainDiagram
+            matches={chainRecords}
+            currentUserId={$currentUser?.id || ''}
+            {isDraft}
           />
 
           <!-- Detailed Match Cards (Only shown if finalized or if I'm a participant) -->
@@ -228,7 +240,11 @@
 
                 {#if isOrganizer || myRole}
                   <div
-                    class="rounded-lg border border-subtle bg-surface-body p-4 {myRole === 'giving' ? 'border-l-4 border-l-orange-500' : myRole === 'receiving' ? 'border-l-4 border-l-emerald-500' : 'border-l-2'}"
+                    class="rounded-lg border border-subtle bg-surface-body p-4 {myRole === 'giving'
+                      ? 'border-l-4 border-l-orange-500'
+                      : myRole === 'receiving'
+                        ? 'border-l-4 border-l-emerald-500'
+                        : 'border-l-2'}"
                   >
                     <div class="mb-3 flex items-center justify-between">
                       <span class="text-sm font-medium text-primary">
@@ -240,7 +256,12 @@
                           🔄 Trade {record.chain_position}
                         {/if}
                       </span>
-                      <span class="rounded-full px-3 py-1 text-xs font-semibold {getStatusColor(trade?.status || 'pending', isDraft)}">
+                      <span
+                        class="rounded-full px-3 py-1 text-xs font-semibold {getStatusColor(
+                          trade?.status || 'pending',
+                          isDraft
+                        )}"
+                      >
                         {isDraft ? 'Draft' : trade?.status}
                       </span>
                     </div>
@@ -252,18 +273,27 @@
                           {record.expand?.giving_submission?.title || 'Unknown'}
                         </p>
                         <p class="text-xs text-secondary">
-                          From: {isDraft ? 'Participant' : (trade?.expand?.seller?.display_name || trade?.expand?.seller?.username || 'Unknown')}
+                          From: {isDraft
+                            ? 'Participant'
+                            : trade?.expand?.seller?.display_name ||
+                              trade?.expand?.seller?.username ||
+                              'Unknown'}
                         </p>
                       </div>
 
                       <div>
                         <p class="mb-1 text-xs text-muted">To Recipient:</p>
                         <p class="text-sm font-medium text-primary">
-                          {isDraft ? 'Participant (Hidden)' : (trade?.expand?.buyer?.display_name || trade?.expand?.buyer?.username || 'Unknown')}
+                          {isDraft
+                            ? 'Participant (Hidden)'
+                            : trade?.expand?.buyer?.display_name ||
+                              trade?.expand?.buyer?.username ||
+                              'Unknown'}
                         </p>
                         {#if isReceiving && !isDraft}
                           <p class="mt-1 text-xs text-secondary">
-                            Receiving: {record.expand?.receiving_submission?.title || 'Your Submission'}
+                            Receiving: {record.expand?.receiving_submission?.title ||
+                              'Your Submission'}
                           </p>
                         {/if}
                       </div>
@@ -271,20 +301,24 @@
 
                     {#if trade?.tracking_number}
                       <div class="mt-3 rounded border border-subtle bg-surface-card p-2">
-                        <p class="text-xs text-muted">Tracking: <span class="font-mono text-primary">{trade.tracking_number}</span></p>
+                        <p class="text-xs text-muted">
+                          Tracking: <span class="font-mono text-primary"
+                            >{trade.tracking_number}</span
+                          >
+                        </p>
                       </div>
                     {/if}
-                    
+
                     <!-- Only show controls if not draft and it's my trade -->
                     {#if !isDraft && myRole}
-                       <div class="mt-4 flex gap-4">
-                          <a 
-                            href="/trades/{trade?.id}"
-                            class="text-xs font-semibold text-accent hover:underline"
-                          >
-                            View Full Trade Details →
-                          </a>
-                       </div>
+                      <div class="mt-4 flex gap-4">
+                        <a
+                          href="/trades/{trade?.id}"
+                          class="text-xs font-semibold text-accent hover:underline"
+                        >
+                          View Full Trade Details →
+                        </a>
+                      </div>
                     {/if}
                   </div>
                 {/if}

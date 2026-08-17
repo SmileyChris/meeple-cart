@@ -57,6 +57,7 @@
     isSubmitting = true;
 
     try {
+      if (!userEntry) return;
       // Delete entry
       await pb.collection('cascade_entries').delete(userEntry.id);
 
@@ -132,7 +133,7 @@
     return { text: `${diffDays} days remaining`, urgent: false };
   };
 
-  const timeRemaining = getTimeRemaining(cascade.deadline);
+  const timeRemaining = $derived(getTimeRemaining(cascade.deadline));
 
   // Get game image URL
   const getGameImageUrl = () => {

@@ -29,7 +29,7 @@ export const load: PageLoad = async ({ url }) => {
 
   // Tag filters (supports multiple tags with AND logic)
   if (tags.length > 0) {
-    const tagFilters = tags.map(tag => `tags ~ "${tag}"`).join(' && ');
+    const tagFilters = tags.map((tag) => `tags ~ "${tag}"`).join(' && ');
     filter = filter ? `${filter} && ${tagFilters}` : tagFilters;
   }
 
@@ -66,7 +66,7 @@ export const load: PageLoad = async ({ url }) => {
       currentSearch: search,
     };
   } catch (err) {
-    console.error('Failed to load chats', err);
+    console.error('Failed to load discussions', err);
     return {
       threads: { items: [], page: 1, perPage: 20, totalItems: 0, totalPages: 0 },
       categories: [],

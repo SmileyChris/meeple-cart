@@ -276,9 +276,9 @@
                     {buyer.display_name}
                   </a>
                   <TrustBadge
-                    tradeCount={buyer.trade_count}
-                    vouchCount={buyer.vouch_count}
-                    size="sm"
+                    joinedDate={buyer.joined_date || buyer.created}
+                    vouchedTrades={buyer.vouch_count}
+                    size="small"
                   />
                 {:else}
                   <span class="text-lg font-semibold text-muted">Unknown buyer</span>
@@ -331,9 +331,7 @@
               <!-- What buyer is offering (their items) -->
               {#if buyerItems.length > 0 || offer.buyer_items_description}
                 <div>
-                  <div class="text-sm font-medium text-emerald-400">
-                    🔄 Offering in trade
-                  </div>
+                  <div class="text-sm font-medium text-emerald-400">🔄 Offering in trade</div>
                   {#if buyerItems.length > 0}
                     <ul class="mt-2 space-y-1">
                       {#each buyerItems as item}

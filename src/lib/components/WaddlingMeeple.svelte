@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { onMount } from 'svelte';
 
   let meepleX = $state(0);
@@ -21,9 +21,17 @@
   let poopY = $state(0);
   let poopRotation = $state(0);
   let poopPhase = $state(0); // 0 = flying out, 1 = landed
-  let poops = $state([]); // Array of {x, y, opacity, timestamp, id}
+  type Poop = {
+    x: number;
+    y: number;
+    opacity: number;
+    timestamp: number;
+    id: number;
+    rotation: number;
+  };
+  let poops = $state<Poop[]>([]);
   let poopIdCounter = $state(0);
-  let animationFrame = $state(null);
+  let animationFrame = $state<number | null>(null);
 
   onMount(() => {
     // Check for reduced motion preference

@@ -1,5 +1,6 @@
-import { PUBLIC_POCKETBASE_URL } from '$env/static/public';
 import type { PageLoad } from './$types';
+import { get } from 'svelte/store';
+import { currentUser as authUser } from '$lib/pocketbase';
 import type { ListingRecord, OfferFilters } from '$lib/types/listing';
 import type { UserRecord, ItemRecord } from '$lib/types/pocketbase';
 import type { ActivityItem } from '$lib/types/activity';
@@ -44,14 +45,14 @@ type ExpandedItemRecord = ItemRecord & {
 
 export const prerender = false;
 
-export const load: PageLoad = async ({ fetch, url, depends, parent }) => {
+export const load: PageLoad = async ({ fetch, url, depends }) => {
   depends('app:games');
 
   const pageParam = Number.parseInt(url.searchParams.get('page') ?? '1', 10);
   const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
 
   // Get current user from parent layout (consistent with activity page)
-  const { currentUser: user } = await parent();
+  const user = get(authUser);
 
   // Get guest regions from localStorage if not logged in
   let guestRegions: string[] = [];
@@ -67,9 +68,7 @@ export const load: PageLoad = async ({ fetch, url, depends, parent }) => {
   }
 
   // Check if URL has any filter params (excluding search/condition which are page-specific)
-  const hasUrlParams =
-    url.searchParams.has('canPost') ||
-    url.searchParams.has('region');
+  const hasUrlParams = url.searchParams.has('canPost') || url.searchParams.has('region');
 
   // Get filter states - from URL if present, otherwise from localStorage
   let urlRegions = url.searchParams.getAll('region');
@@ -145,7 +144,10 @@ export const load: PageLoad = async ({ fetch, url, depends, parent }) => {
     canPost: canPostFilter || undefined,
   };
 
-  const baseUrl = (PUBLIC_POCKETBASE_URL || FALLBACK_BASE_URL).replace(/\/$/, '');
+  const baseUrl = (import.meta.env.VITE_PUBLIC_POCKETBASE_URL || FALLBACK_BASE_URL).replace(
+    /\/$/,
+    ''
+  );
   const searchParams = new URLSearchParams({
     page: String(page),
     perPage: String(ACTIVITY_LIMIT),
@@ -168,9 +170,7 @@ export const load: PageLoad = async ({ fetch, url, depends, parent }) => {
     );
 
     if (!itemsResponse.ok) {
-      throw new Error(
-        `Failed to fetch items: ${itemsResponse.status} ${itemsResponse.statusText}`
-      );
+      throw new Error(`Failed to fetch items: ${itemsResponse.status} ${itemsResponse.statusText}`);
     }
 
     const result = (await itemsResponse.json()) as PocketBaseListResponse<ExpandedItemRecord>;

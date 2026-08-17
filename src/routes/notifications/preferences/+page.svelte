@@ -7,15 +7,17 @@
   // TODO: Convert form to client-side PocketBase calls
   let { data, form }: { data: PageData; form?: { success?: boolean; error?: string } } = $props();
 
-  let prefs = $derived(data.preferences ?? {
-    watched_regions: [],
-    max_distance_km: null,
-    email_frequency: 'instant',
-    in_app_digest: 'instant',
-    notify_new_listings: true,
-    notify_price_drops: false,
-    notify_new_messages: true,
-  });
+  let prefs = $derived(
+    data.preferences ?? {
+      watched_regions: [] as string[],
+      max_distance_km: null,
+      email_frequency: 'instant',
+      in_app_digest: 'instant',
+      notify_new_listings: true,
+      notify_price_drops: false,
+      notify_new_messages: true,
+    }
+  );
 </script>
 
 <svelte:head>

@@ -9,6 +9,7 @@
     canBecomeVerifier,
   } from '$lib/utils/trust-buddy';
   import { getAccountAgeDays } from '$lib/utils/trust-tiers';
+  import type { UserRecord } from '$lib/types/pocketbase';
 
   let { data }: { data: PageData } = $props();
 
@@ -54,7 +55,7 @@
       success = 'Phone number updated successfully';
 
       // Refresh user data
-      const updatedUser = await pb.collection('users').getOne(user.id);
+      const updatedUser = await pb.collection('users').getOne<UserRecord>(user.id);
       currentUser.set(updatedUser);
     } catch (err: any) {
       console.error('Failed to update phone:', err);

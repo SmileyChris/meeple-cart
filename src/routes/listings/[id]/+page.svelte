@@ -11,6 +11,7 @@
   import { logStatusChange } from '$lib/utils/listing-status';
   import Alert from '$lib/components/Alert.svelte';
   import { REGION_LABELS } from '$lib/constants/regions';
+  import type { ItemRecord } from '$lib/types/pocketbase';
 
   let { data }: { data: PageData } = $props();
 
@@ -453,9 +454,6 @@ View full details: ${shareUrl}`;
                 : 'Trade'}
           </span>
           <span class="rounded-full border border-subtle px-3 py-1">Added {listingCreated}</span>
-          {#if listing.prefer_bundle}
-            <span class="rounded-full border border-subtle px-3 py-1">Prefers bundle</span>
-          {/if}
         </div>
 
         <!-- Pickup Regions -->
@@ -550,7 +548,7 @@ View full details: ${shareUrl}`;
             <PhotoRegionOverlay
               regions={photoRegions}
               photoId={photos[activePhotoIndex].id}
-              {games}
+              games={games as unknown as ItemRecord[]}
               {imageWidth}
               {imageHeight}
               onRegionClick={scrollToGame}

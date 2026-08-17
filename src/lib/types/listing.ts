@@ -17,6 +17,7 @@ export type ListingType = 'trade' | 'sell' | 'want';
 export interface ListingRecord extends RecordModel {
   owner: string;
   title: string;
+  listing_type?: ListingType;
   status: 'active' | 'pending' | 'completed' | 'cancelled';
   summary?: string;
   location?: string;
@@ -50,6 +51,7 @@ export interface ListingGameDetail extends ListingGameSummary {
   notes: string | null;
   year: number | null;
   listingCreated: string;
+  can_post?: boolean;
 }
 
 /**

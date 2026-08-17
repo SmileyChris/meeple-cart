@@ -1,4 +1,3 @@
-import { PUBLIC_POCKETBASE_URL } from '$env/static/public';
 import type { PageLoad } from './$types';
 import type { CascadeRecord, CascadeRegion, CascadeStatus } from '$lib/types/cascade';
 import { NZ_REGIONS } from '$lib/constants/regions';
@@ -102,7 +101,10 @@ export const load: PageLoad = async ({ fetch, url }) => {
     sort: sortParam,
   };
 
-  const baseUrl = (PUBLIC_POCKETBASE_URL || FALLBACK_BASE_URL).replace(/\/$/, '');
+  const baseUrl = (import.meta.env.VITE_PUBLIC_POCKETBASE_URL || FALLBACK_BASE_URL).replace(
+    /\/$/,
+    ''
+  );
   const searchParams = new URLSearchParams({
     page: String(page),
     perPage: String(PAGE_LIMIT),

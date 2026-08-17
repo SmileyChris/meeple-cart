@@ -97,6 +97,7 @@ export const load: PageLoad = async ({ params }) => {
         region: cascade.region,
         shippingRequirement: cascade.shipping_requirement,
         specialRules: cascade.special_rules,
+        viewCount: cascade.view_count,
       },
       game: {
         id: game.id,
@@ -113,6 +114,7 @@ export const load: PageLoad = async ({ params }) => {
         vouchCount: holder.vouch_count,
         cascadesSeeded: holder.cascades_seeded,
         cascadesReceived: holder.cascades_received,
+        cascadeReputation: holder.cascade_reputation,
       },
       entries,
       history,

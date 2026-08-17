@@ -103,7 +103,7 @@ describe('canLeaveFeedback', () => {
 
   it('prevents leaving feedback on incomplete trade', () => {
     expect(canLeaveFeedback({ ...completedTrade, status: 'initiated' }, 'buyer123')).toBe(false);
-    expect(canLeaveFeedback({ ...completedTrade, status: 'confirmed' }, 'buyer123')).toBe(false);
+    expect(canLeaveFeedback({ ...completedTrade, status: 'accepted' }, 'buyer123')).toBe(false);
   });
 
   it('prevents leaving feedback on disputed trade', () => {

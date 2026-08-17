@@ -1,8 +1,8 @@
-import type { TradeRecord } from '$lib/types/pocketbase';
+import type { TradeRecord, TradeStatus } from '$lib/types/pocketbase';
 
-export type TradeStatus = 'initiated' | 'confirmed' | 'completed' | 'disputed';
+export type { TradeStatus } from '$lib/types/pocketbase';
 export type UserRole = 'buyer' | 'seller' | 'other';
-export type TradeAction = 'confirm' | 'complete' | 'dispute';
+export type TradeAction = 'accept' | 'ship' | 'receive' | 'complete' | 'dispute' | 'cancel';
 
 /**
  * Determines if a trade can transition from one status to another for a given user role
@@ -17,17 +17,20 @@ export function canTransitionTo(
     return false;
   }
 
-  // Cannot transition from completed or disputed
-  if (currentStatus === 'completed' || currentStatus === 'disputed') {
+  // Completed, disputed, and cancelled trades are terminal.
+  if (['completed', 'disputed', 'cancelled'].includes(currentStatus)) {
     return false;
   }
 
   // Define valid transitions
   const validTransitions: Record<TradeStatus, TradeStatus[]> = {
-    initiated: ['confirmed', 'disputed'],
-    confirmed: ['completed', 'disputed'],
+    initiated: ['accepted', 'disputed', 'cancelled'],
+    accepted: ['shipped', 'disputed', 'cancelled'],
+    shipped: ['received', 'disputed'],
+    received: ['completed', 'disputed'],
     completed: [], // Terminal state
     disputed: [], // Terminal state
+    cancelled: [], // Terminal state
   };
 
   return validTransitions[currentStatus]?.includes(newStatus) ?? false;
@@ -57,7 +60,7 @@ export function validateStatusTransition(
   }
 
   // Check if trying to go backwards
-  const statusOrder: TradeStatus[] = ['initiated', 'confirmed', 'completed'];
+  const statusOrder: TradeStatus[] = ['initiated', 'accepted', 'shipped', 'received', 'completed'];
   const currentIndex = statusOrder.indexOf(currentStatus);
   const newIndex = statusOrder.indexOf(newStatus);
 
@@ -98,14 +101,18 @@ export function getAvailableActions(trade: TradeRecord, userId: string): TradeAc
   }
 
   // Terminal states have no actions
-  if (trade.status === 'completed' || trade.status === 'disputed') {
+  if (['completed', 'disputed', 'cancelled'].includes(trade.status)) {
     return [];
   }
 
   // Add available actions based on current status
   if (trade.status === 'initiated') {
-    actions.push('confirm', 'dispute');
-  } else if (trade.status === 'confirmed') {
+    actions.push('accept', 'cancel', 'dispute');
+  } else if (trade.status === 'accepted') {
+    actions.push('ship', 'cancel', 'dispute');
+  } else if (trade.status === 'shipped') {
+    actions.push('receive', 'dispute');
+  } else if (trade.status === 'received') {
     actions.push('complete', 'dispute');
   }
 
@@ -118,9 +125,12 @@ export function getAvailableActions(trade: TradeRecord, userId: string): TradeAc
 export function getStatusLabel(status: TradeStatus): string {
   const labels: Record<TradeStatus, string> = {
     initiated: 'Proposed',
-    confirmed: 'In Progress',
+    accepted: 'Accepted',
+    shipped: 'Shipped',
+    received: 'Received',
     completed: 'Completed',
     disputed: 'Disputed',
+    cancelled: 'Cancelled',
   };
 
   return labels[status] || status;
@@ -132,9 +142,12 @@ export function getStatusLabel(status: TradeStatus): string {
 export function getStatusColor(status: TradeStatus): string {
   const colors: Record<TradeStatus, string> = {
     initiated: 'bg-blue-500',
-    confirmed: 'bg-green-500',
+    accepted: 'bg-blue-500',
+    shipped: 'bg-amber-500',
+    received: 'bg-green-500',
     completed: 'bg-gray-500',
     disputed: 'bg-red-500',
+    cancelled: 'bg-gray-500',
   };
 
   return colors[status] || 'bg-gray-500';

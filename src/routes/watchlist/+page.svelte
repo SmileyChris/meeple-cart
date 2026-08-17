@@ -116,7 +116,9 @@
                 <span
                   class="rounded-full border border-emerald-600 px-2 py-0.5 uppercase text-emerald-200"
                 >
-                  {typeLabels[item.listingType] ?? item.listingType}
+                  {item.listingType
+                    ? (typeLabels[item.listingType] ?? item.listingType)
+                    : 'Listing'}
                 </span>
                 <span
                   class="rounded-full border border-subtle bg-surface-card-alt px-2 py-0.5 text-secondary transition-colors"

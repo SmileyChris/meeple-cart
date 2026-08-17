@@ -50,6 +50,7 @@ export interface ItemRecord extends RecordModel {
   condition: 'mint' | 'excellent' | 'good' | 'fair' | 'poor';
   notes?: string;
   status: 'available' | 'pending' | 'sold' | 'bundled';
+  can_post?: boolean;
   photo_regions?: Record<string, unknown>;
   expand?: {
     listing?: RecordModel;
@@ -286,7 +287,14 @@ export interface TradePartyRecord extends RecordModel {
   name: string;
   description: string;
   organizer: string;
-  status: 'planning' | 'submissions' | 'want_lists' | 'matching' | 'matching_preview' | 'execution' | 'completed';
+  status:
+    | 'planning'
+    | 'submissions'
+    | 'want_lists'
+    | 'matching'
+    | 'matching_preview'
+    | 'execution'
+    | 'completed';
   matching_preview_at?: string;
   matching_finalized_at?: string;
   submission_opens: string;

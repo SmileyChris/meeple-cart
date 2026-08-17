@@ -1,8 +1,14 @@
-import { PUBLIC_POCKETBASE_URL } from '$env/static/public';
 import { browser } from '$app/environment';
+import { get } from 'svelte/store';
+import { currentUser as authUser } from '$lib/pocketbase';
 import type { PageLoad } from './$types';
 import type { OfferPreview, ListingRecord } from '$lib/types/listing';
-import type { UserRecord, ItemRecord, OfferTemplateRecord, DiscussionThreadRecord } from '$lib/types/pocketbase';
+import type {
+  UserRecord,
+  ItemRecord,
+  OfferTemplateRecord,
+  DiscussionThreadRecord,
+} from '$lib/types/pocketbase';
 import type { CascadeRecord } from '$lib/types/cascade';
 
 const ACTIVITY_LIMIT = 40;
@@ -31,14 +37,17 @@ const buildFileUrl = (
 
 export const prerender = false;
 
-export const load: PageLoad = async ({ fetch, url, parent, depends }) => {
+export const load: PageLoad = async ({ fetch, url, depends }) => {
   depends('app:listings');
-  const baseUrl = (PUBLIC_POCKETBASE_URL || FALLBACK_BASE_URL).replace(/\/$/, '');
+  const baseUrl = (import.meta.env.VITE_PUBLIC_POCKETBASE_URL || FALLBACK_BASE_URL).replace(
+    /\/$/,
+    ''
+  );
 
   const page = url.searchParams.get('page') || '1';
 
   // Get current user from parent layout (need this early)
-  const { currentUser } = await parent();
+  const currentUser = get(authUser);
 
   // Get guest regions from localStorage if in browser and not logged in
   let guestRegions: string[] = [];
@@ -121,15 +130,20 @@ export const load: PageLoad = async ({ fetch, url, parent, depends }) => {
     );
 
     if (!offersResponse.ok) {
-      throw new Error(`Failed to fetch offers: ${offersResponse.status} ${offersResponse.statusText}`);
+      throw new Error(
+        `Failed to fetch offers: ${offersResponse.status} ${offersResponse.statusText}`
+      );
     }
 
-    const offersResult = (await offersResponse.json()) as PocketBaseListResponse<OfferTemplateRecord>;
+    const offersResult =
+      (await offersResponse.json()) as PocketBaseListResponse<OfferTemplateRecord>;
 
     // Transform offer_templates into OfferPreview format
     let offers: OfferPreview[] = offersResult.items.map((offerTemplate) => {
       const listing = offerTemplate.expand?.listing as ListingRecord | undefined;
-      const owner = (offerTemplate.expand?.owner || listing?.expand?.owner) as UserRecord | undefined;
+      const owner = (offerTemplate.expand?.owner || listing?.expand?.owner) as
+        | UserRecord
+        | undefined;
       const items = Array.isArray(offerTemplate.expand?.items)
         ? (offerTemplate.expand?.items as ItemRecord[]).map((itemRecord) => {
             const bggId = typeof itemRecord.bgg_id === 'number' ? itemRecord.bgg_id : null;
@@ -177,7 +191,8 @@ export const load: PageLoad = async ({ fetch, url, parent, depends }) => {
     if (myRegionsFilter && urlRegions.length > 0) {
       offers = offers.filter((offer) => {
         // Match if offer is in a selected region OR can post (when canPost filter enabled)
-        const inRegion = offer.regions && offer.regions.some((region) => urlRegions.includes(region));
+        const inRegion =
+          offer.regions && offer.regions.some((region) => urlRegions.includes(region));
         const canPostToRegion = canPostFilter && offer.canPost;
         return inRegion || canPostToRegion;
       });
@@ -205,7 +220,8 @@ export const load: PageLoad = async ({ fetch, url, parent, depends }) => {
 
     let discussions: DiscussionThreadRecord[] = [];
     if (discussionsResponse.ok) {
-      const discussionsResult = (await discussionsResponse.json()) as PocketBaseListResponse<DiscussionThreadRecord>;
+      const discussionsResult =
+        (await discussionsResponse.json()) as PocketBaseListResponse<DiscussionThreadRecord>;
       discussions = discussionsResult.items;
     }
 
@@ -229,7 +245,8 @@ export const load: PageLoad = async ({ fetch, url, parent, depends }) => {
 
     let cascades: CascadeRecord[] = [];
     if (cascadesResponse.ok) {
-      const cascadesResult = (await cascadesResponse.json()) as PocketBaseListResponse<CascadeRecord>;
+      const cascadesResult =
+        (await cascadesResponse.json()) as PocketBaseListResponse<CascadeRecord>;
       cascades = cascadesResult.items;
     }
 
@@ -259,9 +276,12 @@ export const load: PageLoad = async ({ fetch, url, parent, depends }) => {
       myRegionsFilter,
       // For logged-in users, use their preferred regions
       // For guests, use localStorage regions (available when running in browser)
-      userPreferredRegions: currentUser?.preferred_regions ?? (guestRegions.length > 0 ? guestRegions : null),
+      userPreferredRegions:
+        currentUser?.preferred_regions ?? (guestRegions.length > 0 ? guestRegions : null),
       // Check if user has preferred regions configured (profile or localStorage)
-      hasPreferredRegions: Boolean(currentUser?.preferred_regions?.length || guestRegions.length > 0),
+      hasPreferredRegions: Boolean(
+        currentUser?.preferred_regions?.length || guestRegions.length > 0
+      ),
     };
   } catch (error) {
     console.error('Failed to load activity', error);

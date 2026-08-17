@@ -1,4 +1,10 @@
-  import type { TradePartyMatchRecord, TradeRecord, UserRecord, TradePartySubmissionRecord } from '$lib/types/pocketbase';
+<script lang="ts">
+  import type {
+    TradePartyMatchRecord,
+    TradeRecord,
+    UserRecord,
+    TradePartySubmissionRecord,
+  } from '$lib/types/pocketbase';
   import type { TradePartyContextRecord } from '$lib/types/trade-party-context';
 
   interface Props {
@@ -33,7 +39,7 @@
 
     for (let i = 0; i < matches.length; i++) {
       const match = matches[i];
-      
+
       let fromUserRecord: UserRecord | undefined;
       let toUserRecord: UserRecord | undefined;
       let gameTitle = 'Unknown Game';
@@ -43,9 +49,16 @@
       // Handle both legacy MatchRecord and new ContextRecord
       if ('giving_user' in match) {
         // Legacy/Finalized MatchRecord
-        fromUserRecord = match.expand?.giving_user as UserRecord;
-        toUserRecord = match.expand?.receiving_user as UserRecord;
-        gameTitle = match.expand?.giving_submission?.title || 'Unknown Game';
+        const expanded = match.expand as
+          | {
+              giving_user?: UserRecord;
+              receiving_user?: UserRecord;
+              giving_submission?: TradePartySubmissionRecord;
+            }
+          | undefined;
+        fromUserRecord = expanded?.giving_user;
+        toUserRecord = expanded?.receiving_user;
+        gameTitle = expanded?.giving_submission?.title || 'Unknown Game';
         givingUserId = match.giving_user;
         receivingUserId = match.receiving_user;
       } else {
@@ -53,7 +66,8 @@
         const trade = match.expand?.trade as TradeRecord;
         fromUserRecord = trade?.expand?.seller;
         toUserRecord = trade?.expand?.buyer;
-        gameTitle = (match.expand?.giving_submission as TradePartySubmissionRecord)?.title || 'Unknown Game';
+        gameTitle =
+          (match.expand?.giving_submission as TradePartySubmissionRecord)?.title || 'Unknown Game';
         givingUserId = trade?.seller || '';
         receivingUserId = trade?.buyer || '';
       }
@@ -88,7 +102,11 @@
           ? 'border-accent bg-accent/10'
           : 'border-subtle bg-surface-card'}"
       >
-        <div class="mb-1 text-center text-sm font-semibold {trade.isCurrentUser ? 'text-accent' : 'text-primary'}">
+        <div
+          class="mb-1 text-center text-sm font-semibold {trade.isCurrentUser
+            ? 'text-accent'
+            : 'text-primary'}"
+        >
           {trade.from}
           {#if trade.isCurrentUser}
             <span class="text-xs">(You)</span>
@@ -103,12 +121,7 @@
       <!-- Arrow -->
       {#if index < tradeFlow().length - 1 || isCircular()}
         <div class="flex flex-col items-center">
-          <svg
-            class="h-6 w-8 text-accent"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
+          <svg class="h-6 w-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
@@ -131,7 +144,7 @@
       >
         <div class="text-center text-sm font-semibold text-primary">
           {lastTrade.to}
-          {#if tradeFlow().some((t) => t.from === lastTrade.to && (t.isCurrentUser))}
+          {#if tradeFlow().some((t) => t.from === lastTrade.to && t.isCurrentUser)}
             <span class="text-xs">(You)</span>
           {/if}
         </div>

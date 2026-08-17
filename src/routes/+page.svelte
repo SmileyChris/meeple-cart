@@ -102,7 +102,8 @@
 
     data.activity.forEach((item) => {
       const group = getTimeGroup(item.created);
-      groups[group].push(item);
+      const groupItems = groups[group] as unknown as Array<(typeof data.activity)[number]>;
+      groupItems.push(item);
     });
 
     return groups;
@@ -391,7 +392,10 @@
             <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {#each groupedActivity[group] as item (item.id)}
                 {#if item.itemType === 'offer'}
-                  <OfferCard offer={item} userPreferredRegions={data.userPreferredRegions} />
+                  <OfferCard
+                    offer={item}
+                    userPreferredRegions={data.userPreferredRegions ?? undefined}
+                  />
                 {:else if item.itemType === 'discussion'}
                   <ChatCard thread={item} />
                 {:else if item.itemType === 'cascade'}

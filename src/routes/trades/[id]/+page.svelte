@@ -55,7 +55,7 @@
     cancelled: 'border-slate-500/80 bg-slate-500/10 text-slate-400',
   };
 
-  async function updateTradeStatus(newStatus: string) {
+  async function updateTradeStatus(newStatus: TradeRecord['status']) {
     actionError = null;
     processing = true;
 

@@ -43,14 +43,9 @@
     poor: 'Well loved',
   };
 
-  let colors = $derived(game.activityType === 'listing' ? typeColors[game.type] : undefined);
-
-  const currencyFormatter = new Intl.NumberFormat('en-NZ', {
-    style: 'currency',
-    currency: 'NZD',
-    maximumFractionDigits: 0,
-    minimumFractionDigits: 0,
-  });
+  let colors = $derived(
+    game.activityType === 'listing' && game.type ? typeColors[game.type] : undefined
+  );
 
   // Add game ID to URL so listing page can scroll to it (only for listing activities)
   let gameUrl = $derived(
@@ -71,7 +66,7 @@
         <span
           class="rounded-full border-2 {colors.border} {colors.bg} px-3 py-1 text-xs font-bold uppercase tracking-wider {colors.text}"
         >
-          {typeLabels[game.type]}
+          {game.type ? typeLabels[game.type] : 'Listing'}
         </span>
       </div>
 
@@ -134,25 +129,6 @@
             {conditionLabels[game.condition]}
           </span>
         </div>
-        {#if game.price !== null}
-          <div class="flex items-center gap-2">
-            <span class="text-muted">Price</span>
-            <span
-              class="rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-bold text-badge-emerald ring-1 ring-emerald-500/50"
-            >
-              {currencyFormatter.format(game.price)}
-            </span>
-          </div>
-        {:else if game.tradeValue !== null}
-          <div class="flex items-center gap-2">
-            <span class="text-muted">Value</span>
-            <span
-              class="rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-bold text-badge-emerald ring-1 ring-emerald-500/50"
-            >
-              {currencyFormatter.format(game.tradeValue)}
-            </span>
-          </div>
-        {/if}
       </div>
     {/if}
   {/snippet}

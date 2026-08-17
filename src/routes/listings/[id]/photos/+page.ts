@@ -2,6 +2,8 @@ import type { PageLoad } from './$types';
 import { pb, currentUser } from '$lib/pocketbase';
 import { error, redirect } from '@sveltejs/kit';
 import { get } from 'svelte/store';
+import type { ListingRecord } from '$lib/types/listing';
+import type { ItemRecord, UserRecord } from '$lib/types/pocketbase';
 
 export const load: PageLoad = async ({ params }) => {
   const user = get(currentUser);
@@ -13,7 +15,7 @@ export const load: PageLoad = async ({ params }) => {
 
   try {
     // Load listing with owner info
-    const listing = await pb.collection('listings').getOne(params.id, {
+    const listing = await pb.collection('listings').getOne<ListingRecord>(params.id, {
       expand: 'owner',
     });
 
@@ -23,7 +25,7 @@ export const load: PageLoad = async ({ params }) => {
     }
 
     // Load items for this listing (needed for region mapping)
-    const games = await pb.collection('items').getFullList({
+    const games = await pb.collection('items').getFullList<ItemRecord>({
       filter: `listing = "${params.id}"`,
       sort: 'created',
     });
@@ -42,7 +44,7 @@ export const load: PageLoad = async ({ params }) => {
       listing,
       games,
       photos,
-      owner: listing.expand?.owner,
+      owner: listing.expand?.owner as UserRecord | undefined,
     };
   } catch (err) {
     console.error('Error loading listing for photo management:', err);

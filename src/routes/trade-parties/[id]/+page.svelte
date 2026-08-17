@@ -90,9 +90,7 @@
     party.status === 'want_lists' ||
       (new Date(party.want_list_opens) <= now && new Date(party.want_list_closes) > now)
   );
-  let resultsPublished = $derived(
-    party.status === 'execution' || party.status === 'completed'
-  );
+  let resultsPublished = $derived(party.status === 'execution' || party.status === 'completed');
 
   // Format date helper
   function formatDate(dateString: string) {
@@ -193,10 +191,14 @@
       <!-- User's Submissions List -->
       {#if mySubmissions.length > 0}
         <div class="mb-8 rounded-lg border border-subtle bg-surface-card p-6">
-          <h2 class="mb-4 text-lg font-semibold text-primary">Your Submissions ({mySubmissions.length})</h2>
+          <h2 class="mb-4 text-lg font-semibold text-primary">
+            Your Submissions ({mySubmissions.length})
+          </h2>
           <div class="space-y-4">
             {#each mySubmissions as submission}
-              <div class="flex items-start gap-4 rounded-lg border border-subtle bg-surface-body p-4">
+              <div
+                class="flex items-start gap-4 rounded-lg border border-subtle bg-surface-body p-4"
+              >
                 <div class="flex-1">
                   <div class="mb-2 flex items-start justify-between">
                     <div>
@@ -227,7 +229,9 @@
                   <div class="space-y-2 text-sm">
                     <div class="flex items-center gap-2">
                       <span class="text-muted">Condition:</span>
-                      <span class="font-medium text-secondary capitalize">{submission.condition.replace('_', ' ')}</span>
+                      <span class="font-medium text-secondary capitalize"
+                        >{submission.condition.replace('_', ' ')}</span
+                      >
                     </div>
 
                     {#if submission.description}
@@ -299,7 +303,9 @@
                       </div>
                     </div>
                     <div class="text-sm text-purple-300">
-                      {selectedSubmissionForWantList?.id === submission.id ? '▼ Close' : '▶ Build Want List'}
+                      {selectedSubmissionForWantList?.id === submission.id
+                        ? '▼ Close'
+                        : '▶ Build Want List'}
                     </div>
                   </div>
                 </button>
@@ -376,9 +382,7 @@
           <span class="text-3xl">🎉</span>
           <div>
             <h3 class="text-xl font-semibold text-blue-200">Results Published!</h3>
-            <p class="text-sm text-blue-300/80">
-              The algorithm has run. Check your matches below.
-            </p>
+            <p class="text-sm text-blue-300/80">The algorithm has run. Check your matches below.</p>
           </div>
         </div>
       </div>
@@ -432,7 +436,9 @@
     <h2 class="mb-4 text-lg font-semibold text-primary">Timeline</h2>
     <div class="space-y-3">
       <div class="flex items-start gap-4">
-        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-200">
+        <div
+          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-200"
+        >
           1
         </div>
         <div class="flex-1">
@@ -444,7 +450,9 @@
       </div>
 
       <div class="flex items-start gap-4">
-        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-500/20 text-blue-200">
+        <div
+          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-500/20 text-blue-200"
+        >
           2
         </div>
         <div class="flex-1">
@@ -456,25 +464,29 @@
       </div>
 
       <div class="flex items-start gap-4">
-        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-purple-500/20 text-purple-200">
+        <div
+          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-purple-500/20 text-purple-200"
+        >
           3
         </div>
         <div class="flex-1">
           <h3 class="font-semibold text-primary">Results Published</h3>
           <p class="text-sm text-muted">
-            {formatDate(party.algorithm_runs_at)}
+            {formatDate(party.algorithm_runs_at ?? party.want_list_closes)}
           </p>
         </div>
       </div>
 
       <div class="flex items-start gap-4">
-        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-500/20 text-amber-200">
+        <div
+          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-500/20 text-amber-200"
+        >
           4
         </div>
         <div class="flex-1">
           <h3 class="font-semibold text-primary">Execution Deadline</h3>
           <p class="text-sm text-muted">
-            {formatDate(party.execution_deadline)}
+            {formatDate(party.execution_deadline ?? party.want_list_closes)}
           </p>
         </div>
       </div>
@@ -521,7 +533,8 @@
   {#if isOrganizer}
     <div class="mb-8 rounded-lg border border-blue-500/30 bg-blue-500/10 p-4">
       <p class="mb-3 text-sm text-blue-200">
-        <strong>Organizer Controls:</strong> More options coming soon (edit details, manage submissions, run algorithm)
+        <strong>Organizer Controls:</strong> More options coming soon (edit details, manage submissions,
+        run algorithm)
       </p>
       <button
         disabled

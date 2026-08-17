@@ -135,7 +135,7 @@ describe('cascades listing load', () => {
         region: 'wellington',
         gameTitle: 'Gloomhaven',
         gameCondition: 'excellent',
-        gameImage: 'https://pb.example/api/files/listings/listing-1/cover.jpg?thumb=400x300',
+        gameImage: 'http://127.0.0.1:8090/api/files/listings/listing-1/cover.jpg?thumb=400x300',
         holderName: 'Chris',
         holderId: 'user-1',
         timeRemaining: '1 day remaining',

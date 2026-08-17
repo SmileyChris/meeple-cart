@@ -3,6 +3,7 @@
   import { pb, currentUser } from '$lib/pocketbase';
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
+  import type { UserRecord } from '$lib/types/pocketbase';
 
   let { data }: { data: PageData } = $props();
 
@@ -49,7 +50,7 @@
 
       // Refresh user data
       if (user) {
-        const updatedUser = await pb.collection('users').getOne(user.id);
+        const updatedUser = await pb.collection('users').getOne<UserRecord>(user.id);
         currentUser.set(updatedUser);
       }
     } catch (err: any) {

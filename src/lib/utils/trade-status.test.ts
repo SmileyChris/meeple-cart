@@ -9,24 +9,24 @@ import {
 import type { TradeRecord } from '$lib/types/pocketbase';
 
 describe('canTransitionTo', () => {
-  it('allows buyer to transition from initiated to confirmed', () => {
-    expect(canTransitionTo('initiated', 'confirmed', 'buyer')).toBe(true);
+  it('allows buyer to transition from initiated to accepted', () => {
+    expect(canTransitionTo('initiated', 'accepted', 'buyer')).toBe(true);
   });
 
-  it('allows seller to transition from initiated to confirmed', () => {
-    expect(canTransitionTo('initiated', 'confirmed', 'seller')).toBe(true);
+  it('allows seller to transition from initiated to accepted', () => {
+    expect(canTransitionTo('initiated', 'accepted', 'seller')).toBe(true);
   });
 
-  it('allows either party to transition from confirmed to completed', () => {
-    expect(canTransitionTo('confirmed', 'completed', 'buyer')).toBe(true);
-    expect(canTransitionTo('confirmed', 'completed', 'seller')).toBe(true);
+  it('allows either party to transition from received to completed', () => {
+    expect(canTransitionTo('received', 'completed', 'buyer')).toBe(true);
+    expect(canTransitionTo('received', 'completed', 'seller')).toBe(true);
   });
 
   it('allows either party to transition to disputed from any non-completed status', () => {
     expect(canTransitionTo('initiated', 'disputed', 'buyer')).toBe(true);
     expect(canTransitionTo('initiated', 'disputed', 'seller')).toBe(true);
-    expect(canTransitionTo('confirmed', 'disputed', 'buyer')).toBe(true);
-    expect(canTransitionTo('confirmed', 'disputed', 'seller')).toBe(true);
+    expect(canTransitionTo('accepted', 'disputed', 'buyer')).toBe(true);
+    expect(canTransitionTo('accepted', 'disputed', 'seller')).toBe(true);
   });
 
   it('does not allow transition to disputed from completed', () => {
@@ -35,35 +35,35 @@ describe('canTransitionTo', () => {
   });
 
   it('does not allow backwards transitions', () => {
-    expect(canTransitionTo('confirmed', 'initiated', 'buyer')).toBe(false);
-    expect(canTransitionTo('completed', 'confirmed', 'buyer')).toBe(false);
+    expect(canTransitionTo('accepted', 'initiated', 'buyer')).toBe(false);
+    expect(canTransitionTo('completed', 'accepted', 'buyer')).toBe(false);
     expect(canTransitionTo('completed', 'initiated', 'seller')).toBe(false);
   });
 
   it('does not allow transition from completed', () => {
     expect(canTransitionTo('completed', 'initiated', 'buyer')).toBe(false);
-    expect(canTransitionTo('completed', 'confirmed', 'seller')).toBe(false);
+    expect(canTransitionTo('completed', 'accepted', 'seller')).toBe(false);
   });
 
   it('does not allow transition from disputed', () => {
     expect(canTransitionTo('disputed', 'initiated', 'buyer')).toBe(false);
-    expect(canTransitionTo('disputed', 'confirmed', 'seller')).toBe(false);
+    expect(canTransitionTo('disputed', 'accepted', 'seller')).toBe(false);
     expect(canTransitionTo('disputed', 'completed', 'buyer')).toBe(false);
   });
 
   it('returns false for non-participant role', () => {
-    expect(canTransitionTo('initiated', 'confirmed', 'other')).toBe(false);
+    expect(canTransitionTo('initiated', 'accepted', 'other')).toBe(false);
   });
 });
 
 describe('validateStatusTransition', () => {
   it('returns null for valid transitions', () => {
-    expect(validateStatusTransition('initiated', 'confirmed', 'buyer')).toBeNull();
-    expect(validateStatusTransition('confirmed', 'completed', 'seller')).toBeNull();
+    expect(validateStatusTransition('initiated', 'accepted', 'buyer')).toBeNull();
+    expect(validateStatusTransition('received', 'completed', 'seller')).toBeNull();
   });
 
   it('returns error message for invalid backwards transition', () => {
-    const error = validateStatusTransition('confirmed', 'initiated', 'buyer');
+    const error = validateStatusTransition('accepted', 'initiated', 'buyer');
     expect(error).toBeTruthy();
     expect(error).toContain('cannot go backwards');
   });
@@ -75,13 +75,13 @@ describe('validateStatusTransition', () => {
   });
 
   it('returns error message for transition from disputed', () => {
-    const error = validateStatusTransition('disputed', 'confirmed', 'seller');
+    const error = validateStatusTransition('disputed', 'accepted', 'seller');
     expect(error).toBeTruthy();
     expect(error).toContain('disputed');
   });
 
   it('returns error message for non-participant', () => {
-    const error = validateStatusTransition('initiated', 'confirmed', 'other');
+    const error = validateStatusTransition('initiated', 'accepted', 'other');
     expect(error).toBeTruthy();
     expect(error).toContain('not a participant');
   });
@@ -104,14 +104,14 @@ describe('getAvailableActions', () => {
   describe('initiated status', () => {
     it('allows buyer to confirm or dispute', () => {
       const actions = getAvailableActions({ ...baseTrade, status: 'initiated' }, 'buyer123');
-      expect(actions).toContain('confirm');
+      expect(actions).toContain('accept');
       expect(actions).toContain('dispute');
       expect(actions).not.toContain('complete');
     });
 
     it('allows seller to confirm or dispute', () => {
       const actions = getAvailableActions({ ...baseTrade, status: 'initiated' }, 'seller123');
-      expect(actions).toContain('confirm');
+      expect(actions).toContain('accept');
       expect(actions).toContain('dispute');
       expect(actions).not.toContain('complete');
     });
@@ -122,17 +122,17 @@ describe('getAvailableActions', () => {
     });
   });
 
-  describe('confirmed status', () => {
-    it('allows buyer to complete or dispute', () => {
-      const actions = getAvailableActions({ ...baseTrade, status: 'confirmed' }, 'buyer123');
-      expect(actions).toContain('complete');
+  describe('accepted status', () => {
+    it('allows seller to ship or dispute', () => {
+      const actions = getAvailableActions({ ...baseTrade, status: 'accepted' }, 'seller123');
+      expect(actions).toContain('ship');
       expect(actions).toContain('dispute');
-      expect(actions).not.toContain('confirm');
+      expect(actions).not.toContain('accept');
     });
 
-    it('allows seller to complete or dispute', () => {
-      const actions = getAvailableActions({ ...baseTrade, status: 'confirmed' }, 'seller123');
-      expect(actions).toContain('complete');
+    it('allows cancellation while accepted', () => {
+      const actions = getAvailableActions({ ...baseTrade, status: 'accepted' }, 'buyer123');
+      expect(actions).toContain('cancel');
       expect(actions).toContain('dispute');
     });
   });
