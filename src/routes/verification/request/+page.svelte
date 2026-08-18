@@ -1,7 +1,6 @@
 <script lang="ts">
   import type { PageData } from './$types';
   import { pb, currentUser } from '$lib/pocketbase';
-  import { goto } from '$app/navigation';
   import {
     hashPhoneNumber,
     getPhoneLastFour,

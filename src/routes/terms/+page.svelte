@@ -107,9 +107,7 @@
             <p>You agree to:</p>
             <ul class="ml-6 space-y-1 list-disc">
               <li>
-                Follow our <a href="/rules" class="text-accent hover:underline"
-                  >Site Rules</a
-                >
+                Follow our <a href="/rules" class="text-accent hover:underline">Site Rules</a>
               </li>
               <li>Provide accurate descriptions of items</li>
               <li>Communicate respectfully with other users</li>
@@ -164,8 +162,7 @@
             <p>
               <strong>Disputes:</strong> Users are responsible for resolving disputes amongst
               themselves. See our
-              <a href="/rules" class="text-accent hover:underline">Site Rules</a> for
-              guidance.
+              <a href="/rules" class="text-accent hover:underline">Site Rules</a> for guidance.
             </p>
           </div>
         </div>

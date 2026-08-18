@@ -184,7 +184,7 @@
                 <div class="flex-1 space-y-3">
                   <!-- Rating -->
                   <div class="flex items-center gap-2">
-                    {#each Array(5) as _, i}
+                    {#each Array(5) as _, i (i)}
                       <span class="text-2xl">
                         {i < review.rating ? '⭐' : '☆'}
                       </span>

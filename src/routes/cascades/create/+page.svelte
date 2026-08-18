@@ -56,11 +56,6 @@
         status: 'cascaded',
       });
 
-      // Update user's cascade stats
-      await pb.collection('users').update($currentUser!.id, {
-        cascades_seeded: $currentUser!.cascades_seeded + 1,
-      });
-
       // Redirect to the new cascade
       goto(`/cascades/${cascade.id}`);
     } catch (err: any) {
@@ -231,7 +226,7 @@
                 bind:value={region}
                 class="mt-1 w-full rounded-lg border border-subtle bg-surface-card px-4 py-2.5 text-primary transition focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
               >
-                {#each NZ_REGIONS as region}
+                {#each NZ_REGIONS as region (region)}
                   <option value={region.value}>{region.label}</option>
                 {/each}
               </select>

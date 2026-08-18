@@ -407,7 +407,9 @@
         </li>
         <li class="flex gap-2">
           <span class="text-accent">•</span>
-          <span>Click "Edit Regions" to map items to areas within the photo (coming in Phase 3)</span>
+          <span
+            >Click "Edit Regions" to map items to areas within the photo (coming in Phase 3)</span
+          >
         </li>
         <li class="flex gap-2">
           <span class="text-accent">•</span>

@@ -65,7 +65,7 @@
       </div>
     {:else}
       <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {#each data.parties as party}
+        {#each data.parties as party (party.id)}
           <a
             href="/trade-parties/{party.id}"
             class="flex flex-col overflow-hidden rounded-xl border border-subtle bg-surface-card transition hover:border-accent hover:shadow-lg"

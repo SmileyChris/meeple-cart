@@ -404,7 +404,7 @@
     color: var(--text-secondary);
   }
 
-  .prose li>p {
+  .prose li > p {
     @apply my-1;
   }
 

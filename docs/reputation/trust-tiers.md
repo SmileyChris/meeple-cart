@@ -23,13 +23,13 @@ Currently, Meeple Cart shows trade counts and vouch counts, but doesn't prominen
 
 Users are automatically assigned to one of five trust levels based on account age and activity:
 
-| Level           | Icon | Criteria                           | Description                                     |
-| --------------- | ---- | ---------------------------------- | ----------------------------------------------- |
-| **New** (flag)  | 🆕   | 0 vouched trades                   | Brand new member, highest caution advised       |
-| **Seedling**    | 🌱   | 1 vouched trade                    | First vouched trade completed                   |
-| **Growing**     | 🪴   | 30+ days old AND 2 vouched trades  | Building reputation with community feedback     |
-| **Established** | 🌳   | 90+ days old AND 5 vouched trades  | Experienced trader with proven positive history |
-| **Trusted**     | ⭐   | 1+ year old AND 8 vouched trades   | Highly trusted, long-term community member      |
+| Level           | Icon | Criteria                          | Description                                     |
+| --------------- | ---- | --------------------------------- | ----------------------------------------------- |
+| **New** (flag)  | 🆕   | 0 vouched trades                  | Brand new member, highest caution advised       |
+| **Seedling**    | 🌱   | 1 vouched trade                   | First vouched trade completed                   |
+| **Growing**     | 🪴   | 30+ days old AND 2 vouched trades | Building reputation with community feedback     |
+| **Established** | 🌳   | 90+ days old AND 5 vouched trades | Experienced trader with proven positive history |
+| **Trusted**     | ⭐   | 1+ year old AND 8 vouched trades  | Highly trusted, long-term community member      |
 
 ### Tier Calculation Logic
 

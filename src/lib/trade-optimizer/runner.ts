@@ -110,9 +110,11 @@ async function fetchSubmissions(partyId: string): Promise<TradePartySubmissionRe
  */
 async function fetchWantLists(partyId: string): Promise<TradePartyWantListRecord[]> {
   // First get all submissions for this party
-  const submissions = await pb.collection('trade_party_submissions').getFullList<TradePartySubmissionRecord>({
-    filter: `trade_party = "${partyId}" && status = "approved"`,
-  });
+  const submissions = await pb
+    .collection('trade_party_submissions')
+    .getFullList<TradePartySubmissionRecord>({
+      filter: `trade_party = "${partyId}" && status = "approved"`,
+    });
 
   const submissionIds = (submissions || []).map((s) => s.id);
 
@@ -244,10 +246,12 @@ export async function finalizeTradeMatching(partyId: string): Promise<{ success:
     const party = await pb.collection('trade_parties').getOne<TradePartyRecord>(partyId);
 
     // 1. Fetch all context records for this party
-    const contexts = await pb.collection('trade_party_context').getFullList<TradePartyContextRecord>({
-      filter: `party = "${partyId}" && is_draft = true`,
-      expand: 'trade',
-    });
+    const contexts = await pb
+      .collection('trade_party_context')
+      .getFullList<TradePartyContextRecord>({
+        filter: `party = "${partyId}" && is_draft = true`,
+        expand: 'trade',
+      });
 
     if (!contexts || contexts.length === 0) {
       console.log('No matches to finalize for party:', partyId);
@@ -258,7 +262,9 @@ export async function finalizeTradeMatching(partyId: string): Promise<{ success:
     await Promise.all([
       // Update trades
       ...contexts.map((c) =>
-        pb.collection('trades').update(c.trade as string, { is_draft: false }, { $autoCancel: false })
+        pb
+          .collection('trades')
+          .update(c.trade as string, { is_draft: false }, { $autoCancel: false })
       ),
       // Update contexts
       ...contexts.map((c) =>

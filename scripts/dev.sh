@@ -5,6 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PB_BIN="${ROOT_DIR}/pocketbase/pocketbase"
 PB_DATA_DIR="${ROOT_DIR}/pocketbase/pb_data"
 MIGRATIONS_DIR="${ROOT_DIR}/pocketbase/pb_migrations"
+HOOKS_DIR="${ROOT_DIR}/pocketbase/pb_hooks"
 
 cd "${ROOT_DIR}"
 
@@ -25,7 +26,7 @@ cleanup() {
 }
 trap cleanup EXIT INT TERM
 
-"${PB_BIN}" serve --dev --dir "${PB_DATA_DIR}" &
+"${PB_BIN}" serve --dev --dir "${PB_DATA_DIR}" --hooksDir "${HOOKS_DIR}" &
 PB_PID=$!
 
 echo "PocketBase running (PID ${PB_PID}). Starting SvelteKit dev server..."

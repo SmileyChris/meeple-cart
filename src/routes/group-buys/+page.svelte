@@ -1,6 +1,11 @@
 <script lang="ts">
   import { currentUser } from '$lib/pocketbase';
-  import { groupBuys, activeGroupBuys, completedGroupBuys, groupBuyOperations, participants } from '$lib/stores/group-buys';
+  import {
+    groupBuys,
+    activeGroupBuys,
+    completedGroupBuys,
+    participants,
+  } from '$lib/stores/group-buys';
   import { goto } from '$app/navigation';
 
   let activeTab = $state<'active' | 'planning' | 'completed'>('active');
@@ -8,17 +13,18 @@
 
   // Filter group buys based on active tab
   let filteredGroupBuys = $derived(() => {
-    let buys = activeTab === 'completed'
-      ? $completedGroupBuys
-      : activeTab === 'planning'
-      ? $groupBuys.filter(gb => gb.status === 'collecting_interest')
-      : $activeGroupBuys;
+    let buys =
+      activeTab === 'completed'
+        ? $completedGroupBuys
+        : activeTab === 'planning'
+          ? $groupBuys.filter((gb) => gb.status === 'collecting_interest')
+          : $activeGroupBuys;
 
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      buys = buys.filter(gb =>
-        gb.title.toLowerCase().includes(query) ||
-        gb.description.toLowerCase().includes(query)
+      buys = buys.filter(
+        (gb) =>
+          gb.title.toLowerCase().includes(query) || gb.description.toLowerCase().includes(query)
       );
     }
 
@@ -26,9 +32,8 @@
   });
 
   function getParticipantCount(groupBuyId: string): number {
-    return $participants.filter(p =>
-      p.group_buy_id === groupBuyId &&
-      p.interest_status !== 'withdrawn'
+    return $participants.filter(
+      (p) => p.group_buy_id === groupBuyId && p.interest_status !== 'withdrawn'
     ).length;
   }
 
@@ -148,7 +153,7 @@
           ? 'border-accent text-accent'
           : 'border-transparent text-secondary hover:text-primary'}"
       >
-        Planning ({$groupBuys.filter(gb => gb.status === 'collecting_interest').length})
+        Planning ({$groupBuys.filter((gb) => gb.status === 'collecting_interest').length})
       </button>
       <button
         onclick={() => (activeTab = 'completed')}
@@ -211,13 +216,19 @@
                     {getParticipantCount(groupBuy.id)} participants
                   </span>
                   {#if isManager(groupBuy)}
-                    <span class="rounded-full bg-accent/20 px-2 py-0.5 text-xs font-medium text-accent">
+                    <span
+                      class="rounded-full bg-accent/20 px-2 py-0.5 text-xs font-medium text-accent"
+                    >
                       Manager
                     </span>
                   {/if}
                 </div>
               </div>
-              <span class="shrink-0 rounded-full border px-3 py-1 text-xs font-semibold {getStatusColor(groupBuy.status)}">
+              <span
+                class="shrink-0 rounded-full border px-3 py-1 text-xs font-semibold {getStatusColor(
+                  groupBuy.status
+                )}"
+              >
                 {getStatusLabel(groupBuy.status)}
               </span>
             </div>
@@ -245,9 +256,7 @@
                   {groupBuy.usage_mode}
                 </span>
               </div>
-              <span class="font-medium text-accent">
-                View Details →
-              </span>
+              <span class="font-medium text-accent"> View Details → </span>
             </div>
           </article>
         {/each}
@@ -267,9 +276,7 @@
         <div class="rounded-lg border border-subtle bg-surface-card p-6">
           <div class="mb-3 text-3xl">📍</div>
           <h3 class="mb-2 font-semibold text-primary">Regional Hubs</h3>
-          <p class="text-sm text-muted">
-            Coordinate local pickup points across New Zealand
-          </p>
+          <p class="text-sm text-muted">Coordinate local pickup points across New Zealand</p>
         </div>
         <div class="rounded-lg border border-subtle bg-surface-card p-6">
           <div class="mb-3 text-3xl">📊</div>

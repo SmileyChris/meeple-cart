@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { renderMarkdown } from '$lib/utils/sanitize';
   import { pb, currentUser } from '$lib/pocketbase';
   import type { PageData } from './$types';
   import type { TradePartySubmissionRecord } from '$lib/types/pocketbase';
@@ -195,7 +196,7 @@
             Your Submissions ({mySubmissions.length})
           </h2>
           <div class="space-y-4">
-            {#each mySubmissions as submission}
+            {#each mySubmissions as submission (submission.id)}
               <div
                 class="flex items-start gap-4 rounded-lg border border-subtle bg-surface-body p-4"
               >
@@ -284,7 +285,7 @@
               Build Want Lists for Your Submissions
             </h4>
             <div class="space-y-2">
-              {#each mySubmissions as submission}
+              {#each mySubmissions as submission (submission.id)}
                 <button
                   onclick={() => {
                     selectedSubmissionForWantList =
@@ -427,7 +428,8 @@
   <div class="mb-8 rounded-lg border border-subtle bg-surface-card p-6">
     <h2 class="mb-3 text-lg font-semibold text-primary">About This Trade Party</h2>
     <div class="prose prose-invert max-w-none text-secondary">
-      {@html party.description}
+      <!-- eslint-disable-next-line svelte/no-at-html-tags -- sanitised by $lib/utils/sanitize -->
+      {@html renderMarkdown(party.description)}
     </div>
   </div>
 
@@ -522,7 +524,8 @@
         <div class="mt-4 border-t border-subtle pt-4">
           <h3 class="mb-2 font-semibold text-primary">Shipping Rules</h3>
           <div class="prose prose-sm prose-invert max-w-none text-secondary">
-            {@html party.shipping_rules}
+            <!-- eslint-disable-next-line svelte/no-at-html-tags -- sanitised by $lib/utils/sanitize -->
+            {@html renderMarkdown(party.shipping_rules)}
           </div>
         </div>
       {/if}

@@ -127,7 +127,7 @@
     <div
       class="absolute z-10 mt-1 max-h-60 w-full overflow-y-auto rounded-lg border border-subtle bg-surface-card shadow-lg"
     >
-      {#each results as game, index}
+      {#each results as game, index (game.id)}
         <button
           type="button"
           onclick={() => handleSelect(game)}

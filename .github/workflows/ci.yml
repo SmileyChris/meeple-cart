@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Type check
+        run: npm run check
+
+      - name: Unit tests
+        run: npm run test
+
+      - name: Formatting
+        run: npm run lint:format
+
+      - name: Production build
+        run: npm run build
+
+  schema:
+    # The authorization invariants in src/lib/security/collection-rules.test.ts assert
+    # against pocketbase/schema/effective-rules.json. Regenerate it from the real
+    # PocketBase binary and fail if the committed snapshot has drifted from the migrations.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Regenerate collection rules snapshot
+        run: npm run schema:rules
+
+      - name: Fail if the snapshot is out of date
+        run: |
+          if ! git diff --quiet -- pocketbase/schema/effective-rules.json; then
+            echo "::error::effective-rules.json is stale. Run 'npm run schema:rules' and commit the result."
+            git diff -- pocketbase/schema/effective-rules.json
+            exit 1
+          fi
+
+      - name: Authorization invariants
+        run: npx vitest run src/lib/security
+
+  code-style:
+    # ESLint is not a merge blocker yet: ~70 errors and ~390 warnings remain from the
+    # games -> items migration. Flip continue-on-error to false once they are cleared.
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run lint:code

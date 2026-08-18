@@ -1,14 +1,12 @@
 <script lang="ts">
   import type { PageData } from './$types';
   import { formatCurrency } from '$lib/utils/currency';
-  import WatchlistButton from '$lib/components/WatchlistButton.svelte';
   import PhotoRegionOverlay from '$lib/components/PhotoRegionOverlay.svelte';
   import ListingReactions from '$lib/components/ListingReactions.svelte';
   import TrustBadge from '$lib/components/TrustBadge.svelte';
   import { pb, currentUser } from '$lib/pocketbase';
   import { goto } from '$app/navigation';
   import { generateThreadId } from '$lib/types/message';
-  import { logStatusChange } from '$lib/utils/listing-status';
   import Alert from '$lib/components/Alert.svelte';
   import { REGION_LABELS } from '$lib/constants/regions';
   import type { ItemRecord } from '$lib/types/pocketbase';
@@ -719,7 +717,7 @@ View full details: ${shareUrl}`;
                   <div class="rounded-lg border border-dashed border-subtle bg-surface-body p-3">
                     <div class="text-xs font-medium text-secondary mb-2">Looking for in trade:</div>
                     <div class="flex flex-wrap gap-2">
-                      {#each template.trade_for_items as wantedItem}
+                      {#each template.trade_for_items as wantedItem (wantedItem.title)}
                         <span
                           class="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-300"
                         >
@@ -1179,7 +1177,7 @@ View full details: ${shareUrl}`;
         </div>
       {:else}
         <div class="space-y-3">
-          {#each chats as chat}
+          {#each chats as chat (chat.id)}
             <a
               href="/chat/{chat.id}"
               class="block rounded-lg border border-subtle bg-surface-card p-4 transition hover:border-accent"

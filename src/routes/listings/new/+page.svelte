@@ -361,7 +361,10 @@
         <div class="flex items-center justify-between">
           <div class="space-y-1">
             <h2 class="text-xl font-semibold text-primary">Items</h2>
-            <p class="text-sm text-muted">Add one or more items to this listing. Board games can be linked to BoardGameGeek for additional info.</p>
+            <p class="text-sm text-muted">
+              Add one or more items to this listing. Board games can be linked to BoardGameGeek for
+              additional info.
+            </p>
           </div>
           <button
             class="rounded-lg border border-emerald-500 px-4 py-2 text-sm font-medium text-emerald-300 transition hover:bg-emerald-500/10"
@@ -393,7 +396,8 @@
             <div class="flex gap-2">
               <button
                 type="button"
-                class="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition {game.itemType === 'board_game'
+                class="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition {game.itemType ===
+                'board_game'
                   ? 'bg-emerald-500/20 text-emerald-300 ring-1 ring-emerald-500'
                   : 'bg-surface-body text-secondary hover:bg-surface-card-alt'}"
                 onclick={() => setItemType(index, 'board_game')}
@@ -403,7 +407,8 @@
               </button>
               <button
                 type="button"
-                class="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition {game.itemType === 'other'
+                class="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition {game.itemType ===
+                'other'
                   ? 'bg-emerald-500/20 text-emerald-300 ring-1 ring-emerald-500'
                   : 'bg-surface-body text-secondary hover:bg-surface-card-alt'}"
                 onclick={() => setItemType(index, 'other')}
@@ -420,7 +425,9 @@
               <!-- Title input - different based on item type -->
               <div class="sm:col-span-2">
                 {#if game.itemType === 'board_game'}
-                  <label class="block text-sm font-medium text-secondary">Search BoardGameGeek</label>
+                  <label class="block text-sm font-medium text-secondary"
+                    >Search BoardGameGeek</label
+                  >
                   <p class="mt-1 text-xs text-muted">
                     Find your game to auto-fill details and link to BGG
                   </p>
@@ -432,7 +439,9 @@
                   </div>
                   <!-- Show selected game info -->
                   {#if game.bgg_id}
-                    <div class="mt-2 flex items-center gap-2 rounded-lg bg-emerald-500/10 px-3 py-2 text-sm">
+                    <div
+                      class="mt-2 flex items-center gap-2 rounded-lg bg-emerald-500/10 px-3 py-2 text-sm"
+                    >
                       <span class="text-emerald-300">✓</span>
                       <span class="font-medium text-primary">{game.title}</span>
                       <span class="text-muted">(BGG #{game.bgg_id})</span>

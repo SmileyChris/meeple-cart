@@ -62,44 +62,43 @@
   <section
     class="mx-auto max-w-md rounded-xl border border-subtle bg-surface-panel p-8 shadow-elevated transition-colors"
   >
+    <form class="mt-6 space-y-4" onsubmit={handleSubmit}>
+      <div class="space-y-2">
+        <label class="block text-sm font-medium text-secondary" for="email">Email</label>
+        <input
+          class="w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+          id="email"
+          name="email"
+          type="email"
+          bind:value={email}
+          required
+          autocomplete="email"
+          disabled={loading}
+        />
+      </div>
 
-  <form class="mt-6 space-y-4" onsubmit={handleSubmit}>
-    <div class="space-y-2">
-      <label class="block text-sm font-medium text-secondary" for="email">Email</label>
-      <input
-        class="w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
-        id="email"
-        name="email"
-        type="email"
-        bind:value={email}
-        required
-        autocomplete="email"
-        disabled={loading}
-      />
-    </div>
+      <div class="space-y-2">
+        <label class="block text-sm font-medium text-secondary" for="password">Password</label>
+        <input
+          class="w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+          id="password"
+          name="password"
+          type="password"
+          bind:value={password}
+          required
+          autocomplete="current-password"
+          disabled={loading}
+        />
+      </div>
 
-    <div class="space-y-2">
-      <label class="block text-sm font-medium text-secondary" for="password">Password</label>
-      <input
-        class="w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
-        id="password"
-        name="password"
-        type="password"
-        bind:value={password}
-        required
-        autocomplete="current-password"
-        disabled={loading}
-      />
-    </div>
+      {#if error}
+        <p class="text-sm text-rose-400">{error}</p>
+      {/if}
 
-    {#if error}
-      <p class="text-sm text-rose-400">{error}</p>
-    {/if}
-
-    <button class="btn-primary w-full" type="submit" disabled={loading}>
-      {loading ? 'Logging in...' : 'Continue'}
-    </button>
-  </form>
+      <button class="btn-primary w-full" type="submit" disabled={loading}>
+        {loading ? 'Logging in...' : 'Continue'}
+      </button>
+    </form>
   </section>
 
   <!-- Register link outside the card -->

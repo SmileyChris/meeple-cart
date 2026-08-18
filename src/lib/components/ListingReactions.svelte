@@ -161,7 +161,7 @@
             <div class="py-2 text-center text-sm text-muted">Loading...</div>
           {:else if usersForEmoji.length > 0}
             <div class="space-y-1">
-              {#each usersForEmoji as user}
+              {#each usersForEmoji as user (user.id)}
                 <a
                   href="/users/{user.id}"
                   class="block rounded-lg px-2 py-1.5 text-sm text-primary transition-colors hover:bg-surface-card-alt"

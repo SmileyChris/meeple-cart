@@ -90,10 +90,30 @@ dave receives sub3 from charlie
 `;
 
     const submissions: TradePartySubmissionRecord[] = [
-      { id: 'sub1', title: 'A', user: 'alice', expand: { user: { id: 'alice', username: 'alice' } as any } } as any,
-      { id: 'sub2', title: 'B', user: 'bob', expand: { user: { id: 'bob', username: 'bob' } as any } } as any,
-      { id: 'sub3', title: 'C', user: 'charlie', expand: { user: { id: 'charlie', username: 'charlie' } as any } } as any,
-      { id: 'sub4', title: 'D', user: 'dave', expand: { user: { id: 'dave', username: 'dave' } as any } } as any,
+      {
+        id: 'sub1',
+        title: 'A',
+        user: 'alice',
+        expand: { user: { id: 'alice', username: 'alice' } as any },
+      } as any,
+      {
+        id: 'sub2',
+        title: 'B',
+        user: 'bob',
+        expand: { user: { id: 'bob', username: 'bob' } as any },
+      } as any,
+      {
+        id: 'sub3',
+        title: 'C',
+        user: 'charlie',
+        expand: { user: { id: 'charlie', username: 'charlie' } as any },
+      } as any,
+      {
+        id: 'sub4',
+        title: 'D',
+        user: 'dave',
+        expand: { user: { id: 'dave', username: 'dave' } as any },
+      } as any,
     ];
 
     const chains = parseResults(output, submissions, []);

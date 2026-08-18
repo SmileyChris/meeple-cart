@@ -73,9 +73,7 @@
   // Build border class based on offer type and region match
   let borderClass = $derived.by(() => {
     if (isPreferredRegion) {
-      return offerType === 'sell'
-        ? 'border border-listing-sell'
-        : 'border border-listing-trade';
+      return offerType === 'sell' ? 'border border-listing-sell' : 'border border-listing-trade';
     }
 
     // Grey border by default with colored border on hover
@@ -179,7 +177,7 @@
       <!-- Trade preferences -->
       {#if offer.openToTradeOffers && offer.tradeForItems && offer.tradeForItems.length > 0}
         <p class="text-sm text-secondary">
-          Looking for: {offer.tradeForItems.map(i => i.title).join(', ')}
+          Looking for: {offer.tradeForItems.map((i) => i.title).join(', ')}
         </p>
       {/if}
     </div>
@@ -192,7 +190,10 @@
             {offer.games.length === 1 ? 'game' : 'games'} included
           </h4>
           {#if offer.willConsiderSplit && offer.games.length > 1}
-            <span class="rounded-full border border-amber-500/50 bg-amber-500/10 px-2 py-0.5 text-xs text-amber-300" title="Will consider selling items separately">
+            <span
+              class="rounded-full border border-amber-500/50 bg-amber-500/10 px-2 py-0.5 text-xs text-amber-300"
+              title="Will consider selling items separately"
+            >
               ✂️ May split
             </span>
           {/if}

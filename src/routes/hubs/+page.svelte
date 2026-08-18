@@ -11,7 +11,9 @@
     <!-- Header -->
     <div class="space-y-2">
       <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">Hubs</h1>
-      <p class="text-secondary">Independent Meeple Cart hubs for special ways to trade and share games</p>
+      <p class="text-secondary">
+        Independent Meeple Cart hubs for special ways to trade and share games
+      </p>
     </div>
 
     <!-- Feature Cards -->
@@ -43,7 +45,9 @@
         </div>
       </a>
 
-      <div class="relative flex gap-4 rounded-xl border border-subtle bg-surface-card p-5 opacity-60">
+      <div
+        class="relative flex gap-4 rounded-xl border border-subtle bg-surface-card p-5 opacity-60"
+      >
         <span
           class="absolute right-3 top-3 rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-secondary"
         >

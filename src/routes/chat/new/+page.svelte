@@ -234,7 +234,7 @@
           required
         >
           <option value="">Select a category...</option>
-          {#each categories as cat}
+          {#each categories as cat (cat.id)}
             <option value={cat.id}>
               {cat.icon}
               {cat.name}
@@ -312,7 +312,7 @@
           </div>
           {#if tags.length > 0}
             <div class="flex flex-wrap gap-2">
-              {#each tags as tag}
+              {#each tags as tag (tag)}
                 <span
                   class="inline-flex items-center gap-1 rounded-full border border-subtle bg-surface-card px-3 py-1 text-sm text-secondary"
                 >

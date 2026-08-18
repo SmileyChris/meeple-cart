@@ -9,7 +9,13 @@ export interface GroupBuy {
   description: string;
   pledge_deadline: string;
   estimated_delivery: string;
-  status: 'collecting_interest' | 'collecting_payments' | 'ordered' | 'fulfillment' | 'completed' | 'cancelled';
+  status:
+    | 'collecting_interest'
+    | 'collecting_payments'
+    | 'ordered'
+    | 'fulfillment'
+    | 'completed'
+    | 'cancelled';
   managers: string[]; // user IDs
   usage_mode: 'regional' | 'federated';
   delivery_policy: 'hub_only' | 'hub_or_direct';
@@ -59,7 +65,14 @@ export interface GroupBuyParticipant {
   payment_code?: string;
   payment_status: 'awaiting' | 'pending_verification' | 'paid' | 'partial' | 'refunded';
   payment_notes?: string;
-  fulfillment_status: 'pending' | 'at_main_hub' | 'at_regional_hub' | 'ready' | 'picked_up' | 'shipped' | 'delivered';
+  fulfillment_status:
+    | 'pending'
+    | 'at_main_hub'
+    | 'at_regional_hub'
+    | 'ready'
+    | 'picked_up'
+    | 'shipped'
+    | 'delivered';
   fulfillment_notes?: string;
   audit_log: Array<{
     action: string;
@@ -77,12 +90,14 @@ export const hubs = writable<GroupBuyHub[]>([]);
 export const participants = writable<GroupBuyParticipant[]>([]);
 
 // Derived stores
-export const activeGroupBuys = derived(groupBuys, $groupBuys =>
-  $groupBuys.filter(gb => ['collecting_interest', 'collecting_payments', 'ordered', 'fulfillment'].includes(gb.status))
+export const activeGroupBuys = derived(groupBuys, ($groupBuys) =>
+  $groupBuys.filter((gb) =>
+    ['collecting_interest', 'collecting_payments', 'ordered', 'fulfillment'].includes(gb.status)
+  )
 );
 
-export const completedGroupBuys = derived(groupBuys, $groupBuys =>
-  $groupBuys.filter(gb => gb.status === 'completed')
+export const completedGroupBuys = derived(groupBuys, ($groupBuys) =>
+  $groupBuys.filter((gb) => gb.status === 'completed')
 );
 
 // Helper functions
@@ -105,47 +120,49 @@ export const groupBuyOperations = {
       created: now,
       updated: now,
     };
-    groupBuys.update(gbs => [...gbs, groupBuy]);
+    groupBuys.update((gbs) => [...gbs, groupBuy]);
     return groupBuy;
   },
 
   update: (id: string, updates: Partial<GroupBuy>) => {
-    groupBuys.update(gbs =>
-      gbs.map(gb => gb.id === id ? { ...gb, ...updates, updated: new Date().toISOString() } : gb)
+    groupBuys.update((gbs) =>
+      gbs.map((gb) =>
+        gb.id === id ? { ...gb, ...updates, updated: new Date().toISOString() } : gb
+      )
     );
   },
 
   delete: (id: string) => {
-    groupBuys.update(gbs => gbs.filter(gb => gb.id !== id));
+    groupBuys.update((gbs) => gbs.filter((gb) => gb.id !== id));
     // Cascade delete related data
-    tiers.update(t => t.filter(tier => tier.group_buy_id !== id));
-    hubs.update(h => h.filter(hub => hub.group_buy_id !== id));
-    participants.update(p => p.filter(part => part.group_buy_id !== id));
+    tiers.update((t) => t.filter((tier) => tier.group_buy_id !== id));
+    hubs.update((h) => h.filter((hub) => hub.group_buy_id !== id));
+    participants.update((p) => p.filter((part) => part.group_buy_id !== id));
   },
 
   getById: (id: string): GroupBuy | undefined => {
-    return get(groupBuys).find(gb => gb.id === id);
+    return get(groupBuys).find((gb) => gb.id === id);
   },
 
   getTiers: (groupBuyId: string): GroupBuyTier[] => {
-    return get(tiers).filter(t => t.group_buy_id === groupBuyId);
+    return get(tiers).filter((t) => t.group_buy_id === groupBuyId);
   },
 
   getHubs: (groupBuyId: string): GroupBuyHub[] => {
-    return get(hubs).filter(h => h.group_buy_id === groupBuyId);
+    return get(hubs).filter((h) => h.group_buy_id === groupBuyId);
   },
 
   getParticipants: (groupBuyId: string): GroupBuyParticipant[] => {
-    return get(participants).filter(p => p.group_buy_id === groupBuyId);
+    return get(participants).filter((p) => p.group_buy_id === groupBuyId);
   },
 
   isManager: (groupBuyId: string, userId: string): boolean => {
-    const groupBuy = get(groupBuys).find(gb => gb.id === groupBuyId);
+    const groupBuy = get(groupBuys).find((gb) => gb.id === groupBuyId);
     return groupBuy?.managers.includes(userId) || false;
   },
 
   getUserParticipation: (groupBuyId: string, userId: string): GroupBuyParticipant | undefined => {
-    return get(participants).find(p => p.group_buy_id === groupBuyId && p.user_id === userId);
+    return get(participants).find((p) => p.group_buy_id === groupBuyId && p.user_id === userId);
   },
 };
 
@@ -155,24 +172,24 @@ export const tierOperations = {
       ...data,
       id: generateId(),
     };
-    tiers.update(t => [...t, tier]);
+    tiers.update((t) => [...t, tier]);
     return tier;
   },
 
   update: (id: string, updates: Partial<GroupBuyTier>) => {
-    tiers.update(t => t.map(tier => tier.id === id ? { ...tier, ...updates } : tier));
+    tiers.update((t) => t.map((tier) => (tier.id === id ? { ...tier, ...updates } : tier)));
   },
 
   delete: (id: string) => {
-    tiers.update(t => t.filter(tier => tier.id !== id));
+    tiers.update((t) => t.filter((tier) => tier.id !== id));
   },
 
   batchCreate: (tiersData: Omit<GroupBuyTier, 'id'>[]): GroupBuyTier[] => {
-    const newTiers = tiersData.map(data => ({
+    const newTiers = tiersData.map((data) => ({
       ...data,
       id: generateId(),
     }));
-    tiers.update(t => [...t, ...newTiers]);
+    tiers.update((t) => [...t, ...newTiers]);
     return newTiers;
   },
 };
@@ -183,24 +200,24 @@ export const hubOperations = {
       ...data,
       id: generateId(),
     };
-    hubs.update(h => [...h, hub]);
+    hubs.update((h) => [...h, hub]);
     return hub;
   },
 
   update: (id: string, updates: Partial<GroupBuyHub>) => {
-    hubs.update(h => h.map(hub => hub.id === id ? { ...hub, ...updates } : hub));
+    hubs.update((h) => h.map((hub) => (hub.id === id ? { ...hub, ...updates } : hub)));
   },
 
   delete: (id: string) => {
-    hubs.update(h => h.filter(hub => hub.id !== id));
+    hubs.update((h) => h.filter((hub) => hub.id !== id));
   },
 
   batchCreate: (hubsData: Omit<GroupBuyHub, 'id'>[]): GroupBuyHub[] => {
-    const newHubs = hubsData.map(data => ({
+    const newHubs = hubsData.map((data) => ({
       ...data,
       id: generateId(),
     }));
-    hubs.update(h => [...h, ...newHubs]);
+    hubs.update((h) => [...h, ...newHubs]);
     return newHubs;
   },
 };
@@ -216,8 +233,8 @@ export const participantOperations = {
     shipping_method: 'hub_pickup' | 'direct_delivery';
     shipping_address?: GroupBuyParticipant['shipping_address'];
   }): GroupBuyParticipant => {
-    const tier = get(tiers).find(t => t.id === data.tier_id);
-    const hub = data.hub_id ? get(hubs).find(h => h.id === data.hub_id) : undefined;
+    const tier = get(tiers).find((t) => t.id === data.tier_id);
+    const hub = data.hub_id ? get(hubs).find((h) => h.id === data.hub_id) : undefined;
 
     // Calculate shipping cost
     let shipping_cost = tier ? tier.shipping_per_unit * data.quantity : 0;
@@ -241,21 +258,23 @@ export const participantOperations = {
       interest_status: 'interested',
       payment_status: 'awaiting',
       fulfillment_status: 'pending',
-      audit_log: [{
-        action: 'registered_interest',
-        actor_id: data.user_id,
-        timestamp: new Date().toISOString(),
-      }],
+      audit_log: [
+        {
+          action: 'registered_interest',
+          actor_id: data.user_id,
+          timestamp: new Date().toISOString(),
+        },
+      ],
       created: new Date().toISOString(),
     };
 
-    participants.update(p => [...p, participant]);
+    participants.update((p) => [...p, participant]);
     return participant;
   },
 
   commit: (participantId: string, actorId: string) => {
-    participants.update(parts =>
-      parts.map(p => {
+    participants.update((parts) =>
+      parts.map((p) => {
         if (p.id === participantId) {
           const paymentCode = generatePaymentCode(p.group_buy_id, p.user_id);
           return {
@@ -284,8 +303,8 @@ export const participantOperations = {
     notes: string,
     actorId: string
   ) => {
-    participants.update(parts =>
-      parts.map(p => {
+    participants.update((parts) =>
+      parts.map((p) => {
         if (p.id === participantId) {
           return {
             ...p,
@@ -313,8 +332,8 @@ export const participantOperations = {
     notes: string,
     actorId: string
   ) => {
-    participants.update(parts =>
-      parts.map(p => {
+    participants.update((parts) =>
+      parts.map((p) => {
         if (p.id === participantId) {
           return {
             ...p,
@@ -337,8 +356,8 @@ export const participantOperations = {
   },
 
   withdraw: (participantId: string, actorId: string) => {
-    participants.update(parts =>
-      parts.map(p => {
+    participants.update((parts) =>
+      parts.map((p) => {
         if (p.id === participantId) {
           return {
             ...p,
@@ -359,7 +378,7 @@ export const participantOperations = {
   },
 
   delete: (id: string) => {
-    participants.update(p => p.filter(part => part.id !== id));
+    participants.update((p) => p.filter((part) => part.id !== id));
   },
 };
 
@@ -373,7 +392,8 @@ export function initializeMockData() {
   const groupBuy = groupBuyOperations.create({
     title: 'Frosthaven Expansion - Group Pledge',
     campaign_url: 'https://www.kickstarter.com/projects/example/frosthaven',
-    description: 'Coordinating a group pledge for the Frosthaven expansion. Save on shipping by combining orders! We\'ll be getting the deluxe pledge tier with all stretch goals included.',
+    description:
+      "Coordinating a group pledge for the Frosthaven expansion. Save on shipping by combining orders! We'll be getting the deluxe pledge tier with all stretch goals included.",
     pledge_deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
     estimated_delivery: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString(),
     status: 'collecting_interest',
@@ -449,7 +469,8 @@ export function initializeMockData() {
   const groupBuy2 = groupBuyOperations.create({
     title: 'Wingspan European Expansion - Bulk Order',
     campaign_url: 'https://stonemaiergames.com/games/wingspan/',
-    description: 'Splitting a bulk order to save on international shipping. Looking for 8-10 people interested in the European expansion.',
+    description:
+      'Splitting a bulk order to save on international shipping. Looking for 8-10 people interested in the European expansion.',
     pledge_deadline: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
     estimated_delivery: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
     status: 'collecting_payments',
@@ -472,7 +493,7 @@ export function initializeMockData() {
     group_buy_id: groupBuy2.id,
     name: 'Christchurch Pickup',
     city: 'Christchurch',
-    instructions: 'Pickup from organizer\'s home in Riccarton. Contact for address.',
+    instructions: "Pickup from organizer's home in Riccarton. Contact for address.",
     managers: ['user-4'],
     shipping_type: 'no_fee',
     shipping_amount: 0,

@@ -18,10 +18,7 @@ export const FILTER_STORAGE_KEYS = {
  * Apply stored filter preferences to a URL
  * Returns a new URL with filters applied, or null if no changes needed
  */
-export function applyStoredFilters(
-  currentUrl: URL,
-  currentUser?: UserRecord | null
-): URL | null {
+export function applyStoredFilters(currentUrl: URL, currentUser?: UserRecord | null): URL | null {
   const hasAnyParams =
     currentUrl.searchParams.has('canPost') ||
     currentUrl.searchParams.has('openToTrades') ||
@@ -156,10 +153,7 @@ export function getLastCondition(): string | null {
  */
 export function savePriceRangePreference(minPrice: string, maxPrice: string): void {
   if (minPrice || maxPrice) {
-    localStorage.setItem(
-      FILTER_STORAGE_KEYS.priceRange,
-      JSON.stringify({ minPrice, maxPrice })
-    );
+    localStorage.setItem(FILTER_STORAGE_KEYS.priceRange, JSON.stringify({ minPrice, maxPrice }));
   } else {
     localStorage.removeItem(FILTER_STORAGE_KEYS.priceRange);
   }
@@ -169,10 +163,7 @@ export function savePriceRangePreference(minPrice: string, maxPrice: string): vo
  * Save last used price range to localStorage (for dropdown defaults)
  */
 export function saveLastPriceRange(minPrice: string, maxPrice: string): void {
-  localStorage.setItem(
-    FILTER_STORAGE_KEYS.lastPriceRange,
-    JSON.stringify({ minPrice, maxPrice })
-  );
+  localStorage.setItem(FILTER_STORAGE_KEYS.lastPriceRange, JSON.stringify({ minPrice, maxPrice }));
 }
 
 /**

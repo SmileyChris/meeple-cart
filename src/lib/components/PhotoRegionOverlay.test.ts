@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/svelte';
+import { render } from '@testing-library/svelte';
 import PhotoRegionOverlay from './PhotoRegionOverlay.svelte';
 import { createRectangleRegion, createPolygonRegion } from '$lib/types/photo-region';
 import type { ItemRecord } from '$lib/types/listing';

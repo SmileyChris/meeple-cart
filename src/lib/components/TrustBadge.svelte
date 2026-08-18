@@ -62,7 +62,10 @@
 {#if clickable}
   <a
     href="/trust-levels"
-    class="inline-flex items-center rounded-full {showBorder ? `border ${tierInfo.styles.border}` : ''} {tierInfo.styles.background} {tierInfo.styles.text} {sizeClasses} {className} hover:opacity-80 transition-opacity cursor-pointer"
+    class="inline-flex items-center rounded-full {showBorder
+      ? `border ${tierInfo.styles.border}`
+      : ''} {tierInfo.styles.background} {tierInfo.styles
+      .text} {sizeClasses} {className} hover:opacity-80 transition-opacity cursor-pointer"
     title={showTooltip ? `${tooltipText} Click to learn more.` : undefined}
     aria-label="Trust tier: {tierInfo.label}. Click to learn more about trust levels."
   >
@@ -73,7 +76,9 @@
   </a>
 {:else}
   <span
-    class="inline-flex items-center rounded-full {showBorder ? `border ${tierInfo.styles.border}` : ''} {tierInfo.styles.background} {tierInfo.styles.text} {sizeClasses} {className}"
+    class="inline-flex items-center rounded-full {showBorder
+      ? `border ${tierInfo.styles.border}`
+      : ''} {tierInfo.styles.background} {tierInfo.styles.text} {sizeClasses} {className}"
     title={showTooltip ? tooltipText : undefined}
     role="status"
     aria-label="Trust tier: {tierInfo.label}"

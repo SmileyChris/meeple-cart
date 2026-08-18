@@ -32,9 +32,11 @@ pb.send = async (path, options) => {
       if (!err.response.data) {
         err.response.data = {};
       }
-      err.response.data.message = 'Unable to connect to the server. Please check your internet connection and try again.';
+      err.response.data.message =
+        'Unable to connect to the server. Please check your internet connection and try again.';
       // We also update the main message for good measure, though validation often uses data.message
-      err.message = 'Unable to connect to the server. Please check your internet connection and try again.';
+      err.message =
+        'Unable to connect to the server. Please check your internet connection and try again.';
     }
     throw err;
   }

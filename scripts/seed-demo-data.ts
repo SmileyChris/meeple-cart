@@ -1407,13 +1407,12 @@ const demoDiscussions: SeedDiscussionThread[] = [
       {
         authorEmail: 'demo-lisa@meeplecart.test',
         content:
-          "Yes definitely interested! I can always find the expansion separately. What are you looking for - cash or trade?",
+          'Yes definitely interested! I can always find the expansion separately. What are you looking for - cash or trade?',
         hoursAfterThread: 6,
       },
       {
         authorEmail: 'demo-bella@meeplecart.test',
-        content:
-          "Parks caught my eye actually! Want to DM me and we can work out the details?",
+        content: 'Parks caught my eye actually! Want to DM me and we can work out the details?',
         hoursAfterThread: 8,
       },
     ],
@@ -1422,7 +1421,7 @@ const demoDiscussions: SeedDiscussionThread[] = [
     authorEmail: 'demo-james@meeplecart.test',
     title: 'WTB: Spirit Island + expansions',
     content:
-      "Looking to buy Spirit Island and any expansions. This is my white whale - been wanting to try it for ages!\n\nBased in Auckland, prefer local pickup but can do shipping.\n\nBudget is flexible for good condition copies. Branch & Claw and Jagged Earth especially wanted.",
+      'Looking to buy Spirit Island and any expansions. This is my white whale - been wanting to try it for ages!\n\nBased in Auckland, prefer local pickup but can do shipping.\n\nBudget is flexible for good condition copies. Branch & Claw and Jagged Earth especially wanted.',
     daysAgo: 5,
     threadType: 'wanted',
     wantedItems: [
@@ -1445,8 +1444,7 @@ const demoDiscussions: SeedDiscussionThread[] = [
       },
       {
         authorEmail: 'demo-james@meeplecart.test',
-        content:
-          "That sounds great Tom! I'll DM you. Happy to start with the base game.",
+        content: "That sounds great Tom! I'll DM you. Happy to start with the base game.",
         hoursAfterThread: 14,
       },
     ],
@@ -1455,7 +1453,7 @@ const demoDiscussions: SeedDiscussionThread[] = [
     authorEmail: 'demo-sarah@meeplecart.test',
     title: 'ISO: Ark Nova - will pay well!',
     content:
-      "Desperately seeking Ark Nova! Missed the reprint and really want to play this one.\n\nWilling to pay above retail for a good condition copy. Located in Dunedin but happy to cover shipping costs.\n\nAlso interested in the Marine Worlds expansion if anyone has both!",
+      'Desperately seeking Ark Nova! Missed the reprint and really want to play this one.\n\nWilling to pay above retail for a good condition copy. Located in Dunedin but happy to cover shipping costs.\n\nAlso interested in the Marine Worlds expansion if anyone has both!',
     daysAgo: 1,
     threadType: 'wanted',
     wantedItems: [
@@ -1466,7 +1464,7 @@ const demoDiscussions: SeedDiscussionThread[] = [
       {
         authorEmail: 'demo-maya@meeplecart.test',
         content:
-          "I saw someone selling Ark Nova on the Facebook group last week - might be worth checking there too! Good luck with the search.",
+          'I saw someone selling Ark Nova on the Facebook group last week - might be worth checking there too! Good luck with the search.',
         hoursAfterThread: 2,
       },
     ],
@@ -1608,14 +1606,15 @@ const recreateListing = async (
 
     // Create an offer_template for this game
     // Handle legacy fields: price (dollars) -> cashAmount (cents)
-    const cashAmount = game.cashAmount ??
+    const cashAmount =
+      game.cashAmount ??
       (typeof game.price === 'number' ? game.price * 100 : null) ??
       (typeof game.tradeValue === 'number' ? game.tradeValue * 100 : null);
     const canPost = game.canPost ?? false;
 
     // Infer openToTradeOffers from listing type or tradeValue presence
-    const openToTradeOffers = game.openToTradeOffers ??
-      (typeof game.tradeValue === 'number') ?? false;
+    const openToTradeOffers =
+      game.openToTradeOffers ?? typeof game.tradeValue === 'number' ?? false;
 
     const offerPayload: Record<string, unknown> = {
       listing: listing.id,
@@ -1638,7 +1637,9 @@ const recreateListing = async (
     const offerRecord = await userPb.collection('offer_templates').create(offerPayload);
 
     // Backdate offer creation
-    await userPb.collection('offer_templates').update(offerRecord.id, { created: createdDate.toISOString() });
+    await userPb
+      .collection('offer_templates')
+      .update(offerRecord.id, { created: createdDate.toISOString() });
   }
 
   userPb.authStore.clear();

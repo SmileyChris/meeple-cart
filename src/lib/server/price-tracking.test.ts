@@ -12,13 +12,7 @@ describe('price tracking handlers (deprecated)', () => {
     };
 
     // Should not throw and should complete immediately
-    await handleGamePriceUpdate(
-      pb as any,
-      'game-1',
-      {} as any,
-      100,
-      200
-    );
+    await handleGamePriceUpdate(pb as any, 'game-1', {} as any, 100, 200);
 
     // Should not call any collection methods
     expect(pb.collection).not.toHaveBeenCalled();

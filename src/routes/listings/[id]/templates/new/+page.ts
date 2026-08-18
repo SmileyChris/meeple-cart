@@ -28,7 +28,7 @@ export const load: PageLoad = async ({ params }) => {
     const items = (listing.expand?.[ITEMS_EXPAND_KEY] as ItemRecord[] | undefined) ?? [];
 
     // Only show available items
-    const availableItems = items.filter(item => item.status === 'available');
+    const availableItems = items.filter((item) => item.status === 'available');
 
     if (availableItems.length === 0) {
       throw error(400, 'No available items to create a template for');

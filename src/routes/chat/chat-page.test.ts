@@ -209,7 +209,13 @@ describe('discussions page load', () => {
     const result = (await load({ url } as any))!;
 
     expect(consoleSpy).toHaveBeenCalledWith('Failed to load discussions', expect.any(Error));
-    expect(result.threads).toEqual({ items: [], page: 1, perPage: 20, totalItems: 0, totalPages: 0 });
+    expect(result.threads).toEqual({
+      items: [],
+      page: 1,
+      perPage: 20,
+      totalItems: 0,
+      totalPages: 0,
+    });
     expect(result.categories).toEqual([]);
     consoleSpy.mockRestore();
   });

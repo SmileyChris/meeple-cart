@@ -81,9 +81,19 @@ describe('buildInput', () => {
 
   it('handles multiple want list entries for same submission', () => {
     const submissions: TradePartySubmissionRecord[] = [
-      { id: 'sub1', title: 'Game A', user: 'alice_id', expand: { user: { id: 'alice_id' } } } as any,
+      {
+        id: 'sub1',
+        title: 'Game A',
+        user: 'alice_id',
+        expand: { user: { id: 'alice_id' } },
+      } as any,
       { id: 'sub2', title: 'Game B', user: 'bob_id', expand: { user: { id: 'bob_id' } } } as any,
-      { id: 'sub3', title: 'Game C', user: 'charlie_id', expand: { user: { id: 'charlie_id' } } } as any,
+      {
+        id: 'sub3',
+        title: 'Game C',
+        user: 'charlie_id',
+        expand: { user: { id: 'charlie_id' } },
+      } as any,
     ];
 
     const wantLists: TradePartyWantListRecord[] = [
@@ -120,9 +130,19 @@ describe('buildInput', () => {
 
   it('handles circular trades (A wants B, B wants C, C wants A)', () => {
     const submissions: TradePartySubmissionRecord[] = [
-      { id: 'sub1', title: 'Game A', user: 'alice_id', expand: { user: { id: 'alice_id' } } } as any,
+      {
+        id: 'sub1',
+        title: 'Game A',
+        user: 'alice_id',
+        expand: { user: { id: 'alice_id' } },
+      } as any,
       { id: 'sub2', title: 'Game B', user: 'bob_id', expand: { user: { id: 'bob_id' } } } as any,
-      { id: 'sub3', title: 'Game C', user: 'charlie_id', expand: { user: { id: 'charlie_id' } } } as any,
+      {
+        id: 'sub3',
+        title: 'Game C',
+        user: 'charlie_id',
+        expand: { user: { id: 'charlie_id' } },
+      } as any,
     ];
 
     const wantLists: TradePartyWantListRecord[] = [

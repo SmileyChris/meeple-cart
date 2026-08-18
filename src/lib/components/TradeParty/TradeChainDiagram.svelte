@@ -95,7 +95,7 @@
 
 <div class="overflow-x-auto rounded-lg border border-subtle bg-surface-body p-4">
   <div class="flex items-center gap-4">
-    {#each tradeFlow() as trade, index}
+    {#each tradeFlow() as trade, index (index)}
       <!-- User Box -->
       <div
         class="flex min-w-[120px] flex-col items-center rounded-lg border p-3 {trade.isCurrentUser

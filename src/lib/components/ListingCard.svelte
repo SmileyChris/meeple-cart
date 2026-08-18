@@ -32,10 +32,7 @@
     }>;
   }
 
-  let {
-    listing,
-    hideOwner = false,
-  }: { listing: ListingData; hideOwner?: boolean } = $props();
+  let { listing, hideOwner = false }: { listing: ListingData; hideOwner?: boolean } = $props();
 
   let createdLabel = $derived(
     new Intl.DateTimeFormat('en-NZ', {
@@ -75,7 +72,12 @@
   let showAllGames = $state(false);
 </script>
 
-<BaseCard href={listing.href} imageUrl={listing.coverImage || null} imageAlt={listing.title} {borderClass}>
+<BaseCard
+  href={listing.href}
+  imageUrl={listing.coverImage || null}
+  imageAlt={listing.title}
+  {borderClass}
+>
   {#snippet header()}
     <div class="flex items-center justify-between text-xs uppercase tracking-wide text-muted">
       <span

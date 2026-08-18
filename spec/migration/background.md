@@ -7,11 +7,13 @@ Since Meeple Cart is not live yet, we took a clean slate approach to transition 
 ### 📊 Key Changes
 
 #### Removed Concepts
+
 - ❌ `listing_type` (sell/trade/want)
 - ❌ Individual game pricing (`price`, `trade_value`)
 - ❌ Bundle preferences on listings
 
 #### Added Concepts
+
 - ✅ **Offer Templates** - Flexible pricing/trading packages
 - ✅ **Wanted Posts** - Now discussion threads
 - ✅ **Template-based offers** - Buyers accept or counter templates
@@ -31,15 +33,19 @@ Since Meeple Cart is not live yet, we took a clean slate approach to transition 
 ## 📝 Design Decisions
 
 ### 1. Simplified Listings
+
 Listings are now neutral containers ("I have these games"). Pricing and trade terms are defined via Offer Templates.
 
 ### 2. Offer Template System
+
 Sellers can define multiple templates per listing (e.g., individual item price vs. bundle price). Supports 'cash_only', 'trade_only', or 'cash_or_trade'.
 
 ### 3. Wanted Posts
+
 Integrated into discussions with `thread_type: 'wanted'`. Supports structured data for wanted items (title, bgg_id, max_price).
 
 ### 4. Template Invalidation
+
 When a template is accepted, others containing the same items are automatically invalidated to prevent over-selling.
 
 ---
@@ -47,18 +53,21 @@ When a template is accepted, others containing the same items are automatically 
 ## 🎨 Example User Flows
 
 ### Seller Creates Listing
+
 1. Add games: Wingspan, Wingspan: European Expansion.
 2. Create Template A: Wingspan only ($60).
 3. Create Template B: Both combined ($70).
 4. Publish.
 
 ### Buyer Makes Offer
+
 1. View listing → See 2 templates.
 2. Accept Template B directly OR propose a custom counter-offer.
 
 ---
 
 ## 🏁 Benefits
+
 - **Flexibility**: Sellers can offer multiple options (cash AND trade).
 - **Better UX**: Clear pricing presentation, bundles visible.
 - **Simpler Code**: Removed `listing_type` conditionals throughout the codebase.

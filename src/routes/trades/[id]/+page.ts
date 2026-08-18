@@ -1,4 +1,4 @@
-import { error, redirect } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 import { redirectToLogin } from '$lib/utils/auth-redirect';
 import type { TradeRecord } from '$lib/types/pocketbase';

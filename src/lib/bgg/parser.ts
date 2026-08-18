@@ -179,8 +179,7 @@ function parseStatistics(element: Element | null): BggStatistics | undefined {
   const wishing = getNumericAttribute(ratingsElement.querySelector('wishing'), 'value') || 0;
   const numcomments =
     getNumericAttribute(ratingsElement.querySelector('numcomments'), 'value') || 0;
-  const numweights =
-    getNumericAttribute(ratingsElement.querySelector('numweights'), 'value') || 0;
+  const numweights = getNumericAttribute(ratingsElement.querySelector('numweights'), 'value') || 0;
   const averageweight =
     getNumericAttribute(ratingsElement.querySelector('averageweight'), 'value') || 0;
 

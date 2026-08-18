@@ -2,7 +2,6 @@
   import type { PageData } from './$types';
   import { pb, currentUser } from '$lib/pocketbase';
   import { onMount } from 'svelte';
-  import { goto } from '$app/navigation';
   import type { UserRecord } from '$lib/types/pocketbase';
 
   let { data }: { data: PageData } = $props();

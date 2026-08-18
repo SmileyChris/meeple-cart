@@ -134,7 +134,7 @@ describe('chat new page load', () => {
       { id: 'cat-1', name: 'General', slug: 'general', order: 1, enabled: true },
     ];
 
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     listingsCollection.getOne.mockRejectedValue(new Error('Listing not found'));
     categoriesCollection.getFullList.mockResolvedValue(mockCategories);
 

@@ -199,15 +199,15 @@ npm run seed:demo     # Seed demo data (from scripts/seed-demo-data.ts)
 
 ## 📖 Documentation
 
-| Document                                             | Description                                    |
-| ---------------------------------------------------- | ---------------------------------------------- |
-| **[spec/mvp-plan.md](./spec/mvp-plan.md)**           | **Start here** - 3-week roadmap to launch      |
-| [CLAUDE.md](./CLAUDE.md)                             | Development setup & commands for AI assistants |
-| [spec/prd.md](./spec/prd.md)                         | Product requirements & original vision         |
-| [spec/trade-flow-gaps.md](./spec/trade-flow-gaps.md) | Detailed implementation specs for trade flow   |
-| [spec/migration/guide.md](./spec/migration/guide.md) | **Database Setup Guide**                       |
+| Document                                                 | Description                                    |
+| -------------------------------------------------------- | ---------------------------------------------- |
+| **[spec/mvp-plan.md](./spec/mvp-plan.md)**               | **Start here** - 3-week roadmap to launch      |
+| [CLAUDE.md](./CLAUDE.md)                                 | Development setup & commands for AI assistants |
+| [spec/prd.md](./spec/prd.md)                             | Product requirements & original vision         |
+| [spec/trade-flow-gaps.md](./spec/trade-flow-gaps.md)     | Detailed implementation specs for trade flow   |
+| [spec/migration/guide.md](./spec/migration/guide.md)     | **Database Setup Guide**                       |
 | [docs/trust-and-vouches.md](./docs/trust-and-vouches.md) | Trust system documentation                     |
-| [docs/listings.md](./docs/listings.md)               | Listing lifecycle & mechanics                  |
+| [docs/listings.md](./docs/listings.md)                   | Listing lifecycle & mechanics                  |
 
 ---
 

@@ -410,7 +410,7 @@
             bind:value={selectedGameId}
           >
             <option value={null}>-- Select a game --</option>
-            {#each games as game}
+            {#each games as game (game.id)}
               <option value={game.id}>{game.title}</option>
             {/each}
           </select>
@@ -472,7 +472,7 @@
           <p class="text-sm text-muted">No regions yet. Draw one to get started!</p>
         {:else}
           <div class="space-y-3">
-            {#each regions as region}
+            {#each regions as region (region)}
               {@const gameName = getGameName(region.gameId)}
               <div
                 class={`cursor-pointer rounded-lg border p-3 transition ${
@@ -525,7 +525,7 @@
                     }}
                   >
                     <option value="">Manual obscure</option>
-                    {#each games as game}
+                    {#each games as game (game.id)}
                       <option value={game.id}>{game.title}</option>
                     {/each}
                   </select>

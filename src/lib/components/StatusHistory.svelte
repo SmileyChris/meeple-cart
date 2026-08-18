@@ -26,7 +26,7 @@
     <h3 class="text-lg font-semibold mb-4">Status History</h3>
 
     <div class="space-y-3">
-      {#each statusHistory as change}
+      {#each statusHistory as change (change.timestamp + change.to)}
         <div class="flex items-start gap-4 border-l-2 border-subtle pl-4 py-2">
           <div class="flex-1">
             <div class="flex items-center gap-2 text-sm">

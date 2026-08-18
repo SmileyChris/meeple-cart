@@ -18,7 +18,8 @@ export const load: PageLoad = async ({ url }) => {
 
   let statusFilter = '';
   if (filter === 'active') {
-    statusFilter = 'status = "initiated" || status = "accepted" || status = "shipped" || status = "received"';
+    statusFilter =
+      'status = "initiated" || status = "accepted" || status = "shipped" || status = "received"';
   } else if (filter === 'completed') {
     statusFilter = 'status = "completed"';
   } else if (filter === 'disputed') {
@@ -37,8 +38,8 @@ export const load: PageLoad = async ({ url }) => {
     fields: 'id,status',
   });
 
-  const activeTrades = allTrades.filter(
-    (t) => ['initiated', 'accepted', 'shipped', 'received'].includes(t.status)
+  const activeTrades = allTrades.filter((t) =>
+    ['initiated', 'accepted', 'shipped', 'received'].includes(t.status)
   ).length;
   const completedTrades = allTrades.filter((t) => t.status === 'completed').length;
   const disputedTrades = allTrades.filter((t) => t.status === 'disputed').length;

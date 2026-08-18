@@ -3,7 +3,6 @@
   import type { TemplateType } from '$lib/types/offer-template';
   import { pb, currentUser } from '$lib/pocketbase';
   import { goto } from '$app/navigation';
-  import { formatCurrency } from '$lib/utils/currency';
 
   let { data }: { data: PageData } = $props();
 
@@ -23,7 +22,7 @@
   // Toggle item selection
   function toggleItem(itemId: string) {
     if (selectedItemIds.includes(itemId)) {
-      selectedItemIds = selectedItemIds.filter(id => id !== itemId);
+      selectedItemIds = selectedItemIds.filter((id) => id !== itemId);
     } else {
       selectedItemIds = [...selectedItemIds, itemId];
     }
@@ -34,7 +33,7 @@
     if (selectedItemIds.length === data.items.length) {
       selectedItemIds = [];
     } else {
-      selectedItemIds = data.items.map(item => item.id);
+      selectedItemIds = data.items.map((item) => item.id);
     }
   }
 
@@ -67,7 +66,7 @@
     }
 
     if (templateType === 'trade_only' || templateType === 'cash_or_trade') {
-      const validTradeItems = tradeForItems.filter(item => item.title.trim());
+      const validTradeItems = tradeForItems.filter((item) => item.title.trim());
       if (validTradeItems.length === 0) {
         error = 'Please specify at least one item you want to trade for';
         return;
@@ -85,8 +84,8 @@
 
       // Prepare trade items (filter out empty ones)
       const validTradeItems = tradeForItems
-        .filter(item => item.title.trim())
-        .map(item => ({
+        .filter((item) => item.title.trim())
+        .map((item) => ({
           title: item.title.trim(),
           ...(item.bgg_id.trim() ? { bgg_id: parseInt(item.bgg_id, 10) } : {}),
         }));
@@ -124,7 +123,7 @@
   // Auto-generate display name
   $effect(() => {
     if (!displayName && selectedItemIds.length > 0) {
-      const selectedItems = data.items.filter(item => selectedItemIds.includes(item.id));
+      const selectedItems = data.items.filter((item) => selectedItemIds.includes(item.id));
       if (selectedItems.length === 1) {
         displayName = selectedItems[0].title;
       } else if (selectedItems.length === data.items.length) {
@@ -177,9 +176,17 @@
       </div>
     {/if}
 
-    <form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }} class="space-y-8">
+    <form
+      onsubmit={(e) => {
+        e.preventDefault();
+        handleSubmit();
+      }}
+      class="space-y-8"
+    >
       <!-- Item Selection -->
-      <section class="space-y-4 rounded-xl border border-subtle bg-surface-card p-6 transition-colors">
+      <section
+        class="space-y-4 rounded-xl border border-subtle bg-surface-card p-6 transition-colors"
+      >
         <div class="flex items-center justify-between">
           <h2 class="text-lg font-semibold">Select Items</h2>
           <button
@@ -217,11 +224,15 @@
       </section>
 
       <!-- Template Type -->
-      <section class="space-y-4 rounded-xl border border-subtle bg-surface-card p-6 transition-colors">
+      <section
+        class="space-y-4 rounded-xl border border-subtle bg-surface-card p-6 transition-colors"
+      >
         <h2 class="text-lg font-semibold">Template Type</h2>
         <p class="text-sm text-muted">What are you willing to accept for these items?</p>
         <div class="space-y-3">
-          <label class="flex cursor-pointer items-start gap-3 rounded-lg border border-subtle bg-surface-body p-4 transition hover:border-accent/50">
+          <label
+            class="flex cursor-pointer items-start gap-3 rounded-lg border border-subtle bg-surface-body p-4 transition hover:border-accent/50"
+          >
             <input
               type="radio"
               name="template_type"
@@ -237,7 +248,9 @@
             </div>
           </label>
 
-          <label class="flex cursor-pointer items-start gap-3 rounded-lg border border-subtle bg-surface-body p-4 transition hover:border-accent/50">
+          <label
+            class="flex cursor-pointer items-start gap-3 rounded-lg border border-subtle bg-surface-body p-4 transition hover:border-accent/50"
+          >
             <input
               type="radio"
               name="template_type"
@@ -253,7 +266,9 @@
             </div>
           </label>
 
-          <label class="flex cursor-pointer items-start gap-3 rounded-lg border border-subtle bg-surface-body p-4 transition hover:border-accent/50">
+          <label
+            class="flex cursor-pointer items-start gap-3 rounded-lg border border-subtle bg-surface-body p-4 transition hover:border-accent/50"
+          >
             <input
               type="radio"
               name="template_type"
@@ -273,7 +288,9 @@
 
       <!-- Cash Amount (if applicable) -->
       {#if templateType === 'cash_only' || templateType === 'cash_or_trade'}
-        <section class="space-y-4 rounded-xl border border-subtle bg-surface-card p-6 transition-colors">
+        <section
+          class="space-y-4 rounded-xl border border-subtle bg-surface-card p-6 transition-colors"
+        >
           <h2 class="text-lg font-semibold">Cash Amount</h2>
           <div>
             <label class="block text-sm font-medium text-secondary" for="cash_amount">
@@ -302,7 +319,9 @@
 
       <!-- Trade Items (if applicable) -->
       {#if templateType === 'trade_only' || templateType === 'cash_or_trade'}
-        <section class="space-y-4 rounded-xl border border-subtle bg-surface-card p-6 transition-colors">
+        <section
+          class="space-y-4 rounded-xl border border-subtle bg-surface-card p-6 transition-colors"
+        >
           <h2 class="text-lg font-semibold">Items You Want</h2>
           <p class="text-sm text-muted">
             List the games or items you're willing to trade for. Buyers can propose trades including
@@ -346,18 +365,16 @@
               </div>
             {/each}
           </div>
-          <button
-            type="button"
-            onclick={addTradeItem}
-            class="text-sm text-accent hover:underline"
-          >
+          <button type="button" onclick={addTradeItem} class="text-sm text-accent hover:underline">
             + Add another item
           </button>
         </section>
       {/if}
 
       <!-- Options -->
-      <section class="space-y-4 rounded-xl border border-subtle bg-surface-card p-6 transition-colors">
+      <section
+        class="space-y-4 rounded-xl border border-subtle bg-surface-card p-6 transition-colors"
+      >
         <h2 class="text-lg font-semibold">Additional Options</h2>
         <div class="space-y-3">
           <label class="flex items-start gap-2 text-sm">
@@ -393,7 +410,9 @@
       </section>
 
       <!-- Template Details -->
-      <section class="space-y-4 rounded-xl border border-subtle bg-surface-card p-6 transition-colors">
+      <section
+        class="space-y-4 rounded-xl border border-subtle bg-surface-card p-6 transition-colors"
+      >
         <h2 class="text-lg font-semibold">Template Details</h2>
         <div class="space-y-4">
           <div>

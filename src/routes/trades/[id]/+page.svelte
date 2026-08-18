@@ -190,14 +190,8 @@
         }
       }
 
-      // Increment trade counts for both users
-      await pb.collection('users').update(buyer.id, {
-        trade_count: buyer.trade_count + 1,
-      });
-
-      await pb.collection('users').update(seller.id, {
-        trade_count: seller.trade_count + 1,
-      });
+      // trade_count for both parties is incremented server-side by
+      // pocketbase/pb_hooks/reputation.pb.js on the transition into 'completed'.
 
       // Send completion notifications
       await pb.collection('notifications').create({
@@ -343,10 +337,7 @@
         message: vouchMessage.trim() || '',
       });
 
-      // Increment vouchee's vouch_count
-      await pb.collection('users').update(otherParty.id, {
-        vouch_count: otherParty.vouch_count + 1,
-      });
+      // vouch_count is incremented server-side by pocketbase/pb_hooks/reputation.pb.js.
 
       // Send notification
       await pb.collection('notifications').create({
@@ -542,7 +533,7 @@
             </h3>
             <div class="space-y-2">
               {#if trade.expand?.seller_items}
-                {#each trade.expand.seller_items as item}
+                {#each trade.expand.seller_items as item (item.id)}
                   <div class="rounded-lg border border-subtle bg-surface-body p-3 text-sm">
                     <div class="font-medium text-primary">{item.title}</div>
                     <div class="mt-1 text-xs text-muted">
@@ -575,7 +566,7 @@
             </h3>
             <div class="space-y-2">
               {#if trade.expand?.buyer_items}
-                {#each trade.expand.buyer_items as item}
+                {#each trade.expand.buyer_items as item (item.id)}
                   <div class="rounded-lg border border-subtle bg-surface-body p-3 text-sm">
                     <div class="font-medium text-primary">{item.title}</div>
                     <div class="mt-1 text-xs text-muted">
@@ -735,7 +726,7 @@
           </p>
         </div>
         <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-        <a href={`/messages`} class="btn-secondary"> 💬 Message </a>
+        <a href="/messages" class="btn-secondary"> 💬 Message </a>
       </div>
     </section>
 
@@ -764,7 +755,7 @@
             <div class="space-y-2">
               <label class="block text-sm font-medium text-secondary" for="rating"> Rating </label>
               <div class="flex gap-2">
-                {#each [1, 2, 3, 4, 5] as star}
+                {#each [1, 2, 3, 4, 5] as star (star)}
                   <button
                     type="button"
                     onclick={() => (feedbackRating = star)}
@@ -847,7 +838,7 @@
         <h2 class="text-xl font-semibold text-primary">Your Feedback</h2>
         <div class="flex items-center gap-2">
           <div class="flex gap-1">
-            {#each [1, 2, 3, 4, 5] as star}
+            {#each [1, 2, 3, 4, 5] as star (star)}
               <span class={star <= trade.rating ? 'text-amber-300' : 'text-muted'}>⭐</span>
             {/each}
           </div>

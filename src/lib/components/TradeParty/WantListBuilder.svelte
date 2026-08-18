@@ -1,9 +1,6 @@
 <script lang="ts">
   import { pb, currentUser } from '$lib/pocketbase';
-  import type {
-    TradePartySubmissionRecord,
-    TradePartyWantListRecord,
-  } from '$lib/types/pocketbase';
+  import type { TradePartySubmissionRecord, TradePartyWantListRecord } from '$lib/types/pocketbase';
 
   interface Props {
     mySubmission: TradePartySubmissionRecord;
@@ -203,8 +200,10 @@
             Your Want List ({selectedWants.length} selected)
           </h4>
           <div class="space-y-2">
-            {#each selectedWants as want, index}
-              <div class="flex items-center gap-3 rounded-lg border border-subtle bg-surface-body p-3">
+            {#each selectedWants as want, index (want.submission.id)}
+              <div
+                class="flex items-center gap-3 rounded-lg border border-subtle bg-surface-body p-3"
+              >
                 <div class="flex flex-col gap-1">
                   <button
                     onclick={() => moveUp(index)}
@@ -255,12 +254,10 @@
           <p class="text-sm text-muted">No other games available yet</p>
         {:else}
           <div class="space-y-2">
-            {#each otherSubmissions as submission}
+            {#each otherSubmissions as submission (submission.id)}
               <button
                 onclick={() => toggleSubmission(submission)}
-                class="w-full rounded-lg border p-3 text-left transition {isSelected(
-                  submission.id
-                )
+                class="w-full rounded-lg border p-3 text-left transition {isSelected(submission.id)
                   ? 'border-accent bg-accent/10'
                   : 'border-subtle bg-surface-body hover:border-accent/50'}"
               >
@@ -281,7 +278,9 @@
                   </div>
 
                   {#if isSelected(submission.id)}
-                    <div class="ml-3 rounded-full bg-accent px-3 py-1 text-xs font-semibold text-surface-body">
+                    <div
+                      class="ml-3 rounded-full bg-accent px-3 py-1 text-xs font-semibold text-surface-body"
+                    >
                       #{selectedWants.find((w) => w.submission.id === submission.id)?.rank}
                     </div>
                   {/if}

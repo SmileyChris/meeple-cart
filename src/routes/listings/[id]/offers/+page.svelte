@@ -313,7 +313,7 @@
                     Wants from you ({sellerItems.length} item{sellerItems.length !== 1 ? 's' : ''})
                   </div>
                   <ul class="mt-2 space-y-1">
-                    {#each sellerItems as game}
+                    {#each sellerItems as game (game.id)}
                       <li class="flex items-start gap-2 text-sm">
                         <span class="text-muted">•</span>
                         <div>
@@ -334,7 +334,7 @@
                   <div class="text-sm font-medium text-emerald-400">🔄 Offering in trade</div>
                   {#if buyerItems.length > 0}
                     <ul class="mt-2 space-y-1">
-                      {#each buyerItems as item}
+                      {#each buyerItems as item (item.id)}
                         <li class="flex items-start gap-2 text-sm">
                           <span class="text-emerald-400">•</span>
                           <span class="font-medium text-primary">{item.title}</span>

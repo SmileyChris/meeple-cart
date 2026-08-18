@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getTrustTierInfo, getNextTierProgress, type TrustTier } from '$lib/utils/trust-tiers';
+  import { getTrustTierInfo, type TrustTier } from '$lib/utils/trust-tiers';
 
   const tiers: TrustTier[] = ['new', 'seedling', 'growing', 'established', 'trusted'];
 
@@ -36,8 +36,8 @@
       <h2 class="text-xl font-semibold text-primary">How Trust Levels Work</h2>
       <p class="text-secondary">
         Your trust level is based on two factors: <strong>vouched trades</strong> (successful trades
-        where your trading partner vouched for you) and <strong>account age</strong> (how long
-        you've been a member).
+        where your trading partner vouched for you) and <strong>account age</strong> (how long you've
+        been a member).
       </p>
       <p class="text-secondary">
         As you complete more trades and receive vouches from trading partners, you'll progress
@@ -77,7 +77,9 @@
             </div>
 
             {#if tier === 'new'}
-              <p class="text-sm text-primary bg-surface-card rounded-lg px-3 py-2 border border-amber-500/50">
+              <p
+                class="text-sm text-primary bg-surface-card rounded-lg px-3 py-2 border border-amber-500/50"
+              >
                 ⚠️ New members should use tracked shipping and take extra precautions until they
                 build trust.
               </p>

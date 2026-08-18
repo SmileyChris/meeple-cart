@@ -60,12 +60,14 @@
       // Shipping info (store as JSON string for will_ship_to)
       if (shipFromRegion) formData.append('ship_from_region', shipFromRegion);
       if (willShipTo) {
-        const regions = willShipTo.split(',').map(r => r.trim());
+        const regions = willShipTo.split(',').map((r) => r.trim());
         formData.append('will_ship_to', JSON.stringify(regions));
       }
       if (shippingNotes) formData.append('shipping_notes', shippingNotes);
 
-      const submission = await pb.collection('trade_party_submissions').create<TradePartySubmissionRecord>(formData);
+      const submission = await pb
+        .collection('trade_party_submissions')
+        .create<TradePartySubmissionRecord>(formData);
 
       // Update party game count
       await pb.collection('trade_parties').update(tradePartyId, {
@@ -113,9 +115,7 @@
       Search for Game <span class="text-red-400">*</span>
     </label>
     <BggSearch onSelect={handleBggSelect} placeholder="Search BoardGameGeek..." />
-    <p class="mt-1 text-xs text-muted">
-      Search for a game on BoardGameGeek to auto-fill details
-    </p>
+    <p class="mt-1 text-xs text-muted">Search for a game on BoardGameGeek to auto-fill details</p>
   </div>
 
   <!-- Game Title (Manual Entry or Auto-filled) -->
@@ -131,17 +131,13 @@
       placeholder="e.g., Wingspan"
       class="w-full rounded-lg border border-subtle bg-surface-body px-4 py-2 text-primary placeholder-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
     />
-    <p class="mt-1 text-xs text-muted">
-      Auto-filled from search or enter manually
-    </p>
+    <p class="mt-1 text-xs text-muted">Auto-filled from search or enter manually</p>
   </div>
 
   <!-- BGG ID (auto-filled from search) -->
   {#if bggId}
     <div>
-      <label class="mb-2 block text-sm font-medium text-primary">
-        BoardGameGeek ID
-      </label>
+      <label class="mb-2 block text-sm font-medium text-primary"> BoardGameGeek ID </label>
       <div class="flex items-center gap-2">
         <input
           type="text"
@@ -207,9 +203,7 @@
       multiple
       class="w-full rounded-lg border border-subtle bg-surface-body px-4 py-2 text-primary file:mr-4 file:rounded-lg file:border-0 file:bg-accent file:px-4 file:py-2 file:text-sm file:font-semibold file:text-surface-body hover:file:bg-accent/90"
     />
-    <p class="mt-1 text-xs text-muted">
-      JPEG, PNG, or WebP. Max 5MB per image.
-    </p>
+    <p class="mt-1 text-xs text-muted">JPEG, PNG, or WebP. Max 5MB per image.</p>
   </div>
 
   <!-- Shipping Info -->
@@ -241,9 +235,7 @@
           placeholder="e.g., North Island, South Island, Anywhere in NZ"
           class="w-full rounded-lg border border-subtle bg-surface-body px-4 py-2 text-primary placeholder-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
         />
-        <p class="mt-1 text-xs text-muted">
-          Separate multiple regions with commas
-        </p>
+        <p class="mt-1 text-xs text-muted">Separate multiple regions with commas</p>
       </div>
 
       <div>

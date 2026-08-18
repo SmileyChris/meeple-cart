@@ -1,4 +1,4 @@
-import { error, redirect } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 import { redirectToLogin } from '$lib/utils/auth-redirect';
 import type { MessageItem } from '$lib/types/message';
@@ -38,9 +38,9 @@ export const load: PageLoad = async ({ params, url }) => {
     );
     const otherUserExpand = otherUser?.expand;
     const otherUserData = otherUserExpand
-      ? (otherUserExpand.sender?.id === otherUserId
-          ? otherUserExpand.sender
-          : otherUserExpand.recipient)
+      ? otherUserExpand.sender?.id === otherUserId
+        ? otherUserExpand.sender
+        : otherUserExpand.recipient
       : null;
 
     // Map messages to MessageItem format
@@ -64,9 +64,10 @@ export const load: PageLoad = async ({ params, url }) => {
     }
 
     // Build thumbnail URL if listing has photos
-    const thumbnailUrl = listing && Array.isArray(listing.photos) && listing.photos.length > 0
-      ? `http://127.0.0.1:8090/api/files/${listing.collectionName}/${listing.id}/${listing.photos[0]}?thumb=100x100`
-      : null;
+    const thumbnailUrl =
+      listing && Array.isArray(listing.photos) && listing.photos.length > 0
+        ? `http://127.0.0.1:8090/api/files/${listing.collectionName}/${listing.id}/${listing.photos[0]}?thumb=100x100`
+        : null;
 
     return {
       messages,

@@ -57,11 +57,8 @@
         .collection('verification_requests')
         .getOne(data.link.request, { expand: 'user' });
 
-      // Update user as verified
-      await pb.collection('users').update(request.user, {
-        phone_verified: true,
-        phone_hash: phoneHash,
-      });
+      // phone_verified is set server-side by pocketbase/pb_hooks/reputation.pb.js when
+      // the link is marked used; a client cannot write another user's record.
 
       // Update request as completed
       await pb.collection('verification_requests').update(request.id, {

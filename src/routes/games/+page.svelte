@@ -2,7 +2,7 @@
   import type { PageData } from './$types';
   import GameCard from '$lib/components/GameCard.svelte';
   import RegionSelector from '$lib/components/RegionSelector.svelte';
-  import { NORTH_ISLAND_REGIONS, SOUTH_ISLAND_REGIONS, REGION_LABELS } from '$lib/constants/regions';
+  import { NORTH_ISLAND_REGIONS, SOUTH_ISLAND_REGIONS } from '$lib/constants/regions';
   import { goto, invalidate } from '$app/navigation';
   import { page } from '$app/stores';
   import { currentUser } from '$lib/pocketbase';
@@ -79,7 +79,9 @@
 
   // Find the current condition level from URL
   const currentConditionValue = data.filters.condition || '';
-  const currentConditionIndex = conditionOptions.findIndex(c => c.value === currentConditionValue);
+  const currentConditionIndex = conditionOptions.findIndex(
+    (c) => c.value === currentConditionValue
+  );
 
   // Load last used condition from localStorage for defaults (non-reactive)
   let lastCondition = 4;
@@ -87,7 +89,7 @@
   if (browser) {
     const storedCondition = getLastCondition();
     if (storedCondition) {
-      const idx = conditionOptions.findIndex(c => c.value === storedCondition);
+      const idx = conditionOptions.findIndex((c) => c.value === storedCondition);
       if (idx >= 0) lastCondition = idx;
     }
   }
@@ -128,7 +130,7 @@
     } else {
       // Add region params for each preferred region
       url.searchParams.delete('region');
-      regionsToUse.forEach(region => {
+      regionsToUse.forEach((region) => {
         url.searchParams.append('region', region);
       });
       if (browser) {
@@ -146,7 +148,7 @@
 
   async function toggleGuestRegion(regionValue: string) {
     const wasEmpty = guestRegions.length === 0;
-    const allRegions = [...NORTH_ISLAND_REGIONS, ...SOUTH_ISLAND_REGIONS].map(r => r.value);
+    const allRegions = [...NORTH_ISLAND_REGIONS, ...SOUTH_ISLAND_REGIONS].map((r) => r.value);
 
     if (guestRegions.includes(regionValue)) {
       guestRegions = guestRegions.filter((r) => r !== regionValue);
@@ -380,7 +382,8 @@
               tempConditionLevel = minConditionLevel < 4 ? minConditionLevel : lastCondition;
               showConditionFilter = !showConditionFilter;
             }}
-            class="flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium transition {minConditionLevel < 4
+            class="flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium transition {minConditionLevel <
+            4
               ? 'border-accent text-accent'
               : 'border-transparent text-secondary hover:text-primary'}"
           >
@@ -395,7 +398,12 @@
               {/if}
             </span>
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 9l-7 7-7-7"
+              />
             </svg>
           </button>
 
@@ -442,7 +450,9 @@
                   step="1"
                   bind:value={tempConditionLevel}
                   class="h-2 w-full cursor-pointer appearance-none rounded-lg accent-[var(--accent)]"
-                  style="background: linear-gradient(to right, var(--accent) 0%, var(--accent) {tempConditionLevel * 25}%, var(--surface-card-alt) {tempConditionLevel * 25}%, var(--surface-card-alt) 100%);"
+                  style="background: linear-gradient(to right, var(--accent) 0%, var(--accent) {tempConditionLevel *
+                    25}%, var(--surface-card-alt) {tempConditionLevel *
+                    25}%, var(--surface-card-alt) 100%);"
                 />
 
                 <button

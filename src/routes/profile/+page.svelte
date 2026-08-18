@@ -478,7 +478,9 @@ View full details: ${generateShareUrl(listing.id)}`;
       <!-- Share Link -->
       <div class="space-y-4">
         <div>
-          <label for="share-url" class="block text-sm font-medium text-secondary mb-2">Share Link</label>
+          <label for="share-url" class="block text-sm font-medium text-secondary mb-2"
+            >Share Link</label
+          >
           <div class="flex gap-2">
             <input
               id="share-url"

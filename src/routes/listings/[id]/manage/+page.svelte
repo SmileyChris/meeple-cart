@@ -400,10 +400,13 @@
         </div>
 
         {#if data.templates.length === 0}
-          <div class="rounded-xl border border-dashed border-subtle bg-surface-card p-8 text-center transition-colors">
+          <div
+            class="rounded-xl border border-dashed border-subtle bg-surface-card p-8 text-center transition-colors"
+          >
             <div class="text-4xl opacity-20">📋</div>
             <p class="mt-4 text-sm text-muted">
-              No offer templates yet. Create templates to let buyers know what you're willing to accept.
+              No offer templates yet. Create templates to let buyers know what you're willing to
+              accept.
             </p>
             <a
               href="/listings/{data.listing.id}/templates/new"
@@ -415,7 +418,9 @@
         {:else}
           <div class="space-y-4">
             {#each data.templates as template (template.id)}
-              <section class="rounded-xl border border-subtle bg-surface-card p-6 transition-colors">
+              <section
+                class="rounded-xl border border-subtle bg-surface-card p-6 transition-colors"
+              >
                 <div class="space-y-3">
                   <div class="flex items-start justify-between">
                     <div class="flex-1">
@@ -438,7 +443,9 @@
                             {#if template.open_to_lower_offers}(OBO){/if}
                           </span>
                         {/if}
-                        <span class={template.status === 'active' ? 'text-emerald-400' : 'text-muted'}>
+                        <span
+                          class={template.status === 'active' ? 'text-emerald-400' : 'text-muted'}
+                        >
                           • {template.status.charAt(0).toUpperCase() + template.status.slice(1)}
                         </span>
                       </div>
@@ -447,8 +454,10 @@
                         <div class="mt-3">
                           <span class="text-xs font-medium text-secondary">Items included:</span>
                           <div class="mt-1 flex flex-wrap gap-2">
-                            {#each template.expand.items as item}
-                              <span class="rounded-full bg-surface-body px-2 py-1 text-xs text-muted">
+                            {#each template.expand.items as item (item.id)}
+                              <span
+                                class="rounded-full bg-surface-body px-2 py-1 text-xs text-muted"
+                              >
                                 {item.title}
                               </span>
                             {/each}
@@ -460,8 +469,10 @@
                         <div class="mt-3">
                           <span class="text-xs font-medium text-secondary">Wants in trade:</span>
                           <div class="mt-1 flex flex-wrap gap-2">
-                            {#each template.trade_for_items as wantedItem}
-                              <span class="rounded-full bg-surface-body px-2 py-1 text-xs text-muted">
+                            {#each template.trade_for_items as wantedItem (wantedItem.title)}
+                              <span
+                                class="rounded-full bg-surface-body px-2 py-1 text-xs text-muted"
+                              >
                                 {wantedItem.title}
                                 {#if wantedItem.bgg_id}(BGG {wantedItem.bgg_id}){/if}
                               </span>
@@ -481,9 +492,15 @@
                           class="text-sm text-muted transition hover:text-secondary"
                           type="button"
                           onclick={async () => {
-                            if (confirm('Withdraw this template? It will no longer be visible to buyers.')) {
+                            if (
+                              confirm(
+                                'Withdraw this template? It will no longer be visible to buyers.'
+                              )
+                            ) {
                               try {
-                                await pb.collection('offer_templates').update(template.id, { status: 'withdrawn' });
+                                await pb
+                                  .collection('offer_templates')
+                                  .update(template.id, { status: 'withdrawn' });
                                 window.location.reload();
                               } catch (err) {
                                 console.error('Failed to withdraw template:', err);

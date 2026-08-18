@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { marked } from 'marked';
+  import { renderMarkdown } from '$lib/utils/sanitize';
 
   let {
     value = $bindable(''),
@@ -15,15 +15,7 @@
 
   let showPreview = $state(false);
 
-  // Configure marked for safety
-  marked.setOptions({
-    breaks: true,
-    gfm: true,
-  });
-
-  let renderedMarkdown = $derived(
-    showPreview ? (marked.parse(value, { async: false }) as string) : ''
-  );
+  let sanitizedPreview = $derived(showPreview ? renderMarkdown(value) : '');
 </script>
 
 <div class="space-y-2">
@@ -63,7 +55,8 @@
       class="prose min-h-[150px] w-full rounded-lg border border-subtle bg-surface-body px-3 py-2 text-sm"
     >
       {#if value.trim()}
-        {@html renderedMarkdown}
+        <!-- eslint-disable-next-line svelte/no-at-html-tags -- sanitised by $lib/utils/sanitize -->
+        {@html sanitizedPreview}
       {:else}
         <p class="text-muted italic">Nothing to preview</p>
       {/if}

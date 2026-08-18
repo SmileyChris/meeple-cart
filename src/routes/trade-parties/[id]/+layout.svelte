@@ -10,7 +10,9 @@
 <!-- Private party layout - minimal navigation -->
 <div class="flex min-h-screen flex-col bg-surface-body text-primary transition-colors">
   <!-- Minimal header -->
-  <header class="border-b border-subtle bg-[color:var(--surface-header)] backdrop-blur transition-colors">
+  <header
+    class="border-b border-subtle bg-[color:var(--surface-header)] backdrop-blur transition-colors"
+  >
     <div class="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
       <div class="flex items-center gap-3">
         <img src="/logo.png" alt="Meeple Cart" class="h-8" />

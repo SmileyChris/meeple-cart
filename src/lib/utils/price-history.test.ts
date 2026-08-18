@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { getLowestHistoricalPrice, getMostRecentPrice, formatPrice, formatTradeValue } from './price-history';
+import {
+  getLowestHistoricalPrice,
+  getMostRecentPrice,
+  formatPrice,
+  formatTradeValue,
+} from './price-history';
 
 /**
  * DEPRECATED: These tests verify that price history functions are properly stubbed.

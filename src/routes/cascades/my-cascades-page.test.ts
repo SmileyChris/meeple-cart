@@ -49,11 +49,13 @@ describe('my cascades page load', () => {
     const { get } = await import('svelte/store');
     vi.mocked(get).mockReturnValue(null);
 
-    await expect(load({ url: { pathname: '/cascades/my-cascades' } } as any)).rejects.toMatchObject({
-      message: 'REDIRECT',
-      status: 302,
-      location: '/login?next=%2Fcascades%2Fmy-cascades',
-    });
+    await expect(load({ url: { pathname: '/cascades/my-cascades' } } as any)).rejects.toMatchObject(
+      {
+        message: 'REDIRECT',
+        status: 302,
+        location: '/login?next=%2Fcascades%2Fmy-cascades',
+      }
+    );
   });
 
   it('returns entered, won, and started cascades with user stats', async () => {

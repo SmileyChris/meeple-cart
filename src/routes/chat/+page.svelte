@@ -161,7 +161,7 @@
               : 'border-transparent text-secondary hover:text-primary'}"
           >
             <option value="">All Categories</option>
-            {#each categories as category}
+            {#each categories as category (category.id)}
               <option value={category.slug}>
                 {category.icon}
                 {category.name}
@@ -205,7 +205,7 @@
               </button>
             {/if}
           {/if}
-          {#each currentTags as tag}
+          {#each currentTags as tag (tag)}
             <button
               onclick={() => {
                 const url = new URL($page.url);
@@ -326,7 +326,7 @@
                 <!-- Tags -->
                 {#if thread.tags && thread.tags.length > 0}
                   <div class="mt-2 flex flex-wrap gap-1">
-                    {#each thread.tags.slice(0, 5) as tag}
+                    {#each thread.tags.slice(0, 5) as tag (tag)}
                       <a
                         href="/chat?tag={encodeURIComponent(tag)}"
                         class="inline-block rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent hover:bg-accent/20"

@@ -58,7 +58,9 @@
     <div class="mx-auto max-w-5xl space-y-6">
       <!-- Header -->
       <div class="space-y-3">
-        <h1 class="text-4xl font-semibold tracking-tight text-primary sm:text-5xl">🎁 Gift Cascades</h1>
+        <h1 class="text-4xl font-semibold tracking-tight text-primary sm:text-5xl">
+          🎁 Gift Cascades
+        </h1>
         <p class="text-base text-secondary sm:text-lg">
           Receive free games, then pass on the generosity. Each gift cascade creates a lineage of
           giving.
@@ -107,12 +109,12 @@
             <option value="north_island">All North Island</option>
             <option value="south_island">All South Island</option>
             <optgroup label="North Island Regions">
-              {#each NORTH_ISLAND_REGIONS as region}
+              {#each NORTH_ISLAND_REGIONS as region (region)}
                 <option value={region.value}>{region.label}</option>
               {/each}
             </optgroup>
             <optgroup label="South Island Regions">
-              {#each SOUTH_ISLAND_REGIONS as region}
+              {#each SOUTH_ISLAND_REGIONS as region (region)}
                 <option value={region.value}>{region.label}</option>
               {/each}
             </optgroup>

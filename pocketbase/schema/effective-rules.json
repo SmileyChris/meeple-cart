@@ -1,0 +1,2128 @@
+{
+  "bgg_info": {
+    "fields": [
+      {
+        "name": "id",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "user",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "bgg_id",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "title",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "year_published",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "description",
+        "required": false,
+        "type": "text"
+      },
+      {
+        "name": "thumbnail_url",
+        "required": false,
+        "type": "url"
+      },
+      {
+        "name": "image_url",
+        "required": false,
+        "type": "url"
+      },
+      {
+        "name": "min_players",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "max_players",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "min_playtime",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "max_playtime",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "min_age",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "average_rating",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "rating_stddev",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "num_ratings",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "complexity_weight",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "bgg_rank",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "categories",
+        "required": false,
+        "type": "json"
+      },
+      {
+        "name": "mechanics",
+        "required": false,
+        "type": "json"
+      },
+      {
+        "name": "designers",
+        "required": false,
+        "type": "json"
+      },
+      {
+        "name": "publishers",
+        "required": false,
+        "type": "json"
+      },
+      {
+        "name": "last_fetched",
+        "required": true,
+        "type": "date"
+      },
+      {
+        "name": "fetch_error",
+        "required": false,
+        "type": "text"
+      },
+      {
+        "name": "created",
+        "required": false,
+        "type": "autodate"
+      },
+      {
+        "name": "updated",
+        "required": false,
+        "type": "autodate"
+      }
+    ],
+    "rules": {
+      "createRule": "@request.auth.id = user",
+      "deleteRule": "@request.auth.id = user",
+      "listRule": "",
+      "updateRule": "@request.auth.id = user",
+      "viewRule": ""
+    }
+  },
+  "cascade_entries": {
+    "fields": [
+      {
+        "name": "id",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "cascade",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "user",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "message",
+        "required": false,
+        "type": "text"
+      },
+      {
+        "name": "withdrew",
+        "required": false,
+        "type": "bool"
+      },
+      {
+        "name": "created",
+        "required": false,
+        "type": "autodate"
+      },
+      {
+        "name": "updated",
+        "required": false,
+        "type": "autodate"
+      }
+    ],
+    "rules": {
+      "createRule": "@request.auth.id = user",
+      "deleteRule": "@request.auth.id = user",
+      "listRule": "",
+      "updateRule": "@request.auth.id = user",
+      "viewRule": ""
+    }
+  },
+  "cascade_history": {
+    "fields": [
+      {
+        "name": "id",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "cascade",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "generation",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "event_type",
+        "required": true,
+        "type": "select",
+        "values": [
+          "seeded",
+          "winner_selected",
+          "shipped",
+          "received",
+          "passed_on",
+          "deadline_missed",
+          "broken"
+        ]
+      },
+      {
+        "name": "event_date",
+        "required": true,
+        "type": "date"
+      },
+      {
+        "name": "actor",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "related_user",
+        "required": false,
+        "type": "relation"
+      },
+      {
+        "name": "game",
+        "required": false,
+        "type": "relation"
+      },
+      {
+        "name": "notes",
+        "required": false,
+        "type": "text"
+      },
+      {
+        "name": "shipped_to_location",
+        "required": false,
+        "type": "text"
+      },
+      {
+        "name": "shipping_days",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "created",
+        "required": false,
+        "type": "autodate"
+      },
+      {
+        "name": "updated",
+        "required": false,
+        "type": "autodate"
+      }
+    ],
+    "rules": {
+      "createRule": null,
+      "deleteRule": null,
+      "listRule": "",
+      "updateRule": null,
+      "viewRule": ""
+    }
+  },
+  "cascades": {
+    "fields": [
+      {
+        "name": "id",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "name",
+        "required": false,
+        "type": "text"
+      },
+      {
+        "name": "description",
+        "required": false,
+        "type": "text"
+      },
+      {
+        "name": "status",
+        "required": true,
+        "type": "select",
+        "values": [
+          "accepting_entries",
+          "selecting_winner",
+          "in_transit",
+          "awaiting_pass",
+          "completed",
+          "broken"
+        ]
+      },
+      {
+        "name": "current_game",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "current_holder",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "entry_deadline",
+        "required": true,
+        "type": "date"
+      },
+      {
+        "name": "region",
+        "required": false,
+        "type": "select",
+        "values": [
+          "nz",
+          "au",
+          "worldwide",
+          "north_island",
+          "south_island"
+        ]
+      },
+      {
+        "name": "shipping_requirement",
+        "required": true,
+        "type": "select",
+        "values": [
+          "pickup_only",
+          "shipping_available",
+          "shipping_only"
+        ]
+      },
+      {
+        "name": "special_rules",
+        "required": false,
+        "type": "text"
+      },
+      {
+        "name": "winner",
+        "required": false,
+        "type": "relation"
+      },
+      {
+        "name": "shipped_at",
+        "required": false,
+        "type": "date"
+      },
+      {
+        "name": "shipping_tracking",
+        "required": false,
+        "type": "text"
+      },
+      {
+        "name": "received_at",
+        "required": false,
+        "type": "date"
+      },
+      {
+        "name": "received_confirmed_by",
+        "required": false,
+        "type": "select",
+        "values": [
+          "sender",
+          "receiver",
+          "auto"
+        ]
+      },
+      {
+        "name": "pass_deadline",
+        "required": false,
+        "type": "date"
+      },
+      {
+        "name": "generation",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "entry_count",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "view_count",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "origin_cascade",
+        "required": false,
+        "type": "relation"
+      },
+      {
+        "name": "previous_cascade",
+        "required": false,
+        "type": "relation"
+      },
+      {
+        "name": "created",
+        "required": false,
+        "type": "autodate"
+      },
+      {
+        "name": "updated",
+        "required": false,
+        "type": "autodate"
+      }
+    ],
+    "rules": {
+      "createRule": "@request.auth.id != ''",
+      "deleteRule": "current_holder = @request.auth.id && status = 'accepting_entries'",
+      "listRule": "",
+      "updateRule": "current_holder = @request.auth.id || winner = @request.auth.id",
+      "viewRule": ""
+    }
+  },
+  "discussion_categories": {
+    "fields": [
+      {
+        "name": "id",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "slug",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "name",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "icon",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "description",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "color",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "order",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "enabled",
+        "required": false,
+        "type": "bool"
+      }
+    ],
+    "rules": {
+      "createRule": null,
+      "deleteRule": null,
+      "listRule": "",
+      "updateRule": null,
+      "viewRule": ""
+    }
+  },
+  "discussion_reactions": {
+    "fields": [
+      {
+        "name": "id",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "thread",
+        "required": false,
+        "type": "relation"
+      },
+      {
+        "name": "reply",
+        "required": false,
+        "type": "relation"
+      },
+      {
+        "name": "user",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "emoji",
+        "required": true,
+        "type": "select",
+        "values": [
+          "\u2764\ufe0f",
+          "\ud83d\udc4d",
+          "\ud83d\udd25",
+          "\ud83d\ude02",
+          "\ud83e\udd14",
+          "\ud83d\udc40"
+        ]
+      }
+    ],
+    "rules": {
+      "createRule": "@request.auth.id != \"\"",
+      "deleteRule": "@request.auth.id = user.id",
+      "listRule": "",
+      "updateRule": "@request.auth.id = user.id",
+      "viewRule": ""
+    }
+  },
+  "discussion_replies": {
+    "fields": [
+      {
+        "name": "id",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "thread",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "author",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "content",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "edited",
+        "required": false,
+        "type": "bool"
+      },
+      {
+        "name": "edited_at",
+        "required": false,
+        "type": "date"
+      },
+      {
+        "name": "quoted_reply",
+        "required": false,
+        "type": "relation"
+      },
+      {
+        "name": "created",
+        "required": false,
+        "type": "autodate"
+      },
+      {
+        "name": "updated",
+        "required": false,
+        "type": "autodate"
+      }
+    ],
+    "rules": {
+      "createRule": "@request.auth.id != \"\"",
+      "deleteRule": "@request.auth.id = author.id",
+      "listRule": "",
+      "updateRule": "@request.auth.id = author.id",
+      "viewRule": ""
+    }
+  },
+  "discussion_subscriptions": {
+    "fields": [
+      {
+        "name": "id",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "user",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "thread",
+        "required": true,
+        "type": "relation"
+      }
+    ],
+    "rules": {
+      "createRule": "@request.auth.id != \"\" && @request.body.user = @request.auth.id",
+      "deleteRule": "@request.auth.id != \"\" && user = @request.auth.id",
+      "listRule": "@request.auth.id != \"\" && user = @request.auth.id",
+      "updateRule": null,
+      "viewRule": "@request.auth.id != \"\" && user = @request.auth.id"
+    }
+  },
+  "discussion_threads": {
+    "fields": [
+      {
+        "name": "id",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "title",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "content",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "author",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "wanted_items",
+        "required": false,
+        "type": "json"
+      },
+      {
+        "name": "wanted_offer_type",
+        "required": false,
+        "type": "select",
+        "values": [
+          "buying",
+          "trading",
+          "either"
+        ]
+      },
+      {
+        "name": "view_count",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "reply_count",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "is_pinned",
+        "required": false,
+        "type": "bool"
+      },
+      {
+        "name": "is_locked",
+        "required": false,
+        "type": "bool"
+      },
+      {
+        "name": "category",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "tags",
+        "required": false,
+        "type": "json"
+      },
+      {
+        "name": "created",
+        "required": false,
+        "type": "autodate"
+      },
+      {
+        "name": "updated",
+        "required": false,
+        "type": "autodate"
+      },
+      {
+        "name": "listing",
+        "required": false,
+        "type": "relation"
+      },
+      {
+        "name": "last_reply_at",
+        "required": false,
+        "type": "date"
+      }
+    ],
+    "rules": {
+      "createRule": "@request.auth.id != ''",
+      "deleteRule": "@request.auth.id = author",
+      "listRule": "",
+      "updateRule": "@request.auth.id = author",
+      "viewRule": ""
+    }
+  },
+  "items": {
+    "fields": [
+      {
+        "name": "id",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "listing",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "bgg_id",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "title",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "year",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "condition",
+        "required": true,
+        "type": "select",
+        "values": [
+          "mint",
+          "excellent",
+          "good",
+          "fair",
+          "poor"
+        ]
+      },
+      {
+        "name": "notes",
+        "required": false,
+        "type": "text"
+      },
+      {
+        "name": "status",
+        "required": true,
+        "type": "select",
+        "values": [
+          "available",
+          "pending",
+          "sold",
+          "bundled"
+        ]
+      },
+      {
+        "name": "photo_regions",
+        "required": false,
+        "type": "json"
+      },
+      {
+        "name": "created",
+        "required": false,
+        "type": "autodate"
+      },
+      {
+        "name": "updated",
+        "required": false,
+        "type": "autodate"
+      }
+    ],
+    "rules": {
+      "createRule": "listing.owner = @request.auth.id",
+      "deleteRule": "listing.owner = @request.auth.id",
+      "listRule": "",
+      "updateRule": "listing.owner = @request.auth.id",
+      "viewRule": ""
+    }
+  },
+  "listings": {
+    "fields": [
+      {
+        "name": "id",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "owner",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "title",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "status",
+        "required": true,
+        "type": "select",
+        "values": [
+          "active",
+          "pending",
+          "completed",
+          "cancelled"
+        ]
+      },
+      {
+        "name": "summary",
+        "required": false,
+        "type": "text"
+      },
+      {
+        "name": "location",
+        "required": false,
+        "type": "text"
+      },
+      {
+        "name": "views",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "bump_date",
+        "required": false,
+        "type": "date"
+      },
+      {
+        "name": "photos",
+        "required": false,
+        "type": "file"
+      },
+      {
+        "name": "photo_region_map",
+        "required": false,
+        "type": "json"
+      },
+      {
+        "name": "status_history",
+        "required": false,
+        "type": "json"
+      },
+      {
+        "name": "created",
+        "required": false,
+        "type": "autodate"
+      },
+      {
+        "name": "updated",
+        "required": false,
+        "type": "autodate"
+      },
+      {
+        "name": "regions",
+        "required": false,
+        "type": "json"
+      }
+    ],
+    "rules": {
+      "createRule": "@request.auth.id = owner",
+      "deleteRule": "@request.auth.id = owner",
+      "listRule": "",
+      "updateRule": "@request.auth.id = owner",
+      "viewRule": ""
+    }
+  },
+  "messages": {
+    "fields": [
+      {
+        "name": "id",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "listing",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "thread_id",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "sender",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "recipient",
+        "required": false,
+        "type": "relation"
+      },
+      {
+        "name": "content",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "is_public",
+        "required": false,
+        "type": "bool"
+      },
+      {
+        "name": "read",
+        "required": false,
+        "type": "bool"
+      },
+      {
+        "name": "created",
+        "required": false,
+        "type": "autodate"
+      },
+      {
+        "name": "updated",
+        "required": false,
+        "type": "autodate"
+      }
+    ],
+    "rules": {
+      "createRule": "@request.auth.id != ''",
+      "deleteRule": "sender = @request.auth.id",
+      "listRule": "sender = @request.auth.id || recipient = @request.auth.id || is_public = true",
+      "updateRule": "sender = @request.auth.id",
+      "viewRule": "sender = @request.auth.id || recipient = @request.auth.id || is_public = true"
+    }
+  },
+  "notifications": {
+    "fields": [
+      {
+        "name": "id",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "user",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "type",
+        "required": true,
+        "type": "select",
+        "values": [
+          "new_listing",
+          "new_message",
+          "price_drop",
+          "listing_update",
+          "cascade_won",
+          "cascade_shipped",
+          "cascade_received",
+          "cascade_reminder",
+          "cascade_deadline",
+          "cascade_broken",
+          "discussion_reply",
+          "discussion_mention",
+          "trade_initiated",
+          "trade_accepted",
+          "trade_shipped",
+          "trade_received",
+          "trade_completed",
+          "trade_cancelled",
+          "trade_update",
+          "offer_received",
+          "offer_accepted",
+          "offer_declined",
+          "vouch_received",
+          "trade_party_match"
+        ]
+      },
+      {
+        "name": "title",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "message",
+        "required": false,
+        "type": "text"
+      },
+      {
+        "name": "link",
+        "required": false,
+        "type": "text"
+      },
+      {
+        "name": "listing",
+        "required": false,
+        "type": "relation"
+      },
+      {
+        "name": "read",
+        "required": false,
+        "type": "bool"
+      },
+      {
+        "name": "created",
+        "required": false,
+        "type": "autodate"
+      },
+      {
+        "name": "updated",
+        "required": false,
+        "type": "autodate"
+      }
+    ],
+    "rules": {
+      "createRule": "@request.auth.id != \"\"",
+      "deleteRule": "user = @request.auth.id",
+      "listRule": "user = @request.auth.id",
+      "updateRule": "user = @request.auth.id",
+      "viewRule": "user = @request.auth.id"
+    }
+  },
+  "offer_templates": {
+    "fields": [
+      {
+        "name": "id",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "listing",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "owner",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "items",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "cash_amount",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "trade_for_items",
+        "required": false,
+        "type": "json"
+      },
+      {
+        "name": "open_to_lower_offers",
+        "required": false,
+        "type": "bool"
+      },
+      {
+        "name": "open_to_trade_offers",
+        "required": false,
+        "type": "bool"
+      },
+      {
+        "name": "status",
+        "required": true,
+        "type": "select",
+        "values": [
+          "active",
+          "accepted",
+          "invalidated",
+          "withdrawn"
+        ]
+      },
+      {
+        "name": "display_name",
+        "required": false,
+        "type": "text"
+      },
+      {
+        "name": "notes",
+        "required": false,
+        "type": "text"
+      },
+      {
+        "name": "created",
+        "required": false,
+        "type": "autodate"
+      },
+      {
+        "name": "updated",
+        "required": false,
+        "type": "autodate"
+      },
+      {
+        "name": "can_post",
+        "required": false,
+        "type": "bool"
+      },
+      {
+        "name": "will_consider_split",
+        "required": false,
+        "type": "bool"
+      }
+    ],
+    "rules": {
+      "createRule": "@request.auth.id = owner",
+      "deleteRule": "@request.auth.id = owner",
+      "listRule": "",
+      "updateRule": "@request.auth.id = owner",
+      "viewRule": ""
+    }
+  },
+  "reactions": {
+    "fields": [
+      {
+        "name": "id",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "created",
+        "required": false,
+        "type": "autodate"
+      },
+      {
+        "name": "updated",
+        "required": false,
+        "type": "autodate"
+      },
+      {
+        "name": "user",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "listing",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "emoji",
+        "required": true,
+        "type": "select",
+        "values": [
+          "\u2764\ufe0f",
+          "\ud83d\udc4d",
+          "\ud83d\udd25",
+          "\ud83d\ude02",
+          "\ud83e\udd14",
+          "\ud83d\udc40"
+        ]
+      }
+    ],
+    "rules": {
+      "createRule": "@request.auth.id != \"\" && @request.body.user = @request.auth.id",
+      "deleteRule": "user = @request.auth.id",
+      "listRule": "",
+      "updateRule": "user = @request.auth.id",
+      "viewRule": ""
+    }
+  },
+  "trade_parties": {
+    "fields": [
+      {
+        "name": "id",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "name",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "description",
+        "required": false,
+        "type": "editor"
+      },
+      {
+        "name": "organizer",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "status",
+        "required": true,
+        "type": "select",
+        "values": [
+          "planning",
+          "submissions",
+          "want_lists",
+          "matching",
+          "execution",
+          "completed"
+        ]
+      },
+      {
+        "name": "submission_opens",
+        "required": true,
+        "type": "date"
+      },
+      {
+        "name": "submission_closes",
+        "required": true,
+        "type": "date"
+      },
+      {
+        "name": "want_list_opens",
+        "required": true,
+        "type": "date"
+      },
+      {
+        "name": "want_list_closes",
+        "required": true,
+        "type": "date"
+      },
+      {
+        "name": "algorithm_runs_at",
+        "required": true,
+        "type": "date"
+      },
+      {
+        "name": "execution_deadline",
+        "required": true,
+        "type": "date"
+      },
+      {
+        "name": "max_games_per_user",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "allow_no_trade",
+        "required": false,
+        "type": "bool"
+      },
+      {
+        "name": "regional_restriction",
+        "required": false,
+        "type": "text"
+      },
+      {
+        "name": "shipping_rules",
+        "required": false,
+        "type": "editor"
+      },
+      {
+        "name": "participant_count",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "game_count",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "successful_matches",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "created",
+        "required": false,
+        "type": "autodate"
+      },
+      {
+        "name": "updated",
+        "required": false,
+        "type": "autodate"
+      },
+      {
+        "name": "is_public",
+        "required": false,
+        "type": "bool"
+      }
+    ],
+    "rules": {
+      "createRule": "@request.auth.id = organizer",
+      "deleteRule": "@request.auth.id = organizer",
+      "listRule": "@request.auth.id != \"\"",
+      "updateRule": "@request.auth.id = organizer",
+      "viewRule": "@request.auth.id != \"\""
+    }
+  },
+  "trade_party_context": {
+    "fields": [
+      {
+        "name": "id",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "trade",
+        "required": false,
+        "type": "relation"
+      },
+      {
+        "name": "party",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "chain_id",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "chain_position",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "is_draft",
+        "required": false,
+        "type": "bool"
+      },
+      {
+        "name": "giving_submission",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "receiving_submission",
+        "required": true,
+        "type": "relation"
+      }
+    ],
+    "rules": {
+      "createRule": "@request.auth.id = party.organizer",
+      "deleteRule": "@request.auth.id = party.organizer",
+      "listRule": "@request.auth.id != \"\"",
+      "updateRule": "@request.auth.id = party.organizer",
+      "viewRule": "@request.auth.id != \"\""
+    }
+  },
+  "trade_party_matches": {
+    "fields": [
+      {
+        "name": "id",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "trade_party",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "chain_id",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "chain_position",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "giving_submission",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "receiving_submission",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "giving_user",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "receiving_user",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "status",
+        "required": true,
+        "type": "select",
+        "values": [
+          "pending",
+          "shipping",
+          "completed",
+          "disputed"
+        ]
+      },
+      {
+        "name": "shipped_at",
+        "required": false,
+        "type": "date"
+      },
+      {
+        "name": "received_at",
+        "required": false,
+        "type": "date"
+      },
+      {
+        "name": "tracking_number",
+        "required": false,
+        "type": "text"
+      }
+    ],
+    "rules": {
+      "createRule": null,
+      "deleteRule": null,
+      "listRule": "@request.auth.id != \"\"",
+      "updateRule": "@request.auth.id = giving_user || @request.auth.id = receiving_user",
+      "viewRule": "@request.auth.id != \"\""
+    }
+  },
+  "trade_party_submissions": {
+    "fields": [
+      {
+        "name": "id",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "trade_party",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "user",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "title",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "bgg_id",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "condition",
+        "required": true,
+        "type": "select",
+        "values": [
+          "mint",
+          "like_new",
+          "good",
+          "fair",
+          "poor"
+        ]
+      },
+      {
+        "name": "description",
+        "required": false,
+        "type": "editor"
+      },
+      {
+        "name": "photos",
+        "required": false,
+        "type": "file"
+      },
+      {
+        "name": "ship_from_region",
+        "required": false,
+        "type": "text"
+      },
+      {
+        "name": "will_ship_to",
+        "required": false,
+        "type": "text"
+      },
+      {
+        "name": "shipping_notes",
+        "required": false,
+        "type": "text"
+      },
+      {
+        "name": "status",
+        "required": true,
+        "type": "select",
+        "values": [
+          "pending",
+          "approved",
+          "rejected"
+        ]
+      }
+    ],
+    "rules": {
+      "createRule": "@request.auth.id != \"\" && @request.auth.id = user",
+      "deleteRule": "@request.auth.id = user",
+      "listRule": "@request.auth.id != \"\"",
+      "updateRule": "@request.auth.id = user",
+      "viewRule": "@request.auth.id != \"\""
+    }
+  },
+  "trade_party_want_lists": {
+    "fields": [
+      {
+        "name": "id",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "my_submission",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "wanted_submission",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "preference_rank",
+        "required": false,
+        "type": "number"
+      }
+    ],
+    "rules": {
+      "createRule": "@request.auth.id != \"\" && @request.auth.id = my_submission.user",
+      "deleteRule": "@request.auth.id = my_submission.user",
+      "listRule": "@request.auth.id != \"\"",
+      "updateRule": "@request.auth.id = my_submission.user",
+      "viewRule": "@request.auth.id != \"\""
+    }
+  },
+  "trades": {
+    "fields": [
+      {
+        "name": "id",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "listing",
+        "required": false,
+        "type": "relation"
+      },
+      {
+        "name": "buyer",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "seller",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "status",
+        "required": true,
+        "type": "select",
+        "values": [
+          "initiated",
+          "confirmed",
+          "completed",
+          "disputed",
+          "cancelled"
+        ]
+      },
+      {
+        "name": "offer_status",
+        "required": true,
+        "type": "select",
+        "values": [
+          "pending",
+          "accepted",
+          "declined",
+          "withdrawn"
+        ]
+      },
+      {
+        "name": "buyer_cash_amount",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "seller_items",
+        "required": false,
+        "type": "relation"
+      },
+      {
+        "name": "delivery_method",
+        "required": false,
+        "type": "select",
+        "values": [
+          "in_person",
+          "shipped",
+          "either"
+        ]
+      },
+      {
+        "name": "offer_message",
+        "required": false,
+        "type": "text"
+      },
+      {
+        "name": "declined_reason",
+        "required": false,
+        "type": "text"
+      },
+      {
+        "name": "rating",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "review",
+        "required": false,
+        "type": "text"
+      },
+      {
+        "name": "completed_date",
+        "required": false,
+        "type": "date"
+      },
+      {
+        "name": "offer_template",
+        "required": false,
+        "type": "relation"
+      },
+      {
+        "name": "buyer_items",
+        "required": false,
+        "type": "relation"
+      },
+      {
+        "name": "buyer_items_description",
+        "required": false,
+        "type": "text"
+      },
+      {
+        "name": "tracking_number",
+        "required": false,
+        "type": "text"
+      },
+      {
+        "name": "shipped_at",
+        "required": false,
+        "type": "date"
+      },
+      {
+        "name": "received_at",
+        "required": false,
+        "type": "date"
+      },
+      {
+        "name": "is_draft",
+        "required": false,
+        "type": "bool"
+      }
+    ],
+    "rules": {
+      "createRule": "@request.auth.id != \"\" && @request.body.buyer = @request.auth.id && @request.body.seller != @request.auth.id",
+      "deleteRule": "buyer = @request.auth.id || seller = @request.auth.id",
+      "listRule": "buyer = @request.auth.id || seller = @request.auth.id",
+      "updateRule": "buyer = @request.auth.id || seller = @request.auth.id",
+      "viewRule": "buyer = @request.auth.id || seller = @request.auth.id"
+    }
+  },
+  "users": {
+    "fields": [
+      {
+        "name": "id",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "password",
+        "required": true,
+        "type": "password"
+      },
+      {
+        "name": "tokenKey",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "email",
+        "required": true,
+        "type": "email"
+      },
+      {
+        "name": "emailVisibility",
+        "required": false,
+        "type": "bool"
+      },
+      {
+        "name": "verified",
+        "required": false,
+        "type": "bool"
+      },
+      {
+        "name": "name",
+        "required": false,
+        "type": "text"
+      },
+      {
+        "name": "avatar",
+        "required": false,
+        "type": "file"
+      },
+      {
+        "name": "created",
+        "required": false,
+        "type": "autodate"
+      },
+      {
+        "name": "updated",
+        "required": false,
+        "type": "autodate"
+      },
+      {
+        "name": "display_name",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "location",
+        "required": false,
+        "type": "text"
+      },
+      {
+        "name": "phone",
+        "required": false,
+        "type": "text"
+      },
+      {
+        "name": "trade_count",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "vouch_count",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "joined_date",
+        "required": true,
+        "type": "date"
+      },
+      {
+        "name": "bio",
+        "required": false,
+        "type": "text"
+      },
+      {
+        "name": "preferred_contact",
+        "required": true,
+        "type": "select",
+        "values": [
+          "platform",
+          "email",
+          "phone"
+        ]
+      },
+      {
+        "name": "notification_prefs",
+        "required": false,
+        "type": "json"
+      },
+      {
+        "name": "cascades_seeded",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "cascades_received",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "cascades_passed",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "cascades_broken",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "cascade_reputation",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "cascade_restricted_until",
+        "required": false,
+        "type": "date"
+      },
+      {
+        "name": "can_enter_cascades",
+        "required": false,
+        "type": "bool"
+      }
+    ],
+    "rules": {
+      "createRule": "@request.body.trade_count:isset = false && @request.body.vouch_count:isset = false && @request.body.cascade_reputation:isset = false && @request.body.cascades_seeded:isset = false && @request.body.cascades_received:isset = false && @request.body.cascades_passed:isset = false && @request.body.cascades_broken:isset = false && @request.body.phone_verified:isset = false",
+      "deleteRule": "id = @request.auth.id",
+      "listRule": "@request.auth.id != ''",
+      "updateRule": "id = @request.auth.id && @request.body.trade_count:isset = false && @request.body.vouch_count:isset = false && @request.body.cascade_reputation:isset = false && @request.body.cascades_seeded:isset = false && @request.body.cascades_received:isset = false && @request.body.cascades_passed:isset = false && @request.body.cascades_broken:isset = false && @request.body.phone_verified:isset = false",
+      "viewRule": ""
+    }
+  },
+  "verification_links": {
+    "fields": [
+      {
+        "name": "id",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "code",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "request",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "verifier",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "target_phone_hash",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "attempt_count",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "used",
+        "required": false,
+        "type": "bool"
+      },
+      {
+        "name": "expires_at",
+        "required": true,
+        "type": "date"
+      },
+      {
+        "name": "used_at",
+        "required": false,
+        "type": "date"
+      },
+      {
+        "name": "created",
+        "required": false,
+        "type": "autodate"
+      },
+      {
+        "name": "updated",
+        "required": false,
+        "type": "autodate"
+      }
+    ],
+    "rules": {
+      "createRule": "@request.auth.id = verifier",
+      "deleteRule": "verifier = @request.auth.id",
+      "listRule": "verifier = @request.auth.id || request.user = @request.auth.id",
+      "updateRule": "verifier = @request.auth.id || request.user = @request.auth.id",
+      "viewRule": "verifier = @request.auth.id || request.user = @request.auth.id"
+    }
+  },
+  "verification_pairs": {
+    "fields": [
+      {
+        "name": "id",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "verifier",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "verified",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "verified_at",
+        "required": true,
+        "type": "date"
+      },
+      {
+        "name": "created",
+        "required": false,
+        "type": "autodate"
+      }
+    ],
+    "rules": {
+      "createRule": null,
+      "deleteRule": null,
+      "listRule": "@request.auth.id != \"\"",
+      "updateRule": null,
+      "viewRule": "@request.auth.id != \"\""
+    }
+  },
+  "verification_requests": {
+    "fields": [
+      {
+        "name": "id",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "user",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "phone_hash",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "phone_last_four",
+        "required": false,
+        "type": "text"
+      },
+      {
+        "name": "status",
+        "required": true,
+        "type": "select",
+        "values": [
+          "pending",
+          "assigned",
+          "sent",
+          "completed",
+          "expired",
+          "cancelled"
+        ]
+      },
+      {
+        "name": "queue_position",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "assigned_at",
+        "required": false,
+        "type": "date"
+      },
+      {
+        "name": "completed_at",
+        "required": false,
+        "type": "date"
+      },
+      {
+        "name": "expires_at",
+        "required": false,
+        "type": "date"
+      },
+      {
+        "name": "created",
+        "required": false,
+        "type": "autodate"
+      },
+      {
+        "name": "updated",
+        "required": false,
+        "type": "autodate"
+      }
+    ],
+    "rules": {
+      "createRule": "@request.auth.id = user",
+      "deleteRule": "user = @request.auth.id",
+      "listRule": "user = @request.auth.id",
+      "updateRule": "user = @request.auth.id",
+      "viewRule": "user = @request.auth.id"
+    }
+  },
+  "verifier_settings": {
+    "fields": [
+      {
+        "name": "id",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "user",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "is_active",
+        "required": false,
+        "type": "bool"
+      },
+      {
+        "name": "weekly_limit",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "total_verifications",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "success_count",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "last_verification",
+        "required": false,
+        "type": "date"
+      },
+      {
+        "name": "karma_earned",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "created",
+        "required": false,
+        "type": "autodate"
+      },
+      {
+        "name": "updated",
+        "required": false,
+        "type": "autodate"
+      }
+    ],
+    "rules": {
+      "createRule": "@request.auth.id = user",
+      "deleteRule": "user = @request.auth.id",
+      "listRule": "user = @request.auth.id",
+      "updateRule": "user = @request.auth.id && @request.body.total_verifications:isset = false && @request.body.success_count:isset = false && @request.body.karma_earned:isset = false",
+      "viewRule": "user = @request.auth.id"
+    }
+  },
+  "vouches": {
+    "fields": [
+      {
+        "name": "id",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "voucher",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "vouchee",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "message",
+        "required": false,
+        "type": "text"
+      },
+      {
+        "name": "updated",
+        "required": false,
+        "type": "autodate"
+      },
+      {
+        "name": "created",
+        "required": false,
+        "type": "autodate"
+      }
+    ],
+    "rules": {
+      "createRule": "@request.auth.id != \"\" && @request.body.voucher = @request.auth.id && @request.body.vouchee != @request.auth.id",
+      "deleteRule": "@request.auth.id = voucher",
+      "listRule": "",
+      "updateRule": "@request.auth.id = voucher",
+      "viewRule": ""
+    }
+  },
+  "watchlist": {
+    "fields": [
+      {
+        "name": "id",
+        "required": true,
+        "type": "text"
+      },
+      {
+        "name": "user",
+        "required": true,
+        "type": "relation"
+      },
+      {
+        "name": "listing",
+        "required": false,
+        "type": "relation"
+      },
+      {
+        "name": "bgg_id",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "max_price",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "max_distance",
+        "required": false,
+        "type": "number"
+      },
+      {
+        "name": "created",
+        "required": false,
+        "type": "autodate"
+      },
+      {
+        "name": "updated",
+        "required": false,
+        "type": "autodate"
+      }
+    ],
+    "rules": {
+      "createRule": "user = @request.auth.id",
+      "deleteRule": "user = @request.auth.id",
+      "listRule": "user = @request.auth.id",
+      "updateRule": "user = @request.auth.id",
+      "viewRule": "user = @request.auth.id"
+    }
+  }
+}

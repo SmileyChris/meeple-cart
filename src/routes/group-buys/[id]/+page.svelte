@@ -80,19 +80,17 @@
   }
 
   function getParticipantCount(): number {
-    return participants.filter(p => p.interest_status !== 'withdrawn').length;
+    return participants.filter((p) => p.interest_status !== 'withdrawn').length;
   }
 
   function getTierParticipants(tierId: string): number {
-    return participants.filter(
-      p => p.tier_id === tierId && p.interest_status !== 'withdrawn'
-    ).length;
+    return participants.filter((p) => p.tier_id === tierId && p.interest_status !== 'withdrawn')
+      .length;
   }
 
   function getHubParticipants(hubId: string): number {
-    return participants.filter(
-      p => p.hub_id === hubId && p.interest_status !== 'withdrawn'
-    ).length;
+    return participants.filter((p) => p.hub_id === hubId && p.interest_status !== 'withdrawn')
+      .length;
   }
 
   function openRegistrationModal() {
@@ -118,8 +116,8 @@
   }
 
   function calculateEstimatedCost(): { tierCost: number; shippingCost: number; total: number } {
-    const tier = tiers.find(t => t.id === selectedTier);
-    const hub = hubs.find(h => h.id === selectedHub);
+    const tier = tiers.find((t) => t.id === selectedTier);
+    const hub = hubs.find((h) => h.id === selectedHub);
 
     if (!tier) return { tierCost: 0, shippingCost: 0, total: 0 };
 
@@ -190,7 +188,9 @@
 </svelte:head>
 
 {#if groupBuy}
-  <div class="bg-surface-body min-h-screen px-4 py-8 text-primary transition-colors sm:px-6 lg:px-8">
+  <div
+    class="bg-surface-body min-h-screen px-4 py-8 text-primary transition-colors sm:px-6 lg:px-8"
+  >
     <div class="mx-auto max-w-7xl">
       <!-- Breadcrumb -->
       <div class="mb-6 flex items-center gap-2 text-sm text-secondary">
@@ -209,7 +209,11 @@
               <div class="flex-1">
                 <h1 class="text-3xl font-bold text-primary">{groupBuy.title}</h1>
                 <div class="mt-3 flex flex-wrap items-center gap-3">
-                  <span class="rounded-full border px-3 py-1 text-sm font-semibold {getStatusColor(groupBuy.status)}">
+                  <span
+                    class="rounded-full border px-3 py-1 text-sm font-semibold {getStatusColor(
+                      groupBuy.status
+                    )}"
+                  >
                     {getStatusLabel(groupBuy.status)}
                   </span>
                   <span class="text-sm text-muted capitalize">
@@ -258,11 +262,15 @@
                 </div>
                 <div>
                   <span class="text-muted">Pledge Deadline:</span>
-                  <span class="ml-2 font-medium text-primary">{formatDate(groupBuy.pledge_deadline)}</span>
+                  <span class="ml-2 font-medium text-primary"
+                    >{formatDate(groupBuy.pledge_deadline)}</span
+                  >
                 </div>
                 <div>
                   <span class="text-muted">Est. Delivery:</span>
-                  <span class="ml-2 font-medium text-primary">{formatDate(groupBuy.estimated_delivery)}</span>
+                  <span class="ml-2 font-medium text-primary"
+                    >{formatDate(groupBuy.estimated_delivery)}</span
+                  >
                 </div>
               </div>
             </div>
@@ -282,10 +290,16 @@
                       {/if}
                     </div>
                     <div class="text-right">
-                      <div class="text-lg font-bold text-accent">{formatCurrency(tier.price_per_unit)}</div>
-                      <div class="text-xs text-muted">+ {formatCurrency(tier.shipping_per_unit)} shipping</div>
+                      <div class="text-lg font-bold text-accent">
+                        {formatCurrency(tier.price_per_unit)}
+                      </div>
+                      <div class="text-xs text-muted">
+                        + {formatCurrency(tier.shipping_per_unit)} shipping
+                      </div>
                       <div class="mt-2 text-xs text-secondary">
-                        {getTierParticipants(tier.id)} / {tier.max_quantity > 0 ? tier.max_quantity : '∞'} spots
+                        {getTierParticipants(tier.id)} / {tier.max_quantity > 0
+                          ? tier.max_quantity
+                          : '∞'} spots
                       </div>
                     </div>
                   </div>
@@ -321,7 +335,12 @@
               {#if groupBuy.delivery_policy === 'hub_or_direct'}
                 <div class="rounded-lg border border-dashed border-subtle bg-surface-body p-4">
                   <div class="flex items-start gap-3">
-                    <svg class="h-5 w-5 shrink-0 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg
+                      class="h-5 w-5 shrink-0 text-accent"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
                       <path
                         stroke-linecap="round"
                         stroke-linejoin="round"
@@ -332,7 +351,8 @@
                     <div>
                       <h3 class="font-semibold text-primary">Direct Delivery Available</h3>
                       <p class="mt-1 text-sm text-muted">
-                        Can't make it to a pickup location? Direct delivery to your address is available.
+                        Can't make it to a pickup location? Direct delivery to your address is
+                        available.
                       </p>
                     </div>
                   </div>
@@ -361,12 +381,14 @@
               <div class="space-y-3 text-sm">
                 <div>
                   <span class="text-muted">Status:</span>
-                  <span class="ml-2 font-medium capitalize text-primary">{userParticipation.interest_status}</span>
+                  <span class="ml-2 font-medium capitalize text-primary"
+                    >{userParticipation.interest_status}</span
+                  >
                 </div>
                 <div>
                   <span class="text-muted">Tier:</span>
                   <span class="ml-2 font-medium text-primary">
-                    {tiers.find(t => t.id === userParticipation.tier_id)?.name || 'Unknown'}
+                    {tiers.find((t) => t.id === userParticipation.tier_id)?.name || 'Unknown'}
                   </span>
                 </div>
                 <div>
@@ -377,7 +399,7 @@
                   <span class="text-muted">Total Cost:</span>
                   <span class="ml-2 font-medium text-accent">
                     {formatCurrency(
-                      (tiers.find(t => t.id === userParticipation.tier_id)?.price_per_unit || 0) *
+                      (tiers.find((t) => t.id === userParticipation.tier_id)?.price_per_unit || 0) *
                         userParticipation.quantity +
                         userParticipation.shipping_cost
                     )}
@@ -434,7 +456,8 @@
               ></div>
             </div>
             <p class="text-sm text-secondary">
-              {getParticipantCount()} {getParticipantCount() === 1 ? 'participant' : 'participants'} registered
+              {getParticipantCount()}
+              {getParticipantCount() === 1 ? 'participant' : 'participants'} registered
             </p>
           </div>
 
@@ -448,7 +471,9 @@
               </div>
               <div class="flex justify-between">
                 <span class="text-muted">Est. Delivery:</span>
-                <span class="font-medium text-primary">{formatDate(groupBuy.estimated_delivery)}</span>
+                <span class="font-medium text-primary"
+                  >{formatDate(groupBuy.estimated_delivery)}</span
+                >
               </div>
             </div>
           </div>
@@ -474,7 +499,12 @@
             class="rounded-lg p-2 text-secondary transition hover:bg-surface-body hover:text-primary"
           >
             <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -509,7 +539,7 @@
               type="number"
               bind:value={quantity}
               min="1"
-              max={tiers.find(t => t.id === selectedTier)?.max_quantity || 99}
+              max={tiers.find((t) => t.id === selectedTier)?.max_quantity || 99}
               required
               class="w-full rounded-lg border border-subtle bg-surface-body px-4 py-3 text-primary transition focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
             />
@@ -520,7 +550,9 @@
             <div>
               <label class="mb-2 block text-sm font-medium text-primary">Shipping Method</label>
               <div class="space-y-2">
-                <label class="flex items-center gap-3 rounded-lg border border-subtle bg-surface-body p-3 cursor-pointer transition hover:border-accent">
+                <label
+                  class="flex items-center gap-3 rounded-lg border border-subtle bg-surface-body p-3 cursor-pointer transition hover:border-accent"
+                >
                   <input
                     type="radio"
                     bind:group={shippingMethod}
@@ -529,7 +561,9 @@
                   />
                   <span class="text-sm text-primary">Hub Pickup</span>
                 </label>
-                <label class="flex items-center gap-3 rounded-lg border border-subtle bg-surface-body p-3 cursor-pointer transition hover:border-accent">
+                <label
+                  class="flex items-center gap-3 rounded-lg border border-subtle bg-surface-body p-3 cursor-pointer transition hover:border-accent"
+                >
                   <input
                     type="radio"
                     bind:group={shippingMethod}
@@ -566,15 +600,21 @@
             <div class="space-y-2 text-sm">
               <div class="flex justify-between">
                 <span class="text-muted">Pledge Amount:</span>
-                <span class="font-medium text-primary">{formatCurrency(calculateEstimatedCost().tierCost)}</span>
+                <span class="font-medium text-primary"
+                  >{formatCurrency(calculateEstimatedCost().tierCost)}</span
+                >
               </div>
               <div class="flex justify-between">
                 <span class="text-muted">Shipping:</span>
-                <span class="font-medium text-primary">{formatCurrency(calculateEstimatedCost().shippingCost)}</span>
+                <span class="font-medium text-primary"
+                  >{formatCurrency(calculateEstimatedCost().shippingCost)}</span
+                >
               </div>
               <div class="flex justify-between border-t border-subtle pt-2">
                 <span class="font-semibold text-primary">Total:</span>
-                <span class="text-lg font-bold text-accent">{formatCurrency(calculateEstimatedCost().total)}</span>
+                <span class="text-lg font-bold text-accent"
+                  >{formatCurrency(calculateEstimatedCost().total)}</span
+                >
               </div>
             </div>
           </div>

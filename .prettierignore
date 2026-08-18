@@ -13,3 +13,16 @@ CLAUDE.md
 MVP_IMPLEMENTATION_PLAN.md
 TRADE_FLOW_STATUS.md
 spec/*.md
+
+# Generated PocketBase types, archived snapshots and test artefacts
+pocketbase/types.d.ts
+pocketbase/types_debug.d.ts
+pocketbase/pb_data/
+pocketbase/pb_migrations/
+pocketbase/pb_migrations_temp/
+pocketbase/migrations_backup/
+pocketbase/schema/
+backups/
+build/
+test-results/
+coverage/

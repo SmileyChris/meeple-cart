@@ -22,46 +22,57 @@
   let delivery_policy = $state<'hub_only' | 'hub_or_direct'>('hub_only');
 
   // Step 2: Pledge Tiers
-  let tiers = $state<Array<{
-    name: string;
-    price_per_unit: number;
-    shipping_per_unit: number;
-    min_quantity: number;
-    max_quantity: number;
-    notes: string;
-  }>>([{
-    name: '',
-    price_per_unit: 0,
-    shipping_per_unit: 0,
-    min_quantity: 1,
-    max_quantity: 1,
-    notes: '',
-  }]);
-
-  // Step 3: Hubs
-  let hubs = $state<Array<{
-    name: string;
-    city: string;
-    instructions: string;
-    shipping_type: 'flat_per_order' | 'flat_per_unit' | 'no_fee';
-    shipping_amount: number;
-  }>>([{
-    name: '',
-    city: '',
-    instructions: '',
-    shipping_type: 'no_fee',
-    shipping_amount: 0,
-  }]);
-
-  function addTier() {
-    tiers = [...tiers, {
+  let tiers = $state<
+    Array<{
+      name: string;
+      price_per_unit: number;
+      shipping_per_unit: number;
+      min_quantity: number;
+      max_quantity: number;
+      notes: string;
+    }>
+  >([
+    {
       name: '',
       price_per_unit: 0,
       shipping_per_unit: 0,
       min_quantity: 1,
       max_quantity: 1,
       notes: '',
-    }];
+    },
+  ]);
+
+  // Step 3: Hubs
+  let hubs = $state<
+    Array<{
+      name: string;
+      city: string;
+      instructions: string;
+      shipping_type: 'flat_per_order' | 'flat_per_unit' | 'no_fee';
+      shipping_amount: number;
+    }>
+  >([
+    {
+      name: '',
+      city: '',
+      instructions: '',
+      shipping_type: 'no_fee',
+      shipping_amount: 0,
+    },
+  ]);
+
+  function addTier() {
+    tiers = [
+      ...tiers,
+      {
+        name: '',
+        price_per_unit: 0,
+        shipping_per_unit: 0,
+        min_quantity: 1,
+        max_quantity: 1,
+        notes: '',
+      },
+    ];
   }
 
   function removeTier(index: number) {
@@ -71,13 +82,16 @@
   }
 
   function addHub() {
-    hubs = [...hubs, {
-      name: '',
-      city: '',
-      instructions: '',
-      shipping_type: 'no_fee',
-      shipping_amount: 0,
-    }];
+    hubs = [
+      ...hubs,
+      {
+        name: '',
+        city: '',
+        instructions: '',
+        shipping_type: 'no_fee',
+        shipping_amount: 0,
+      },
+    ];
   }
 
   function removeHub(index: number) {
@@ -214,15 +228,17 @@
 
     <!-- Progress Steps -->
     <div class="mb-8 flex items-center justify-between">
-      {#each Array(totalSteps) as _, i}
+      {#each Array(totalSteps) as _, i (i)}
         <div class="flex flex-1 items-center">
           <div class="flex items-center">
             <div
-              class="flex h-10 w-10 items-center justify-center rounded-full border-2 text-sm font-semibold transition {i + 1 === currentStep
+              class="flex h-10 w-10 items-center justify-center rounded-full border-2 text-sm font-semibold transition {i +
+                1 ===
+              currentStep
                 ? 'border-accent bg-accent text-surface-body'
                 : i + 1 < currentStep
-                ? 'border-emerald-500 bg-emerald-500 text-surface-body'
-                : 'border-subtle bg-surface-body text-muted'}"
+                  ? 'border-emerald-500 bg-emerald-500 text-surface-body'
+                  : 'border-subtle bg-surface-body text-muted'}"
             >
               {i + 1 < currentStep ? '✓' : i + 1}
             </div>
@@ -240,9 +256,14 @@
 
     <!-- Step Labels -->
     <div class="mb-8 flex justify-between text-xs sm:text-sm">
-      <span class={currentStep === 1 ? 'font-semibold text-accent' : 'text-muted'}>Campaign Info</span>
-      <span class={currentStep === 2 ? 'font-semibold text-accent' : 'text-muted'}>Pledge Tiers</span>
-      <span class={currentStep === 3 ? 'font-semibold text-accent' : 'text-muted'}>Pickup Hubs</span>
+      <span class={currentStep === 1 ? 'font-semibold text-accent' : 'text-muted'}
+        >Campaign Info</span
+      >
+      <span class={currentStep === 2 ? 'font-semibold text-accent' : 'text-muted'}
+        >Pledge Tiers</span
+      >
+      <span class={currentStep === 3 ? 'font-semibold text-accent' : 'text-muted'}>Pickup Hubs</span
+      >
       <span class={currentStep === 4 ? 'font-semibold text-accent' : 'text-muted'}>Review</span>
     </div>
 
@@ -298,7 +319,8 @@
             </div>
 
             <div>
-              <label class="mb-2 block text-sm font-medium text-primary">Estimated Delivery *</label>
+              <label class="mb-2 block text-sm font-medium text-primary">Estimated Delivery *</label
+              >
               <input
                 type="date"
                 bind:value={estimated_delivery}
@@ -319,7 +341,9 @@
                 <option value="regional">Regional (local group)</option>
                 <option value="federated">Federated (national network)</option>
               </select>
-              <p class="mt-1 text-xs text-muted">Regional for local groups, Federated for nationwide coordination</p>
+              <p class="mt-1 text-xs text-muted">
+                Regional for local groups, Federated for nationwide coordination
+              </p>
             </div>
 
             <div>
@@ -331,11 +355,12 @@
                 <option value="hub_only">Hub pickup only</option>
                 <option value="hub_or_direct">Hub or direct delivery</option>
               </select>
-              <p class="mt-1 text-xs text-muted">Whether to allow direct shipping to participants</p>
+              <p class="mt-1 text-xs text-muted">
+                Whether to allow direct shipping to participants
+              </p>
             </div>
           </div>
         </div>
-
       {:else if currentStep === 2}
         <!-- Step 2: Pledge Tiers -->
         <div class="space-y-6">
@@ -346,7 +371,12 @@
               class="flex items-center gap-2 rounded-lg border border-accent bg-accent px-4 py-2 text-sm font-semibold text-surface-body transition hover:bg-accent/90"
             >
               <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 4v16m8-8H4"
+                />
               </svg>
               Add Tier
             </button>
@@ -362,7 +392,12 @@
                     class="text-red-400 transition hover:text-red-300"
                   >
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
                     </svg>
                   </button>
                 {/if}
@@ -382,7 +417,9 @@
 
                 <div class="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label class="mb-2 block text-sm font-medium text-primary">Price Per Unit (NZD) *</label>
+                    <label class="mb-2 block text-sm font-medium text-primary"
+                      >Price Per Unit (NZD) *</label
+                    >
                     <input
                       type="number"
                       bind:value={tier.price_per_unit}
@@ -395,7 +432,9 @@
                   </div>
 
                   <div>
-                    <label class="mb-2 block text-sm font-medium text-primary">Shipping Per Unit (NZD)</label>
+                    <label class="mb-2 block text-sm font-medium text-primary"
+                      >Shipping Per Unit (NZD)</label
+                    >
                     <input
                       type="number"
                       bind:value={tier.shipping_per_unit}
@@ -432,7 +471,8 @@
                 </div>
 
                 <div>
-                  <label class="mb-2 block text-sm font-medium text-primary">Notes (optional)</label>
+                  <label class="mb-2 block text-sm font-medium text-primary">Notes (optional)</label
+                  >
                   <textarea
                     bind:value={tier.notes}
                     placeholder="Any additional information about this tier..."
@@ -444,7 +484,6 @@
             </div>
           {/each}
         </div>
-
       {:else if currentStep === 3}
         <!-- Step 3: Pickup Hubs -->
         <div class="space-y-6">
@@ -455,7 +494,12 @@
               class="flex items-center gap-2 rounded-lg border border-accent bg-accent px-4 py-2 text-sm font-semibold text-surface-body transition hover:bg-accent/90"
             >
               <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 4v16m8-8H4"
+                />
               </svg>
               Add Hub
             </button>
@@ -471,7 +515,12 @@
                     class="text-red-400 transition hover:text-red-300"
                   >
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
                     </svg>
                   </button>
                 {/if}
@@ -501,7 +550,9 @@
                 </div>
 
                 <div>
-                  <label class="mb-2 block text-sm font-medium text-primary">Pickup Instructions</label>
+                  <label class="mb-2 block text-sm font-medium text-primary"
+                    >Pickup Instructions</label
+                  >
                   <textarea
                     bind:value={hub.instructions}
                     placeholder="e.g., Pickup from 123 Queen Street, CBD. Saturdays 10am-2pm."
@@ -512,7 +563,9 @@
 
                 <div class="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label class="mb-2 block text-sm font-medium text-primary">Shipping Fee Type</label>
+                    <label class="mb-2 block text-sm font-medium text-primary"
+                      >Shipping Fee Type</label
+                    >
                     <select
                       bind:value={hub.shipping_type}
                       class="w-full rounded-lg border border-subtle bg-surface-card px-4 py-2 text-primary transition focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
@@ -525,7 +578,9 @@
 
                   {#if hub.shipping_type !== 'no_fee'}
                     <div>
-                      <label class="mb-2 block text-sm font-medium text-primary">Fee Amount (NZD)</label>
+                      <label class="mb-2 block text-sm font-medium text-primary"
+                        >Fee Amount (NZD)</label
+                      >
                       <input
                         type="number"
                         bind:value={hub.shipping_amount}
@@ -541,13 +596,14 @@
             </div>
           {/each}
         </div>
-
       {:else if currentStep === 4}
         <!-- Step 4: Review -->
         <div class="space-y-8">
           <div>
             <h2 class="mb-4 text-xl font-semibold text-primary">Review Your Group Buy</h2>
-            <p class="text-sm text-secondary">Please review all details before creating your group buy.</p>
+            <p class="text-sm text-secondary">
+              Please review all details before creating your group buy.
+            </p>
           </div>
 
           <!-- Campaign Info -->
@@ -561,7 +617,8 @@
               <div>
                 <dt class="text-muted">Campaign URL:</dt>
                 <dd class="mt-1 text-accent hover:underline">
-                  <a href={campaign_url} target="_blank" rel="noopener noreferrer">{campaign_url}</a>
+                  <a href={campaign_url} target="_blank" rel="noopener noreferrer">{campaign_url}</a
+                  >
                 </dd>
               </div>
               <div>
@@ -572,13 +629,21 @@
                 <div>
                   <dt class="text-muted">Pledge Deadline:</dt>
                   <dd class="mt-1 font-medium text-primary">
-                    {new Date(pledge_deadline).toLocaleDateString('en-NZ', { year: 'numeric', month: 'long', day: 'numeric' })}
+                    {new Date(pledge_deadline).toLocaleDateString('en-NZ', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })}
                   </dd>
                 </div>
                 <div>
                   <dt class="text-muted">Estimated Delivery:</dt>
                   <dd class="mt-1 font-medium text-primary">
-                    {new Date(estimated_delivery).toLocaleDateString('en-NZ', { year: 'numeric', month: 'long', day: 'numeric' })}
+                    {new Date(estimated_delivery).toLocaleDateString('en-NZ', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })}
                   </dd>
                 </div>
               </div>
@@ -589,7 +654,9 @@
                 </div>
                 <div>
                   <dt class="text-muted">Delivery Policy:</dt>
-                  <dd class="mt-1 font-medium capitalize text-primary">{delivery_policy.replace('_', ' ')}</dd>
+                  <dd class="mt-1 font-medium capitalize text-primary">
+                    {delivery_policy.replace('_', ' ')}
+                  </dd>
                 </div>
               </div>
             </dl>
@@ -599,7 +666,7 @@
           <div class="rounded-lg border border-subtle bg-surface-body p-6">
             <h3 class="mb-4 font-semibold text-primary">Pledge Tiers ({tiers.length})</h3>
             <div class="space-y-3">
-              {#each tiers as tier, i}
+              {#each tiers as tier, i (i)}
                 <div class="rounded-lg border border-subtle bg-surface-card p-4">
                   <div class="flex items-start justify-between">
                     <div>
@@ -610,7 +677,9 @@
                     </div>
                     <div class="text-right">
                       <div class="font-bold text-accent">${tier.price_per_unit.toFixed(2)}</div>
-                      <div class="text-xs text-muted">+ ${tier.shipping_per_unit.toFixed(2)} shipping</div>
+                      <div class="text-xs text-muted">
+                        + ${tier.shipping_per_unit.toFixed(2)} shipping
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -622,7 +691,7 @@
           <div class="rounded-lg border border-subtle bg-surface-body p-6">
             <h3 class="mb-4 font-semibold text-primary">Pickup Hubs ({hubs.length})</h3>
             <div class="space-y-3">
-              {#each hubs as hub, i}
+              {#each hubs as hub, i (i)}
                 <div class="rounded-lg border border-subtle bg-surface-card p-4">
                   <h4 class="font-medium text-primary">📍 {hub.name}</h4>
                   <p class="mt-1 text-sm text-secondary">{hub.city}</p>
@@ -631,7 +700,9 @@
                   {/if}
                   {#if hub.shipping_type !== 'no_fee'}
                     <p class="mt-2 text-xs text-muted">
-                      {hub.shipping_type === 'flat_per_order' ? 'Flat fee' : 'Per unit fee'}: ${hub.shipping_amount.toFixed(2)}
+                      {hub.shipping_type === 'flat_per_order' ? 'Flat fee' : 'Per unit fee'}: ${hub.shipping_amount.toFixed(
+                        2
+                      )}
                     </p>
                   {/if}
                 </div>

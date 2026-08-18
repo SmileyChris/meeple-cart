@@ -56,7 +56,9 @@ migrate(
     db.execSQL('CREATE INDEX idx_threads_type ON discussion_threads (thread_type)');
 
     // Set default thread_type for existing records
-    db.execSQL("UPDATE discussion_threads SET thread_type = 'discussion' WHERE thread_type IS NULL");
+    db.execSQL(
+      "UPDATE discussion_threads SET thread_type = 'discussion' WHERE thread_type IS NULL"
+    );
 
     return dao.saveCollection(collection);
   },

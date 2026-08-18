@@ -43,7 +43,7 @@ const baseListing = {
       id: 'user123',
       display_name: 'Chris',
     },
-    'items_via_listing': [
+    items_via_listing: [
       {
         id: 'game1',
         title: 'Gloomhaven',

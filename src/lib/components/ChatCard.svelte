@@ -77,7 +77,7 @@
       <!-- Tags -->
       {#if thread.tags && thread.tags.length > 0}
         <div class="mt-2 flex flex-wrap gap-1">
-          {#each thread.tags.slice(0, 3) as tag}
+          {#each thread.tags.slice(0, 3) as tag (tag)}
             <span class="inline-block rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent">
               #{tag}
             </span>

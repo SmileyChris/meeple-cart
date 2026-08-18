@@ -1,9 +1,8 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import { goto, invalidate } from '$app/navigation';
   import { page } from '$app/stores';
   import { pb, currentUser } from '$lib/pocketbase';
-  import { marked } from 'marked';
+  import { renderMarkdown } from '$lib/utils/sanitize';
   import MarkdownEditor from '$lib/components/MarkdownEditor.svelte';
   import {
     subscribeToThread,
@@ -35,12 +34,6 @@
   let error = $state('');
 
   const availableEmojis: DiscussionReactionEmoji[] = ['❤️', '👍', '🔥', '😂', '🤔', '👀'];
-
-  // Configure marked for safe rendering
-  marked.setOptions({
-    breaks: true,
-    gfm: true,
-  });
 
   // Format date for display
   function formatDate(dateStr: string): string {
@@ -306,7 +299,7 @@
         <!-- Tags -->
         {#if thread.tags && thread.tags.length > 0}
           <div class="mb-3 flex flex-wrap gap-1">
-            {#each thread.tags as tag}
+            {#each thread.tags as tag (tag)}
               <a
                 href="/chat?tag={encodeURIComponent(tag)}"
                 class="inline-block rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent hover:bg-accent/20"
@@ -358,12 +351,13 @@
 
     <!-- Thread content -->
     <div class="prose max-w-none">
-      {@html marked.parse(thread.content)}
+      <!-- eslint-disable-next-line svelte/no-at-html-tags -- sanitised by $lib/utils/sanitize -->
+      {@html renderMarkdown(thread.content)}
     </div>
 
     <!-- Thread Reactions -->
     <div class="mt-4 flex items-center gap-2 border-t border-subtle pt-4">
-      {#each availableEmojis as emoji}
+      {#each availableEmojis as emoji (emoji)}
         {@const count = threadReactions[emoji]}
         <button
           onclick={() => toggleReaction(emoji, 'thread')}
@@ -435,14 +429,15 @@
             {/if}
 
             <div class="prose max-w-none prose-p:my-2">
-              {@html marked.parse(reply.content)}
+              <!-- eslint-disable-next-line svelte/no-at-html-tags -- sanitised by $lib/utils/sanitize -->
+              {@html renderMarkdown(reply.content)}
             </div>
 
             <!-- Reply Reactions -->
             {#if replyReactions.has(reply.id)}
               {@const counts = replyReactions.get(reply.id)!}
               <div class="mt-3 flex items-center gap-2 border-t border-subtle pt-3">
-                {#each availableEmojis as emoji}
+                {#each availableEmojis as emoji (emoji)}
                   {@const count = counts[emoji]}
                   {@const userReacted = userReplyReactions.get(reply.id) === emoji}
                   <button

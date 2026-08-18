@@ -19,26 +19,32 @@ The migrations execute in this specific order to handle collection dependencies:
 ## Collections Created
 
 ### Auth Collection
+
 - **users** (extended) - User accounts with profile data, trade stats, and cascade reputation
 
 ### Core Collections
+
 - **listings** - Marketplace listings (simplified - no `listing_type`, `prefer_bundle`, `bundle_discount`)
 - **items** - Individual items within listings (renamed from `games`, no `price`, `trade_value`, `price_history`)
 
 ### Offer Templates System (NEW)
+
 - **offer_templates** - Seller-created pricing/trading packages for their items
 - **discussion_threads** - Discussion threads with wanted post support
 
 ### Engagement Collections
+
 - **vouches** - Trust endorsements between users
 - **watchlist** - User watchlists for specific items or listings
 - **notifications** - User notifications
 - **messages** - Public and private messages on listings
 
 ### Trading System
+
 - **trades** - Trade records with offers, status tracking, reviews, and optional offer_template reference
 
 ### Cascade System
+
 - **cascades** - Gift cascade instances
 - **cascade_entries** - User entries for cascades
 - **cascade_history** - Event history for cascades
@@ -46,7 +52,9 @@ The migrations execute in this specific order to handle collection dependencies:
 ## Key Schema Changes
 
 ### Simplified Listings
+
 **Removed fields:**
+
 - `listing_type` (sell/trade/want) - No longer needed with offer templates
 - `prefer_bundle` - Bundle preferences now in offer templates
 - `bundle_discount` - Pricing now in offer templates
@@ -54,7 +62,9 @@ The migrations execute in this specific order to handle collection dependencies:
 **Result:** Listings are now just "I have these items" with no pricing assumptions.
 
 ### Items Collection (renamed from games)
+
 **Removed fields:**
+
 - `price` - Pricing now in offer_templates
 - `trade_value` - Trading info now in offer_templates
 - `price_history` - No longer tracked individually
@@ -62,7 +72,9 @@ The migrations execute in this specific order to handle collection dependencies:
 **Result:** Items describe physical condition and details without pricing.
 
 ### Offer Templates (NEW)
+
 Sellers create templates defining what they'll accept:
+
 - Multiple items per template (bundles!)
 - Cash, trade, or both
 - Firm pricing by default (`open_to_lower_offers: false`)
@@ -70,18 +82,23 @@ Sellers create templates defining what they'll accept:
 - Trade-for wish list for trade templates
 
 ### Discussion Threads (NEW)
+
 Supports both general discussions and wanted posts:
+
 - `thread_type`: 'discussion' or 'wanted'
 - `wanted_items`: Array of {title, bgg_id, max_price} for wanted posts
 - `wanted_offer_type`: 'buying', 'trading', or 'either'
 
 ### Trades Enhanced
+
 Added `offer_template` relation - links accepted template to the trade record.
 
 ## Design Decisions
 
 ### Dependency Ordering
+
 Collections are created in dependency order:
+
 1. Users (auto-created by PocketBase)
 2. Listings (depends on users)
 3. Items (depends on listings)
@@ -93,9 +110,11 @@ Collections are created in dependency order:
 9. Cascade self-references (added after cascades collection exists)
 
 ### Two-Phase Rules Application
+
 Rules are applied in a separate final migration to avoid validation errors.
 
 ### Self-Reference Handling
+
 The `cascades` collection has self-referencing fields (`origin_cascade`, `previous_cascade`). These are added in a separate migration after the collection is created.
 
 ## PocketBase 0.32 API
@@ -103,41 +122,51 @@ The `cascades` collection has self-referencing fields (`origin_cascade`, `previo
 These migrations use the modern PocketBase 0.32+ JavaScript migration API:
 
 ### Creating Collections
+
 ```javascript
 const collection = new Collection({
   name: 'collection_name',
-  type: 'base'  // or 'auth'
+  type: 'base', // or 'auth'
 });
 ```
 
 ### Adding Fields
+
 Use specific field type constructors:
+
 ```javascript
-collection.fields.add(new TextField({
-  name: 'field_name',
-  required: true,
-  min: 0,
-  max: 200
-}));
+collection.fields.add(
+  new TextField({
+    name: 'field_name',
+    required: true,
+    min: 0,
+    max: 200,
+  })
+);
 
-collection.fields.add(new SelectField({
-  name: 'status',
-  required: true,
-  maxSelect: 1,
-  values: ['active', 'inactive']
-}));
+collection.fields.add(
+  new SelectField({
+    name: 'status',
+    required: true,
+    maxSelect: 1,
+    values: ['active', 'inactive'],
+  })
+);
 
-collection.fields.add(new RelationField({
-  name: 'owner',
-  required: true,
-  collectionId: usersId,
-  cascadeDelete: false,
-  minSelect: 1,
-  maxSelect: 1
-}));
+collection.fields.add(
+  new RelationField({
+    name: 'owner',
+    required: true,
+    collectionId: usersId,
+    cascadeDelete: false,
+    minSelect: 1,
+    maxSelect: 1,
+  })
+);
 ```
 
 Available field types:
+
 - `TextField` - Text fields
 - `SelectField` - Dropdown/select fields (values as direct property)
 - `NumberField` - Numeric fields
@@ -148,31 +177,37 @@ Available field types:
 - `RelationField` - Relations to other collections (collectionId as direct property)
 
 ### Multi-Select Relations
+
 For relations that can have multiple items (e.g., items in an offer template):
+
 ```javascript
-collection.fields.add(new RelationField({
-  name: 'items',
-  required: true,
-  collectionId: itemsId,
-  cascadeDelete: false,
-  minSelect: 1,
-  maxSelect: 999  // Use a high number for "unlimited"
-}));
+collection.fields.add(
+  new RelationField({
+    name: 'items',
+    required: true,
+    collectionId: itemsId,
+    cascadeDelete: false,
+    minSelect: 1,
+    maxSelect: 999, // Use a high number for "unlimited"
+  })
+);
 ```
 
 **Note:** Cannot use `null` for `minSelect` or `maxSelect` - must use actual numbers.
 
 ### Adding Indexes
+
 ```javascript
 collection.indexes = [
   'CREATE INDEX idx_name ON collection_name (field_name)',
-  'CREATE UNIQUE INDEX idx_unique ON collection_name (field1, field2)'
+  'CREATE UNIQUE INDEX idx_unique ON collection_name (field1, field2)',
 ];
 ```
 
 ### Adding Rules
+
 ```javascript
-collection.listRule = '@request.auth.id != \'\'';
+collection.listRule = "@request.auth.id != ''";
 collection.viewRule = '';
 collection.createRule = '@request.auth.id = owner';
 collection.updateRule = '@request.auth.id = owner';
@@ -180,6 +215,7 @@ collection.deleteRule = '@request.auth.id = owner';
 ```
 
 ### Saving Collections
+
 ```javascript
 app.save(collection);
 ```
@@ -187,21 +223,25 @@ app.save(collection);
 ## Running Migrations
 
 ### Apply All Migrations
+
 ```bash
 ./pocketbase/pocketbase migrate up --dir pocketbase/pb_data
 ```
 
 ### Apply Specific Migration
+
 ```bash
 ./pocketbase/pocketbase migrate up --dir pocketbase/pb_data 1731200000
 ```
 
 ### Rollback Migrations
+
 ```bash
 ./pocketbase/pocketbase migrate down --dir pocketbase/pb_data
 ```
 
 ### Check Migration Status
+
 ```bash
 ./pocketbase/pocketbase migrate collections --dir pocketbase/pb_data
 ```
@@ -227,47 +267,56 @@ Server starts successfully with all 13 collections created and rules applied.
 ## Schema Source
 
 The complete schema is documented in:
+
 - `/SIMPLIFIED_MIGRATION_SUMMARY.md` - Migration rationale and user flows
 - This README - Technical migration details and collection structure
 
 ## Troubleshooting
 
 ### "relation collection doesn't exist" Error
+
 Check migration order - ensure the target collection is created before any collection that references it.
 
 ### "values: cannot be blank" Error
+
 Ensure SelectField uses `values` as a direct property:
+
 ```javascript
 // ✅ Correct
-new SelectField({ values: ['a', 'b'] })
+new SelectField({ values: ['a', 'b'] });
 
 // ❌ Wrong
-new SelectField({ options: { values: ['a', 'b'] } })
+new SelectField({ options: { values: ['a', 'b'] } });
 ```
 
 ### "collectionId: cannot be blank" Error
+
 Ensure RelationField uses `collectionId` as a direct property:
+
 ```javascript
 // ✅ Correct
-new RelationField({ collectionId: id })
+new RelationField({ collectionId: id });
 
 // ❌ Wrong
-new RelationField({ options: { collectionId: id } })
+new RelationField({ options: { collectionId: id } });
 ```
 
 ### "maxSelect: cannot be blank" Error
+
 Multi-select relations need actual numbers, not `null`:
+
 ```javascript
 // ✅ Correct
-new RelationField({ minSelect: 0, maxSelect: 999 })
+new RelationField({ minSelect: 0, maxSelect: 999 });
 
 // ❌ Wrong
-new RelationField({ minSelect: null, maxSelect: null })
+new RelationField({ minSelect: null, maxSelect: null });
 ```
 
 ## Next Steps
 
 After running migrations:
+
 1. Create superuser: `./pocketbase/pocketbase superuser upsert admin@example.com password123`
 2. Access admin UI: http://127.0.0.1:8090/_/
 3. Verify all 13 collections exist

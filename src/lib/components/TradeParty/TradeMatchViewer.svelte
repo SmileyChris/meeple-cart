@@ -1,7 +1,8 @@
 <script lang="ts">
   import { pb, currentUser } from '$lib/pocketbase';
-  import type { TradePartyRecord, TradeRecord } from '$lib/types/pocketbase';
+  import type { TradeRecord } from '$lib/types/pocketbase';
   import type { TradePartyContextRecord } from '$lib/types/trade-party-context';
+  import { finalizeTradeMatching } from '$lib/trade-optimizer/runner';
   import TradeChainDiagram from './TradeChainDiagram.svelte';
 
   interface Props {
@@ -91,19 +92,13 @@
 
     try {
       isFinalizing = true;
-      // We'll call a server action or use the PB SDK if we have the finalizeTradeMatching exported
-      // For now, let's assume we use an endpoint or just direct PB updates if allowed
-      // In a real app, this should be a secure server-side call.
 
-      // Temporary: Since I added finalizeTradeMatching to runner.ts, I'll assume
-      // there's a way to call it. Usually this would be via an API route.
-      const response = await fetch(`/api/trade-parties/${partyId}/finalize`, {
-        method: 'POST',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to finalize matches');
-      }
+      // This used to POST /api/trade-parties/[id]/finalize, but adapter-static drops
+      // server endpoints from the build, so the SPA fallback answered with index.html and
+      // a 200 — the UI reported success for an operation that never ran. Authorization is
+      // enforced by the trade_party_context collection rules, which restrict writes to the
+      // party organizer.
+      await finalizeTradeMatching(partyId);
 
       await loadMatches();
     } catch (err: any) {
@@ -197,7 +192,7 @@
     </div>
 
     <!-- Group by Chain -->
-    {#each Object.entries(chains()) as [chainId, chainRecords]}
+    {#each Object.entries(chains()) as [chainId, chainRecords] (chainId)}
       {@const isMyChain = myContextRecords().some((r) => r.chain_id === chainId)}
       {@const isDraft = chainRecords[0]?.is_draft}
 
@@ -232,7 +227,7 @@
           <!-- Detailed Match Cards (Only shown if finalized or if I'm a participant) -->
           {#if !isDraft || isOrganizer}
             <div class="mt-6 space-y-4">
-              {#each chainRecords as record}
+              {#each chainRecords as record (record.id)}
                 {@const trade = record.expand?.trade as TradeRecord | undefined}
                 {@const isGiving = trade?.seller === $currentUser?.id}
                 {@const isReceiving = trade?.buyer === $currentUser?.id}

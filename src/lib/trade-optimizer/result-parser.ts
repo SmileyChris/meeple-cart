@@ -1,5 +1,5 @@
 import type { TradePartySubmissionRecord, TradePartyWantListRecord } from '$lib/types/pocketbase';
-import type { TradeChain, Trade } from './types';
+import type { TradeChain } from './types';
 
 /**
  * Parse TradeMaximizer output into structured trade chains

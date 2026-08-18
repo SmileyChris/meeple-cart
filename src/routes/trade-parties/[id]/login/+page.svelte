@@ -47,9 +47,7 @@
   <!-- Header -->
   <div class="mb-8 text-center">
     <h1 class="mb-2 text-3xl font-bold text-primary">Sign In</h1>
-    <p class="text-secondary">
-      Sign in to view and participate in this trade party
-    </p>
+    <p class="text-secondary">Sign in to view and participate in this trade party</p>
   </div>
 
   <!-- Login Form -->
@@ -63,9 +61,7 @@
     <div class="space-y-4">
       <!-- Email -->
       <div>
-        <label for="email" class="mb-2 block text-sm font-medium text-primary">
-          Email
-        </label>
+        <label for="email" class="mb-2 block text-sm font-medium text-primary"> Email </label>
         <input
           type="email"
           id="email"
@@ -79,9 +75,7 @@
 
       <!-- Password -->
       <div>
-        <label for="password" class="mb-2 block text-sm font-medium text-primary">
-          Password
-        </label>
+        <label for="password" class="mb-2 block text-sm font-medium text-primary"> Password </label>
         <input
           type="password"
           id="password"
@@ -113,16 +107,15 @@
       </a>
     </p>
     <p class="text-secondary">
-      <a href="/reset-password" class="text-accent hover:underline">
-        Forgot your password?
-      </a>
+      <a href="/reset-password" class="text-accent hover:underline"> Forgot your password? </a>
     </p>
   </div>
 
   <!-- Info Box -->
   <div class="mt-8 rounded-lg border border-blue-500/30 bg-blue-500/10 p-4">
     <p class="text-sm text-blue-200">
-      <strong>Note:</strong> You need a Meeple Cart account to participate in trade parties. Creating an account is free and takes less than a minute.
+      <strong>Note:</strong> You need a Meeple Cart account to participate in trade parties. Creating
+      an account is free and takes less than a minute.
     </p>
   </div>
 </div>

@@ -8,7 +8,15 @@
 import type PocketBase from 'pocketbase';
 import type { BggInfoRecord, BggThing } from '$lib/types/bgg';
 import { fetchGameById } from './client';
-import { parseThingResponse, getCategories, getMechanics, getDesigners, getPublishers, getPrimaryName, getOverallRank } from './parser';
+import {
+  parseThingResponse,
+  getCategories,
+  getMechanics,
+  getDesigners,
+  getPublishers,
+  getPrimaryName,
+  getOverallRank,
+} from './parser';
 
 const CACHE_EXPIRY_DAYS = 30; // Refresh BGG data after 30 days
 
@@ -212,10 +220,7 @@ export async function deleteCachedBggInfo(
  * @param userId - Current user's ID
  * @returns Array of user's BGG info records
  */
-export async function getUserBggCache(
-  pb: PocketBase,
-  userId: string
-): Promise<BggInfoRecord[]> {
+export async function getUserBggCache(pb: PocketBase, userId: string): Promise<BggInfoRecord[]> {
   return pb.collection('bgg_info').getFullList<BggInfoRecord>({
     filter: `user = "${userId}"`,
     sort: '-last_fetched',

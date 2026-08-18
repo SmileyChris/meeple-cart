@@ -128,10 +128,7 @@ export async function searchGames(query: string, exact = false): Promise<string>
  * @returns XML response text
  * @throws Error if more than 20 IDs provided or fetch fails
  */
-export async function fetchGamesByIds(
-  bggIds: number[],
-  includeStats = true
-): Promise<string> {
+export async function fetchGamesByIds(bggIds: number[], includeStats = true): Promise<string> {
   if (bggIds.length === 0) {
     throw new Error('At least one BGG ID is required');
   }
