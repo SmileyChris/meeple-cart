@@ -406,7 +406,7 @@
           </label>
           <select
             id="game-select"
-            class="mt-1 w-full rounded-lg border border-subtle bg-surface-body px-3 py-2 text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+            class="mt-1 w-full rounded-lg border border-subtle bg-surface-body px-3 py-2 text-primary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent"
             bind:value={selectedGameId}
           >
             <option value={null}>-- Select a game --</option>

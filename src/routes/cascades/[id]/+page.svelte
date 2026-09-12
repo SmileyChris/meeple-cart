@@ -441,7 +441,7 @@
                     maxlength="500"
                     rows="3"
                     placeholder="Why do you want this game?"
-                    class="w-full rounded-lg border border-subtle bg-surface-card px-4 py-2.5 text-primary placeholder:text-muted transition focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+                    class="w-full rounded-lg border border-subtle bg-surface-card px-4 py-2.5 text-primary placeholder:text-muted transition focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
                   />
                 </div>
                 <button

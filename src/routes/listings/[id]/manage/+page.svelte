@@ -209,7 +209,7 @@
                   >Game title</label
                 >
                 <input
-                  class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+                  class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
                   id="new_title"
                   name="title"
                   placeholder="Eg: Gloomhaven"
@@ -224,7 +224,7 @@
                   >Condition</label
                 >
                 <select
-                  class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+                  class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
                   id="new_condition"
                   name="condition"
                   required
@@ -245,7 +245,7 @@
                   >BoardGameGeek ID</label
                 >
                 <input
-                  class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+                  class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
                   id="new_bgg_id"
                   name="bgg_id"
                   placeholder="Optional"
@@ -260,7 +260,7 @@
                   >Copy notes</label
                 >
                 <textarea
-                  class="mt-2 min-h-[120px] w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+                  class="mt-2 min-h-[120px] w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
                   id="new_notes"
                   name="notes"
                   maxlength="2000"
@@ -298,7 +298,7 @@
                       for="edit_title_{game.id}">Game title</label
                     >
                     <input
-                      class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+                      class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
                       id="edit_title_{game.id}"
                       name="title"
                       required
@@ -313,7 +313,7 @@
                       for="edit_condition_{game.id}">Condition</label
                     >
                     <select
-                      class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+                      class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
                       id="edit_condition_{game.id}"
                       name="condition"
                       required
@@ -333,7 +333,7 @@
                       for="edit_bgg_id_{game.id}">BoardGameGeek ID</label
                     >
                     <input
-                      class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+                      class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
                       id="edit_bgg_id_{game.id}"
                       name="bgg_id"
                       placeholder="Optional"
@@ -349,7 +349,7 @@
                       for="edit_notes_{game.id}">Copy notes</label
                     >
                     <textarea
-                      class="mt-2 min-h-[120px] w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+                      class="mt-2 min-h-[120px] w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
                       id="edit_notes_{game.id}"
                       name="notes"
                       maxlength="2000"

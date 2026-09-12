@@ -327,7 +327,7 @@ View full details: ${generateShareUrl(listing.id)}`;
           >Display name</label
         >
         <input
-          class="mt-2 w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+          class="mt-2 w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
           id="display_name"
           name="display_name"
           type="text"
@@ -342,7 +342,7 @@ View full details: ${generateShareUrl(listing.id)}`;
       <div>
         <label class="block text-sm font-medium text-secondary" for="location">Location</label>
         <input
-          class="mt-2 w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+          class="mt-2 w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
           id="location"
           name="location"
           type="text"
@@ -358,7 +358,7 @@ View full details: ${generateShareUrl(listing.id)}`;
           >Preferred contact</label
         >
         <select
-          class="mt-2 w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+          class="mt-2 w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
           id="preferred_contact"
           name="preferred_contact"
           bind:value={preferredContact}
@@ -373,7 +373,7 @@ View full details: ${generateShareUrl(listing.id)}`;
       <div class="sm:col-span-2">
         <label class="block text-sm font-medium text-secondary" for="bio">Bio</label>
         <textarea
-          class="mt-2 h-32 w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+          class="mt-2 h-32 w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
           id="bio"
           name="bio"
           maxlength="2000"

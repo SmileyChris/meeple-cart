@@ -417,7 +417,7 @@
             id="sort-select"
             value={data.sort}
             onchange={handleSortChange}
-            class="rounded border border-subtle bg-surface-card px-3 py-1.5 text-sm text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+            class="rounded border border-subtle bg-surface-card px-3 py-1.5 text-sm text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
           >
             {#each GAME_SORT_OPTIONS as option (option)}
               <option value={option}>{sortLabels[option]}</option>
@@ -531,7 +531,7 @@
       <!-- Search Bar -->
       <div class="relative">
         <input
-          class="w-full rounded-xl border border-subtle bg-surface-card px-4 py-3.5 pl-11 text-base text-primary shadow-sm transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+          class="w-full rounded-xl border border-subtle bg-surface-card px-4 py-3.5 pl-11 text-base text-primary shadow-sm transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
           id="search"
           type="text"
           placeholder="Search for a game..."

@@ -329,7 +329,7 @@
             <label class="block text-sm font-medium text-secondary" for="title">Listing title</label
             >
             <input
-              class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+              class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
               id="title"
               name="title"
               placeholder="Eg: Gloomhaven 2nd edition with inserts"
@@ -410,7 +410,7 @@
               >Additional location details (optional)</label
             >
             <input
-              class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+              class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
               id="location"
               name="location"
               placeholder="Eg: Auckland CBD near Britomart, or West Auckland (Henderson)"
@@ -425,7 +425,7 @@
           <div class="sm:col-span-2">
             <label class="block text-sm font-medium text-secondary" for="summary">Summary</label>
             <textarea
-              class="mt-2 min-h-[140px] w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+              class="mt-2 min-h-[140px] w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
               id="summary"
               name="summary"
               maxlength="2000"
@@ -451,7 +451,7 @@
         <div class="space-y-3">
           <label class="block text-sm font-medium text-secondary" for="photos">Upload photos</label>
           <input
-            class="w-full cursor-pointer rounded-lg border border-dashed border-subtle bg-surface-body transition-colors px-3 py-8 text-sm text-secondary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+            class="w-full cursor-pointer rounded-lg border border-dashed border-subtle bg-surface-body transition-colors px-3 py-8 text-sm text-secondary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
             id="photos"
             name="photos"
             type="file"
@@ -591,7 +591,7 @@
                     Eg: "3D printed Catan tiles" or "Kallax board game shelf"
                   </p>
                   <input
-                    class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+                    class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
                     id="game_{index}_title"
                     name="game_{index}_title"
                     placeholder="Enter item name"
@@ -607,7 +607,7 @@
                   >Condition</label
                 >
                 <select
-                  class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+                  class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
                   id="game_{index}_condition"
                   name="game_{index}_condition"
                   required
@@ -626,7 +626,7 @@
                   >Year (optional)</label
                 >
                 <input
-                  class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+                  class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
                   id="game_{index}_year"
                   type="number"
                   min="1900"
@@ -641,7 +641,7 @@
                   >Notes</label
                 >
                 <textarea
-                  class="mt-2 min-h-[120px] w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+                  class="mt-2 min-h-[120px] w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
                   id="game_{index}_notes"
                   name="game_{index}_notes"
                   maxlength="2000"
@@ -673,7 +673,7 @@
               >Asking price (NZ$)</label
             >
             <input
-              class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+              class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
               id="cash_amount"
               type="number"
               min="0"
@@ -711,7 +711,7 @@
                 >What you'd take in trade</label
               >
               <input
-                class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+                class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
                 id="trade_for_items"
                 placeholder="Eg: Scythe, Wingspan, or similar Euro games"
                 maxlength="500"
@@ -736,7 +736,7 @@
               >Offer notes (optional)</label
             >
             <textarea
-              class="mt-2 min-h-[100px] w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+              class="mt-2 min-h-[100px] w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
               id="offer_notes"
               maxlength="1000"
               placeholder="Any additional information about this offer..."

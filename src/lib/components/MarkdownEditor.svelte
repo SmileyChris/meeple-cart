@@ -48,7 +48,7 @@
       {placeholder}
       {rows}
       {maxlength}
-      class="w-full rounded-lg border border-subtle bg-surface-body px-3 py-2 font-mono text-sm text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+      class="w-full rounded-lg border border-subtle bg-surface-body px-3 py-2 font-mono text-sm text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
     ></textarea>
   {:else}
     <div

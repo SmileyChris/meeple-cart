@@ -86,7 +86,7 @@
             id="status-filter"
             value={filters.status ?? ''}
             onchange={(e) => updateFilter('status', e.currentTarget.value)}
-            class="rounded border border-subtle bg-surface-card px-3 py-1.5 text-sm text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+            class="rounded border border-subtle bg-surface-card px-3 py-1.5 text-sm text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
           >
             <option value="">All Active</option>
             <option value="accepting_entries">Accepting Entries</option>
@@ -103,7 +103,7 @@
             id="region-filter"
             value={filters.region ?? 'nz'}
             onchange={(e) => updateFilter('region', e.currentTarget.value)}
-            class="rounded border border-subtle bg-surface-card px-3 py-1.5 text-sm text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+            class="rounded border border-subtle bg-surface-card px-3 py-1.5 text-sm text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
           >
             <option value="nz">All of NZ</option>
             <option value="north_island">All North Island</option>
@@ -128,7 +128,7 @@
             id="sort-filter"
             value={filters.sort ?? 'deadline'}
             onchange={(e) => updateFilter('sort', e.currentTarget.value)}
-            class="rounded border border-subtle bg-surface-card px-3 py-1.5 text-sm text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+            class="rounded border border-subtle bg-surface-card px-3 py-1.5 text-sm text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
           >
             <option value="deadline">Ending Soon</option>
             <option value="newest">Newest</option>

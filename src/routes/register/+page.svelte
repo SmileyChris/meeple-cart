@@ -112,7 +112,7 @@
       <div class="space-y-2">
         <label class="block text-sm font-medium text-secondary" for="display_name">Full name</label>
         <input
-          class="w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+          class="w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
           id="display_name"
           name="display_name"
           type="text"
@@ -128,7 +128,7 @@
       <div class="space-y-2">
         <label class="block text-sm font-medium text-secondary" for="email">Email</label>
         <input
-          class="w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+          class="w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
           id="email"
           name="email"
           type="email"
@@ -142,7 +142,7 @@
       <div class="space-y-2">
         <label class="block text-sm font-medium text-secondary" for="password">Password</label>
         <input
-          class="w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+          class="w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
           id="password"
           name="password"
           type="password"
@@ -160,7 +160,7 @@
           >Confirm password</label
         >
         <input
-          class="w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+          class="w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
           id="passwordConfirm"
           name="passwordConfirm"
           type="password"

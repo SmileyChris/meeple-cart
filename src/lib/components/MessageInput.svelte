@@ -42,7 +42,7 @@
       {disabled}
       maxlength={maxLength}
       rows="3"
-      class="w-full resize-none rounded-xl border border-subtle bg-surface-card px-4 py-3 text-primary placeholder:text-muted transition focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)] disabled:cursor-not-allowed disabled:opacity-50"
+      class="w-full resize-none rounded-xl border border-subtle bg-surface-card px-4 py-3 text-primary placeholder:text-muted transition focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent disabled:cursor-not-allowed disabled:opacity-50"
     />
   </div>
 

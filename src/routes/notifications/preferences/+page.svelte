@@ -78,7 +78,7 @@
                 type="checkbox"
                 name="region_{region}"
                 checked={prefs.watched_regions?.includes(region)}
-                class="h-4 w-4 rounded border-subtle bg-surface-card transition-colors focus:ring-[color:rgba(52,211,153,0.35)] focus:ring-offset-0"
+                class="h-4 w-4 rounded border-subtle bg-surface-card transition-colors focus:ring-accent focus:ring-offset-0"
                 style="color: var(--accent)"
               />
               <span class="text-secondary">{region}</span>
@@ -104,7 +104,7 @@
             step="10"
             value={prefs.max_distance_km || ''}
             placeholder="No limit"
-            class="w-32 rounded-lg border border-subtle bg-surface-card transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+            class="w-32 rounded-lg border border-subtle bg-surface-card transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
           />
           <span class="text-muted">km from your location</span>
         </div>
@@ -127,7 +127,7 @@
                 name="email_frequency"
                 value={option.value}
                 checked={prefs.email_frequency === option.value}
-                class="h-4 w-4 border-subtle bg-surface-card transition-colors focus:ring-[color:rgba(52,211,153,0.35)] focus:ring-offset-0"
+                class="h-4 w-4 border-subtle bg-surface-card transition-colors focus:ring-accent focus:ring-offset-0"
                 style="color: var(--accent)"
               />
               <span class="text-secondary">{option.label}</span>
@@ -156,7 +156,7 @@
                 value={option.value}
                 checked={prefs.in_app_digest === option.value ||
                   (!prefs.in_app_digest && option.value === 'instant')}
-                class="h-4 w-4 border-subtle bg-surface-card transition-colors focus:ring-[color:rgba(52,211,153,0.35)] focus:ring-offset-0"
+                class="h-4 w-4 border-subtle bg-surface-card transition-colors focus:ring-accent focus:ring-offset-0"
                 style="color: var(--accent)"
               />
               <span class="text-secondary">{option.label}</span>
@@ -180,7 +180,7 @@
               type="checkbox"
               name="notify_new_listings"
               checked={prefs.notify_new_listings}
-              class="h-4 w-4 rounded border-subtle bg-surface-card transition-colors focus:ring-[color:rgba(52,211,153,0.35)] focus:ring-offset-0"
+              class="h-4 w-4 rounded border-subtle bg-surface-card transition-colors focus:ring-accent focus:ring-offset-0"
               style="color: var(--accent)"
             />
             <div>
@@ -196,7 +196,7 @@
               type="checkbox"
               name="notify_price_drops"
               checked={prefs.notify_price_drops}
-              class="h-4 w-4 rounded border-subtle bg-surface-card transition-colors focus:ring-[color:rgba(52,211,153,0.35)] focus:ring-offset-0"
+              class="h-4 w-4 rounded border-subtle bg-surface-card transition-colors focus:ring-accent focus:ring-offset-0"
               style="color: var(--accent)"
             />
             <div>
@@ -212,7 +212,7 @@
               type="checkbox"
               name="notify_new_messages"
               checked={prefs.notify_new_messages}
-              class="h-4 w-4 rounded border-subtle bg-surface-card transition-colors focus:ring-[color:rgba(52,211,153,0.35)] focus:ring-offset-0"
+              class="h-4 w-4 rounded border-subtle bg-surface-card transition-colors focus:ring-accent focus:ring-offset-0"
               style="color: var(--accent)"
             />
             <div>

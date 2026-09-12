@@ -37,18 +37,35 @@
     --accent-shadow: rgba(41, 16, 10, 0.65);
     /* Filled-control only: darker than --accent so accent-contrast text clears 4.6:1 (5.07:1 measured). */
     --accent-fill: #b8462b;
+    /* Text-only: lighter than --accent so it clears 4.5:1 on both
+       --surface-card (5.30:1) and --surface-card-alt (4.70:1); --accent
+       itself is only 3.06:1 on --surface-card. Borders/rings/underlines
+       keep using --accent. */
+    --accent-text: #e5876d;
+    /* Focus-ring tint: translucent so it reads as a glow, not a solid outline. */
+    --ring-accent: rgba(197, 82, 54, 0.35);
     --trust: #2f7654;
+    /* Text-only: --trust itself is 2.25:1 on --surface-card-alt (fails AA).
+       Lighter so it clears 4.5:1 on both --surface-card (6.29:1) and
+       --surface-card-alt (5.58:1); fills/stamps keep using --trust. */
+    --trust-text: #6fbf8f;
     --pin: #d1a33b;
 
-    /* Badge colors - warm-shifted off the old cool Tailwind swatches, same lightness/saturation */
-    --badge-emerald: #a7f3b4;
-    --badge-amber: #fcc24d;
-    --badge-rose: #fda4b3;
-    --badge-sky: #fc9d7d;
-    --badge-blue: #fdbf93;
-    --badge-purple: #feb4ba;
-    --badge-lime: #f2f264;
-    --badge-violet: #febab4;
+    /* Badge colors - eight hues rotated ~40-45deg apart (rose 340, amber 20,
+       lime 65, emerald 140, sky 185, blue 215, purple 255, violet 295) so
+       each is visibly distinct; the previous warm-shift had collapsed
+       rose/purple/violet (all ~350-355) and sky/blue (~15-25) into
+       near-identical hues. Each clears >=4.5:1 as text on both
+       --surface-card and --surface-card-alt (measured, see
+       .superpowers/sdd/launch-trim/fixwave-report.md). */
+    --badge-rose: #f0759e;
+    --badge-amber: #f07f47;
+    --badge-lime: #d9e830;
+    --badge-emerald: #3cdd71;
+    --badge-sky: #59b7c0;
+    --badge-blue: #82a0c9;
+    --badge-purple: #a394d1;
+    --badge-violet: #ce81d5;
 
     /* Listing type border colors - ochre/rust/slate-teal; green is reserved for --trust */
     --border-listing-trade: #d1a33b;
@@ -94,18 +111,28 @@
     --accent-shadow: rgba(41, 12, 7, 0.45);
     /* Filled-control only: already clears 4.5:1 against accent-contrast (7.41:1 measured), so unchanged from --accent. */
     --accent-fill: #8f3525;
+    /* Text-only: --accent already clears 4.5:1 in light mode (7.14:1 on
+       --surface-card), so this is unchanged from --accent. */
+    --accent-text: #8f3525;
+    --ring-accent: rgba(143, 53, 37, 0.3);
     --trust: #245c41;
+    /* Text-only: --trust already clears 4.5:1 in light mode (7.20:1 on
+       --surface-card), so this is unchanged from --trust. */
+    --trust-text: #245c41;
     --pin: #d1a33b;
 
-    /* Badge colors - warm-shifted, darkened for light-mode contrast */
-    --badge-emerald: #047817;
-    --badge-amber: #b47b09;
-    --badge-rose: #be122f;
-    --badge-sky: #a12a03;
-    --badge-blue: #d86b1d;
-    --badge-purple: #ce2230;
-    --badge-lime: #7c7c0f;
-    --badge-violet: #a82c21;
+    /* Badge colors - same eight re-derived hues as dark mode, darkened for
+       light-surface contrast. See the dark-mode block above for the hue
+       rationale; each clears >=4.5:1 as text on both --surface-card and
+       --surface-card-alt (measured). */
+    --badge-rose: #b8144b;
+    --badge-amber: #a03e0d;
+    --badge-lime: #59600b;
+    --badge-emerald: #136c31;
+    --badge-sky: #29666b;
+    --badge-blue: #3d5f8f;
+    --badge-purple: #6249ab;
+    --badge-violet: #94349d;
 
     /* Listing type border colors - ochre/rust/slate-teal; green is reserved for --trust */
     --border-listing-trade: #9a7420;
@@ -563,5 +590,39 @@
   /* Modifier for paragraph spacing */
   .prose-p\:my-2 p {
     @apply my-2;
+  }
+}
+
+@layer utilities {
+  /*
+   * `--color-accent: var(--accent)` in the @theme block above registers a
+   * full dynamic utility family (bg-accent, border-accent, text-accent,
+   * ring-accent, ...) all pointing at the opaque action color. Borders,
+   * fills and underlines are meant to keep using that opaque --accent, but
+   * text and focus rings need different values (a lighter shade for AA
+   * text contrast, a translucent tint for a ring glow) — and Tailwind v4
+   * always resolves a dynamic `text-{color}`/`ring-{color}` utility from
+   * `@theme`'s `--color-*` tokens ahead of a same-named custom `@utility`,
+   * so that mechanism can't repoint just these two. Overriding the two
+   * classes directly here works instead: this block sits later in the
+   * same "utilities" cascade layer as Tailwind's generated rules, so at
+   * equal specificity these declarations win. Every `text-accent` variant
+   * actually used in the app (bare, hover:, group-hover:) is listed
+   * explicitly since only exact selectors are overridden.
+   */
+  .text-accent {
+    color: var(--accent-text);
+  }
+
+  .hover\:text-accent:hover {
+    color: var(--accent-text);
+  }
+
+  .group:hover .group-hover\:text-accent {
+    color: var(--accent-text);
+  }
+
+  .focus\:ring-accent:focus {
+    --tw-ring-color: var(--ring-accent);
   }
 }
