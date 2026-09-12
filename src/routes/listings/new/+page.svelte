@@ -180,6 +180,12 @@
       return;
     }
 
+    const emptyTitleIndex = games.findIndex((game) => game.title.trim() === '');
+    if (emptyTitleIndex !== -1) {
+      formError = `Item ${emptyTitleIndex + 1} needs a title. Search and select a board game above, or switch it to "Other Item" and enter a title.`;
+      return;
+    }
+
     submitting = true;
     formError = null;
     orphanedListingId = null;
@@ -239,8 +245,6 @@
         }
       );
       await pb.collection('offer_templates').create(offerTemplatePayload);
-
-      await goto(`/listings/${listing.id}`);
     } catch (err) {
       console.error('Failed to finish creating listing:', err);
 
@@ -263,7 +267,14 @@
       }
 
       submitting = false;
+      return;
     }
+
+    // Navigate outside the try above: a failure here (e.g. a navigation
+    // guard throwing) must not be treated as "item/offer creation failed"
+    // and trigger the orphan-listing cleanup — the listing is already
+    // complete at this point.
+    await goto(`/listings/${listing.id}`);
   }
 
   onDestroy(() => {

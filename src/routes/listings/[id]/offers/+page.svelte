@@ -37,6 +37,10 @@
         return 'Meet up';
       case 'post':
         return 'Post';
+      case 'shipped':
+        // Legacy delivery_method value from before the trade-status
+        // 'shipped' rename; means the same thing as 'post' here.
+        return 'Post';
       case 'either':
         return 'Either';
       default:

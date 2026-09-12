@@ -111,7 +111,8 @@ export function getAvailableActions(trade: TradeRecord, userId: string): TradeAc
   // Add available actions based on current status
   if (trade.status === 'initiated') {
     actions.push('accept', 'cancel', 'dispute');
-  } else if (trade.status === 'accepted') {
+  } else if (trade.status === 'accepted' || trade.status === 'confirmed') {
+    // 'confirmed' is a legacy synonym of 'accepted' (see canTransitionTo above).
     actions.push('ship', 'cancel', 'dispute');
   } else if (trade.status === 'shipped') {
     actions.push('receive', 'dispute');
