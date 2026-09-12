@@ -3,6 +3,7 @@
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
   import type { PageData } from './$types';
+  import TrustBadge from '$lib/components/TrustBadge.svelte';
 
   let { data }: { data: PageData } = $props();
 
@@ -84,7 +85,7 @@
   function getPreview(content: string, maxLength: number = 200): string {
     // Strip markdown syntax
     const plain = content
-      .replace(/[#*`_\[\]]/g, '')
+      .replace(/[#*`_[\]]/g, '')
       .replace(/\n+/g, ' ')
       .trim();
     return plain.length > maxLength ? plain.substring(0, maxLength) + '...' : plain;
@@ -347,6 +348,13 @@
               <span class="font-medium text-secondary">
                 {thread.expand?.author?.display_name ?? 'Unknown'}
               </span>
+              {#if thread.expand?.author?.joined_date}
+                <TrustBadge
+                  compact
+                  joinedDate={thread.expand.author.joined_date}
+                  vouchedTrades={thread.expand.author.vouch_count}
+                />
+              {/if}
               <span>·</span>
               <span>{formatDate(thread.created)}</span>
               <span>·</span>
