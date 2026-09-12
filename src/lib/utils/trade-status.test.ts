@@ -1,11 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  canTransitionTo,
-  getAvailableActions,
-  validateStatusTransition,
-  type TradeStatus,
-  type UserRole,
-} from './trade-status';
+import { canTransitionTo, getAvailableActions, validateStatusTransition } from './trade-status';
 import type { TradeRecord } from '$lib/types/pocketbase';
 
 describe('canTransitionTo', () => {
@@ -132,6 +126,21 @@ describe('getAvailableActions', () => {
 
     it('allows cancellation while accepted', () => {
       const actions = getAvailableActions({ ...baseTrade, status: 'accepted' }, 'buyer123');
+      expect(actions).toContain('cancel');
+      expect(actions).toContain('dispute');
+    });
+  });
+
+  describe('confirmed status (legacy synonym of accepted)', () => {
+    it('allows seller to ship or dispute, same as accepted', () => {
+      const actions = getAvailableActions({ ...baseTrade, status: 'confirmed' }, 'seller123');
+      expect(actions).toContain('ship');
+      expect(actions).toContain('dispute');
+      expect(actions).not.toContain('accept');
+    });
+
+    it('allows cancellation while confirmed', () => {
+      const actions = getAvailableActions({ ...baseTrade, status: 'confirmed' }, 'buyer123');
       expect(actions).toContain('cancel');
       expect(actions).toContain('dispute');
     });

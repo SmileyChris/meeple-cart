@@ -65,7 +65,7 @@
 {#if compact}
   <span
     class="inline-flex items-center rounded-full border border-subtle bg-surface-card-alt px-2 py-0.5 text-xs font-medium {className}"
-    style="color: var(--trust, #2f7654)"
+    style="color: var(--trust-text, #2f7654)"
     title={showTooltip ? tooltipText : undefined}
     role="status"
     aria-label="Trust tier: {tierInfo.label}"

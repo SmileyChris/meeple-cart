@@ -51,7 +51,6 @@ export interface ItemRecord extends RecordModel {
   condition: 'mint' | 'excellent' | 'good' | 'fair' | 'poor';
   notes?: string;
   status: 'available' | 'pending' | 'sold' | 'bundled';
-  can_post?: boolean;
   photo_regions?: Record<string, unknown>;
   expand?: {
     listing?: RecordModel;

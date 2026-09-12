@@ -126,7 +126,7 @@
               name="game_id"
               bind:value={selectedGameId}
               required
-              class="mt-1 w-full rounded-lg border border-subtle bg-surface-card px-4 py-2.5 text-primary transition focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+              class="mt-1 w-full rounded-lg border border-subtle bg-surface-card px-4 py-2.5 text-primary transition focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
             >
               <option value="">-- Select a game --</option>
               {#each availableGames as game (game.id)}
@@ -173,7 +173,7 @@
                 bind:value={cascadeName}
                 maxlength="120"
                 placeholder="e.g., Wellington Area Gift Cascade, Party Games Only"
-                class="mt-1 w-full rounded-lg border border-subtle bg-surface-card px-4 py-2.5 text-primary placeholder:text-muted transition focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+                class="mt-1 w-full rounded-lg border border-subtle bg-surface-card px-4 py-2.5 text-primary placeholder:text-muted transition focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
               />
             </div>
 
@@ -189,7 +189,7 @@
                 maxlength="2000"
                 rows="3"
                 placeholder="Add any additional context about this cascade..."
-                class="mt-1 w-full rounded-lg border border-subtle bg-surface-card px-4 py-2.5 text-primary placeholder:text-muted transition focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+                class="mt-1 w-full rounded-lg border border-subtle bg-surface-card px-4 py-2.5 text-primary placeholder:text-muted transition focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
               />
             </div>
 
@@ -203,7 +203,7 @@
                 name="deadline_days"
                 bind:value={deadlineDays}
                 required
-                class="mt-1 w-full rounded-lg border border-subtle bg-surface-card px-4 py-2.5 text-primary transition focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+                class="mt-1 w-full rounded-lg border border-subtle bg-surface-card px-4 py-2.5 text-primary transition focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
               >
                 <option value={7}>7 days</option>
                 <option value={14}>14 days (recommended)</option>
@@ -224,7 +224,7 @@
                 id="region"
                 name="region"
                 bind:value={region}
-                class="mt-1 w-full rounded-lg border border-subtle bg-surface-card px-4 py-2.5 text-primary transition focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+                class="mt-1 w-full rounded-lg border border-subtle bg-surface-card px-4 py-2.5 text-primary transition focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
               >
                 {#each NZ_REGIONS as region (region)}
                   <option value={region.value}>{region.label}</option>
@@ -242,7 +242,7 @@
                 name="shipping_requirement"
                 bind:value={shippingRequirement}
                 required
-                class="mt-1 w-full rounded-lg border border-subtle bg-surface-card px-4 py-2.5 text-primary transition focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+                class="mt-1 w-full rounded-lg border border-subtle bg-surface-card px-4 py-2.5 text-primary transition focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
               >
                 <option value="pickup_only">Pickup only</option>
                 <option value="shipping_available">Shipping available (I'll pay)</option>
@@ -262,7 +262,7 @@
                 maxlength="1000"
                 rows="2"
                 placeholder="e.g., Must be willing to pass on a party game, First-time cascade participants only"
-                class="mt-1 w-full rounded-lg border border-subtle bg-surface-card px-4 py-2.5 text-primary placeholder:text-muted transition focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+                class="mt-1 w-full rounded-lg border border-subtle bg-surface-card px-4 py-2.5 text-primary placeholder:text-muted transition focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
               />
             </div>
           </div>

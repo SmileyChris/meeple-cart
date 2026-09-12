@@ -41,6 +41,10 @@ curl -s "http://127.0.0.1:8099/api/collections?perPage=200" \
   | python3 -c "
 import json, sys
 items = json.load(sys.stdin)['items']
+# Skip PocketBase's own system collections (_superusers, _authOrigins,
+# _externalAuths, _mfas, _otps, ...) - this file documents the app's own
+# schema, not PocketBase internals.
+items = [c for c in items if not c['name'].startswith('_')]
 items.sort(key=lambda c: c['name'])
 json.dump({'collections': items}, sys.stdout, indent=2)
 print()

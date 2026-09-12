@@ -32,8 +32,13 @@ export interface ListingItemFormValues {
   notes: string;
   /** Raw string from the form/hidden input; '' means "no BGG match selected". */
   bggId: string;
-  /** Raw string from the form input; '' means "not provided". */
-  year: string;
+  /**
+   * From the form's "Year" field. Usually a string, but Svelte 5 coerces
+   * `bind:value` on `<input type="number">` to `number | null` regardless
+   * of the form state's declared type, so this must tolerate all three.
+   * '' or null means "not provided".
+   */
+  year: string | number | null;
 }
 
 export interface ItemCreatePayload {
@@ -47,8 +52,13 @@ export interface ItemCreatePayload {
 }
 
 export interface OfferTermsFormValues {
-  /** NZ$ amount as a string, e.g. "45.50"; '' means trade only / no asking price. */
-  cashAmount: string;
+  /**
+   * NZ$ amount, e.g. "45.50". Usually a string, but Svelte 5 coerces
+   * `bind:value` on `<input type="number">` to `number | null` regardless
+   * of the form state's declared type, so this must tolerate all three.
+   * '' or null means trade only / no asking price.
+   */
+  cashAmount: string | number | null;
   openToLowerOffers: boolean;
   openToTradeOffers: boolean;
   /** Free-text "what you'd take" field, only meaningful when openToTradeOffers is true. */
@@ -116,12 +126,28 @@ export function buildListingFormData(payload: ListingCreatePayload, photos: File
   return formData;
 }
 
-function parsePositiveInt(raw: string): number | undefined {
-  const trimmed = raw.trim();
-  if (!trimmed) return undefined;
+/**
+ * Coerce a value that should be a string, but — because it may come
+ * straight from Svelte 5 state bound to `<input type="number">` — could
+ * actually be a number or null at runtime, into a plain string.
+ */
+function toRawString(value: string | number | null | undefined): string {
+  return value == null ? '' : String(value);
+}
+
+/**
+ * Parses a positive whole number from user input. Accepts a string, a
+ * number, or null (the shapes a bound numeric input can actually produce),
+ * and only accepts digit-only strings — no leading '+'/'-', no decimals,
+ * no trailing garbage (e.g. '2018x') — that parse to a value greater than
+ * zero.
+ */
+function parsePositiveInt(raw: string | number | null | undefined): number | undefined {
+  const trimmed = toRawString(raw).trim();
+  if (!/^\d+$/.test(trimmed)) return undefined;
 
   const value = Number.parseInt(trimmed, 10);
-  if (!Number.isFinite(value) || Number.isNaN(value)) return undefined;
+  if (!Number.isFinite(value) || value <= 0) return undefined;
 
   return value;
 }
@@ -171,7 +197,7 @@ export function buildOfferTemplatePayload(
     status: 'active',
   };
 
-  const trimmedCash = terms.cashAmount.trim();
+  const trimmedCash = toRawString(terms.cashAmount).trim();
   if (trimmedCash) {
     const dollars = Number.parseFloat(trimmedCash);
     if (Number.isFinite(dollars) && dollars >= 0) {

@@ -303,7 +303,7 @@
               step="0.01"
               bind:value={cashAmount}
               placeholder="e.g., 50.00"
-              class="mt-2 w-full rounded-lg border border-subtle bg-surface-body px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+              class="mt-2 w-full rounded-lg border border-subtle bg-surface-body px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
             />
           </div>
           <label class="flex items-center gap-2 text-sm">
@@ -335,7 +335,7 @@
                     type="text"
                     bind:value={tradeItem.title}
                     placeholder="Game title (e.g., Wingspan)"
-                    class="w-full rounded-lg border border-subtle bg-surface-body px-3 py-2 text-sm text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+                    class="w-full rounded-lg border border-subtle bg-surface-body px-3 py-2 text-sm text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
                   />
                 </div>
                 <div class="w-32">
@@ -343,7 +343,7 @@
                     type="number"
                     bind:value={tradeItem.bgg_id}
                     placeholder="BGG ID"
-                    class="w-full rounded-lg border border-subtle bg-surface-body px-3 py-2 text-sm text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+                    class="w-full rounded-lg border border-subtle bg-surface-body px-3 py-2 text-sm text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
                   />
                 </div>
                 {#if tradeForItems.length > 1}
@@ -424,7 +424,7 @@
               type="text"
               bind:value={displayName}
               placeholder="e.g., Wingspan Bundle, Full Collection"
-              class="mt-2 w-full rounded-lg border border-subtle bg-surface-body px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+              class="mt-2 w-full rounded-lg border border-subtle bg-surface-body px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
             />
             <p class="mt-1 text-xs text-muted">
               A friendly name for this template. Auto-generated if left blank.
@@ -440,7 +440,7 @@
               bind:value={notes}
               rows="3"
               placeholder="Any additional information about this offer..."
-              class="mt-2 w-full rounded-lg border border-subtle bg-surface-body px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+              class="mt-2 w-full rounded-lg border border-subtle bg-surface-body px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
             ></textarea>
           </div>
         </div>

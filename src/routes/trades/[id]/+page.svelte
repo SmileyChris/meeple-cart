@@ -511,7 +511,9 @@
               <span class="rounded-full bg-emerald-500/20 px-3 py-1 font-medium text-badge-emerald">
                 🤝 Meet up
               </span>
-            {:else if trade.delivery_method === 'post'}
+            {:else if trade.delivery_method === 'post' || trade.delivery_method === 'shipped'}
+              <!-- 'shipped' is a legacy delivery_method value from before the
+                   trade-status 'shipped' rename; it means the same as 'post'. -->
               <span class="rounded-full bg-blue-500/20 px-3 py-1 font-medium text-badge-blue">
                 📬 Post
               </span>

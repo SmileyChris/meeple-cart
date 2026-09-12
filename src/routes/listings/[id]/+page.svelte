@@ -44,10 +44,16 @@
   let chats = $derived(data.chats ?? []);
   let activePhotoIndex = $state(0);
 
-  // Check if any selected games can be posted
+  // Check if any selected games can be posted. `can_post` lives on the
+  // offer_template covering an item, not on the item itself (items has no
+  // such column), so this checks the offer templates whose items include a
+  // selected game.
   let canPostSelectedGames = $derived(
     selectedGameIds.length > 0 &&
-      games.filter((g) => selectedGameIds.includes(g.id)).some((g) => g.can_post === true)
+      data.offerTemplates.some(
+        (template) =>
+          template.can_post && template.items?.some((id) => selectedGameIds.includes(id))
+      )
   );
 
   // Photo region state
@@ -731,16 +737,10 @@
             {/if}
 
             <!-- eslint-disable svelte/no-navigation-without-resolve -->
-            <a
-              href={`/listings/${listing.id}/manage`}
-              class="block w-full rounded-lg border border-emerald-500 bg-emerald-500/10 px-4 py-2 text-center font-semibold text-emerald-200 transition hover:bg-emerald-500/20"
-            >
+            <a href={`/listings/${listing.id}/manage`} class="btn-secondary w-full">
               Manage listing
             </a>
-            <a
-              href={`/listings/${listing.id}/photos`}
-              class="block w-full rounded-lg border border-emerald-500 bg-emerald-500/10 px-4 py-2 text-center font-semibold text-emerald-200 transition hover:bg-emerald-500/20"
-            >
+            <a href={`/listings/${listing.id}/photos`} class="btn-secondary w-full">
               Manage photos
             </a>
             <!-- eslint-enable svelte/no-navigation-without-resolve -->
@@ -1077,7 +1077,7 @@
                   maxlength="4000"
                   required
                   disabled={sendingMessage}
-                  class="w-full resize-none rounded-lg border border-subtle bg-surface-card transition-colors px-3 py-2 text-primary placeholder-slate-500 focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+                  class="w-full resize-none rounded-lg border border-subtle bg-surface-card transition-colors px-3 py-2 text-primary placeholder-slate-500 focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-accent"
                 />
 
                 <div class="flex gap-2">
