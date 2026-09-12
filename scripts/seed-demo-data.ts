@@ -1,4 +1,6 @@
 import PocketBase, { ClientResponseError, RecordModel } from 'pocketbase';
+import { existsSync, readFileSync } from 'node:fs';
+import { basename, dirname, join, resolve } from 'node:path';
 import { REACTION_EMOJIS } from '../src/lib/types/pocketbase';
 
 const baseUrl = (process.env.POCKETBASE_URL ?? 'http://127.0.0.1:8090').replace(/\/$/, '');
@@ -7,6 +9,8 @@ const baseUrl = (process.env.POCKETBASE_URL ?? 'http://127.0.0.1:8090').replace(
 const args = process.argv.slice(2);
 const clearListings = args.includes('--clear-listings');
 const help = args.includes('--help') || args.includes('-h');
+const extraIdx = args.indexOf('--extra');
+const extraDataPath = extraIdx >= 0 && args[extraIdx + 1] ? resolve(args[extraIdx + 1]) : null;
 
 if (help) {
   console.log(`
@@ -17,6 +21,8 @@ Usage:
 
 Options:
   --clear-listings    Delete all existing listings before creating new ones
+  --extra <file>      Also seed users/listings from a JSON file ({ users, listings });
+                      photoFiles paths are resolved relative to that file
   --help, -h         Show this help message
 
 Examples:
@@ -65,6 +71,8 @@ type SeedListing = {
   regions: string[];
   daysAgo: number;
   games: SeedGame[];
+  // Local image paths (relative to the --extra data file) uploaded as listing photos
+  photoFiles?: string[];
   // Legacy fields (ignored)
   listingType?: 'trade' | 'sell' | 'want';
   preferBundle?: boolean;
@@ -1494,16 +1502,22 @@ const ensureUser = async (seed: SeedUser): Promise<RecordModel | null> => {
   const joinedDate = new Date();
   joinedDate.setDate(joinedDate.getDate() - seed.joinedDaysAgo);
 
-  const updatePayload = {
+  // Trust-bearing counters are server-owned (pb_hooks/reputation.pb.js +
+  // 1739800100_harden_collection_rules.js): clients may not set them via the
+  // user API, so we create/update without them and patch them afterwards as a
+  // superuser (which bypasses the rules).
+  const userUpdatable: Record<string, unknown> = {
     display_name: seed.displayName,
     location: seed.location,
     phone: seed.phone ?? null,
-    trade_count: seed.tradeCount,
-    vouch_count: seed.vouchCount,
     joined_date: joinedDate.toISOString(),
     bio: seed.bio ?? '',
     preferred_contact: seed.preferredContact,
-    preferred_regions: seed.preferredRegions ?? [],
+    notification_prefs: {}, // required by schema defaults
+  };
+  const reputationPatch: Record<string, unknown> = {
+    trade_count: seed.tradeCount,
+    vouch_count: seed.vouchCount,
     cascades_seeded: 0,
     cascades_received: 0,
     cascades_passed: 0,
@@ -1512,41 +1526,54 @@ const ensureUser = async (seed: SeedUser): Promise<RecordModel | null> => {
     can_enter_cascades: true,
   };
 
-  const authClient = new PocketBase(baseUrl);
+  let userId: string | null = null;
 
+  const authClient = new PocketBase(baseUrl);
   try {
     const auth = await authClient.collection('users').authWithPassword(seed.email, seed.password);
-    const updated = await authClient.collection('users').update(auth.record.id, updatePayload);
-    authClient.authStore.clear();
-    return updated;
+    userId = auth.record.id;
+    await authClient.collection('users').update(auth.record.id, userUpdatable);
   } catch (error) {
     if (!(error instanceof ClientResponseError) || error.status !== 400) {
       authClient.authStore.clear();
       throw error;
     }
-  }
-
-  authClient.authStore.clear();
-  const createClient = new PocketBase(baseUrl);
-
-  try {
-    const created = await createClient.collection('users').create({
-      email: seed.email,
-      password: seed.password,
-      passwordConfirm: seed.password,
-      ...updatePayload,
-    });
-    createClient.authStore.clear();
-    return created;
-  } catch (error) {
-    createClient.authStore.clear();
-    if (error instanceof ClientResponseError && error.status === 400) {
-      const details = JSON.stringify(error.response?.data ?? {});
-      console.warn(`Skipping demo user ${seed.email}: ${error.message} ${details}`);
-      return null;
+    // User doesn't exist yet — create it (reputation fields are filled by the
+    // onRecordCreate hook with defaults).
+    try {
+      const created = await authClient.collection('users').create({
+        email: seed.email,
+        password: seed.password,
+        passwordConfirm: seed.password,
+        ...userUpdatable,
+      });
+      userId = created.id;
+    } catch (createError) {
+      authClient.authStore.clear();
+      if (createError instanceof ClientResponseError && createError.status === 400) {
+        console.warn(`Skipping demo user ${seed.email}: ${createError.message}`);
+        return null;
+      }
+      throw createError;
     }
-    throw error;
   }
+  authClient.authStore.clear();
+
+  // Patch the server-owned reputation fields as superuser.
+  const adminEmail = process.env.PB_ADMIN_EMAIL ?? 'admin@meeplecart.test';
+  const adminPassword = process.env.PB_ADMIN_PASSWORD ?? 'AdminPass2024!';
+  try {
+    const adminClient = new PocketBase(baseUrl);
+    await adminClient.collection('_superusers').authWithPassword(adminEmail, adminPassword);
+    await adminClient.collection('users').update(userId!, reputationPatch);
+    adminClient.authStore.clear();
+  } catch (adminError) {
+    console.warn(
+      `⚠ Could not set reputation fields for ${seed.email} (is PB_ADMIN_EMAIL/PB_ADMIN_PASSWORD set?): ${adminError}`
+    );
+  }
+
+  return { id: userId, display_name: seed.displayName } as unknown as RecordModel;
 };
 
 const recreateListing = async (
@@ -1572,7 +1599,28 @@ const recreateListing = async (
     views: Math.floor(Math.random() * 150) + 10,
   };
 
-  const listing = await userPb.collection('listings').create(payload);
+  let listing: RecordModel;
+  if (seed.photoFiles?.length) {
+    // Upload photos along with the listing (file field: max 6, 5MB each)
+    const formData = new FormData();
+    for (const [k, v] of Object.entries(payload)) formData.append(k, String(v));
+    for (const rel of seed.photoFiles) {
+      const abs = join(extraDataDir, rel);
+      if (!existsSync(abs)) {
+        console.warn(`    ⚠ Photo not found: ${rel}`);
+        continue;
+      }
+      const bytes = readFileSync(abs);
+      if (bytes.length > 5_000_000) {
+        console.warn(`    ⚠ Photo too large (>5MB): ${rel}`);
+        continue;
+      }
+      formData.append('photos', new File([bytes], basename(rel), { type: 'image/jpeg' }));
+    }
+    listing = await userPb.collection('listings').create(formData);
+  } else {
+    listing = await userPb.collection('listings').create(payload);
+  }
 
   // Update created timestamp to backdate the listing
   await userPb.collection('listings').update(listing.id, { created: createdDate.toISOString() });
@@ -1835,6 +1883,27 @@ const createDiscussionThread = async (
     return null;
   }
 };
+
+// ---------------------------------------------------------------------------
+// Optional extra demo data from --extra <file> ({ users, listings })
+// ---------------------------------------------------------------------------
+const extraDataDir = extraDataPath ? dirname(extraDataPath) : process.cwd();
+
+if (extraDataPath) {
+  if (!existsSync(extraDataPath)) {
+    console.error(`Extra data file not found: ${extraDataPath}`);
+    process.exit(1);
+  }
+  const extra = JSON.parse(readFileSync(extraDataPath, 'utf8')) as {
+    users?: SeedUser[];
+    listings?: SeedListing[];
+  };
+  demoUsers.push(...(extra.users ?? []));
+  demoListings.push(...(extra.listings ?? []));
+  console.log(
+    `Loaded ${extra.users?.length ?? 0} users + ${extra.listings?.length ?? 0} listings from ${extraDataPath}`
+  );
+}
 
 const clearAllListings = async (): Promise<void> => {
   const pb = new PocketBase(baseUrl);
