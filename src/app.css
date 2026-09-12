@@ -2,125 +2,187 @@
 
 @theme {
   --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-heading: 'Momo Trust Display', 'Inter', system-ui, sans-serif;
+  --font-heading: 'Bitter', Georgia, serif;
+  --font-brand: 'Momo Trust Display', 'Bitter', Georgia, serif;
 
   --color-accent: var(--accent);
 
-  --color-listing-trade: light-dark(#059669, #10b981);
-  --color-listing-sell: light-dark(#2563eb, #3b82f6);
-  --color-listing-want: light-dark(#2563eb, #3b82f6);
+  --color-listing-trade: light-dark(#9a7420, #d1a33b);
+  --color-listing-sell: light-dark(#8f3525, #c55236);
+  --color-listing-want: light-dark(#4e6b72, #6e8e95);
 }
 
 @layer base {
   :root {
     color-scheme: dark;
-    --surface-body: #050b1a;
-    --surface-header: rgba(5, 11, 26, 0.88);
-    --surface-panel: #0f172a;
-    --surface-card: #111c2f;
-    --surface-card-alt: #19263b;
-    --surface-ghost: rgba(148, 163, 184, 0.08);
-    --surface-nav: rgba(15, 23, 42, 0.5);
-    --border-nav: rgba(51, 65, 85, 1);
-    --border-subtle: rgba(148, 163, 184, 0.28);
-    --border-strong: rgba(148, 163, 184, 0.42);
-    --shadow-elevated: 0 12px 30px rgba(15, 23, 42, 0.25);
-    --text-primary: #f8fafc;
-    --text-secondary: #d1d8e8;
-    --text-muted: #8ea0c0;
-    --accent: #34d399;
-    --accent-strong: #10b981;
-    --accent-soft: rgba(52, 211, 153, 0.12);
-    --accent-contrast: #022c22;
+    /* Club Night After Hours — warm charcoal noticeboard, from design-explorations/board.html */
+    --surface-body: #221e18;
+    --surface-header: rgba(34, 30, 24, 0.92);
+    --surface-panel: #302c26;
+    --surface-card: #302c26;
+    --surface-card-alt: #3a342c;
+    --surface-ghost: rgba(246, 236, 216, 0.08);
+    --surface-nav: rgba(34, 30, 24, 0.55);
+    --border-nav: rgba(232, 217, 188, 0.46);
+    --border-subtle: rgba(232, 217, 188, 0.26);
+    --border-strong: rgba(232, 217, 188, 0.46);
+    --shadow-elevated: 0 12px 30px rgba(15, 11, 6, 0.35);
+    --text-primary: #f5eddd;
+    --text-secondary: #d8cdb8;
+    --text-muted: #b9aa91;
+    --accent: #c55236;
+    --accent-strong: #a93f29;
+    --accent-soft: rgba(197, 82, 54, 0.15);
+    --accent-contrast: #fff9ee;
+    --accent-shadow: rgba(41, 16, 10, 0.65);
+    /* Filled-control only: darker than --accent so accent-contrast text clears 4.6:1 (5.07:1 measured). */
+    --accent-fill: #b8462b;
+    --trust: #2f7654;
+    --pin: #d1a33b;
 
-    /* Badge colors - adapt to theme */
-    --badge-emerald: #a7f3d0;
-    --badge-amber: #fcd34d;
-    --badge-rose: #fda4af;
-    --badge-sky: #7dd3fc;
-    --badge-blue: #93c5fd;
-    --badge-purple: #d8b4fe;
-    --badge-lime: #bef264;
-    --badge-violet: #d8b4fe;
+    /* Badge colors - warm-shifted off the old cool Tailwind swatches, same lightness/saturation */
+    --badge-emerald: #a7f3b4;
+    --badge-amber: #fcc24d;
+    --badge-rose: #fda4b3;
+    --badge-sky: #fc9d7d;
+    --badge-blue: #fdbf93;
+    --badge-purple: #feb4ba;
+    --badge-lime: #f2f264;
+    --badge-violet: #febab4;
 
-    /* Listing type border colors */
-    --border-listing-trade: #10b981;
-    --border-listing-sell: #10b981;
-    --border-listing-want: #3b82f6;
+    /* Listing type border colors - ochre/rust/slate-teal; green is reserved for --trust */
+    --border-listing-trade: #d1a33b;
+    --border-listing-sell: #c55236;
+    --border-listing-want: #6e8e95;
 
-    /* Alert/notification colors */
-    --alert-error-bg: rgba(239, 68, 68, 0.1);
-    --alert-error-border: rgba(239, 68, 68, 0.3);
-    --alert-error-text: #fca5a5;
-    --alert-success-bg: rgba(52, 211, 153, 0.1);
-    --alert-success-border: rgba(52, 211, 153, 0.3);
-    --alert-success-text: #6ee7b7;
-    --alert-warning-bg: rgba(251, 191, 36, 0.1);
-    --alert-warning-border: rgba(251, 191, 36, 0.3);
-    --alert-warning-text: #fcd34d;
-    --alert-info-bg: rgba(96, 165, 250, 0.1);
-    --alert-info-border: rgba(96, 165, 250, 0.3);
-    --alert-info-text: #93c5fd;
+    /* Alert/notification colors - warm-shifted off the old cool Tailwind swatches */
+    --alert-error-bg: rgba(239, 68, 82, 0.1);
+    --alert-error-border: rgba(239, 68, 82, 0.3);
+    --alert-error-text: #fca5ac;
+    --alert-success-bg: rgba(52, 211, 79, 0.1);
+    --alert-success-border: rgba(52, 211, 79, 0.3);
+    --alert-success-text: #6ee782;
+    --alert-warning-bg: rgba(251, 179, 36, 0.1);
+    --alert-warning-border: rgba(251, 179, 36, 0.3);
+    --alert-warning-text: #fcc24d;
+    --alert-info-bg: rgba(250, 160, 96, 0.1);
+    --alert-info-border: rgba(250, 160, 96, 0.3);
+    --alert-info-text: #fdbf93;
   }
 
   [data-theme='light'] {
     color-scheme: light;
-    --surface-body: #f2f6fb;
-    --surface-header: rgba(248, 250, 252, 0.9);
-    --surface-panel: #ffffff;
-    --surface-card: #f1f5f9;
-    --surface-card-alt: #e2e8f0;
-    --surface-ghost: rgba(15, 23, 42, 0.06);
-    --surface-nav: rgba(255, 255, 255, 0.95);
-    --border-nav: rgba(226, 232, 240, 1);
-    --border-subtle: rgba(148, 163, 184, 0.35);
-    --border-strong: rgba(71, 85, 105, 0.55);
-    --shadow-elevated: 0 10px 24px rgba(15, 23, 42, 0.12);
-    --text-primary: #0f172a;
-    --text-secondary: #334155;
-    --text-muted: #64748b;
-    --accent: #059669;
-    --accent-strong: #047857;
-    --accent-soft: rgba(5, 150, 105, 0.12);
-    --accent-contrast: #f1fff7;
+    /* Club Night After Hours, daylight — derived from board.html's .card cream-notice override */
+    --surface-body: #f2ead8;
+    --surface-header: rgba(242, 234, 216, 0.92);
+    --surface-panel: #f5eddd;
+    --surface-card: #faf5ea;
+    --surface-card-alt: #e5d8bd;
+    --surface-ghost: rgba(41, 37, 31, 0.06);
+    --surface-nav: rgba(242, 234, 216, 0.7);
+    --border-nav: rgba(72, 60, 43, 0.42);
+    --border-subtle: rgba(72, 60, 43, 0.22);
+    --border-strong: rgba(72, 60, 43, 0.42);
+    --shadow-elevated: 0 10px 24px rgba(41, 37, 31, 0.14);
+    --text-primary: #29251f;
+    --text-secondary: #50483c;
+    --text-muted: #6c604e;
+    --accent: #8f3525;
+    --accent-strong: #702719;
+    --accent-soft: rgba(143, 53, 37, 0.12);
+    --accent-contrast: #fff9ee;
+    --accent-shadow: rgba(41, 12, 7, 0.45);
+    /* Filled-control only: already clears 4.5:1 against accent-contrast (7.41:1 measured), so unchanged from --accent. */
+    --accent-fill: #8f3525;
+    --trust: #245c41;
+    --pin: #d1a33b;
 
-    /* Badge colors - darker for light mode */
-    --badge-emerald: #047857;
-    --badge-amber: #b45309;
-    --badge-rose: #be123c;
-    --badge-sky: #0369a1;
-    --badge-blue: #1d4ed8;
-    --badge-purple: #7e22ce;
-    --badge-lime: #4d7c0f;
-    --badge-violet: #6b21a8;
+    /* Badge colors - warm-shifted, darkened for light-mode contrast */
+    --badge-emerald: #047817;
+    --badge-amber: #b47b09;
+    --badge-rose: #be122f;
+    --badge-sky: #a12a03;
+    --badge-blue: #d86b1d;
+    --badge-purple: #ce2230;
+    --badge-lime: #7c7c0f;
+    --badge-violet: #a82c21;
 
-    /* Listing type border colors */
-    --border-listing-trade: #059669;
-    --border-listing-sell: #059669;
-    --border-listing-want: #2563eb;
+    /* Listing type border colors - ochre/rust/slate-teal; green is reserved for --trust */
+    --border-listing-trade: #9a7420;
+    --border-listing-sell: #8f3525;
+    --border-listing-want: #4e6b72;
 
-    /* Alert/notification colors for light mode */
-    --alert-error-bg: rgba(239, 68, 68, 0.08);
-    --alert-error-border: rgba(220, 38, 38, 0.25);
-    --alert-error-text: #dc2626;
-    --alert-success-bg: rgba(5, 150, 105, 0.08);
-    --alert-success-border: rgba(5, 150, 105, 0.25);
-    --alert-success-text: #059669;
-    --alert-warning-bg: rgba(245, 158, 11, 0.08);
-    --alert-warning-border: rgba(217, 119, 6, 0.25);
-    --alert-warning-text: #d97706;
-    --alert-info-bg: rgba(37, 99, 235, 0.08);
-    --alert-info-border: rgba(37, 99, 235, 0.25);
-    --alert-info-text: #2563eb;
+    /* Alert/notification colors for light mode - warm-shifted, darkened for AA contrast on cream */
+    --alert-error-bg: rgba(220, 38, 53, 0.08);
+    --alert-error-border: rgba(220, 38, 53, 0.25);
+    --alert-error-text: #bb1e2b;
+    --alert-success-bg: rgba(5, 150, 29, 0.08);
+    --alert-success-border: rgba(5, 150, 29, 0.25);
+    --alert-success-text: #046f15;
+    --alert-warning-bg: rgba(217, 147, 6, 0.08);
+    --alert-warning-border: rgba(217, 147, 6, 0.25);
+    --alert-warning-text: #805604;
+    --alert-info-bg: rgba(235, 120, 37, 0.08);
+    --alert-info-border: rgba(235, 120, 37, 0.25);
+    --alert-info-text: #a54e0f;
   }
 
   body {
     font-family: var(--font-sans);
     background-color: var(--surface-body);
     color: var(--text-primary);
+    position: relative;
+    isolation: isolate;
     transition:
       background-color 150ms ease,
       color 150ms ease;
+  }
+
+  /* The wall: a warm lamp-light spill from above and a faint pinboard dot
+     grid, fixed so it never scrolls against the notices. Dark theme only. */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image:
+      radial-gradient(120% 55% at 50% -12%, rgba(209, 163, 59, 0.14), rgba(209, 163, 59, 0) 62%),
+      radial-gradient(70% 45% at 100% 110%, rgba(197, 82, 54, 0.06), rgba(197, 82, 54, 0) 60%),
+      linear-gradient(180deg, rgba(0, 0, 0, 0) 0, rgba(0, 0, 0, 0.28) 100%),
+      radial-gradient(rgba(233, 211, 172, 0.045) 1px, transparent 1.3px);
+    background-size:
+      auto,
+      auto,
+      auto,
+      22px 22px;
+    background-position:
+      0 0,
+      0 0,
+      0 0,
+      11px 11px;
+  }
+
+  /* A fine paper grain so the flat charcoal reads as a surface. */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.07;
+    mix-blend-mode: soft-light;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .9 0'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>");
+    background-size: 160px 160px;
+  }
+
+  /* Light theme: no lamp-spill / dot grid, just a much fainter grain. */
+  [data-theme='light'] body::before {
+    content: none;
+  }
+
+  [data-theme='light'] body::after {
+    opacity: 0.035;
   }
 
   h1,
@@ -130,6 +192,11 @@
   h5,
   h6 {
     font-family: var(--font-heading);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
   }
 }
 
@@ -213,15 +280,18 @@
 
 @layer components {
   .btn-primary {
-    @apply inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold transition-[background-color,color,border-color,box-shadow];
+    @apply inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold transition-[background-color,color,border-color,box-shadow,transform];
     border: 1px solid transparent;
-    background-color: var(--accent);
+    /* --accent-fill (not --accent) so accent-contrast text keeps AA contrast on the filled button. */
+    background-color: var(--accent-fill);
     color: var(--accent-contrast);
-    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.25);
+    box-shadow: 0 3px 0 var(--accent-shadow);
   }
 
   .btn-primary:hover {
     background-color: var(--accent-strong);
+    transform: translateY(1px);
+    box-shadow: 0 2px 0 var(--accent-shadow);
   }
 
   .btn-secondary {
@@ -250,6 +320,33 @@
     border-color: var(--accent);
     color: var(--accent-strong);
     background-color: var(--surface-ghost);
+  }
+
+  /* Primary nav links: an accent underline marks the active route, matching
+     board.html's .site-nav a[aria-current="page"]::after. */
+  .nav-link {
+    position: relative;
+    color: var(--text-muted);
+  }
+
+  .nav-link:hover {
+    color: var(--text-primary);
+    background-color: var(--surface-ghost);
+  }
+
+  .nav-link[aria-current='page'] {
+    color: var(--text-primary);
+  }
+
+  .nav-link[aria-current='page']::after {
+    content: '';
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 2px;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--accent);
   }
 
   .btn-filter {
