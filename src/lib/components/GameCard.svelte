@@ -1,6 +1,5 @@
 <script lang="ts">
-  import type { ActivityItem } from '$lib/types/activity';
-  import type { ListingType } from '$lib/types/listing';
+  import type { ListingActivity, SignupActivity } from '$lib/types/activity';
   import BaseCard from './BaseCard.svelte';
   import {
     getAccountAgeDays,
@@ -9,31 +8,13 @@
     getTooltipText,
   } from '$lib/utils/trust-tiers';
 
-  let { game }: { game: ActivityItem } = $props();
+  // Superset of ActivityItem that also carries the year/price the /games route resolves
+  // (year straight off the item, price from the item or its offer_template's cash_amount).
+  type GameCardActivity =
+    | (ListingActivity & { year: number | null; price: number | null })
+    | SignupActivity;
 
-  const typeLabels: Record<ListingType, string> = {
-    trade: 'Trade',
-    sell: 'Sell',
-    want: 'Looking for',
-  };
-
-  const typeColors: Record<ListingType, { border: string; bg: string; text: string }> = {
-    trade: {
-      border: 'border-emerald-600',
-      bg: 'bg-emerald-500/10',
-      text: 'text-badge-emerald',
-    },
-    sell: {
-      border: 'border-emerald-600',
-      bg: 'bg-emerald-500/10',
-      text: 'text-badge-emerald',
-    },
-    want: {
-      border: 'border-blue-600',
-      bg: 'bg-blue-500/10',
-      text: 'text-badge-blue',
-    },
-  };
+  let { game }: { game: GameCardActivity } = $props();
 
   const conditionLabels: Record<string, string> = {
     mint: 'Mint',
@@ -43,9 +24,12 @@
     poor: 'Well loved',
   };
 
-  let colors = $derived(
-    game.activityType === 'listing' && game.type ? typeColors[game.type] : undefined
-  );
+  const currencyFormatter = new Intl.NumberFormat('en-NZ', {
+    style: 'currency',
+    currency: 'NZD',
+    maximumFractionDigits: 0,
+    minimumFractionDigits: 0,
+  });
 
   // Add game ID to URL so listing page can scroll to it (only for listing activities)
   let gameUrl = $derived(
@@ -57,25 +41,14 @@
   href={gameUrl}
   imageUrl={game.activityType === 'listing' ? game.thumbnail : null}
   imageAlt={game.activityType === 'listing' ? game.gameTitle : 'Activity'}
-  borderClass={colors ? `border-2 ${colors.border}` : 'border border-subtle'}
+  borderClass="border border-subtle"
 >
   {#snippet header()}
-    {#if game.activityType === 'listing' && colors}
-      <!-- Type badge -->
-      <div class="flex items-center justify-between">
-        <span
-          class="rounded-full border-2 {colors.border} {colors.bg} px-3 py-1 text-xs font-bold uppercase tracking-wider {colors.text}"
-        >
-          {game.type ? typeLabels[game.type] : 'Listing'}
-        </span>
-      </div>
-
+    {#if game.activityType === 'listing' && game.listingTitle}
       <!-- Listing title (smaller text) -->
-      {#if game.listingTitle}
-        <p class="text-xs font-medium uppercase tracking-wide text-muted">
-          {game.listingTitle}
-        </p>
-      {/if}
+      <p class="text-xs font-medium uppercase tracking-wide text-muted">
+        {game.listingTitle}
+      </p>
     {/if}
   {/snippet}
 
@@ -83,7 +56,9 @@
     {#if game.activityType === 'listing'}
       <!-- Game title -->
       <div class="space-y-2">
-        <h3 class="text-xl font-bold text-primary transition-colors">{game.gameTitle}</h3>
+        <h3 class="text-xl font-bold text-primary transition-colors">
+          {game.year ? `${game.gameTitle} (${game.year})` : game.gameTitle}
+        </h3>
       </div>
 
       <!-- User info (moved up, before details) -->
@@ -129,6 +104,17 @@
             {conditionLabels[game.condition]}
           </span>
         </div>
+
+        {#if game.price != null}
+          <div class="flex items-center gap-2">
+            <span class="text-muted">Price</span>
+            <span
+              class="rounded-full bg-surface-card-alt px-3 py-1 text-xs font-semibold text-primary transition-colors"
+            >
+              {currencyFormatter.format(game.price / 100)}
+            </span>
+          </div>
+        {/if}
       </div>
     {/if}
   {/snippet}

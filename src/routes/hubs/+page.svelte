@@ -45,22 +45,18 @@
         </div>
       </a>
 
-      <div
-        class="relative flex gap-4 rounded-xl border border-subtle bg-surface-card p-5 opacity-60"
+      <a
+        href="/group-buys"
+        class="group flex gap-4 rounded-xl border border-subtle bg-surface-card p-5 transition hover:border-accent hover:shadow-md"
       >
-        <span
-          class="absolute right-3 top-3 rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-secondary"
-        >
-          Coming Soon
-        </span>
         <span class="text-3xl">🛒</span>
         <div>
-          <h2 class="mb-1 font-semibold">Group Buys</h2>
+          <h2 class="mb-1 font-semibold group-hover:text-accent">Group Buys</h2>
           <p class="text-sm text-secondary">
             Pool orders with other members for better deals on new releases and bulk purchases.
           </p>
         </div>
-      </div>
+      </a>
     </div>
   </div>
 </main>
