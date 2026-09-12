@@ -17,9 +17,9 @@ export interface GameListingActivity extends ListingActivity {
 
 export type GameActivityItem = GameListingActivity | SignupActivity;
 
-export type GameSortOption = 'newest' | 'price' | 'title';
+export type GameSortOption = 'newest' | 'title';
 
-export const GAME_SORT_OPTIONS: GameSortOption[] = ['newest', 'price', 'title'];
+export const GAME_SORT_OPTIONS: GameSortOption[] = ['newest', 'title'];
 
 type PocketBaseListResponse<T> = {
   page: number;
@@ -118,39 +118,24 @@ export const buildItemsFilter = ({
 
 /** Validates a `sort` URL param, defaulting to 'newest'. */
 export const resolveGameSort = (value: string | null): GameSortOption => {
-  return value === 'price' || value === 'title' ? value : 'newest';
+  return value === 'title' ? value : 'newest';
 };
 
 /**
  * Maps a sort option to a PocketBase `sort` string for the `items` collection.
- * 'price' has no reliable PocketBase equivalent because price/cash_amount lives on the
- * related offer_template, not a top-level `items` field - callers should fetch newest-first
- * and re-sort client-side with `sortActivitiesByPrice`.
+ * There is no "price" option: price/cash_amount lives on the related offer_template, not a
+ * top-level `items` field, so PocketBase can't sort by it, and a client-side re-sort would
+ * only ever be correct within a single fetched page - misleading across pagination. See
+ * task-3-report.md "Fix round 1" for the removal rationale.
  */
 export const mapSortToPocketBaseSort = (sort: GameSortOption): string => {
   switch (sort) {
     case 'title':
       return 'title';
-    case 'price':
     case 'newest':
     default:
       return '-created';
   }
-};
-
-/** Client-side re-sort by resolved price (ascending, nulls last). Used for the 'price' sort option. */
-export const sortActivitiesByPrice = (activities: GameActivityItem[]): GameActivityItem[] => {
-  const priceOf = (activity: GameActivityItem): number | null =>
-    activity.activityType === 'listing' ? activity.price : null;
-
-  return [...activities].sort((a, b) => {
-    const aPrice = priceOf(a);
-    const bPrice = priceOf(b);
-    if (aPrice == null && bPrice == null) return 0;
-    if (aPrice == null) return 1;
-    if (bPrice == null) return -1;
-    return aPrice - bPrice;
-  });
 };
 
 /** Formats the results-count label using the total match count, not the current page size. */
@@ -307,11 +292,6 @@ export const load: PageLoad = async ({ fetch, url, depends }) => {
         if (activity.activityType !== 'listing') return true;
         return activity.listingRegions.some((region) => regions.includes(region));
       });
-    }
-
-    // PocketBase can't sort by the related offer_template's cash_amount, so re-sort client-side.
-    if (sort === 'price') {
-      activities = sortActivitiesByPrice(activities);
     }
 
     return {

@@ -274,7 +274,6 @@
 
   const sortLabels: Record<GameSortOption, string> = {
     newest: 'Newest',
-    price: 'Price: low to high',
     title: 'Title: A–Z',
   };
 

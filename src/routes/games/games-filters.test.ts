@@ -4,8 +4,6 @@ import {
   formatResultsCount,
   mapSortToPocketBaseSort,
   resolveGameSort,
-  sortActivitiesByPrice,
-  type GameActivityItem,
 } from './+page';
 
 describe('buildItemsFilter', () => {
@@ -76,9 +74,12 @@ describe('resolveGameSort', () => {
     expect(resolveGameSort('bogus')).toBe('newest');
   });
 
-  it('accepts price and title', () => {
-    expect(resolveGameSort('price')).toBe('price');
+  it('accepts title', () => {
     expect(resolveGameSort('title')).toBe('title');
+  });
+
+  it('rejects the removed price option, falling back to newest', () => {
+    expect(resolveGameSort('price')).toBe('newest');
   });
 });
 
@@ -89,51 +90,6 @@ describe('mapSortToPocketBaseSort', () => {
 
   it('maps title to ascending title', () => {
     expect(mapSortToPocketBaseSort('title')).toBe('title');
-  });
-
-  it('falls back to -created for price (sorted client-side instead)', () => {
-    expect(mapSortToPocketBaseSort('price')).toBe('-created');
-  });
-});
-
-describe('sortActivitiesByPrice', () => {
-  const listing = (id: string, price: number | null): GameActivityItem => ({
-    id,
-    activityType: 'listing',
-    gameTitle: id,
-    bggId: null,
-    condition: 'good',
-    timestamp: '2024-01-01',
-    userName: null,
-    userId: null,
-    userJoinedDate: null,
-    userVouchedTrades: 0,
-    userLocation: null,
-    listingHref: `/listings/${id}`,
-    thumbnail: null,
-    listingRegions: [],
-    year: null,
-    price,
-  });
-
-  it('sorts ascending by price', () => {
-    const sorted = sortActivitiesByPrice([listing('c', 300), listing('a', 100), listing('b', 200)]);
-
-    expect(sorted.map((a) => a.id)).toEqual(['a', 'b', 'c']);
-  });
-
-  it('places items with no price last', () => {
-    const sorted = sortActivitiesByPrice([listing('a', null), listing('b', 100)]);
-
-    expect(sorted.map((a) => a.id)).toEqual(['b', 'a']);
-  });
-
-  it('does not mutate the input array', () => {
-    const input = [listing('b', 200), listing('a', 100)];
-    const sorted = sortActivitiesByPrice(input);
-
-    expect(input.map((a) => a.id)).toEqual(['b', 'a']);
-    expect(sorted).not.toBe(input);
   });
 });
 
