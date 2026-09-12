@@ -37,6 +37,10 @@
 
   let submitting = $state(false);
   let formError = $state<string | null>(null);
+  // Set only when a listing was created, a later step failed, and the
+  // best-effort cleanup delete of that listing also failed — gives the
+  // user a way back to the orphaned listing instead of losing it.
+  let orphanedListingId = $state<string | null>(null);
 
   let selectedRegions = $state<string[]>([]);
 
@@ -178,15 +182,31 @@
 
     submitting = true;
     formError = null;
+    orphanedListingId = null;
 
+    // Step 1: create the listing itself. If this fails there is nothing to
+    // clean up yet, so just report the error.
+    let listing;
     try {
       const listingPayload = buildListingPayload(
         { title, summary, location, regions: selectedRegions },
         user.id
       );
       const listingFormData = buildListingFormData(listingPayload, photoFiles);
-      const listing = await pb.collection('listings').create(listingFormData);
+      listing = await pb.collection('listings').create(listingFormData);
+    } catch (err) {
+      console.error('Failed to create listing:', err);
+      formError = errorMessageFor(err);
+      submitting = false;
+      return;
+    }
 
+    // Step 2: create the items and the single offer template covering them.
+    // If anything here fails, the listing already exists but is incomplete
+    // (no items / no offer), so it must not be left behind silently: attempt
+    // a best-effort delete of the listing rather than leaving an orphan the
+    // user can't see and can't retry without duplicating.
+    try {
       const itemPayloads = buildItemPayloads(
         games.map((game) => ({
           title: game.title,
@@ -222,8 +242,26 @@
 
       await goto(`/listings/${listing.id}`);
     } catch (err) {
-      console.error('Failed to create listing:', err);
-      formError = errorMessageFor(err);
+      console.error('Failed to finish creating listing:', err);
+
+      try {
+        // Best-effort only: the listings -> items and listings -> offer_templates
+        // relations both cascade-delete in the migrations, but that's a
+        // PocketBase implementation detail we should not depend on here —
+        // this delete is the actual cleanup, cascade or not.
+        await pb.collection('listings').delete(listing.id);
+        // Cleanup succeeded: report the original failure and leave every
+        // field as the user left it so they can fix and resubmit without
+        // creating a second, duplicate listing.
+        formError = errorMessageFor(err);
+      } catch (cleanupErr) {
+        console.error('Failed to clean up incomplete listing:', cleanupErr);
+        // Cleanup itself failed: the listing is now stuck half-built. Give
+        // the user a way back to it instead of losing track of it.
+        formError = `${errorMessageFor(err)} We also couldn't remove the incomplete listing automatically.`;
+        orphanedListingId = listing.id;
+      }
+
       submitting = false;
     }
   }
@@ -249,7 +287,18 @@
 
     {#if formError}
       <div class="rounded-lg border border-rose-500 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-        {formError}
+        <p>{formError}</p>
+        {#if orphanedListingId}
+          <p class="mt-2">
+            <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+            <a
+              class="font-medium underline hover:text-rose-100"
+              href={`/listings/${orphanedListingId}/manage`}
+            >
+              Go to the listing to finish or remove it
+            </a>
+          </p>
+        {/if}
       </div>
     {/if}
 
