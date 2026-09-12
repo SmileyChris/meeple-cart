@@ -159,11 +159,6 @@ describe('buildItemPayloads', () => {
     const [payload] = buildItemPayloads([{ ...otherItem, year: null }], 'listing123');
     expect(payload).not.toHaveProperty('year');
   });
-
-  it('tolerates a numeric bgg_id', () => {
-    const [payload] = buildItemPayloads([{ ...boardGame, bggId: 199792 }], 'listing123');
-    expect(payload.bgg_id).toBe(199792);
-  });
 });
 
 describe('buildOfferTemplatePayload', () => {

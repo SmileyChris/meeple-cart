@@ -15,7 +15,6 @@
     condition: 'excellent',
     notes: '',
     bgg_id: '',
-    can_post: false,
   });
 
   let manageError = $state<string | null>(null);
@@ -32,7 +31,6 @@
         condition: 'excellent',
         notes: '',
         bgg_id: '',
-        can_post: false,
       });
     }
   };
@@ -78,7 +76,6 @@
         title: addFormValues.title.trim(),
         condition: addFormValues.condition,
         notes: addFormValues.notes.trim(),
-        can_post: addFormValues.can_post,
         status: 'available',
       };
       const bggId = addFormValues.bgg_id.trim();
@@ -106,7 +103,6 @@
         title: String(formData.get('title') ?? '').trim(),
         condition: String(formData.get('condition') ?? ''),
         notes: String(formData.get('notes') ?? '').trim(),
-        can_post: formData.get('can_post') === 'on',
       };
       const bggId = String(formData.get('bgg_id') ?? '').trim();
       if (bggId) payload.bgg_id = parseInt(bggId, 10);
@@ -272,18 +268,6 @@
                   bind:value={addFormValues.notes}
                 ></textarea>
               </div>
-
-              <div class="sm:col-span-2">
-                <label class="flex items-center gap-2 text-sm text-secondary">
-                  <input
-                    class="h-4 w-4 rounded border border-subtle bg-surface-body transition-colors"
-                    type="checkbox"
-                    name="can_post"
-                    bind:checked={addFormValues.can_post}
-                  />
-                  🚚 Can post (available for courier/postal delivery)
-                </label>
-              </div>
             </div>
 
             <div class="flex justify-end gap-3">
@@ -294,11 +278,7 @@
               >
                 Cancel
               </button>
-              <button
-                class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-[var(--accent-contrast)] transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
-                type="submit"
-                disabled={addingGame}
-              >
+              <button class="btn-primary" type="submit" disabled={addingGame}>
                 {addingGame ? 'Adding...' : 'Add Game'}
               </button>
             </div>
@@ -377,18 +357,6 @@
                       >{game.notes ?? ''}</textarea
                     >
                   </div>
-
-                  <div class="sm:col-span-2">
-                    <label class="flex items-center gap-2 text-sm text-secondary">
-                      <input
-                        class="h-4 w-4 rounded border border-subtle bg-surface-body transition-colors"
-                        type="checkbox"
-                        name="can_post"
-                        checked={game.can_post ?? false}
-                      />
-                      🚚 Can post (available for courier/postal delivery)
-                    </label>
-                  </div>
                 </div>
 
                 <div class="flex justify-end gap-3">
@@ -399,11 +367,7 @@
                   >
                     Cancel
                   </button>
-                  <button
-                    class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-[var(--accent-contrast)] transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
-                    type="submit"
-                    disabled={savingGameId === game.id}
-                  >
+                  <button class="btn-primary" type="submit" disabled={savingGameId === game.id}>
                     {savingGameId === game.id ? 'Saving...' : 'Save Changes'}
                   </button>
                 </div>
@@ -425,9 +389,6 @@
                       <!-- Note: Price and trade_value display removed - now in offer_templates -->
                       {#if game.bgg_id}
                         <span>• BGG ID: {game.bgg_id}</span>
-                      {/if}
-                      {#if game.can_post}
-                        <span>• 🚚 Can post</span>
                       {/if}
                     </div>
                     {#if game.notes}

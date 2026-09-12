@@ -51,7 +51,6 @@ export interface ListingGameDetail extends ListingGameSummary {
   notes: string | null;
   year: number | null;
   listingCreated: string;
-  can_post?: boolean;
 }
 
 /**

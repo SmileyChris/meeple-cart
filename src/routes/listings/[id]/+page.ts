@@ -50,7 +50,6 @@ export const load: PageLoad = async ({ params }) => {
         previousTradeValue: null,
         listingCreated: listing.created,
         priceHistory: undefined,
-        can_post: item.can_post ?? false,
       };
     });
 

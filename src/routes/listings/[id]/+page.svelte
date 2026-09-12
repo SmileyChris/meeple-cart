@@ -44,10 +44,16 @@
   let chats = $derived(data.chats ?? []);
   let activePhotoIndex = $state(0);
 
-  // Check if any selected games can be posted
+  // Check if any selected games can be posted. `can_post` lives on the
+  // offer_template covering an item, not on the item itself (items has no
+  // such column), so this checks the offer templates whose items include a
+  // selected game.
   let canPostSelectedGames = $derived(
     selectedGameIds.length > 0 &&
-      games.filter((g) => selectedGameIds.includes(g.id)).some((g) => g.can_post === true)
+      data.offerTemplates.some(
+        (template) =>
+          template.can_post && template.items?.some((id) => selectedGameIds.includes(id))
+      )
   );
 
   // Photo region state
