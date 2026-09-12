@@ -23,6 +23,8 @@
     showBorder?: boolean;
     /** Make badge clickable (links to trust-levels page) */
     clickable?: boolean;
+    /** Compact rendering: just the tier label in a small pill, sized for card metadata */
+    compact?: boolean;
     /** Custom class names */
     class?: string;
   }
@@ -35,6 +37,7 @@
     showTooltip = true,
     showBorder = true,
     clickable = false,
+    compact = false,
     class: className = '',
   }: Props = $props();
 
@@ -59,7 +62,17 @@
   );
 </script>
 
-{#if clickable}
+{#if compact}
+  <span
+    class="inline-flex items-center rounded-full border border-subtle bg-surface-card-alt px-2 py-0.5 text-xs font-medium {className}"
+    style="color: var(--trust, #2f7654)"
+    title={showTooltip ? tooltipText : undefined}
+    role="status"
+    aria-label="Trust tier: {tierInfo.label}"
+  >
+    {tierInfo.label}
+  </span>
+{:else if clickable}
   <a
     href="/trust-levels"
     class="inline-flex items-center rounded-full {showBorder
