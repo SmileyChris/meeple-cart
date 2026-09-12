@@ -1,13 +1,19 @@
 /**
  * BoardGameGeek XML API2 Client
  *
- * Fetches game data from BGG's public XML API.
+ * Fetches game data via PocketBase's `/api/bgg/*` proxy (see
+ * `pocketbase/pb_hooks/bgg.pb.js`), rather than calling BGG directly. BGG now requires an
+ * `Authorization: Bearer <token>` header on every request, and this app is a client-side
+ * SPA with nowhere to keep that token secret - so PocketBase holds it and forwards
+ * requests server-side instead.
  * Includes rate limiting and error handling.
  *
  * API Documentation: https://boardgamegeek.com/wiki/page/BGG_XML_API2
  */
 
-const BGG_API_BASE = 'https://boardgamegeek.com/xmlapi2';
+import { pb } from '$lib/pocketbase';
+
+const BGG_API_BASE = `${pb.baseURL}/api/bgg`;
 const BGG_RATE_LIMIT_MS = 5000; // BGG requires 5 second delay between requests
 
 let lastRequestTime = 0;
