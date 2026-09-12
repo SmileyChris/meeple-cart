@@ -7,6 +7,7 @@
     SOUTH_ISLAND_REGIONS,
     getIslandRegions,
   } from '$lib/constants/regions';
+  import TrustBadge from '$lib/components/TrustBadge.svelte';
 
   let { data }: { data: PageData } = $props();
 
@@ -15,6 +16,7 @@
   let updated = $state(false);
   let error = $state<string | null>(null);
   let saving = $state(false);
+  let showEditForm = $state(false);
   let showShareModal = $state(false);
   let selectedListingForShare = $state<any>(null);
   let shareLinkCopied = $state(false);
@@ -155,10 +157,22 @@ View full details: ${generateShareUrl(listing.id)}`;
   <header class="flex flex-col gap-3 border-b border-subtle pb-4">
     <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <h1 class="text-2xl font-semibold text-primary">{profile.display_name}</h1>
+        <div class="flex items-center gap-2">
+          <h1 class="text-2xl font-semibold text-primary">{profile.display_name}</h1>
+          <TrustBadge
+            joinedDate={profile.joined_date}
+            vouchedTrades={profile.vouch_count}
+            size="small"
+          />
+        </div>
         <p class="text-sm text-muted">
           Joined {new Date(profile.joined_date).toLocaleDateString()}
         </p>
+        <!-- eslint-disable svelte/no-navigation-without-resolve -->
+        <a href={`/users/${profile.id}`} class="text-sm font-medium" style="color: var(--accent)">
+          View public profile
+        </a>
+        <!-- eslint-enable svelte/no-navigation-without-resolve -->
       </div>
       <div class="flex gap-4 text-sm text-secondary">
         <span
@@ -295,145 +309,159 @@ View full details: ${generateShareUrl(listing.id)}`;
     {/if}
   </section>
 
-  <form class="mt-6 grid gap-4 sm:grid-cols-2" onsubmit={handleUpdate}>
-    <div class="sm:col-span-2">
-      <label class="block text-sm font-medium text-secondary" for="display_name">Display name</label
-      >
-      <input
-        class="mt-2 w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
-        id="display_name"
-        name="display_name"
-        type="text"
-        minlength="2"
-        maxlength="64"
-        bind:value={displayName}
-        disabled={saving}
-        required
-      />
-    </div>
+  <div class="mt-6 flex justify-end">
+    <button
+      type="button"
+      class="btn-secondary px-4 py-2"
+      aria-expanded={showEditForm}
+      onclick={() => (showEditForm = !showEditForm)}
+    >
+      {showEditForm ? 'Hide edit form' : 'Edit profile'}
+    </button>
+  </div>
 
-    <div>
-      <label class="block text-sm font-medium text-secondary" for="location">Location</label>
-      <input
-        class="mt-2 w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
-        id="location"
-        name="location"
-        type="text"
-        maxlength="120"
-        bind:value={location}
-        disabled={saving}
-        placeholder="Eg: Wellington"
-      />
-    </div>
+  {#if showEditForm}
+    <form class="mt-6 grid gap-4 sm:grid-cols-2" onsubmit={handleUpdate}>
+      <div class="sm:col-span-2">
+        <label class="block text-sm font-medium text-secondary" for="display_name"
+          >Display name</label
+        >
+        <input
+          class="mt-2 w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+          id="display_name"
+          name="display_name"
+          type="text"
+          minlength="2"
+          maxlength="64"
+          bind:value={displayName}
+          disabled={saving}
+          required
+        />
+      </div>
 
-    <div>
-      <label class="block text-sm font-medium text-secondary" for="preferred_contact"
-        >Preferred contact</label
-      >
-      <select
-        class="mt-2 w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
-        id="preferred_contact"
-        name="preferred_contact"
-        bind:value={preferredContact}
-        disabled={saving}
-      >
-        <option value="platform">Meeple Cart messages</option>
-        <option value="email">Email</option>
-        <option value="phone">Phone</option>
-      </select>
-    </div>
+      <div>
+        <label class="block text-sm font-medium text-secondary" for="location">Location</label>
+        <input
+          class="mt-2 w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+          id="location"
+          name="location"
+          type="text"
+          maxlength="120"
+          bind:value={location}
+          disabled={saving}
+          placeholder="Eg: Wellington"
+        />
+      </div>
 
-    <div class="sm:col-span-2">
-      <label class="block text-sm font-medium text-secondary" for="bio">Bio</label>
-      <textarea
-        class="mt-2 h-32 w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
-        id="bio"
-        name="bio"
-        maxlength="2000"
-        bind:value={bio}
-        disabled={saving}
-      ></textarea>
-      <p class="mt-1 text-xs text-muted">Share a short intro or trading preferences.</p>
-    </div>
+      <div>
+        <label class="block text-sm font-medium text-secondary" for="preferred_contact"
+          >Preferred contact</label
+        >
+        <select
+          class="mt-2 w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+          id="preferred_contact"
+          name="preferred_contact"
+          bind:value={preferredContact}
+          disabled={saving}
+        >
+          <option value="platform">Meeple Cart messages</option>
+          <option value="email">Email</option>
+          <option value="phone">Phone</option>
+        </select>
+      </div>
 
-    <div class="sm:col-span-2">
-      <div class="block text-sm font-medium text-secondary">Preferred regions</div>
-      <p class="mt-1 text-xs text-muted">
-        Select your favorite regions to automatically filter listings when you visit the browse
-        page.
-      </p>
-      <div class="mt-3 space-y-4">
-        <!-- North Island -->
-        <div class="space-y-2">
-          <label class="flex items-center gap-2 text-sm font-medium text-primary">
-            <input
-              type="checkbox"
-              class="h-4 w-4 rounded border border-subtle bg-surface-card transition-colors"
-              checked={northIslandChecked}
-              disabled={saving}
-              onchange={() => toggleIsland('north_island')}
-            />
-            North Island
-          </label>
-          <div class="ml-6 grid gap-2 sm:grid-cols-2">
-            {#each NORTH_ISLAND_REGIONS as region (region.value)}
-              <label class="flex items-center gap-2 text-sm text-secondary">
-                <input
-                  type="checkbox"
-                  class="h-4 w-4 rounded border border-subtle bg-surface-card transition-colors"
-                  checked={preferredRegions.includes(region.value)}
-                  disabled={saving}
-                  onchange={() => toggleRegion(region.value)}
-                />
-                {region.label}
-              </label>
-            {/each}
+      <div class="sm:col-span-2">
+        <label class="block text-sm font-medium text-secondary" for="bio">Bio</label>
+        <textarea
+          class="mt-2 h-32 w-full rounded-lg border border-subtle bg-surface-card px-3 py-2 text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+          id="bio"
+          name="bio"
+          maxlength="2000"
+          bind:value={bio}
+          disabled={saving}
+        ></textarea>
+        <p class="mt-1 text-xs text-muted">Share a short intro or trading preferences.</p>
+      </div>
+
+      <div class="sm:col-span-2">
+        <div class="block text-sm font-medium text-secondary">Preferred regions</div>
+        <p class="mt-1 text-xs text-muted">
+          Select your favorite regions to automatically filter listings when you visit the browse
+          page.
+        </p>
+        <div class="mt-3 space-y-4">
+          <!-- North Island -->
+          <div class="space-y-2">
+            <label class="flex items-center gap-2 text-sm font-medium text-primary">
+              <input
+                type="checkbox"
+                class="h-4 w-4 rounded border border-subtle bg-surface-card transition-colors"
+                checked={northIslandChecked}
+                disabled={saving}
+                onchange={() => toggleIsland('north_island')}
+              />
+              North Island
+            </label>
+            <div class="ml-6 grid gap-2 sm:grid-cols-2">
+              {#each NORTH_ISLAND_REGIONS as region (region.value)}
+                <label class="flex items-center gap-2 text-sm text-secondary">
+                  <input
+                    type="checkbox"
+                    class="h-4 w-4 rounded border border-subtle bg-surface-card transition-colors"
+                    checked={preferredRegions.includes(region.value)}
+                    disabled={saving}
+                    onchange={() => toggleRegion(region.value)}
+                  />
+                  {region.label}
+                </label>
+              {/each}
+            </div>
           </div>
-        </div>
 
-        <!-- South Island -->
-        <div class="space-y-2">
-          <label class="flex items-center gap-2 text-sm font-medium text-primary">
-            <input
-              type="checkbox"
-              class="h-4 w-4 rounded border border-subtle bg-surface-card transition-colors"
-              checked={southIslandChecked}
-              disabled={saving}
-              onchange={() => toggleIsland('south_island')}
-            />
-            South Island
-          </label>
-          <div class="ml-6 grid gap-2 sm:grid-cols-2">
-            {#each SOUTH_ISLAND_REGIONS as region (region.value)}
-              <label class="flex items-center gap-2 text-sm text-secondary">
-                <input
-                  type="checkbox"
-                  class="h-4 w-4 rounded border border-subtle bg-surface-card transition-colors"
-                  checked={preferredRegions.includes(region.value)}
-                  disabled={saving}
-                  onchange={() => toggleRegion(region.value)}
-                />
-                {region.label}
-              </label>
-            {/each}
+          <!-- South Island -->
+          <div class="space-y-2">
+            <label class="flex items-center gap-2 text-sm font-medium text-primary">
+              <input
+                type="checkbox"
+                class="h-4 w-4 rounded border border-subtle bg-surface-card transition-colors"
+                checked={southIslandChecked}
+                disabled={saving}
+                onchange={() => toggleIsland('south_island')}
+              />
+              South Island
+            </label>
+            <div class="ml-6 grid gap-2 sm:grid-cols-2">
+              {#each SOUTH_ISLAND_REGIONS as region (region.value)}
+                <label class="flex items-center gap-2 text-sm text-secondary">
+                  <input
+                    type="checkbox"
+                    class="h-4 w-4 rounded border border-subtle bg-surface-card transition-colors"
+                    checked={preferredRegions.includes(region.value)}
+                    disabled={saving}
+                    onchange={() => toggleRegion(region.value)}
+                  />
+                  {region.label}
+                </label>
+              {/each}
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    {#if error}
-      <p class="sm:col-span-2 text-sm text-rose-400">{error}</p>
-    {/if}
-    {#if updated}
-      <p class="sm:col-span-2 text-sm" style="color: var(--accent)">Profile updated.</p>
-    {/if}
+      {#if error}
+        <p class="sm:col-span-2 text-sm text-rose-400">{error}</p>
+      {/if}
+      {#if updated}
+        <p class="sm:col-span-2 text-sm" style="color: var(--accent)">Profile updated.</p>
+      {/if}
 
-    <div class="sm:col-span-2 flex justify-end">
-      <button class="btn-primary" type="submit" disabled={saving}>
-        {saving ? 'Saving...' : 'Save changes'}
-      </button>
-    </div>
-  </form>
+      <div class="sm:col-span-2 flex justify-end">
+        <button class="btn-primary" type="submit" disabled={saving}>
+          {saving ? 'Saving...' : 'Save changes'}
+        </button>
+      </div>
+    </form>
+  {/if}
 </section>
 
 <!-- Share Modal -->

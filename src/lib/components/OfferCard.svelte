@@ -2,12 +2,7 @@
   import { REGION_LABELS } from '$lib/constants/regions';
   import type { OfferPreview } from '$lib/types/listing';
   import BaseCard from './BaseCard.svelte';
-  import {
-    getAccountAgeDays,
-    getTrustTier,
-    getTrustTierInfo,
-    getTooltipText,
-  } from '$lib/utils/trust-tiers';
+  import TrustBadge from './TrustBadge.svelte';
 
   let {
     offer,
@@ -109,6 +104,23 @@
   });
 
   let showAllGames = $state(false);
+
+  let ownerJoinedYear = $derived(
+    offer.ownerJoinedDate ? new Date(offer.ownerJoinedDate).getFullYear() : null
+  );
+
+  // Condition summary: single item shows its condition, a bundle lists each item up to 4
+  let conditionSummary = $derived.by(() => {
+    if (offer.games.length === 0) return null;
+    if (offer.games.length === 1) {
+      return { kind: 'single' as const, condition: conditionLabels[offer.games[0].condition] };
+    }
+    const items = offer.games
+      .slice(0, 4)
+      .map((game) => `${game.title} · ${conditionLabels[game.condition]}`);
+    const remaining = offer.games.length - 4;
+    return { kind: 'bundle' as const, items, remaining: remaining > 0 ? remaining : 0 };
+  });
 </script>
 
 <BaseCard href={offer.href} imageUrl={offer.coverImage} imageAlt={displayTitle} {borderClass}>
@@ -139,25 +151,29 @@
     <div class="space-y-2">
       <h3 class="text-lg font-semibold text-primary transition-colors">{displayTitle}</h3>
 
+      <!-- Condition summary -->
+      {#if conditionSummary?.kind === 'single'}
+        <p class="text-sm text-secondary">
+          Condition: <strong class="font-semibold text-primary">{conditionSummary.condition}</strong
+          >
+        </p>
+      {:else if conditionSummary?.kind === 'bundle'}
+        <p class="text-sm text-secondary">
+          {conditionSummary.items.join(', ')}{#if conditionSummary.remaining > 0}, +{conditionSummary.remaining}
+            more{/if}
+        </p>
+      {/if}
+
       <!-- Owner info right after title -->
       {#if !hideOwner}
         <div class="flex items-center gap-1.5 text-sm">
           {#if offer.ownerId && offer.ownerName}
             {#if offer.ownerJoinedDate}
-              {@const tier = getTrustTier(
-                getAccountAgeDays(offer.ownerJoinedDate),
-                offer.ownerVouchedTrades
-              )}
-              {@const tierInfo = getTrustTierInfo(tier)}
-              {@const tooltipText = getTooltipText(tier)}
-              <span
-                class="text-base leading-none"
-                title={tooltipText}
-                role="img"
-                aria-label="Trust tier: {tierInfo.label}"
-              >
-                {tierInfo.icon}
-              </span>
+              <TrustBadge
+                compact
+                joinedDate={offer.ownerJoinedDate}
+                vouchedTrades={offer.ownerVouchedTrades}
+              />
             {/if}
             <a
               href={`/users/${offer.ownerId}`}
@@ -172,6 +188,12 @@
             <span class="font-medium text-primary">Meeple Cart trader</span>
           {/if}
         </div>
+        {#if offer.ownerJoinedDate}
+          <p class="text-xs text-muted">
+            {offer.ownerVouchedTrades}
+            {offer.ownerVouchedTrades === 1 ? 'vouched trade' : 'vouched trades'} · joined {ownerJoinedYear}
+          </p>
+        {/if}
       {/if}
 
       <!-- Trade preferences -->
