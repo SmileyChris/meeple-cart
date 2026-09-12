@@ -8,8 +8,9 @@ import { get } from 'svelte/store';
 
 const ITEMS_EXPAND_KEY = 'items_via_listing';
 
-export const load: PageLoad = async ({ params }) => {
+export const load: PageLoad = async ({ params, depends }) => {
   const { id } = params;
+  depends('app:listing-manage');
   const user = get(currentUser);
 
   // Must be authenticated

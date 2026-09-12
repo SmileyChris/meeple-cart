@@ -1,7 +1,9 @@
 <script lang="ts">
   import type { PageData } from './$types';
   import StatusHistory from '$lib/components/StatusHistory.svelte';
+  import Alert from '$lib/components/Alert.svelte';
   import { pb } from '$lib/pocketbase';
+  import { invalidate } from '$app/navigation';
 
   let { data }: { data: PageData } = $props();
 
@@ -15,6 +17,12 @@
     bgg_id: '',
     can_post: false,
   });
+
+  let manageError = $state<string | null>(null);
+  let addingGame = $state(false);
+  let savingGameId = $state<string | null>(null);
+  let removingGameId = $state<string | null>(null);
+  let updatingStatusId = $state<string | null>(null);
 
   const toggleAddForm = () => {
     showAddForm = !showAddForm;
@@ -52,8 +60,99 @@
     }
   };
 
-  // TODO: Migrate form actions to client-side mutations
-  // Form submissions won't work until migrated to use PocketBase SDK directly
+  function errorMessageFor(err: unknown): string {
+    const status = (err as { status?: number } | null)?.status;
+    if (status === 400) return 'Invalid data. Please check the form and try again.';
+    if (status === 403) return 'You do not have permission to do that.';
+    return 'Something went wrong. Please try again later.';
+  }
+
+  async function handleAddGame(event: SubmitEvent) {
+    event.preventDefault();
+    manageError = null;
+    addingGame = true;
+
+    try {
+      const payload: Record<string, unknown> = {
+        listing: data.listing.id,
+        title: addFormValues.title.trim(),
+        condition: addFormValues.condition,
+        notes: addFormValues.notes.trim(),
+        can_post: addFormValues.can_post,
+        status: 'available',
+      };
+      const bggId = addFormValues.bgg_id.trim();
+      if (bggId) payload.bgg_id = parseInt(bggId, 10);
+
+      await pb.collection('items').create(payload);
+      await invalidate('app:listing-manage');
+      toggleAddForm();
+    } catch (err) {
+      console.error('Failed to add game:', err);
+      manageError = errorMessageFor(err);
+    } finally {
+      addingGame = false;
+    }
+  }
+
+  async function handleUpdateGame(event: SubmitEvent, gameId: string) {
+    event.preventDefault();
+    manageError = null;
+    savingGameId = gameId;
+
+    try {
+      const formData = new FormData(event.currentTarget as HTMLFormElement);
+      const payload: Record<string, unknown> = {
+        title: String(formData.get('title') ?? '').trim(),
+        condition: String(formData.get('condition') ?? ''),
+        notes: String(formData.get('notes') ?? '').trim(),
+        can_post: formData.get('can_post') === 'on',
+      };
+      const bggId = String(formData.get('bgg_id') ?? '').trim();
+      if (bggId) payload.bgg_id = parseInt(bggId, 10);
+
+      await pb.collection('items').update(gameId, payload);
+      await invalidate('app:listing-manage');
+      editingGameId = null;
+    } catch (err) {
+      console.error('Failed to update game:', err);
+      manageError = errorMessageFor(err);
+    } finally {
+      savingGameId = null;
+    }
+  }
+
+  async function handleRemoveGame(gameId: string) {
+    if (!confirm('Are you sure you want to remove this game?')) return;
+
+    manageError = null;
+    removingGameId = gameId;
+
+    try {
+      await pb.collection('items').delete(gameId);
+      await invalidate('app:listing-manage');
+    } catch (err) {
+      console.error('Failed to remove game:', err);
+      manageError = errorMessageFor(err);
+    } finally {
+      removingGameId = null;
+    }
+  }
+
+  async function handleStatusChange(gameId: string, status: string) {
+    manageError = null;
+    updatingStatusId = gameId;
+
+    try {
+      await pb.collection('items').update(gameId, { status });
+      await invalidate('app:listing-manage');
+    } catch (err) {
+      console.error('Failed to update game status:', err);
+      manageError = errorMessageFor(err);
+    } finally {
+      updatingStatusId = null;
+    }
+  }
 </script>
 
 <svelte:head>
@@ -86,6 +185,10 @@
       </div>
     </header>
 
+    {#if manageError}
+      <Alert type="error">{manageError}</Alert>
+    {/if}
+
     <div class="space-y-6">
       <div class="flex items-center justify-between">
         <h2 class="text-xl font-semibold">
@@ -103,7 +206,7 @@
       {#if showAddForm}
         <section class="rounded-xl border border-subtle bg-surface-card transition-colors p-6">
           <h3 class="mb-4 text-lg font-medium">Add New Game</h3>
-          <form method="POST" action="?/add_game" class="space-y-4">
+          <form onsubmit={handleAddGame} class="space-y-4">
             <div class="grid gap-4 sm:grid-cols-2">
               <div class="sm:col-span-2">
                 <label class="block text-sm font-medium text-secondary" for="new_title"
@@ -192,10 +295,11 @@
                 Cancel
               </button>
               <button
-                class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-[var(--accent-contrast)] transition hover:bg-emerald-400"
+                class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-[var(--accent-contrast)] transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
                 type="submit"
+                disabled={addingGame}
               >
-                Add Game
+                {addingGame ? 'Adding...' : 'Add Game'}
               </button>
             </div>
           </form>
@@ -206,9 +310,7 @@
         {#each data.games as game (game.id)}
           <section class="rounded-xl border border-subtle bg-surface-card transition-colors p-6">
             {#if editingGameId === game.id}
-              <form method="POST" action="?/update_game" class="space-y-4">
-                <input type="hidden" name="game_id" value={game.id} />
-
+              <form onsubmit={(event) => handleUpdateGame(event, game.id)} class="space-y-4">
                 <div class="grid gap-4 sm:grid-cols-2">
                   <div class="sm:col-span-2">
                     <label
@@ -298,10 +400,11 @@
                     Cancel
                   </button>
                   <button
-                    class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-[var(--accent-contrast)] transition hover:bg-emerald-400"
+                    class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-[var(--accent-contrast)] transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
                     type="submit"
+                    disabled={savingGameId === game.id}
                   >
-                    Save Changes
+                    {savingGameId === game.id ? 'Saving...' : 'Save Changes'}
                   </button>
                 </div>
               </form>
@@ -341,20 +444,14 @@
                       Edit
                     </button>
                     {#if data.games.length > 1}
-                      <form method="POST" action="?/remove_game" class="inline">
-                        <input type="hidden" name="game_id" value={game.id} />
-                        <button
-                          class="text-sm text-rose-400 transition hover:text-rose-300"
-                          type="submit"
-                          onclick={(e) => {
-                            if (!confirm('Are you sure you want to remove this game?')) {
-                              e.preventDefault();
-                            }
-                          }}
-                        >
-                          Remove
-                        </button>
-                      </form>
+                      <button
+                        class="text-sm text-rose-400 transition hover:text-rose-300 disabled:cursor-not-allowed disabled:opacity-50"
+                        type="button"
+                        disabled={removingGameId === game.id}
+                        onclick={() => handleRemoveGame(game.id)}
+                      >
+                        {removingGameId === game.id ? 'Removing...' : 'Remove'}
+                      </button>
                     {/if}
                   </div>
                 </div>
@@ -362,21 +459,18 @@
                 {#if game.status !== 'sold'}
                   <div class="flex gap-2">
                     <span class="text-sm text-muted">Status:</span>
-                    <form method="POST" action="?/update_status" class="inline">
-                      <input type="hidden" name="game_id" value={game.id} />
-                      <select
-                        class="rounded border border-subtle bg-surface-card transition-colors px-2 py-1 text-xs text-secondary"
-                        name="status"
-                        value={game.status}
-                        onchange={(e) => e.currentTarget.form?.requestSubmit()}
-                      >
-                        {#each data.gameStatuses as status (status)}
-                          <option value={status}
-                            >{status.charAt(0).toUpperCase() + status.slice(1)}</option
-                          >
-                        {/each}
-                      </select>
-                    </form>
+                    <select
+                      class="rounded border border-subtle bg-surface-card transition-colors px-2 py-1 text-xs text-secondary"
+                      value={game.status}
+                      disabled={updatingStatusId === game.id}
+                      onchange={(e) => handleStatusChange(game.id, e.currentTarget.value)}
+                    >
+                      {#each data.gameStatuses as status (status)}
+                        <option value={status}
+                          >{status.charAt(0).toUpperCase() + status.slice(1)}</option
+                        >
+                      {/each}
+                    </select>
                   </div>
                 {/if}
               </div>
@@ -501,7 +595,7 @@
                                 await pb
                                   .collection('offer_templates')
                                   .update(template.id, { status: 'withdrawn' });
-                                window.location.reload();
+                                await invalidate('app:listing-manage');
                               } catch (err) {
                                 console.error('Failed to withdraw template:', err);
                                 alert('Failed to withdraw template');
@@ -519,7 +613,7 @@
                           if (confirm('Delete this template permanently?')) {
                             try {
                               await pb.collection('offer_templates').delete(template.id);
-                              window.location.reload();
+                              await invalidate('app:listing-manage');
                             } catch (err) {
                               console.error('Failed to delete template:', err);
                               alert('Failed to delete template');

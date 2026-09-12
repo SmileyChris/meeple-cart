@@ -36,9 +36,6 @@
     Array<{ id: string; title: string; condition: string; listingTitle: string }>
   >([]);
   let loadingBuyerItems = $state(false);
-  let showShareModal = $state(false);
-  let shareLinkCopied = $state(false);
-  let shareTextCopied = $state(false);
 
   let listing = $derived(data.listing);
   let owner = $derived(data.owner);
@@ -205,49 +202,6 @@
     if (typeof window === 'undefined') return '';
     return `${window.location.origin}/listings/${listing.id}`;
   });
-
-  // Generate formatted text for Facebook posting
-  let shareText = $derived.by(() => {
-    const gamesList =
-      games.length > 0
-        ? games
-            .map((g) => {
-              const parts = [`• ${g.title}`];
-              if (g.condition) parts.push(`- ${conditionBadges[g.condition]}`);
-              // Note: price/tradeValue now in offer templates, not shown here
-              return parts.join(' ');
-            })
-            .join('\n')
-        : '';
-
-    const type = 'LISTING';
-
-    const regionText =
-      listing.regions && listing.regions.length > 0
-        ? `\n📍 ${listing.regions.map((r) => REGION_LABELS[r] || r).join(', ')}`
-        : '';
-
-    return `${type}: ${listing.title}${regionText}
-
-${gamesList ? `Games:\n${gamesList}\n` : ''}
-${listing.summary ? `\n${listing.summary}\n` : ''}
-View full details: ${shareUrl}`;
-  });
-
-  async function copyToClipboard(text: string, type: 'link' | 'text') {
-    try {
-      await navigator.clipboard.writeText(text);
-      if (type === 'link') {
-        shareLinkCopied = true;
-        setTimeout(() => (shareLinkCopied = false), 2000);
-      } else {
-        shareTextCopied = true;
-        setTimeout(() => (shareTextCopied = false), 2000);
-      }
-    } catch (err) {
-      console.error('Failed to copy to clipboard', err);
-    }
-  }
 
   async function loadBuyerItems() {
     if (!$currentUser) return;
@@ -778,10 +732,10 @@ View full details: ${shareUrl}`;
 
             <!-- eslint-disable svelte/no-navigation-without-resolve -->
             <a
-              href={`/listings/${listing.id}/edit`}
+              href={`/listings/${listing.id}/manage`}
               class="block w-full rounded-lg border border-emerald-500 bg-emerald-500/10 px-4 py-2 text-center font-semibold text-emerald-200 transition hover:bg-emerald-500/20"
             >
-              Edit prices
+              Manage listing
             </a>
             <a
               href={`/listings/${listing.id}/photos`}
