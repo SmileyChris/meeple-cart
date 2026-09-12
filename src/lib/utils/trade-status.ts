@@ -25,6 +25,9 @@ export function canTransitionTo(
   // Define valid transitions
   const validTransitions: Record<TradeStatus, TradeStatus[]> = {
     initiated: ['accepted', 'disputed', 'cancelled'],
+    // 'confirmed' is a legacy synonym of 'accepted', kept in the schema/type so pre-existing
+    // rows written before the accepted/shipped/received flow existed remain valid values.
+    confirmed: ['shipped', 'disputed', 'cancelled'],
     accepted: ['shipped', 'disputed', 'cancelled'],
     shipped: ['received', 'disputed'],
     received: ['completed', 'disputed'],
@@ -125,6 +128,7 @@ export function getAvailableActions(trade: TradeRecord, userId: string): TradeAc
 export function getStatusLabel(status: TradeStatus): string {
   const labels: Record<TradeStatus, string> = {
     initiated: 'Proposed',
+    confirmed: 'Accepted',
     accepted: 'Accepted',
     shipped: 'Shipped',
     received: 'Received',
@@ -142,6 +146,7 @@ export function getStatusLabel(status: TradeStatus): string {
 export function getStatusColor(status: TradeStatus): string {
   const colors: Record<TradeStatus, string> = {
     initiated: 'bg-blue-500',
+    confirmed: 'bg-blue-500',
     accepted: 'bg-blue-500',
     shipped: 'bg-amber-500',
     received: 'bg-green-500',
