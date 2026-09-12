@@ -8,39 +8,37 @@
   } from '$lib/constants/regions';
   import BggSearch from '$lib/components/BggSearch.svelte';
   import type { BggSearchItem } from '$lib/types/bgg';
-
-  // Form state (for validation errors and rehydration)
-  interface FormState {
-    message?: string;
-    values?: { title: string; summary: string; location: string };
-    regions?: string[];
-    games?: GameEntry[];
-    fieldErrors?: Record<string, string>;
-  }
+  import { pb, currentUser } from '$lib/pocketbase';
+  import { goto } from '$app/navigation';
+  import {
+    buildListingPayload,
+    buildListingFormData,
+    buildItemPayloads,
+    buildOfferTemplatePayload,
+    type ItemCondition,
+  } from '$lib/utils/listing-create';
 
   let { data }: { data: PageData } = $props();
-  let form = $state<FormState | undefined>(undefined);
 
   type ItemType = 'board_game' | 'other';
 
   interface GameEntry {
     itemType: ItemType;
     title: string;
-    condition: string;
+    condition: ItemCondition;
     notes: string;
     bgg_id: string;
-    can_post: boolean;
+    year: string;
   }
 
-  let listingValues = $derived(
-    form?.values ?? {
-      title: '',
-      summary: '',
-      location: '',
-    }
-  );
+  let title = $state('');
+  let summary = $state('');
+  let location = $state('');
 
-  let selectedRegions = $state<string[]>(form?.regions ?? []);
+  let submitting = $state(false);
+  let formError = $state<string | null>(null);
+
+  let selectedRegions = $state<string[]>([]);
 
   // Island selection logic
   let northIslandChecked = $derived(
@@ -72,22 +70,26 @@
     }
   }
 
-  let games = $state<GameEntry[]>(
-    form?.games ??
-      ([
-        {
-          itemType: 'board_game',
-          title: '',
-          condition: data.defaults.condition,
-          notes: '',
-          bgg_id: '',
-          can_post: false,
-        },
-      ] as GameEntry[])
-  );
+  let games = $state<GameEntry[]>([
+    {
+      itemType: 'board_game',
+      title: '',
+      condition: data.defaults.condition as ItemCondition,
+      notes: '',
+      bgg_id: '',
+      year: '',
+    },
+  ]);
 
-  let fieldErrors = $derived(form?.fieldErrors ?? {});
+  // Offer terms (applies to the single offer covering every item above)
+  let cashAmount = $state('');
+  let openToLowerOffers = $state(false);
+  let openToTradeOffers = $state(false);
+  let tradeForItemsText = $state('');
+  let canPostOffer = $state(false);
+  let offerNotes = $state('');
 
+  let photoFiles = $state<File[]>([]);
   let photoPreviews = $state<Array<{ name: string; url: string; size: string }>>([]);
 
   const resetPreviews = () => {
@@ -116,6 +118,7 @@
 
     resetPreviews();
 
+    photoFiles = files;
     photoPreviews = files.map((file) => ({
       name: file.name,
       url: URL.createObjectURL(file),
@@ -129,10 +132,10 @@
       {
         itemType: 'board_game',
         title: '',
-        condition: data.defaults.condition,
+        condition: data.defaults.condition as ItemCondition,
         notes: '',
         bgg_id: '',
-        can_post: false,
+        year: '',
       },
     ];
   };
@@ -140,6 +143,7 @@
   function handleBggSelect(index: number, game: BggSearchItem) {
     games[index].title = game.name.value;
     games[index].bgg_id = String(game.id);
+    games[index].year = game.yearpublished?.value ? String(game.yearpublished.value) : '';
   }
 
   function setItemType(index: number, type: ItemType) {
@@ -153,6 +157,76 @@
   const removeGame = (index: number) => {
     games = games.filter((_, i) => i !== index);
   };
+
+  function errorMessageFor(err: unknown): string {
+    const status = (err as { status?: number } | null)?.status;
+    if (status === 400) return 'Invalid listing data. Please check the form and try again.';
+    if (status === 403) return 'You do not have permission to create this listing.';
+    return 'Something went wrong. Please try again later.';
+  }
+
+  async function handleSubmit(event: SubmitEvent) {
+    event.preventDefault();
+
+    if (submitting) return;
+
+    const user = $currentUser;
+    if (!user) {
+      formError = 'You must be logged in to create a listing.';
+      return;
+    }
+
+    submitting = true;
+    formError = null;
+
+    try {
+      const listingPayload = buildListingPayload(
+        { title, summary, location, regions: selectedRegions },
+        user.id
+      );
+      const listingFormData = buildListingFormData(listingPayload, photoFiles);
+      const listing = await pb.collection('listings').create(listingFormData);
+
+      const itemPayloads = buildItemPayloads(
+        games.map((game) => ({
+          title: game.title,
+          condition: game.condition,
+          notes: game.notes,
+          bggId: game.bgg_id,
+          year: game.year,
+        })),
+        listing.id
+      );
+      const createdItems = [];
+      for (const itemPayload of itemPayloads) {
+        const item = await pb.collection('items').create(itemPayload);
+        createdItems.push(item);
+      }
+
+      const offerTemplatePayload = buildOfferTemplatePayload(
+        {
+          cashAmount,
+          openToLowerOffers,
+          openToTradeOffers,
+          tradeForItemsText,
+          canPost: canPostOffer,
+          notes: offerNotes,
+        },
+        {
+          listingId: listing.id,
+          ownerId: user.id,
+          itemIds: createdItems.map((item) => item.id),
+        }
+      );
+      await pb.collection('offer_templates').create(offerTemplatePayload);
+
+      await goto(`/listings/${listing.id}`);
+    } catch (err) {
+      console.error('Failed to create listing:', err);
+      formError = errorMessageFor(err);
+      submitting = false;
+    }
+  }
 
   onDestroy(() => {
     resetPreviews();
@@ -173,13 +247,13 @@
       </p>
     </header>
 
-    {#if form?.message}
+    {#if formError}
       <div class="rounded-lg border border-rose-500 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-        {form.message}
+        {formError}
       </div>
     {/if}
 
-    <form class="space-y-10" method="POST">
+    <form class="space-y-10" onsubmit={handleSubmit}>
       <section
         class="space-y-6 rounded-xl border border-subtle bg-surface-card transition-colors p-6"
       >
@@ -201,11 +275,8 @@
               placeholder="Eg: Gloomhaven 2nd edition with inserts"
               required
               maxlength="120"
-              value={listingValues.title}
+              bind:value={title}
             />
-            {#if fieldErrors.title}
-              <p class="mt-2 text-sm text-rose-300">{fieldErrors.title}</p>
-            {/if}
           </div>
 
           <!-- Listing type field removed - type now inferred from offer templates -->
@@ -284,7 +355,7 @@
               name="location"
               placeholder="Eg: Auckland CBD near Britomart, or West Auckland (Henderson)"
               maxlength="120"
-              value={listingValues.location}
+              bind:value={location}
             />
             <p class="mt-1 text-xs text-muted">
               Add more specific pickup details within your selected regions
@@ -299,8 +370,8 @@
               name="summary"
               maxlength="2000"
               placeholder="Describe condition, included expansions, and trade preferences."
-              >{listingValues.summary}</textarea
-            >
+              bind:value={summary}
+            ></textarea>
           </div>
         </div>
 
@@ -328,9 +399,6 @@
             multiple
             onchange={handlePhotoChange}
           />
-          {#if fieldErrors.photos}
-            <p class="text-sm text-rose-300">{fieldErrors.photos}</p>
-          {/if}
           <p class="text-xs text-muted">
             You'll need to reselect images if the form submission fails.
           </p>
@@ -418,9 +486,6 @@
               </button>
             </div>
 
-            <!-- Hidden field to store item type -->
-            <input type="hidden" name="game_{index}_item_type" value={game.itemType} />
-
             <div class="grid gap-6 sm:grid-cols-2">
               <!-- Title input - different based on item type -->
               <div class="sm:col-span-2">
@@ -451,15 +516,13 @@
                         onclick={() => {
                           games[index].title = '';
                           games[index].bgg_id = '';
+                          games[index].year = '';
                         }}
                       >
                         ✕
                       </button>
                     </div>
                   {/if}
-                  <!-- Hidden inputs to store BGG data -->
-                  <input type="hidden" name="game_{index}_title" value={game.title} />
-                  <input type="hidden" name="game_{index}_bgg_id" value={game.bgg_id} />
                 {:else}
                   <label class="block text-sm font-medium text-secondary" for="game_{index}_title"
                     >Item title</label
@@ -476,11 +539,6 @@
                     maxlength="200"
                     bind:value={game.title}
                   />
-                  <!-- Hidden empty bgg_id for non-game items -->
-                  <input type="hidden" name="game_{index}_bgg_id" value="" />
-                {/if}
-                {#if fieldErrors[`game_${index}_title`]}
-                  <p class="mt-2 text-sm text-rose-300">{fieldErrors[`game_${index}_title`]}</p>
                 {/if}
               </div>
 
@@ -501,13 +559,22 @@
                     >
                   {/each}
                 </select>
-                {#if fieldErrors[`game_${index}_condition`]}
-                  <p class="mt-2 text-sm text-rose-300">{fieldErrors[`game_${index}_condition`]}</p>
-                {/if}
               </div>
 
-              <!-- Empty cell for grid alignment -->
-              <div></div>
+              <div>
+                <label class="block text-sm font-medium text-secondary" for="game_{index}_year"
+                  >Year (optional)</label
+                >
+                <input
+                  class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+                  id="game_{index}_year"
+                  type="number"
+                  min="1900"
+                  max="2100"
+                  placeholder="Eg: 2019"
+                  bind:value={game.year}
+                />
+              </div>
 
               <div class="sm:col-span-2">
                 <label class="block text-sm font-medium text-secondary" for="game_{index}_notes"
@@ -524,22 +591,100 @@
                   bind:value={game.notes}
                 />
               </div>
-
-              <div class="sm:col-span-2">
-                <label class="flex items-center gap-2 text-sm text-secondary">
-                  <input
-                    class="h-4 w-4 rounded border border-subtle bg-surface-body transition-colors"
-                    type="checkbox"
-                    name="game_{index}_can_post"
-                    bind:checked={game.can_post}
-                  />
-                  📬 Can post (available for courier/postal delivery)
-                </label>
-              </div>
             </div>
           </section>
         {/each}
       </div>
+
+      <section
+        class="space-y-6 rounded-xl border border-subtle bg-surface-card transition-colors p-6"
+      >
+        <div class="space-y-2">
+          <h2 class="text-xl font-semibold text-primary">Offer terms</h2>
+          <p class="text-sm text-muted">
+            These terms apply to the whole listing. Buyers will see one offer covering every item
+            above.
+          </p>
+        </div>
+
+        <div class="grid gap-6 sm:grid-cols-2">
+          <div>
+            <label class="block text-sm font-medium text-secondary" for="cash_amount"
+              >Asking price (NZ$)</label
+            >
+            <input
+              class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+              id="cash_amount"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="Leave blank for trade only"
+              bind:value={cashAmount}
+            />
+          </div>
+
+          <div class="flex items-end">
+            <label class="flex items-center gap-2 text-sm text-secondary">
+              <input
+                class="h-4 w-4 rounded border border-subtle bg-surface-body transition-colors"
+                type="checkbox"
+                bind:checked={openToLowerOffers}
+              />
+              Open to lower offers (or near offer)
+            </label>
+          </div>
+
+          <div class="sm:col-span-2">
+            <label class="flex items-center gap-2 text-sm text-secondary">
+              <input
+                class="h-4 w-4 rounded border border-subtle bg-surface-body transition-colors"
+                type="checkbox"
+                bind:checked={openToTradeOffers}
+              />
+              Open to trade offers
+            </label>
+          </div>
+
+          {#if openToTradeOffers}
+            <div class="sm:col-span-2">
+              <label class="block text-sm font-medium text-secondary" for="trade_for_items"
+                >What you'd take in trade</label
+              >
+              <input
+                class="mt-2 w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+                id="trade_for_items"
+                placeholder="Eg: Scythe, Wingspan, or similar Euro games"
+                maxlength="500"
+                bind:value={tradeForItemsText}
+              />
+            </div>
+          {/if}
+
+          <div class="sm:col-span-2">
+            <label class="flex items-center gap-2 text-sm text-secondary">
+              <input
+                class="h-4 w-4 rounded border border-subtle bg-surface-body transition-colors"
+                type="checkbox"
+                bind:checked={canPostOffer}
+              />
+              📬 Can post (available for courier/postal delivery)
+            </label>
+          </div>
+
+          <div class="sm:col-span-2">
+            <label class="block text-sm font-medium text-secondary" for="offer_notes"
+              >Offer notes (optional)</label
+            >
+            <textarea
+              class="mt-2 min-h-[100px] w-full rounded-lg border border-subtle bg-surface-body transition-colors px-3 py-2 text-primary focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
+              id="offer_notes"
+              maxlength="1000"
+              placeholder="Any additional information about this offer..."
+              bind:value={offerNotes}
+            ></textarea>
+          </div>
+        </div>
+      </section>
 
       <div class="flex items-center justify-end gap-4">
         <!-- eslint-disable svelte/no-navigation-without-resolve -->
@@ -550,10 +695,13 @@
           Cancel
         </a>
         <button
-          class="rounded-lg bg-emerald-500 px-4 py-2 font-semibold text-[var(--accent-contrast)] transition hover:bg-emerald-400"
+          class="rounded-lg bg-emerald-500 px-4 py-2 font-semibold text-[var(--accent-contrast)] transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
           type="submit"
+          disabled={submitting}
         >
-          Publish listing {games.length > 1 ? `with ${games.length} items` : ''}
+          {submitting
+            ? 'Publishing...'
+            : `Publish listing ${games.length > 1 ? `with ${games.length} items` : ''}`}
         </button>
         <!-- eslint-enable svelte/no-navigation-without-resolve -->
       </div>
