@@ -67,9 +67,7 @@
       <div class="mx-auto flex max-w-5xl items-center justify-center px-4 py-4">
         <a class="flex items-center gap-3 transition-opacity hover:opacity-80" href="/">
           <img src="/logo.png" alt="Meeple Cart" class="h-8" />
-          <span class="text-lg font-semibold" style="font-family: var(--font-heading)">
-            Meeple Cart
-          </span>
+          <span class="text-lg" style="font-family: var(--font-brand)"> Meeple Cart </span>
         </a>
       </div>
     </header>
@@ -79,9 +77,7 @@
       <div class="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
         <a class="flex items-center gap-3 transition-opacity hover:opacity-80" href="/hubs">
           <img src="/logo.png" alt="Meeple Cart" class="h-8" />
-          <span class="text-lg font-semibold" style="font-family: var(--font-heading)">
-            Meeple Cart Hubs
-          </span>
+          <span class="text-lg" style="font-family: var(--font-brand)"> Meeple Cart Hubs </span>
         </a>
 
         <nav class="flex items-center gap-3 text-sm">
@@ -100,15 +96,13 @@
         <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
         <a class="flex items-center gap-3 transition-opacity hover:opacity-80" href="/">
           <img src="/logo.png" alt="Meeple Cart" class="h-8" />
-          <span class="text-lg font-semibold" style="font-family: var(--font-heading)">
-            Meeple Cart
-          </span>
+          <span class="text-lg" style="font-family: var(--font-brand)"> Meeple Cart </span>
         </a>
         <!-- eslint-disable svelte/no-navigation-without-resolve -->
         <nav class="flex items-center gap-3 text-sm">
           {#if $currentUser}
             <NotificationBell unreadCount={unreadNotifications} {currentPath} />
-            <a class="btn-primary" href="/listings/new"> New listing </a>
+            <a class="btn-primary" href="/listings/new"> Pin a listing </a>
           {:else}
             <a class="btn-ghost" href="/login"> Log in </a>
             <a class="btn-primary" href="/register"> Create account </a>
@@ -136,7 +130,7 @@
                       d="M15 19l-7-7 7-7"
                     />
                   </svg>
-                  Activity Feed
+                  Back to Board
                 </a>
               </div>
 
@@ -198,20 +192,6 @@
                 </a>
 
                 <a
-                  href="/trade-parties"
-                  class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition whitespace-nowrap {currentPath.startsWith(
-                    '/trade-parties'
-                  )
-                    ? 'text-secondary'
-                    : 'text-muted hover:text-secondary'}"
-                  style={currentPath.startsWith('/trade-parties')
-                    ? 'background-color: var(--accent-soft); color: var(--accent-strong)'
-                    : ''}
-                >
-                  My Trade Parties
-                </a>
-
-                <a
                   href="/logout"
                   class="ml-2 flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition whitespace-nowrap {currentPath.startsWith(
                     '/logout'
@@ -230,10 +210,8 @@
               <div class="flex items-center gap-2">
                 <a
                   href="/"
-                  class="flex items-center gap-2 rounded-lg px-4 py-2.5 text-base transition whitespace-nowrap {currentPath ===
-                  '/'
-                    ? 'bg-emerald-500 text-white font-semibold'
-                    : 'font-medium text-muted hover:text-accent'}"
+                  aria-current={currentPath === '/' ? 'page' : undefined}
+                  class="nav-link flex items-center gap-2 rounded-lg px-4 py-2.5 text-base font-medium transition whitespace-nowrap"
                 >
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
@@ -243,15 +221,13 @@
                       d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
-                  Activity
+                  Board
                 </a>
 
                 <a
                   href="/games"
-                  class="flex items-center gap-2 rounded-lg px-4 py-2.5 text-base transition whitespace-nowrap {currentPath ===
-                  '/games'
-                    ? 'bg-emerald-500 text-white font-semibold'
-                    : 'font-medium text-muted hover:text-accent'}"
+                  aria-current={currentPath === '/games' ? 'page' : undefined}
+                  class="nav-link flex items-center gap-2 rounded-lg px-4 py-2.5 text-base font-medium transition whitespace-nowrap"
                 >
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
@@ -261,16 +237,13 @@
                       d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
                     />
                   </svg>
-                  Games
+                  Browse
                 </a>
 
                 <a
                   href="/chat"
-                  class="flex items-center gap-2 rounded-lg px-4 py-2.5 text-base transition whitespace-nowrap {currentPath.startsWith(
-                    '/chat'
-                  )
-                    ? 'bg-emerald-500 text-white font-semibold'
-                    : 'font-medium text-muted hover:text-accent'}"
+                  aria-current={currentPath.startsWith('/chat') ? 'page' : undefined}
+                  class="nav-link flex items-center gap-2 rounded-lg px-4 py-2.5 text-base font-medium transition whitespace-nowrap"
                 >
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
@@ -285,11 +258,10 @@
 
                 <a
                   href="/hubs"
-                  class="flex items-center gap-2 rounded-lg px-4 py-2.5 text-base transition whitespace-nowrap {currentPath.startsWith(
-                    '/hubs'
-                  ) || isFeatureSection
-                    ? 'bg-emerald-500 text-white font-semibold'
-                    : 'font-medium text-muted hover:text-accent'}"
+                  aria-current={currentPath.startsWith('/hubs') || isFeatureSection
+                    ? 'page'
+                    : undefined}
+                  class="nav-link flex items-center gap-2 rounded-lg px-4 py-2.5 text-base font-medium transition whitespace-nowrap"
                 >
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
