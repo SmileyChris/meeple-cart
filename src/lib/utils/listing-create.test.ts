@@ -133,6 +133,37 @@ describe('buildItemPayloads', () => {
     expect(payload).not.toHaveProperty('bgg_id');
     expect(payload).not.toHaveProperty('year');
   });
+
+  it('rejects a negative bgg_id/year and a trailing-garbage numeric string', () => {
+    const [payload] = buildItemPayloads([{ ...otherItem, bggId: '-5', year: '2018x' }], 'l1');
+    expect(payload).not.toHaveProperty('bgg_id');
+    expect(payload).not.toHaveProperty('year');
+  });
+
+  // Regression: Svelte 5 coerces `bind:value` on <input type="number"> to
+  // number | null, not string, no matter what the form's own state type
+  // says. A real "Year" field bound this way hands buildItemPayloads a
+  // number (or null when cleared) rather than the string the old
+  // `ListingItemFormValues.year: string` type promised. The old
+  // `parsePositiveInt` called `raw.trim()` unconditionally, which threw on
+  // a number/null and — because this runs inside the create flow's step-2
+  // try/catch — triggered the orphan-listing cleanup and swallowed the
+  // real error. These prove the builder tolerates every shape the DOM can
+  // actually produce.
+  it('tolerates a numeric year straight from a bound <input type="number">', () => {
+    const [payload] = buildItemPayloads([{ ...boardGame, year: 2018 }], 'listing123');
+    expect(payload.year).toBe(2018);
+  });
+
+  it('tolerates a null year from a cleared <input type="number">', () => {
+    const [payload] = buildItemPayloads([{ ...otherItem, year: null }], 'listing123');
+    expect(payload).not.toHaveProperty('year');
+  });
+
+  it('tolerates a numeric bgg_id', () => {
+    const [payload] = buildItemPayloads([{ ...boardGame, bggId: 199792 }], 'listing123');
+    expect(payload.bgg_id).toBe(199792);
+  });
 });
 
 describe('buildOfferTemplatePayload', () => {
@@ -177,6 +208,20 @@ describe('buildOfferTemplatePayload', () => {
 
     const nonNumeric = buildOfferTemplatePayload({ ...baseTerms, cashAmount: 'abc' }, context);
     expect(nonNumeric).not.toHaveProperty('cash_amount');
+  });
+
+  // Regression: `bind:value` on <input type="number"> hands Svelte 5 state
+  // a number | null, not the string `OfferTermsFormValues.cashAmount` was
+  // typed as. Passing that straight into `.trim()` threw and (via the
+  // create flow's step-2 catch) silently deleted the just-created listing.
+  it('tolerates a numeric cash amount straight from a bound <input type="number">', () => {
+    const payload = buildOfferTemplatePayload({ ...baseTerms, cashAmount: 45.5 }, context);
+    expect(payload.cash_amount).toBe(4550);
+  });
+
+  it('tolerates a null cash amount from a cleared <input type="number">', () => {
+    const payload = buildOfferTemplatePayload({ ...baseTerms, cashAmount: null }, context);
+    expect(payload).not.toHaveProperty('cash_amount');
   });
 
   it('stores free-text trade preferences as a one-element string array', () => {
