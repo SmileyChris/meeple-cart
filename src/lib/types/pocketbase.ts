@@ -34,13 +34,14 @@ export type AuthenticatedUser = UserRecord | null;
 export type OfferStatus = 'pending' | 'accepted' | 'declined' | 'withdrawn';
 export type TradeStatus =
   | 'initiated'
+  | 'confirmed'
   | 'accepted'
   | 'shipped'
   | 'received'
   | 'completed'
   | 'disputed'
   | 'cancelled';
-export type DeliveryMethod = 'in_person' | 'post' | 'either';
+export type DeliveryMethod = 'in_person' | 'post' | 'either' | 'shipped';
 
 export interface ItemRecord extends RecordModel {
   listing: string;
