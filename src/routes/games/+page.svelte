@@ -16,6 +16,7 @@
     saveLastCondition,
     getLastCondition,
   } from '$lib/utils/filters';
+  import { GAME_SORT_OPTIONS, formatResultsCount, type GameSortOption } from './+page';
 
   let { data }: { data: PageData } = $props();
 
@@ -270,6 +271,44 @@
     url.searchParams.delete('page');
     goto(url, { replaceState: true, invalidateAll: true });
   }
+
+  const sortLabels: Record<GameSortOption, string> = {
+    newest: 'Newest',
+    price: 'Price: low to high',
+    title: 'Title: A–Z',
+  };
+
+  function handleSortChange(event: Event) {
+    const target = event.target as HTMLSelectElement;
+    const url = new URL($page.url);
+
+    if (target.value === 'newest') {
+      url.searchParams.delete('sort');
+    } else {
+      url.searchParams.set('sort', target.value);
+    }
+
+    url.searchParams.delete('page');
+    // eslint-disable-next-line svelte/no-navigation-without-resolve
+    goto(url);
+  }
+
+  function clearAllFilters() {
+    if (browser) {
+      saveRegionFilterState(false);
+      saveCanPostState(false);
+      saveConditionPreference(null);
+      saveGuestRegions([]);
+    }
+    guestRegions = [];
+    searchValue = '';
+    minConditionLevel = 4;
+    tempConditionLevel = 4;
+
+    const url = new URL(browser ? window.location.href : $page.url);
+    Array.from(url.searchParams.keys()).forEach((key) => url.searchParams.delete(key));
+    goto(url, { replaceState: true, invalidateAll: true });
+  }
 </script>
 
 <svelte:head>
@@ -362,20 +401,33 @@
           </div>
         {/if}
 
-        <!-- Can Post Tab (only when region filter is active) -->
-        {#if data.myRegionsFilter && (($currentUser && data.hasPreferredRegions) || (!$currentUser && guestRegions.length > 0))}
-          <button
-            onclick={toggleCanPost}
-            class="border-b-2 px-4 py-2 text-sm font-medium transition {data.canPostFilter
-              ? 'border-accent text-accent'
-              : 'border-transparent text-secondary hover:text-primary'}"
+        <!-- Can Post Tab -->
+        <button
+          onclick={toggleCanPost}
+          class="border-b-2 px-4 py-2 text-sm font-medium transition {data.canPostFilter
+            ? 'border-accent text-accent'
+            : 'border-transparent text-secondary hover:text-primary'}"
+        >
+          + Can Post
+        </button>
+
+        <!-- Sort -->
+        <div class="ml-auto flex items-center gap-2">
+          <label for="sort-select" class="text-sm font-medium text-secondary">Sort</label>
+          <select
+            id="sort-select"
+            value={data.sort}
+            onchange={handleSortChange}
+            class="rounded border border-subtle bg-surface-card px-3 py-1.5 text-sm text-primary transition-colors focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(52,211,153,0.35)]"
           >
-            + Can Post
-          </button>
-        {/if}
+            {#each GAME_SORT_OPTIONS as option (option)}
+              <option value={option}>{sortLabels[option]}</option>
+            {/each}
+          </select>
+        </div>
 
         <!-- Condition Filter (dropdown style) -->
-        <div class="relative ml-auto" bind:this={conditionFilterRef}>
+        <div class="relative" bind:this={conditionFilterRef}>
           <button
             type="button"
             onclick={() => {
@@ -505,7 +557,7 @@
     </div>
 
     <!-- Results -->
-    {#if data.activities.length === 0}
+    {#if data.pagination.totalItems === 0}
       <div
         class="mx-auto max-w-md rounded-2xl border-2 border-dashed border-subtle bg-surface-card p-12 text-center transition-colors"
       >
@@ -517,14 +569,21 @@
             No games match your filters yet. Check back soon!
           {/if}
         </p>
+        {#if !data.loadError}
+          <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <button type="button" onclick={clearAllFilters} class="btn-secondary px-4 py-2 text-sm">
+              Clear all filters
+            </button>
+            <a href="/chat" class="btn-primary px-4 py-2 text-sm">Ask in chat</a>
+          </div>
+        {/if}
       </div>
     {:else}
       <div>
         <div class="mb-6">
           <h2 class="text-2xl font-semibold text-primary">Available games</h2>
           <p class="text-sm text-muted">
-            {data.activities.length}
-            {data.activities.length === 1 ? 'game' : 'games'}
+            {formatResultsCount(data.pagination.totalItems)}
           </p>
         </div>
 
