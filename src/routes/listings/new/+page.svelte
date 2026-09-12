@@ -755,7 +755,7 @@
           Cancel
         </a>
         <button
-          class="rounded-lg bg-emerald-500 px-4 py-2 font-semibold text-[var(--accent-contrast)] transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
+          class="btn-primary disabled:cursor-not-allowed disabled:opacity-50"
           type="submit"
           disabled={submitting}
         >

@@ -737,16 +737,10 @@
             {/if}
 
             <!-- eslint-disable svelte/no-navigation-without-resolve -->
-            <a
-              href={`/listings/${listing.id}/manage`}
-              class="block w-full rounded-lg border border-emerald-500 bg-emerald-500/10 px-4 py-2 text-center font-semibold text-emerald-200 transition hover:bg-emerald-500/20"
-            >
+            <a href={`/listings/${listing.id}/manage`} class="btn-secondary w-full">
               Manage listing
             </a>
-            <a
-              href={`/listings/${listing.id}/photos`}
-              class="block w-full rounded-lg border border-emerald-500 bg-emerald-500/10 px-4 py-2 text-center font-semibold text-emerald-200 transition hover:bg-emerald-500/20"
-            >
+            <a href={`/listings/${listing.id}/photos`} class="btn-secondary w-full">
               Manage photos
             </a>
             <!-- eslint-enable svelte/no-navigation-without-resolve -->
