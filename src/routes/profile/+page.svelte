@@ -303,7 +303,7 @@ View full details: ${generateShareUrl(listing.id)}`;
         class="rounded-xl border border-dashed border-subtle bg-surface-card p-6 text-sm text-muted transition-colors"
       >
         You have not created any listings yet. Use the <span style="color: var(--accent)"
-          >New listing</span
+          >Pin a listing</span
         > button to publish your first trade.
       </div>
     {/if}
