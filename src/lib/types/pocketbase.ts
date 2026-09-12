@@ -310,6 +310,7 @@ export interface TradePartyRecord extends RecordModel {
   participant_count: number;
   game_count: number;
   successful_matches: number;
+  is_public?: boolean;
   expand?: {
     organizer?: UserRecord;
   };
