@@ -9,6 +9,16 @@ HOOKS_DIR="${ROOT_DIR}/pocketbase/pb_hooks"
 
 cd "${ROOT_DIR}"
 
+# Load .env (BGG_TOKEN, etc.) into this process's environment so PocketBase's hooks can
+# read it via $os.getenv - without ever echoing it. `set -a` exports every var sourced
+# below; `set +a` turns that back off so we don't export unrelated shell vars afterwards.
+if [[ -f "${ROOT_DIR}/.env" ]]; then
+  set -a
+  # shellcheck disable=SC1091
+  . "${ROOT_DIR}/.env"
+  set +a
+fi
+
 # Ensure we have the correct PocketBase version
 "${ROOT_DIR}/scripts/download-pocketbase.sh"
 

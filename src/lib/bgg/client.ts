@@ -1,19 +1,35 @@
 /**
  * BoardGameGeek XML API2 Client
  *
- * Fetches game data from BGG's public XML API.
+ * Fetches game data via PocketBase's `/api/bgg/*` proxy (see
+ * `pocketbase/pb_hooks/bgg.pb.js`), rather than calling BGG directly. BGG now requires an
+ * `Authorization: Bearer <token>` header on every request, and this app is a client-side
+ * SPA with nowhere to keep that token secret - so PocketBase holds it and forwards
+ * requests server-side instead.
+ *
+ * The proxy also requires a logged-in user ($apis.requireAuth() in the hook), so anonymous
+ * scripts can't consume the shared upstream rate-limit budget. Every current caller
+ * (BggSearch.svelte) only ever runs for an authenticated user already.
  * Includes rate limiting and error handling.
  *
  * API Documentation: https://boardgamegeek.com/wiki/page/BGG_XML_API2
  */
 
-const BGG_API_BASE = 'https://boardgamegeek.com/xmlapi2';
+import { pb } from '$lib/pocketbase';
+
+const BGG_API_BASE = `${pb.baseURL}/api/bgg`;
 const BGG_RATE_LIMIT_MS = 5000; // BGG requires 5 second delay between requests
 
 let lastRequestTime = 0;
 
 /**
- * Rate-limited fetch to respect BGG's API guidelines
+ * Rate-limited fetch to respect BGG's API guidelines.
+ *
+ * Uses raw `fetch` (not `pb.send()`) because the PocketBase SDK always tries to JSON-parse
+ * the response body and silently falls back to `{}` when it can't - which would swallow
+ * BGG's XML payload on every successful call. We still need the request to carry the
+ * user's auth token though (the proxy requires one), so we attach the same
+ * `Authorization: <token>` header `pb.send()` would have added automatically.
  */
 async function rateLimitedFetch(url: string): Promise<Response> {
   const now = Date.now();
@@ -25,7 +41,19 @@ async function rateLimitedFetch(url: string): Promise<Response> {
   }
 
   lastRequestTime = Date.now();
-  return fetch(url);
+
+  const headers: HeadersInit = {};
+  if (pb.authStore.token) {
+    headers['Authorization'] = pb.authStore.token;
+  }
+
+  const response = await fetch(url, { headers });
+
+  if (response.status === 401) {
+    throw new Error('You must be logged in to use BoardGameGeek search.');
+  }
+
+  return response;
 }
 
 /**

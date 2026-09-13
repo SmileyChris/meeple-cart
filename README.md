@@ -255,9 +255,14 @@ Copy `.env.example` to `.env` and configure:
 ```bash
 # PocketBase URL (client-side accessible)
 PUBLIC_POCKETBASE_URL=http://127.0.0.1:8090
+
+# BoardGameGeek API token (server-side only, never exposed to the browser)
+BGG_TOKEN=your-bgg-token-here
 ```
 
 **Note:** The `PUBLIC_` prefix makes this available to browser via `$env/static/public` in SvelteKit.
+
+**BGG_TOKEN:** BoardGameGeek's XML API2 now requires an `Authorization: Bearer <token>` header on every request. Since this app is a client-side SPA, that token can't live in `src/` - `just dev` / `scripts/dev.sh` load it from `.env` into the environment PocketBase runs in, and `pocketbase/pb_hooks/bgg.pb.js` proxies BGG search/lookup requests through `/api/bgg/search` and `/api/bgg/thing` so the browser never sees it. If `BGG_TOKEN` isn't set, those routes respond `503`.
 
 ---
 
