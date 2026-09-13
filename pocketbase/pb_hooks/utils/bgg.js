@@ -94,6 +94,9 @@ function handleBggRequest(app, e, endpoint) {
   }
 
   const now = Date.now();
+  // Not atomic (get + set is two separate store calls), so two requests arriving at the
+  // exact same instant could both read the same lastCall and both proceed - an acceptable
+  // approximation for a ~1 req/s guidance limit, not a hard guarantee.
   const lastCall = app.store().get(RATE_LIMIT_STORE_KEY) || 0;
   if (now - lastCall < MIN_REQUEST_GAP_MS) {
     e.response.header().set('Retry-After', '1');

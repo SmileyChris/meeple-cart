@@ -10,6 +10,11 @@
 // pulled in with `require` from inside each handler body - see that file's header comment,
 // and reputation.pb.js / utils/reputation.js for the same pattern already used elsewhere in
 // this codebase.
+//
+// Both routes require a logged-in user ($apis.requireAuth()): anonymous access would let
+// any script consume the shared ~1 req/s upstream budget. Every current caller
+// (BggSearch.svelte, used from listings/new and the trade-party submission form) already
+// only runs for an authenticated user.
 
 onBootstrap((e) => {
   e.next();
@@ -21,12 +26,22 @@ onBootstrap((e) => {
   }
 });
 
-routerAdd('GET', '/api/bgg/search', (e) => {
-  const { handleBggRequest } = require(`${__hooks}/utils/bgg.js`);
-  handleBggRequest($app, e, 'search');
-});
+routerAdd(
+  'GET',
+  '/api/bgg/search',
+  (e) => {
+    const { handleBggRequest } = require(`${__hooks}/utils/bgg.js`);
+    handleBggRequest($app, e, 'search');
+  },
+  $apis.requireAuth()
+);
 
-routerAdd('GET', '/api/bgg/thing', (e) => {
-  const { handleBggRequest } = require(`${__hooks}/utils/bgg.js`);
-  handleBggRequest($app, e, 'thing');
-});
+routerAdd(
+  'GET',
+  '/api/bgg/thing',
+  (e) => {
+    const { handleBggRequest } = require(`${__hooks}/utils/bgg.js`);
+    handleBggRequest($app, e, 'thing');
+  },
+  $apis.requireAuth()
+);
