@@ -1,0 +1,1315 @@
+<!--
+  DIRECTION CONTRACT — 05 · "Fair Catalog"
+
+  World statement:
+  The printed catalogue of a games fair: hundreds of stalls packed into a numbered
+  grid, one ink on newsprint, one spot colour, and the joy of scanning a dense page
+  and circling what you want in biro. The feed IS the catalogue — offers are
+  postage-stamp entries packed edge-to-edge in a coordinate grid (region code +
+  stall number), regions are hall sections with heavy spot-colour dividers, and the
+  visitor's own state (watching) is a hand-drawn biro circle over the cell. Print
+  grammar executed as native web: the grid is the navigation.
+
+  Palette tokens (single ink + one spot, on paper):
+    --paper  #F7F2E5   newsprint-warm off-white ground
+    --ink    #1A1710   near-black warm ink (all structure, rules, type)
+    --spot   #1240B4   biro/risograph cobalt — dividers, the visitor's marks, actions
+    --mut    #66604F   secondary text, tinted from the paper's warmth (never flat gray)
+    --mut-inv #B9B3A3  secondary text on inverted (ink) cells
+
+  Type pairing:
+    Display — "Big Shoulders" (condensed grotesk with real character): masthead,
+              coordinates, section dividers, prices.
+    Text    — "Archivo Narrow" (compact catalogue text face): entries, notes, UI.
+
+  System rules enforced:
+  1. Single ink + one spot. Thumbnails are ink-duotone SVG placeholders (currentColor)
+     so even messy photos unify into the print language. Nothing else is coloured.
+  2. The grid is the space: visible 1.5px rules between cells, printed coordinates
+     (AK-01, WG-02…). Cell size varies only by strict rule: featured bundle = 2 cells.
+  3. Biro marks: watching renders as a drawn SVG circle in the spot colour —
+     the ONE expressive element, used on exactly 2 offers (AK-04, WG-01).
+  4. Print type system: heavy entry numbers, tabular price column, trust tiers as
+     small printed die-face seals (1–5 pips) in the ink system.
+  5. Flat by contract: zero shadows. Hierarchy = ink weight, size, rules, spot.
+     Hover is print-native: the whole cell's ink inverts (currentColor swap).
+
+  Motion: one authored moment — the two biro circles draw themselves in on page
+  load (stroke-dashoffset), staggered. prefers-reduced-motion shows them static.
+  Theme: light committed — it is paper.
+-->
+<title>Fair Catalog</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders:opsz,wght@10..72,500..800&family=Archivo+Narrow:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --paper: #f7f2e5;
+    --ink: #1a1710;
+    --spot: #1240b4;
+    --mut: #66604f;
+    --mut-inv: #b9b3a3;
+    --rule: 1.5px;
+    --display: 'Big Shoulders', 'Arial Narrow', 'Helvetica Neue', sans-serif;
+    --text: 'Archivo Narrow', 'Arial Narrow', Arial, sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scrollbar-color: var(--ink) var(--paper); }
+  body::-webkit-scrollbar { width: 11px; }
+  body::-webkit-scrollbar-track { background: var(--paper); border-left: 1px solid var(--ink); }
+  body::-webkit-scrollbar-thumb { background: var(--ink); border: 2px solid var(--paper); }
+
+  ::selection { background: var(--spot); color: var(--paper); }
+
+  :focus-visible {
+    outline: 2.5px solid var(--spot);
+    outline-offset: 2px;
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--text);
+    font-size: 15px;
+    line-height: 1.4;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 20px 64px;
+  }
+
+  /* ============ MASTHEAD ============ */
+
+  .plate-line {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    border-bottom: var(--rule) solid var(--ink);
+    padding: 10px 0 8px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--mut);
+  }
+  .plate-line .spot { color: var(--spot); }
+
+  .masthead {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 26px 0 20px;
+    border-bottom: 4px solid var(--ink);
+  }
+
+  .masthead-title h1 {
+    font-family: var(--display);
+    font-optical-sizing: auto;
+    font-size: clamp(56px, 8.5vw, 108px);
+    font-weight: 800;
+    line-height: 0.86;
+    letter-spacing: 0.005em;
+    text-transform: uppercase;
+  }
+  .masthead-title h1 .cart { color: var(--spot); }
+
+  .masthead-sub {
+    margin-top: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .masthead-issue {
+    margin-top: 3px;
+    font-size: 13px;
+    color: var(--mut);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .masthead-stamp {
+    flex: none;
+    text-align: center;
+    border: var(--rule) solid var(--ink);
+    padding: 10px 14px 8px;
+  }
+  .masthead-stamp svg { display: block; margin: 0 auto; }
+  .masthead-stamp .stamp-word {
+    display: block;
+    margin-top: 6px;
+    font-family: var(--display);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  /* ============ NAV ============ */
+
+  .nav {
+    display: flex;
+    align-items: stretch;
+    border-bottom: var(--rule) solid var(--ink);
+    overflow-x: auto;
+  }
+  .nav a {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 18px;
+    font-family: var(--display);
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--ink);
+    border-right: var(--rule) solid var(--ink);
+  }
+  .nav a:first-child { border-left: var(--rule) solid var(--ink); }
+  .nav a[aria-current='page'] { background: var(--ink); color: var(--paper); }
+  .nav a:hover:not([aria-current='page']) { background: var(--spot); color: var(--paper); }
+  .nav .count {
+    font-family: var(--text);
+    font-size: 11.5px;
+    font-weight: 700;
+    line-height: 1;
+    padding: 3px 5px;
+    border: 1.5px solid currentColor;
+    font-variant-numeric: tabular-nums;
+  }
+  .nav .nav-me {
+    margin-left: auto;
+    border-left: var(--rule) solid var(--ink);
+    color: var(--spot);
+  }
+  .nav .nav-me .seal { color: var(--ink); }
+  .nav .nav-me:hover .seal { color: var(--paper); }
+
+  /* ============ FILTERS ============ */
+
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 22px;
+    padding: 18px 0 16px;
+    border-bottom: var(--rule) solid var(--ink);
+  }
+  .filter { display: flex; flex-direction: column; gap: 5px; }
+  .filter > .flabel {
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--mut);
+  }
+  .filter select {
+    appearance: none;
+    font-family: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--ink);
+    background: var(--paper);
+    border: var(--rule) solid var(--ink);
+    border-radius: 0;
+    padding: 7px 32px 7px 10px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7'%3E%3Cpath d='M1 1l4.5 4.5L10 1' fill='none' stroke='%231a1710' stroke-width='1.8'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    cursor: pointer;
+  }
+  .filter select:hover { border-color: var(--spot); color: var(--spot); }
+
+  .seg { display: flex; }
+  .seg label {
+    position: relative;
+    border: var(--rule) solid var(--ink);
+    border-right-width: 0;
+    padding: 7px 14px;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+  }
+  .seg label:last-child { border-right-width: var(--rule); }
+  .seg input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .seg label:has(input:checked) { background: var(--ink); color: var(--paper); }
+  .seg label:hover:not(:has(input:checked)) { color: var(--spot); border-color: var(--spot); }
+  .seg label:has(input:focus-visible) { outline: 2.5px solid var(--spot); outline-offset: 2px; }
+
+  .checkline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 0;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+  }
+  .checkline input {
+    appearance: none;
+    width: 17px;
+    height: 17px;
+    border: var(--rule) solid var(--ink);
+    background: var(--paper);
+    cursor: pointer;
+    display: grid;
+    place-content: center;
+  }
+  .checkline input:checked { background: var(--spot); border-color: var(--spot); }
+  .checkline input:checked::before {
+    content: '';
+    width: 9px;
+    height: 5px;
+    border-left: 2.2px solid var(--paper);
+    border-bottom: 2.2px solid var(--paper);
+    transform: translateY(-1.5px) rotate(-45deg);
+  }
+
+  .filters .tally {
+    margin-left: auto;
+    align-self: center;
+    font-family: var(--display);
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
+  }
+  .filters .tally b { color: var(--spot); }
+
+  /* ============ KEY / LEGEND ============ */
+
+  .key {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    row-gap: 6px;
+    padding: 9px 0;
+    border-bottom: var(--rule) solid var(--ink);
+    font-size: 12.5px;
+    color: var(--mut);
+  }
+  .key .k-word {
+    font-family: var(--display);
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin-right: 14px;
+  }
+  .key .k-item { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+  .key .k-item + .k-item::before {
+    content: '·';
+    margin: 0 10px;
+    color: var(--ink);
+    font-weight: 700;
+  }
+  .key .k-item .seal { color: var(--ink); }
+  .key .k-circ { color: var(--spot); }
+
+  /* ============ SECTIONS ============ */
+
+  .hall { margin-top: 26px; }
+
+  .hall-divider {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    background: var(--spot);
+    color: var(--paper);
+    padding: 8px 14px 7px;
+  }
+  .hall-divider h2 {
+    font-family: var(--display);
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+  .hall-divider .hall-meta {
+    margin-left: auto;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--paper) 76%, var(--spot)); /* tinted from the spot hue, not gray */
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* the celled grid — ink shows through the gaps as rules */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    background: var(--paper);
+    background-image: repeating-linear-gradient(45deg, transparent 0 7px, color-mix(in srgb, var(--ink) 12%, transparent) 7px 8px);
+    border: var(--rule) solid var(--ink);
+    border-top: 0;
+  }
+  .grid > * { border-right: var(--rule) solid var(--ink); border-bottom: var(--rule) solid var(--ink); }
+
+
+  /* unallocated stall space — remainder of each hall row */
+  .cell-fill {
+    grid-column-end: -1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 64px;
+    background: transparent;
+    border-right: none !important;
+    border-bottom: none !important;
+    color: color-mix(in srgb, var(--ink) 62%, var(--paper));
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-align: center;
+    padding: 10px;
+  }
+  .cell-fill span { background: var(--paper); padding: 3px 10px; border: var(--rule) solid color-mix(in srgb, var(--ink) 45%, transparent); }
+
+  /* ============ CELLS ============ */
+
+  .cell {
+    --c-ink: var(--ink);
+    --c-paper: var(--paper);
+    --c-spot: var(--spot);
+    --c-mut: var(--mut);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: var(--c-paper);
+    color: var(--c-ink);
+    transition: background-color 90ms linear, color 90ms linear;
+  }
+  .cell:hover, .cell:focus-within {
+    --c-ink: var(--paper);
+    --c-paper: var(--ink);
+    --c-spot: var(--paper);
+    --c-mut: var(--mut-inv);
+  }
+
+  .cell--wide { grid-column: span 2; }
+
+  .cell-head {
+    display: flex;
+    align-items: stretch;
+    border-bottom: var(--rule) solid var(--c-ink);
+  }
+  .coord {
+    font-family: var(--display);
+    font-size: 21px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    padding: 5px 10px 3px;
+    border-right: var(--rule) solid var(--c-ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .headtags {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 8px;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--c-mut);
+  }
+  .price {
+    margin-left: auto;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    padding: 5px 10px 3px;
+    border-left: var(--rule) solid var(--c-ink);
+    font-family: var(--display);
+    font-size: 21px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .price .ono {
+    font-family: var(--text);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    color: var(--c-spot);
+  }
+  .price .trade-word {
+    font-family: var(--text);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    align-self: center;
+  }
+
+  /* duotone photo plates */
+  .photo {
+    overflow: hidden;
+    border-bottom: var(--rule) solid var(--c-ink);
+    background: color-mix(in srgb, currentColor 7%, transparent);
+  }
+  .photo svg { display: block; width: 100%; height: 100%; }
+  .photo--s { height: 92px; }
+  .photo--m { height: 122px; }
+  .photo--l { height: 152px; }
+  .photo--xl { height: 186px; }
+
+  .cell-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 10px 12px 11px;
+    gap: 7px;
+  }
+  .cell-title {
+    font-family: var(--display);
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.02;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+  }
+  .cell-title .yr {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--c-mut);
+    letter-spacing: 0.05em;
+  }
+
+  .tagrow { display: flex; flex-wrap: wrap; gap: 5px; }
+  .tag {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 1.5px solid var(--c-ink);
+    padding: 2px 6px 1px;
+  }
+  .tag--terms { border-color: var(--c-spot); color: var(--c-spot); }
+  .tag--mut { border-color: var(--c-mut); color: var(--c-mut); }
+
+  .itemlist {
+    list-style: none;
+    font-size: 13.5px;
+  }
+  .itemlist li {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 2.5px 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--c-ink) 30%, transparent);
+  }
+  .itemlist li:first-child { border-top: 1.5px solid var(--c-ink); }
+  .itemlist .cond { color: var(--c-mut); font-size: 11px; font-weight: 700; letter-spacing: 0.07em; white-space: nowrap; }
+
+  .note { font-size: 13.5px; color: var(--c-mut); }
+  .note b { color: var(--c-ink); font-weight: 600; }
+
+  .cell-foot {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-top: 8px;
+    border-top: 1px solid color-mix(in srgb, var(--c-ink) 30%, transparent);
+    font-size: 12.5px;
+  }
+  .seller { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
+  .seller .loc { color: var(--c-mut); font-weight: 400; }
+  .seal { display: inline-block; vertical-align: -2px; }
+
+  .circle-btn {
+    margin-left: auto;
+    appearance: none;
+    background: none;
+    border: none;
+    font-family: var(--text);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--c-spot);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1.5px;
+    cursor: pointer;
+    padding: 2px;
+    white-space: nowrap;
+  }
+  .circle-btn:hover { text-decoration-thickness: 3px; }
+
+  /* ============ BIRO MARKS (the one expressive element) ============ */
+
+  .biro {
+    position: absolute;
+    top: -9px;
+    left: -10px;
+    width: 118px;
+    height: 56px;
+    pointer-events: none;
+    color: var(--c-spot);
+    z-index: 2;
+  }
+  .biro path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 3.2;
+    stroke-linecap: round;
+    stroke-dasharray: 330;
+    stroke-dashoffset: 0;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .biro path { animation: birodraw 0.7s cubic-bezier(0.4, 0, 0.3, 1) backwards; }
+    .cell[data-biro='2'] .biro path { animation-delay: 0.9s; }
+    .cell[data-biro='1'] .biro path { animation-delay: 0.45s; }
+    @keyframes birodraw { from { stroke-dashoffset: 330; } to { stroke-dashoffset: 0; } }
+  }
+
+  .biro-tick {
+    position: absolute;
+    right: 6px;
+    top: 4px;
+    width: 22px;
+    height: 22px;
+    pointer-events: none;
+    color: var(--c-spot);
+    z-index: 2;
+  }
+  .biro-tick path { fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; }
+
+  /* ============ FOOTER / COLOPHON ============ */
+
+  .colophon {
+    margin-top: 40px;
+    border-top: 4px solid var(--ink);
+    padding-top: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 28px;
+    justify-content: space-between;
+    font-size: 12.5px;
+    color: var(--mut);
+  }
+  .colophon .c-title {
+    font-family: var(--display);
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+  .colophon a { color: var(--spot); font-weight: 600; }
+
+  .sr {
+    position: absolute;
+    width: 1px; height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* ============ RESPONSIVE ============ */
+
+  @media (max-width: 1080px) {
+    .grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 840px) {
+    .grid { grid-template-columns: repeat(2, 1fr); }
+    .masthead { padding: 20px 0 16px; }
+    .masthead-stamp { display: none; }
+    .filters { gap: 14px; }
+    .filters .tally { margin-left: 0; flex-basis: 100%; }
+  }
+  @media (max-width: 560px) {
+    body { font-size: 14px; }
+    .page { padding: 0 10px 48px; }
+    .grid { grid-template-columns: 1fr; }
+    .cell--wide { grid-column: span 1; }
+    .plate-line { font-size: 10.5px; gap: 8px; }
+    .plate-line span:nth-child(2) { display: none; }
+    .nav a { padding: 9px 12px; font-size: 15px; }
+    .hall-divider { padding: 7px 10px 6px; }
+    .hall-divider h2 { font-size: 21px; }
+    .photo--s { height: 104px; }
+    .photo--xl { height: 150px; }
+    .key .k-item:nth-child(n + 6) { display: none; }
+  }
+</style>
+
+<div class="page">
+
+  <!-- printed plate line -->
+  <div class="plate-line" role="presentation">
+    <span>Free entry · no fees · no commission at any stall</span>
+    <span>Community-run &amp; <span class="spot">open source</span></span>
+    <span>Aotearoa New Zealand · NZ$</span>
+  </div>
+
+  <!-- masthead -->
+  <header class="masthead">
+    <div class="masthead-title">
+      <h1>Meeple <span class="cart">Cart</span></h1>
+      <p class="masthead-sub">The Aotearoa board-game trading fair — catalogue of live offers</p>
+      <p class="masthead-issue">Spring sitting · compiled Monday 18 August 2026 · 13 stalls across 5 sections</p>
+    </div>
+    <div class="masthead-stamp" aria-hidden="true">
+      <!-- meeple stamp in spot -->
+      <svg width="46" height="46" viewBox="0 0 46 46">
+        <circle cx="23" cy="23" r="21.5" fill="none" stroke="#1240b4" stroke-width="2"/>
+        <path d="M23 9c3.4 0 5.6 2.5 5.6 5.4 0 1.9-.9 3.4-2 4.5 2.6 1.1 6.6 3.4 8.3 6.1 1.1 1.8-.1 3.2-1.8 3.2h-3.4c.9 2.6 2.7 5.4 2.7 6.9 0 1.3-1 1.9-2.2 1.9h-14.4c-1.2 0-2.2-.6-2.2-1.9 0-1.5 1.8-4.3 2.7-6.9h-3.4c-1.7 0-2.9-1.4-1.8-3.2 1.7-2.7 5.7-5 8.3-6.1-1.1-1.1-2-2.6-2-4.5C17.4 11.5 19.6 9 23 9z" fill="#1240b4"/>
+      </svg>
+      <span class="stamp-word">Stall-holder<br>approved</span>
+    </div>
+  </header>
+
+  <!-- nav as printed index tabs -->
+  <nav class="nav" aria-label="Main">
+    <a href="#" aria-current="page">Browse</a>
+    <a href="#">Wanted</a>
+    <a href="#">Messages <span class="count">2</span></a>
+    <a href="#">Trades <span class="count">1</span></a>
+    <a href="#" class="nav-me">
+      Chris B.
+      <!-- seedling seal: 2 pips -->
+      <svg class="seal" width="15" height="15" viewBox="0 0 16 16" aria-hidden="true">
+        <rect x="1" y="1" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"/>
+        <circle cx="5" cy="11" r="1.7" fill="currentColor"/><circle cx="11" cy="5" r="1.7" fill="currentColor"/>
+      </svg>
+      <span class="sr">— your trust tier: Seedling</span>
+    </a>
+  </nav>
+
+  <!-- filter row -->
+  <form class="filters" aria-label="Filter the catalogue">
+    <div class="filter">
+      <label class="flabel" for="f-section">Section</label>
+      <select id="f-section">
+        <option>All halls</option>
+        <option>AK — Auckland</option>
+        <option>WG — Wellington</option>
+        <option>CH — Christchurch</option>
+        <option>DN — Dunedin</option>
+        <option>HM — Hamilton</option>
+        <option>TR — Tauranga</option>
+        <option>PN — Palmerston North</option>
+        <option>NL — Nelson</option>
+      </select>
+    </div>
+    <fieldset class="filter" style="border:0">
+      <legend class="flabel">Terms</legend>
+      <div class="seg">
+        <label>Sell <input type="radio" name="terms"></label>
+        <label>Trade <input type="radio" name="terms"></label>
+        <label>Both <input type="radio" name="terms" checked></label>
+      </div>
+    </fieldset>
+    <div class="filter">
+      <span class="flabel" aria-hidden="true">Shipping</span>
+      <label class="checkline"><input type="checkbox"> Can post</label>
+    </div>
+    <p class="tally"><b>13</b> stalls on this page</p>
+  </form>
+
+  <!-- key -->
+  <p class="key">
+    <span class="k-word">Key</span>
+    <span class="k-item"><svg class="seal" width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><rect x="1" y="1" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="8" r="1.7" fill="currentColor"/></svg> New</span>
+    <span class="k-item"><svg class="seal" width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><rect x="1" y="1" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="5" cy="11" r="1.7" fill="currentColor"/><circle cx="11" cy="5" r="1.7" fill="currentColor"/></svg> Seedling</span>
+    <span class="k-item"><svg class="seal" width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><rect x="1" y="1" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="4.5" cy="11.5" r="1.7" fill="currentColor"/><circle cx="8" cy="8" r="1.7" fill="currentColor"/><circle cx="11.5" cy="4.5" r="1.7" fill="currentColor"/></svg> Growing</span>
+    <span class="k-item"><svg class="seal" width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><rect x="1" y="1" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="5" cy="5" r="1.7" fill="currentColor"/><circle cx="11" cy="5" r="1.7" fill="currentColor"/><circle cx="5" cy="11" r="1.7" fill="currentColor"/><circle cx="11" cy="11" r="1.7" fill="currentColor"/></svg> Established</span>
+    <span class="k-item"><svg class="seal" width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><rect x="1" y="1" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="4.5" cy="4.5" r="1.7" fill="currentColor"/><circle cx="11.5" cy="4.5" r="1.7" fill="currentColor"/><circle cx="8" cy="8" r="1.7" fill="currentColor"/><circle cx="4.5" cy="11.5" r="1.7" fill="currentColor"/><circle cx="11.5" cy="11.5" r="1.7" fill="currentColor"/></svg> Trusted</span>
+    <span class="k-item k-circ"><svg width="26" height="14" viewBox="0 0 40 22" aria-hidden="true"><path d="M8 12C6 5 18 2 27 3.5 36 5 38 12 32 16.5 26 21 8 20 5 14 3.5 10.5 9 6 15 5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg> circled — you're watching it</span>
+    <span class="k-item">ONO = or near offer</span>
+  </p>
+
+  <main>
+
+    <!-- =========== SECTION AK =========== -->
+    <section class="hall" aria-labelledby="hall-ak">
+      <header class="hall-divider">
+        <h2 id="hall-ak">Section AK — Auckland</h2>
+        <span class="hall-meta">Stalls 01–05 · Hall A</span>
+      </header>
+      <div class="grid">
+
+        <!-- AK-01 Wingspan -->
+        <article class="cell">
+          <header class="cell-head">
+            <span class="coord">AK-01</span>
+            <span class="price">$95 <span class="ono">ONO</span></span>
+          </header>
+          <div class="photo photo--m" aria-hidden="true">
+            <svg viewBox="0 0 240 122" preserveAspectRatio="xMidYMid slice">
+              <defs><pattern id="ht1" width="7" height="7" patternUnits="userSpaceOnUse"><circle cx="3.5" cy="3.5" r="1.15" fill="currentColor"/></pattern></defs>
+              <rect width="240" height="122" fill="url(#ht1)" opacity="0.28"/>
+              <g transform="rotate(-2 120 61)">
+                <path d="M52 88c20-34 52-52 96-50-14 8-20 16-22 26 18-4 34-2 48 6-22 2-38 8-48 18-12 12-40 14-74 0z" fill="currentColor" opacity="0.82"/>
+                <circle cx="150" cy="44" r="3.5" fill="currentColor"/>
+              </g>
+            </svg>
+          </div>
+          <div class="cell-body">
+            <h3 class="cell-title">Wingspan <span class="yr">2019</span></h3>
+            <div class="tagrow">
+              <span class="tag">Cond · Excellent</span>
+              <span class="tag--terms tag">Posts</span>
+              <span class="tag--terms tag">Trade OK</span>
+            </div>
+            <p class="note">Sleeved, swift-start pack included. Would trade for <b>Ark Nova</b> straight up.</p>
+            <footer class="cell-foot">
+              <span class="seller">
+                Aroha T.
+                <svg class="seal" width="14" height="14" viewBox="0 0 16 16" role="img" aria-label="Trust tier: Established"><rect x="1" y="1" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="5" cy="5" r="1.7" fill="currentColor"/><circle cx="11" cy="5" r="1.7" fill="currentColor"/><circle cx="5" cy="11" r="1.7" fill="currentColor"/><circle cx="11" cy="11" r="1.7" fill="currentColor"/></svg>
+                <span class="loc">Ponsonby</span>
+              </span>
+              <button class="circle-btn" type="button">Circle it</button>
+            </footer>
+          </div>
+        </article>
+
+        <!-- AK-02/03 Everdell bundle — FEATURED, 2 cells -->
+        <article class="cell cell--wide">
+          <header class="cell-head">
+            <span class="coord">AK-02</span>
+            <span class="headtags">Featured stall · bundle of 3</span>
+            <span class="price">$220 <span class="trade-word">or trade offers</span></span>
+          </header>
+          <div class="photo photo--m" aria-hidden="true">
+            <svg viewBox="0 0 500 122" preserveAspectRatio="xMidYMid slice">
+              <defs><pattern id="ht2" width="6" height="6" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="0.95" fill="currentColor"/></pattern></defs>
+              <rect width="500" height="122" fill="url(#ht2)" opacity="0.3"/>
+              <g transform="rotate(1.5 250 61)">
+                <rect x="228" y="52" width="22" height="62" fill="currentColor" opacity="0.85"/>
+                <circle cx="239" cy="34" r="34" fill="currentColor" opacity="0.62"/>
+                <circle cx="204" cy="52" r="22" fill="currentColor" opacity="0.5"/>
+                <circle cx="276" cy="50" r="25" fill="currentColor" opacity="0.5"/>
+                <circle cx="120" cy="82" r="16" fill="currentColor" opacity="0.35"/>
+                <circle cx="382" cy="78" r="19" fill="currentColor" opacity="0.35"/>
+                <path d="M0 112h500" stroke="currentColor" stroke-width="3" opacity="0.7"/>
+              </g>
+            </svg>
+          </div>
+          <div class="cell-body">
+            <h3 class="cell-title">Everdell + Expansions Bundle</h3>
+            <ul class="itemlist">
+              <li>Everdell (base, collector's ed.) <span class="cond">Excellent</span></li>
+              <li>Pearlbrook expansion <span class="cond">Mint</span></li>
+              <li>Spirecrest expansion <span class="cond">Excellent</span></li>
+            </ul>
+            <div class="tagrow">
+              <span class="tag--terms tag">Posts</span>
+              <span class="tag--terms tag">Trade OK</span>
+              <span class="tag--mut tag">Bundle only</span>
+            </div>
+            <p class="note">Not splitting, sorry — it goes as one lot. Wooden Ever Tree assembled once and it lives upright on the shelf. Keen on heavy euros in trade: Brass, Barrage, that end of the shelf.</p>
+            <footer class="cell-foot">
+              <span class="seller">
+                Sam K.
+                <svg class="seal" width="14" height="14" viewBox="0 0 16 16" role="img" aria-label="Trust tier: Trusted"><rect x="1" y="1" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="4.5" cy="4.5" r="1.7" fill="currentColor"/><circle cx="11.5" cy="4.5" r="1.7" fill="currentColor"/><circle cx="8" cy="8" r="1.7" fill="currentColor"/><circle cx="4.5" cy="11.5" r="1.7" fill="currentColor"/><circle cx="11.5" cy="11.5" r="1.7" fill="currentColor"/></svg>
+                <span class="loc">Mt Eden</span>
+              </span>
+              <button class="circle-btn" type="button">Circle it</button>
+            </footer>
+          </div>
+        </article>
+
+        <!-- AK-04 Azul — WATCHED (biro circle 1) -->
+        <article class="cell" data-biro="1">
+          <svg class="biro" viewBox="0 0 118 56" aria-hidden="true">
+            <path d="M16 30C12 12 44 4 72 6c26 2 40 10 38 24-2 15-30 22-62 20C22 48 8 40 12 26 15 16 30 9 46 8"/>
+          </svg>
+          <header class="cell-head">
+            <span class="coord">AK-04</span>
+            <span class="price">$45</span>
+          </header>
+          <div class="photo photo--s" aria-hidden="true">
+            <svg viewBox="0 0 240 92" preserveAspectRatio="xMidYMid slice">
+              <g transform="rotate(-3 120 46)">
+                <g fill="currentColor">
+                  <rect x="52" y="18" width="24" height="24" opacity="0.8" transform="rotate(45 64 30)"/>
+                  <rect x="96" y="18" width="24" height="24" opacity="0.45" transform="rotate(45 108 30)"/>
+                  <rect x="140" y="18" width="24" height="24" opacity="0.65" transform="rotate(45 152 30)"/>
+                  <rect x="74" y="52" width="24" height="24" opacity="0.5" transform="rotate(45 86 64)"/>
+                  <rect x="118" y="52" width="24" height="24" opacity="0.85" transform="rotate(45 130 64)"/>
+                  <rect x="162" y="52" width="24" height="24" opacity="0.4" transform="rotate(45 174 64)"/>
+                </g>
+              </g>
+            </svg>
+          </div>
+          <div class="cell-body">
+            <h3 class="cell-title">Azul <span class="yr">2017</span></h3>
+            <div class="tagrow">
+              <span class="tag">Cond · Good</span>
+              <span class="tag--terms tag">Posts</span>
+              <span class="tag--mut tag">Sell only</span>
+            </div>
+            <p class="note">Box corners a bit soft, tiles perfect.</p>
+            <footer class="cell-foot">
+              <span class="seller">
+                Priya N.
+                <svg class="seal" width="14" height="14" viewBox="0 0 16 16" role="img" aria-label="Trust tier: Growing"><rect x="1" y="1" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="4.5" cy="11.5" r="1.7" fill="currentColor"/><circle cx="8" cy="8" r="1.7" fill="currentColor"/><circle cx="11.5" cy="4.5" r="1.7" fill="currentColor"/></svg>
+                <span class="loc">Henderson</span>
+              </span>
+              <button class="circle-btn" type="button">Circled ✓<span class="sr"> — remove from watchlist</span></button>
+            </footer>
+          </div>
+        </article>
+
+        <!-- AK-05 Brass -->
+        <article class="cell">
+          <header class="cell-head">
+            <span class="coord">AK-05</span>
+            <span class="price">$120</span>
+          </header>
+          <div class="photo photo--l" aria-hidden="true">
+            <svg viewBox="0 0 240 152" preserveAspectRatio="xMidYMid slice">
+              <defs><pattern id="hx1" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="1.4" fill="currentColor"/></pattern></defs>
+              <rect width="240" height="152" fill="url(#hx1)" opacity="0.22"/>
+              <g transform="rotate(2 120 76)" fill="currentColor">
+                <rect x="46" y="66" width="18" height="62" opacity="0.85"/>
+                <rect x="78" y="46" width="14" height="82" opacity="0.7"/>
+                <rect x="150" y="58" width="20" height="70" opacity="0.8"/>
+                <circle cx="120" cy="56" r="24" fill="none" stroke="currentColor" stroke-width="6" opacity="0.75"/>
+                <circle cx="120" cy="56" r="8" opacity="0.75"/>
+                <path d="M30 128h180" stroke="currentColor" stroke-width="4"/>
+              </g>
+            </svg>
+          </div>
+          <div class="cell-body">
+            <h3 class="cell-title">Brass: Birmingham <span class="yr">2018</span></h3>
+            <div class="tagrow">
+              <span class="tag">Cond · Mint</span>
+              <span class="tag--mut tag">Pickup only</span>
+              <span class="tag--mut tag">Sell only</span>
+            </div>
+            <p class="note">Played twice, still smells new. Firm on price. Central Auckland pickup, evenings and weekends.</p>
+            <footer class="cell-foot">
+              <span class="seller">
+                Dave M.
+                <svg class="seal" width="14" height="14" viewBox="0 0 16 16" role="img" aria-label="Trust tier: Seedling"><rect x="1" y="1" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="5" cy="11" r="1.7" fill="currentColor"/><circle cx="11" cy="5" r="1.7" fill="currentColor"/></svg>
+                <span class="loc">Grey Lynn</span>
+              </span>
+              <button class="circle-btn" type="button">Circle it</button>
+            </footer>
+          </div>
+        </article>
+
+        <div class="cell-fill" aria-hidden="true"><span>Stall space available &mdash; listing is free</span></div>
+      </div>
+    </section>
+
+    <!-- =========== SECTION WG =========== -->
+    <section class="hall" aria-labelledby="hall-wg">
+      <header class="hall-divider">
+        <h2 id="hall-wg">Section WG — Wellington</h2>
+        <span class="hall-meta">Stalls 01–03 · Hall B</span>
+      </header>
+      <div class="grid">
+
+        <!-- WG-01 Root — WATCHED (biro circle 2) -->
+        <article class="cell" data-biro="2">
+          <svg class="biro" viewBox="0 0 118 56" aria-hidden="true">
+            <path d="M14 28C14 10 48 2 76 5c24 3 38 12 34 26-4 14-32 21-60 18C24 46 6 38 10 24 13 14 28 8 44 7"/>
+          </svg>
+          <svg class="biro-tick" viewBox="0 0 22 22" aria-hidden="true">
+            <path d="M4 12l5 6L19 4"/>
+          </svg>
+          <header class="cell-head">
+            <span class="coord">WG-01</span>
+            <span class="price">$110 <span class="ono">ONO</span></span>
+          </header>
+          <div class="photo photo--m" aria-hidden="true">
+            <svg viewBox="0 0 240 122" preserveAspectRatio="xMidYMid slice">
+              <g transform="rotate(-1.5 120 61)" fill="currentColor">
+                <path d="M120 96 76 42l18 4 8-24 18 20 18-20 8 24 18-4z" opacity="0.85"/>
+                <circle cx="104" cy="58" r="4" fill="var(--paper)"/>
+                <circle cx="136" cy="58" r="4" fill="var(--paper)"/>
+                <circle cx="52" cy="98" r="10" opacity="0.35"/>
+                <circle cx="190" cy="94" r="13" opacity="0.35"/>
+              </g>
+            </svg>
+          </div>
+          <div class="cell-body">
+            <h3 class="cell-title">Root + Riverfolk <span class="yr">2018</span></h3>
+            <div class="tagrow">
+              <span class="tag">Cond · Excellent</span>
+              <span class="tag--terms tag">Posts</span>
+              <span class="tag--terms tag">Trade OK</span>
+            </div>
+            <p class="note">Base + Riverfolk expansion together. Wants: <b>Oath</b>, <b>Arcs</b>, or cash.</p>
+            <footer class="cell-foot">
+              <span class="seller">
+                Hemi W.
+                <svg class="seal" width="14" height="14" viewBox="0 0 16 16" role="img" aria-label="Trust tier: Trusted"><rect x="1" y="1" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="4.5" cy="4.5" r="1.7" fill="currentColor"/><circle cx="11.5" cy="4.5" r="1.7" fill="currentColor"/><circle cx="8" cy="8" r="1.7" fill="currentColor"/><circle cx="4.5" cy="11.5" r="1.7" fill="currentColor"/><circle cx="11.5" cy="11.5" r="1.7" fill="currentColor"/></svg>
+                <span class="loc">Newtown</span>
+              </span>
+              <button class="circle-btn" type="button">Circled ✓<span class="sr"> — remove from watchlist</span></button>
+            </footer>
+          </div>
+        </article>
+
+        <!-- WG-02 Gloomhaven -->
+        <article class="cell">
+          <header class="cell-head">
+            <span class="coord">WG-02</span>
+            <span class="price">$140</span>
+          </header>
+          <div class="photo photo--s" aria-hidden="true">
+            <svg viewBox="0 0 240 92" preserveAspectRatio="xMidYMid slice">
+              <g transform="rotate(2.5 120 46)" fill="none" stroke="currentColor">
+                <path d="M120 8l32 18v36l-32 18-32-18V26z" stroke-width="5" opacity="0.85"/>
+                <path d="M62 26l20 11v22L62 70 42 59V37z" stroke-width="3.5" opacity="0.45"/>
+                <path d="M178 26l20 11v22l-20 11-20-11V37z" stroke-width="3.5" opacity="0.45"/>
+              </g>
+            </svg>
+          </div>
+          <div class="cell-body">
+            <h3 class="cell-title">Gloomhaven <span class="yr">2017</span></h3>
+            <div class="tagrow">
+              <span class="tag">Cond · Good</span>
+              <span class="tag--mut tag">Pickup only</span>
+              <span class="tag--mut tag">Sell only</span>
+            </div>
+            <p class="note">Party got to prosperity 5 before life happened, so some classes are unlocked and a few stickers are down — nothing that stops a fresh campaign with the removable sticker set. All minis present, cards sleeved, organised into a Folded Space insert. It's 10 kg; genuinely pickup only, sorry Palmy.</p>
+            <footer class="cell-foot">
+              <span class="seller">
+                Kat R.
+                <svg class="seal" width="14" height="14" viewBox="0 0 16 16" role="img" aria-label="Trust tier: Established"><rect x="1" y="1" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="5" cy="5" r="1.7" fill="currentColor"/><circle cx="11" cy="5" r="1.7" fill="currentColor"/><circle cx="5" cy="11" r="1.7" fill="currentColor"/><circle cx="11" cy="11" r="1.7" fill="currentColor"/></svg>
+                <span class="loc">Karori</span>
+              </span>
+              <button class="circle-btn" type="button">Circle it</button>
+            </footer>
+          </div>
+        </article>
+
+        <!-- WG-03 Spirit Island -->
+        <article class="cell">
+          <header class="cell-head">
+            <span class="coord">WG-03</span>
+            <span class="price">$90</span>
+          </header>
+          <div class="photo photo--l" aria-hidden="true">
+            <svg viewBox="0 0 240 152" preserveAspectRatio="xMidYMid slice">
+              <defs><pattern id="ht3" width="9" height="9" patternUnits="userSpaceOnUse"><circle cx="4.5" cy="4.5" r="1.3" fill="currentColor"/></pattern></defs>
+              <rect width="240" height="152" fill="url(#ht3)" opacity="0.2"/>
+              <g transform="rotate(-2 120 76)">
+                <path d="M64 96c6-30 28-48 56-48 30 0 50 20 54 48-20-8-36-10-54-6-20 4-38 6-56 6z" fill="currentColor" opacity="0.8"/>
+                <path d="M28 118c18 8 46 10 92 8 40-2 66 0 92-6M36 132c22 6 52 8 94 6 34-2 58 0 82-4" fill="none" stroke="currentColor" stroke-width="3.5" opacity="0.5"/>
+              </g>
+            </svg>
+          </div>
+          <div class="cell-body">
+            <h3 class="cell-title">Spirit Island <span class="yr">2017</span></h3>
+            <div class="tagrow">
+              <span class="tag">Cond · Excellent</span>
+              <span class="tag--terms tag">Posts</span>
+              <span class="tag--terms tag">Trade OK</span>
+            </div>
+            <p class="note">Base game, punched once, tokens bagged. Happy to courier anywhere in the motu.</p>
+            <footer class="cell-foot">
+              <span class="seller">
+                Jules F.
+                <svg class="seal" width="14" height="14" viewBox="0 0 16 16" role="img" aria-label="Trust tier: New"><rect x="1" y="1" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="8" r="1.7" fill="currentColor"/></svg>
+                <span class="loc">Te Aro</span>
+              </span>
+              <button class="circle-btn" type="button">Circle it</button>
+            </footer>
+          </div>
+        </article>
+
+        <div class="cell-fill" aria-hidden="true"><span>Stall space available &mdash; listing is free</span></div>
+      </div>
+    </section>
+
+    <!-- =========== SECTION CH =========== -->
+    <section class="hall" aria-labelledby="hall-ch">
+      <header class="hall-divider">
+        <h2 id="hall-ch">Section CH — Christchurch</h2>
+        <span class="hall-meta">Stalls 01–03 · Hall C</span>
+      </header>
+      <div class="grid">
+
+        <!-- CH-01 Ark Nova -->
+        <article class="cell">
+          <header class="cell-head">
+            <span class="coord">CH-01</span>
+            <span class="price">$105</span>
+          </header>
+          <div class="photo photo--m" aria-hidden="true">
+            <svg viewBox="0 0 240 122" preserveAspectRatio="xMidYMid slice">
+              <g transform="rotate(1.5 120 61)" fill="currentColor">
+                <path d="M120 18c26 14 34 40 22 66-8 16-22 24-22 24s-14-8-22-24c-12-26-4-52 22-66z" opacity="0.78"/>
+                <path d="M120 30v70M120 52c-8-6-14-6-22-4M120 66c8-6 14-6 22-4" fill="none" stroke="var(--paper)" stroke-width="3"/>
+                <circle cx="58" cy="92" r="10" opacity="0.35"/>
+                <circle cx="186" cy="88" r="12" opacity="0.35"/>
+              </g>
+            </svg>
+          </div>
+          <div class="cell-body">
+            <h3 class="cell-title">Ark Nova <span class="yr">2021</span></h3>
+            <div class="tagrow">
+              <span class="tag">Cond · Mint</span>
+              <span class="tag--terms tag">Posts</span>
+              <span class="tag--mut tag">Sell only</span>
+            </div>
+            <p class="note">Shrink off, played once. In over my head — it deserves a better zoo director.</p>
+            <footer class="cell-foot">
+              <span class="seller">
+                Ollie B.
+                <svg class="seal" width="14" height="14" viewBox="0 0 16 16" role="img" aria-label="Trust tier: Growing"><rect x="1" y="1" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="4.5" cy="11.5" r="1.7" fill="currentColor"/><circle cx="8" cy="8" r="1.7" fill="currentColor"/><circle cx="11.5" cy="4.5" r="1.7" fill="currentColor"/></svg>
+                <span class="loc">Riccarton</span>
+              </span>
+              <button class="circle-btn" type="button">Circle it</button>
+            </footer>
+          </div>
+        </article>
+
+        <!-- CH-02 Heat -->
+        <article class="cell">
+          <header class="cell-head">
+            <span class="coord">CH-02</span>
+            <span class="price">$70 <span class="ono">ONO</span></span>
+          </header>
+          <div class="photo photo--s" aria-hidden="true">
+            <svg viewBox="0 0 240 92" preserveAspectRatio="xMidYMid slice">
+              <g transform="rotate(-2 120 46)" fill="currentColor">
+                <path d="M60 58c10-14 26-20 48-20h36c12 0 22 6 26 14l6 6H54z" opacity="0.85"/>
+                <circle cx="88" cy="62" r="9" opacity="0.9"/>
+                <circle cx="152" cy="62" r="9" opacity="0.9"/>
+                <path d="M20 34h56M12 46h48M22 58h30" stroke="currentColor" stroke-width="3.5" opacity="0.5"/>
+              </g>
+            </svg>
+          </div>
+          <div class="cell-body">
+            <h3 class="cell-title">Heat: Pedal to the Metal <span class="yr">2022</span></h3>
+            <div class="tagrow">
+              <span class="tag">Cond · Excellent</span>
+              <span class="tag--terms tag">Posts</span>
+              <span class="tag--terms tag">Trade OK</span>
+            </div>
+            <p class="note">Family favourite that stopped hitting the table. Would swap for <b>Cascadia + cash</b> or hear near offers.</p>
+            <footer class="cell-foot">
+              <span class="seller">
+                Mere P.
+                <svg class="seal" width="14" height="14" viewBox="0 0 16 16" role="img" aria-label="Trust tier: Seedling"><rect x="1" y="1" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="5" cy="11" r="1.7" fill="currentColor"/><circle cx="11" cy="5" r="1.7" fill="currentColor"/></svg>
+                <span class="loc">Sydenham</span>
+              </span>
+              <button class="circle-btn" type="button">Circle it</button>
+            </footer>
+          </div>
+        </article>
+
+        <!-- CH-03 Carcassonne bundle -->
+        <article class="cell">
+          <header class="cell-head">
+            <span class="coord">CH-03</span>
+            <span class="price">$65</span>
+          </header>
+          <div class="photo photo--m" aria-hidden="true">
+            <svg viewBox="0 0 240 122" preserveAspectRatio="xMidYMid slice">
+              <g transform="rotate(3 120 61)" fill="currentColor">
+                <rect x="58" y="24" width="36" height="36" opacity="0.75"/>
+                <rect x="98" y="24" width="36" height="36" opacity="0.4"/>
+                <rect x="98" y="64" width="36" height="36" opacity="0.85"/>
+                <rect x="138" y="64" width="36" height="36" opacity="0.5"/>
+                <rect x="138" y="24" width="36" height="36" opacity="0.6"/>
+                <path d="M116 34l6 12h-12zM110 46h12v10h-12z" fill="var(--paper)"/>
+              </g>
+            </svg>
+          </div>
+          <div class="cell-body">
+            <h3 class="cell-title">Carcassonne + 3 Expansions</h3>
+            <ul class="itemlist">
+              <li>Carcassonne base <span class="cond">Good</span></li>
+              <li>Inns &amp; Cathedrals <span class="cond">Good</span></li>
+              <li>Traders &amp; Builders <span class="cond">Fair</span></li>
+              <li>The River <span class="cond">Good</span></li>
+            </ul>
+            <div class="tagrow">
+              <span class="tag--terms tag">Posts</span>
+              <span class="tag--mut tag">Sell only</span>
+            </div>
+            <p class="note">Well loved, all pieces counted twice. One meeple chewed by the dog (photographed, still stands).</p>
+            <footer class="cell-foot">
+              <span class="seller">
+                Nga H.
+                <svg class="seal" width="14" height="14" viewBox="0 0 16 16" role="img" aria-label="Trust tier: Growing"><rect x="1" y="1" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="4.5" cy="11.5" r="1.7" fill="currentColor"/><circle cx="8" cy="8" r="1.7" fill="currentColor"/><circle cx="11.5" cy="4.5" r="1.7" fill="currentColor"/></svg>
+                <span class="loc">New Brighton</span>
+              </span>
+              <button class="circle-btn" type="button">Circle it</button>
+            </footer>
+          </div>
+        </article>
+
+        <div class="cell-fill" aria-hidden="true"><span>Stall space available &mdash; listing is free</span></div>
+      </div>
+    </section>
+
+    <!-- =========== SECTION DN =========== -->
+    <section class="hall" aria-labelledby="hall-dn">
+      <header class="hall-divider">
+        <h2 id="hall-dn">Section DN — Dunedin</h2>
+        <span class="hall-meta">Stall 01 · Hall D</span>
+      </header>
+      <div class="grid">
+
+        <!-- DN-01 TI4 -->
+        <article class="cell">
+          <header class="cell-head">
+            <span class="coord">DN-01</span>
+            <span class="price">$150 <span class="ono">ONO</span></span>
+          </header>
+          <div class="photo photo--xl" aria-hidden="true">
+            <svg viewBox="0 0 240 186" preserveAspectRatio="xMidYMid slice">
+              <g fill="currentColor">
+                <circle cx="52" cy="34" r="1.8"/><circle cx="196" cy="26" r="1.4"/><circle cx="170" cy="150" r="1.8"/>
+                <circle cx="30" cy="130" r="1.4"/><circle cx="212" cy="92" r="1.6"/><circle cx="96" cy="16" r="1.4"/>
+              </g>
+              <g transform="rotate(-4 120 93)">
+                <circle cx="120" cy="92" r="42" fill="currentColor" opacity="0.8"/>
+                <ellipse cx="120" cy="92" rx="72" ry="18" fill="none" stroke="currentColor" stroke-width="4" opacity="0.6"/>
+                <circle cx="176" cy="46" r="8" fill="currentColor" opacity="0.5"/>
+              </g>
+            </svg>
+          </div>
+          <div class="cell-body">
+            <h3 class="cell-title">Twilight Imperium <span class="yr">4th ed · 2017</span></h3>
+            <div class="tagrow">
+              <span class="tag">Cond · Good</span>
+              <span class="tag--mut tag">Pickup only</span>
+              <span class="tag--terms tag">Trade OK</span>
+            </div>
+            <p class="note">The full galactic experience, honestly graded: box has shelf wear and one crushed corner, contents complete and tidy. Comes with a printed player-aid set and the good intentions of three abandoned eight-hour sessions. Would trade toward <b>Twilight Imperium: Prophecy of Kings</b> plus cash your way, or near offers. Dunedin pickup — it does not fit in a courier bag, believe me, I tried.</p>
+            <footer class="cell-foot">
+              <span class="seller">
+                Angus C.
+                <svg class="seal" width="14" height="14" viewBox="0 0 16 16" role="img" aria-label="Trust tier: Established"><rect x="1" y="1" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="5" cy="5" r="1.7" fill="currentColor"/><circle cx="11" cy="5" r="1.7" fill="currentColor"/><circle cx="5" cy="11" r="1.7" fill="currentColor"/><circle cx="11" cy="11" r="1.7" fill="currentColor"/></svg>
+                <span class="loc">North East Valley</span>
+              </span>
+              <button class="circle-btn" type="button">Circle it</button>
+            </footer>
+          </div>
+        </article>
+
+        <div class="cell-fill" aria-hidden="true"><span>Stall space available &mdash; listing is free</span></div>
+      </div>
+    </section>
+
+    <!-- =========== SECTION HM =========== -->
+    <section class="hall" aria-labelledby="hall-hm">
+      <header class="hall-divider">
+        <h2 id="hall-hm">Section HM — Hamilton</h2>
+        <span class="hall-meta">Stalls 01–02 · Hall E</span>
+      </header>
+      <div class="grid">
+
+        <!-- HM-01 Cascadia -->
+        <article class="cell">
+          <header class="cell-head">
+            <span class="coord">HM-01</span>
+            <span class="price">$55</span>
+          </header>
+          <div class="photo photo--m" aria-hidden="true">
+            <svg viewBox="0 0 240 122" preserveAspectRatio="xMidYMid slice">
+              <g transform="rotate(-1.5 120 61)" fill="currentColor">
+                <path d="M76 78 96 34l20 44z" opacity="0.8"/>
+                <path d="M118 78l16-34 16 34z" opacity="0.55"/>
+                <path d="M152 78l13-26 13 26z" opacity="0.7"/>
+                <path d="M30 96c24-8 46-8 70 0 26 8 52 8 84 0" fill="none" stroke="currentColor" stroke-width="4" opacity="0.5"/>
+              </g>
+            </svg>
+          </div>
+          <div class="cell-body">
+            <h3 class="cell-title">Cascadia <span class="yr">2021</span></h3>
+            <div class="tagrow">
+              <span class="tag">Cond · Excellent</span>
+              <span class="tag--terms tag">Posts</span>
+              <span class="tag--terms tag">Trade OK</span>
+            </div>
+            <p class="note">Landmarks promo tiles included.</p>
+            <footer class="cell-foot">
+              <span class="seller">
+                Tayla R.
+                <svg class="seal" width="14" height="14" viewBox="0 0 16 16" role="img" aria-label="Trust tier: New"><rect x="1" y="1" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="8" r="1.7" fill="currentColor"/></svg>
+                <span class="loc">Hillcrest</span>
+              </span>
+              <button class="circle-btn" type="button">Circle it</button>
+            </footer>
+          </div>
+        </article>
+
+        <!-- HM-02 Patchwork -->
+        <article class="cell">
+          <header class="cell-head">
+            <span class="coord">HM-02</span>
+            <span class="price">$30</span>
+          </header>
+          <div class="photo photo--s" aria-hidden="true">
+            <svg viewBox="0 0 240 92" preserveAspectRatio="xMidYMid slice">
+              <defs><pattern id="ht4" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M0 5h10M5 0v10" stroke="currentColor" stroke-width="1"/></pattern></defs>
+              <rect width="240" height="92" fill="url(#ht4)" opacity="0.2"/>
+              <g transform="rotate(2 120 46)" fill="currentColor">
+                <path d="M84 22h28v16h16v28H100v-16H84z" opacity="0.8"/>
+                <path d="M140 30h24v24h-12v12h-12z" opacity="0.5"/>
+                <rect x="60" y="48" width="16" height="16" opacity="0.6"/>
+              </g>
+            </svg>
+          </div>
+          <div class="cell-body">
+            <h3 class="cell-title">Patchwork <span class="yr">2014</span></h3>
+            <div class="tagrow">
+              <span class="tag">Cond · Fair</span>
+              <span class="tag--terms tag">Posts</span>
+              <span class="tag--mut tag">Sell only</span>
+            </div>
+            <p class="note">Buttons a bit scuffed, board fine. Cheap as — first courier bag out the door wins.</p>
+            <footer class="cell-foot">
+              <span class="seller">
+                Ben T.
+                <svg class="seal" width="14" height="14" viewBox="0 0 16 16" role="img" aria-label="Trust tier: Growing"><rect x="1" y="1" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="4.5" cy="11.5" r="1.7" fill="currentColor"/><circle cx="8" cy="8" r="1.7" fill="currentColor"/><circle cx="11.5" cy="4.5" r="1.7" fill="currentColor"/></svg>
+                <span class="loc">Frankton</span>
+              </span>
+              <button class="circle-btn" type="button">Circle it</button>
+            </footer>
+          </div>
+        </article>
+
+        <div class="cell-fill" aria-hidden="true"><span>Stall space available &mdash; listing is free</span></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- colophon -->
+  <footer class="colophon">
+    <div>
+      <p class="c-title">Meeple Cart</p>
+      <p>Free, community-run and open source. No stall pays for placement; no trade pays a cut.</p>
+    </div>
+    <p>Printed in one ink and one spot colour.<br>Circles are yours — bring your own biro.</p>
+    <p>Trades finish off-platform: bank transfer,<br>courier, or a car-park handover done right.</p>
+  </footer>
+
+</div>

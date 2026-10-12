@@ -1,0 +1,728 @@
+<!--
+  DIRECTION CONTRACT — Merged — Hubs
+  (companion page to 06.1 "Club Night — House Colours / Live fonts")
+
+  World statement:
+  The same club-night noticeboard as board.html — deep navy felt, slate ink,
+  emerald stamp pad, every notice opening with a printed status line — but this
+  page is the corkboard by the club door where the special programmes are
+  posted: Gift Cascades, Trade Parties, Group Buys. Three independent hubs,
+  each a full pinned notice of its own, laid out editorially (text/diagram
+  alternating, one full-width procedural band) rather than as a row of
+  identical cards. Emblems are drawn in the world's single-stroke style;
+  liveliness comes from one clearly-labelled illustration per hub, never
+  from invented participation numbers.
+
+  Palette tokens (verbatim from the incumbent app.css dark theme):
+    --board #050b1a · --panel #0f172a · --paper #111c2f · --paper-alt #19263b
+    --ghost rgba(148,163,184,.08) · --line rgba(148,163,184,.28)
+    --line-strong rgba(148,163,184,.42) · --ink #f8fafc · --ink-2 #d1d8e8
+    --ink-soft #8ea0c0 · --accent #34d399 · --accent-deep #10b981
+    --accent-soft rgba(52,211,153,.12) · --accent-contrast #022c22
+
+  Type pairing:
+    Display — Momo Trust Display, SINGLE 400 weight only; hierarchy by size
+              and tracking, never by weight. h1 ~42px, hub names 27px.
+    Body    — Inter 400/600/700, genuinely loaded.
+
+  System rules this world enforces:
+  1. Emerald is earned, never ambient: it appears only on actions (the quiet
+     hub links, buttons, focus rings, selection) and trust marks. Emblems,
+     diagrams and status lines print in slate ink.
+  2. Staged clarity: every hub notice opens with a printed status line in
+     fixed vocabulary (HUB · OPEN), same position on every notice.
+  3. Zero rotation on cards and chrome; rubber stamps remain the only angled
+     things — here the small "PAY IT FORWARD / ONE ROUND / SPLIT THE FREIGHT"
+     ink stamps beside each hub name land at ±2deg.
+  4. No fabricated aggregates: each hub may show ONE plausible individual
+     example, explicitly captioned as an illustration.
+  5. One authored motion moment: hovering the cascade illustration sets the
+     gift chain flowing (dashed connectors stream forward). Nothing else moves.
+-->
+<!doctype html>
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meeple Cart — Hubs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Momo+Trust+Display&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --board:#050b1a;
+    --panel:#0f172a;
+    --paper:#111c2f;
+    --paper-alt:#19263b;
+    --ghost:rgba(148,163,184,.08);
+    --line:rgba(148,163,184,.28);
+    --line-strong:rgba(148,163,184,.42);
+    --ink:#f8fafc;
+    --ink-2:#d1d8e8;
+    --ink-soft:#8ea0c0;
+    --accent:#34d399;
+    --accent-deep:#10b981;
+    --accent-soft:rgba(52,211,153,.12);
+    --accent-contrast:#022c22;
+    --shadow-card:0 1px 2px rgba(2,6,18,.5), 0 14px 30px -14px rgba(2,6,18,.6);
+    --shadow-lift:0 4px 10px rgba(2,6,18,.5), 0 26px 50px -18px rgba(2,6,18,.7);
+    --font-display:'Momo Trust Display', 'Trebuchet MS', 'Segoe UI', sans-serif;
+    --font-body:'Inter', 'Segoe UI', 'Helvetica Neue', sans-serif;
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; }
+
+  html{ scrollbar-color: #33415f var(--board); }
+  ::-webkit-scrollbar{ width:13px; }
+  ::-webkit-scrollbar-track{ background:var(--board); }
+  ::-webkit-scrollbar-thumb{ background:#33415f; border:3px solid var(--board); border-radius:8px; }
+  ::selection{ background:var(--accent); color:var(--accent-contrast); }
+
+  body{
+    font-family:var(--font-body);
+    font-size:16px;
+    line-height:1.5;
+    color:var(--ink);
+    background-color:var(--board);
+    /* felt-board pinholes — pure CSS, barely there */
+    background-image:radial-gradient(rgba(148,163,184,.05) 1px, transparent 1.4px);
+    background-size:23px 23px;
+    min-height:100vh;
+  }
+
+  a{ color:inherit; }
+  :focus-visible{ outline:2px solid var(--accent); outline-offset:2px; border-radius:2px; }
+
+  .wrap{ max-width:1500px; margin:0 auto; padding:0 40px; }
+
+  /* ---------- Header ---------- */
+
+  .site-head{
+    display:flex; align-items:center; gap:28px; flex-wrap:wrap;
+    padding:22px 0 18px;
+    border-bottom:1px solid var(--line);
+  }
+  .logo{
+    display:flex; align-items:center; gap:10px;
+    text-decoration:none;
+  }
+  .logo svg{ display:block; }
+  .logo-word{
+    font-family:var(--font-display);
+    font-weight:400; /* Momo ships in 400 only — never heavier */
+    font-size:26px;
+    line-height:1;
+    letter-spacing:.01em;
+  }
+
+  .site-nav{ display:flex; align-items:center; gap:4px; flex-wrap:wrap; margin-inline:auto; }
+  .site-nav a{
+    position:relative;
+    display:inline-flex; align-items:center; gap:7px;
+    text-decoration:none;
+    font-weight:600;
+    font-size:16px;
+    padding:8px 14px;
+    border-radius:4px;
+    color:var(--ink-soft);
+  }
+  .site-nav a:hover{ color:var(--ink); background:var(--ghost); }
+  .site-nav a[aria-current="page"]{ color:var(--ink); }
+  .site-nav a[aria-current="page"]::after{
+    content:"";
+    position:absolute; left:12px; right:12px; bottom:2px;
+    height:3px; border-radius:2px;
+    background:var(--accent);
+  }
+  .nav-badge{
+    font-size:12px; font-weight:700;
+    min-width:20px; height:20px;
+    display:inline-grid; place-items:center;
+    padding:0 5px;
+    border-radius:10px;
+    background:var(--accent); color:var(--accent-contrast);
+  }
+
+
+  .bell{
+    position:relative;
+    display:grid; place-items:center;
+    width:38px; height:38px;
+    border-radius:4px;
+    color:var(--ink-soft);
+    text-decoration:none;
+    transition:color .15s ease, background .15s ease;
+  }
+  .bell:hover{ color:var(--ink); background:var(--ghost); }
+  .bell .nav-badge{ position:absolute; top:-1px; right:-3px; }
+
+  .head-actions{ display:flex; align-items:center; gap:16px; }
+  .btn-pin{
+    font-family:var(--font-body);
+    font-weight:700; font-size:15px;
+    color:var(--accent-contrast);
+    background:var(--accent);
+    border:none; cursor:pointer;
+    padding:10px 18px 11px;
+    border-radius:4px;
+    box-shadow:0 3px 0 rgba(2,44,34,.65);
+    text-decoration:none;
+    display:inline-flex; align-items:center; gap:8px;
+    transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+  .btn-pin:hover{ background:var(--accent-deep); transform:translateY(1px); box-shadow:0 2px 0 rgba(2,44,34,.65); }
+  .avatar-self{
+    width:40px; height:40px; border-radius:50%;
+    display:grid; place-items:center;
+    background:var(--paper-alt); border:2px solid var(--line-strong);
+    font-family:var(--font-body); font-weight:700; font-size:14px; letter-spacing:.04em;
+    color:var(--ink); text-decoration:none;
+  }
+  .avatar-self:hover{ border-color:var(--ink-soft); }
+
+  /* ---------- Page intro ---------- */
+
+  .intro{ padding:44px 0 8px; }
+  .intro h1{
+    font-family:var(--font-display);
+    font-weight:400; /* single-weight face; scale carries the hierarchy */
+    font-size:clamp(32px, 4.2vw, 44px);
+    line-height:1.12;
+    letter-spacing:0;
+  }
+  .intro p{
+    margin-top:10px;
+    max-width:62ch;
+    font-size:17px;
+    color:var(--ink-2);
+  }
+
+  /* ---------- Hub notices ---------- */
+
+  .hubs{
+    padding:34px 0 30px;
+    display:grid;
+    gap:44px;
+  }
+
+  .hub{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:3px;
+    box-shadow:var(--shadow-card);
+  }
+
+  /* staged clarity: every notice opens with a printed status line */
+  .status{
+    font-size:11.5px;
+    font-weight:700;
+    letter-spacing:.14em;
+    color:var(--ink-soft);
+    background:var(--paper-alt);
+    border-bottom:1px solid var(--line);
+    border-radius:3px 3px 0 0;
+    padding:9px 22px 8px;
+  }
+
+  .hub-cols{
+    display:grid;
+    grid-template-columns:minmax(0,1.02fr) minmax(0,.98fr);
+    gap:14px 44px;
+    padding:28px 30px 30px;
+    align-items:start;
+  }
+  .hub-cols.flip .hub-text{ order:2; }
+  .hub-cols.flip .illus{ order:1; }
+
+  .hub-name-row{
+    display:flex; align-items:center; gap:18px; flex-wrap:wrap;
+  }
+  .hub-emblem{ flex:none; color:var(--ink-2); }
+  .hub h2{
+    font-family:var(--font-display);
+    font-weight:400; /* single-weight face — size does the work */
+    font-size:27px;
+    line-height:1.2;
+  }
+  /* the small ink stamp beside each name — stamps are the one angled thing */
+  .hub-mark{
+    display:inline-block;
+    font-size:11px; font-weight:700; letter-spacing:.18em;
+    color:var(--ink-soft);
+    border:2px solid var(--ink-soft);
+    border-radius:3px;
+    padding:4px 9px 4px 11px;
+    transform:rotate(-2deg);
+    opacity:.9;
+    white-space:nowrap;
+  }
+  .hub-parties .hub-mark{ transform:rotate(1.6deg); }
+  .hub-groupbuys .hub-mark{ transform:rotate(-1.4deg); }
+
+  .hub-text p{
+    margin-top:14px;
+    font-size:15.5px;
+    line-height:1.6;
+    color:var(--ink-2);
+    max-width:52ch;
+  }
+
+  .msg{
+    display:inline-flex; align-items:center; gap:8px;
+    font-weight:700; font-size:15px;
+    color:var(--accent);
+    text-decoration:none;
+    border-bottom:2px solid transparent;
+    padding-bottom:1px;
+    margin-top:20px;
+  }
+  .msg:hover{ color:var(--accent-deep); border-bottom-color:var(--accent-deep); }
+  .msg svg{ transition:transform .18s ease; }
+  .msg:hover svg{ transform:translateX(3px); }
+
+  /* ---------- Illustration panels ---------- */
+
+  .illus{
+    background:var(--paper-alt);
+    border:1px solid var(--line);
+    border-radius:3px;
+    padding:18px 20px 20px;
+  }
+  .illus figcaption{
+    font-size:12px; font-weight:700; letter-spacing:.12em;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+  }
+  .illus figcaption em{ font-style:normal; font-weight:600; letter-spacing:.06em; opacity:.8; }
+
+  /* cascade flow diagram */
+  .flow{
+    display:flex; align-items:flex-start; gap:6px;
+    margin-top:18px;
+    flex-wrap:nowrap;
+  }
+  .flow-node{
+    flex:1; min-width:0;
+    display:grid; justify-items:center; gap:5px;
+    text-align:center;
+  }
+  .flow-avatar{
+    width:46px; height:46px; border-radius:50%;
+    display:grid; place-items:center;
+    background:var(--paper);
+    border:1.5px solid var(--line-strong);
+    font-weight:700; font-size:14px; letter-spacing:.04em;
+    color:var(--ink);
+  }
+  .flow-node.next .flow-avatar{ border-style:dashed; color:var(--ink-soft); }
+  .flow-name{ font-size:13px; font-weight:600; color:var(--ink); }
+  .flow-node.next .flow-name{ color:var(--ink-soft); }
+  .flow-gift{ font-size:12.5px; color:var(--ink-soft); line-height:1.35; }
+  .flow-arrow{ flex:none; margin-top:16px; color:var(--ink-soft); }
+  .flow-arrow .dash{ stroke-dasharray:6 5; }
+
+  /* the ONE authored motion moment: hover the illustration, the chain flows */
+  .illus-cascade:hover .flow-arrow .dash{
+    animation:flowdash .9s linear infinite;
+  }
+  @keyframes flowdash{
+    to{ stroke-dashoffset:-11; }
+  }
+
+  /* group-buy split diagram */
+  .split{ margin-top:14px; }
+  .split svg{ display:block; width:100%; max-width:560px; height:auto; margin:0 auto; }
+
+  /* ---------- Trade Parties: full-width procedural band ---------- */
+
+  .hub-band{ padding:28px 30px 30px; }
+  .hub-band .hub-text p{ max-width:66ch; }
+
+  .steps{
+    list-style:none;
+    counter-reset:step;
+    display:grid;
+    grid-template-columns:repeat(3, minmax(0,1fr));
+    gap:0 34px;
+    margin-top:26px;
+    border-top:1px solid var(--line);
+  }
+  .steps li{
+    counter-increment:step;
+    padding:16px 0 4px;
+    position:relative;
+  }
+  .steps li + li::before{
+    content:"";
+    position:absolute; left:-17px; top:16px; bottom:4px;
+    border-left:1px dashed var(--line);
+  }
+  .step-head{
+    display:flex; align-items:center; gap:10px;
+    color:var(--ink);
+    font-weight:700; font-size:15px;
+  }
+  .step-head::before{
+    content:counter(step);
+    font-family:var(--font-display);
+    font-weight:400;
+    font-size:21px;
+    color:var(--ink-soft);
+    min-width:22px;
+  }
+  .step-head svg{ color:var(--ink-soft); flex:none; }
+  .steps li p{
+    margin-top:7px;
+    font-size:14.5px; line-height:1.55;
+    color:var(--ink-soft);
+    max-width:38ch;
+  }
+
+  /* full-width board: give the illustrations the extra room, keep the prose measured */
+  @media (min-width:1200px){
+    .hub-cols{
+      grid-template-columns:minmax(0,.86fr) minmax(0,1.14fr);
+      padding:30px 34px 32px;
+      column-gap:52px;
+    }
+    .hub-cols.flip{ grid-template-columns:minmax(0,1.14fr) minmax(0,.86fr); }
+    .hub-text p{ max-width:58ch; }
+    .hub-band{ padding:30px 34px 32px; }
+    .steps li p{ max-width:46ch; }
+  }
+
+  /* ---------- Footer ---------- */
+
+  .site-foot{
+    border-top:1px solid var(--line);
+    padding:26px 0 34px;
+    display:flex; align-items:center; gap:10px 28px; flex-wrap:wrap;
+    color:var(--ink-soft);
+    font-size:14.5px;
+  }
+  .site-foot p strong{ color:var(--ink); font-weight:700; }
+  .site-foot nav{ display:flex; gap:20px; margin-left:auto; }
+  .site-foot a{ color:var(--ink-soft); text-decoration:underline; text-underline-offset:3px; }
+  .site-foot a:hover{ color:var(--accent); }
+
+  /* ---------- Responsive ---------- */
+
+  @media (max-width:980px){
+    .hub-cols{ grid-template-columns:1fr; gap:22px; }
+    .hub-cols.flip .hub-text{ order:1; }
+    .hub-cols.flip .illus{ order:2; }
+    .steps{ grid-template-columns:1fr; gap:2px; }
+    .steps li + li::before{ display:none; }
+    .steps li{ border-top:1px dashed var(--line); }
+    .steps li:first-child{ border-top:none; }
+  }
+  @media (max-width:760px){
+    .wrap{ padding:0 18px; }
+    .site-head{ gap:14px; padding-top:16px; }
+    .site-nav{ order:3; width:100%; margin-inline:0; justify-content:flex-start; }
+    .head-actions{ margin-left:auto; }
+    .intro{ padding-top:30px; }
+    .hubs{ gap:30px; }
+    .hub-cols, .hub-band{ padding:22px 18px 24px; }
+    .flow{ flex-direction:column; align-items:stretch; gap:10px; }
+    .flow-node{ grid-template-columns:46px 1fr; grid-template-rows:auto auto; justify-items:start; text-align:left; column-gap:14px; }
+    .flow-node .flow-avatar{ grid-row:1 / span 2; }
+    .flow-arrow{ margin:0 0 0 15px; transform:rotate(90deg); transform-origin:16px 8px; }
+  }
+  @media (max-width:430px){
+    .wrap{ padding:0 12px; }
+    .logo-word{ font-size:22px; }
+    .btn-pin{ padding:9px 13px 10px; font-size:14px; }
+    .site-nav a{ padding:7px 9px; font-size:15px; }
+    .intro p{ font-size:16px; }
+    .hub h2{ font-size:24px; }
+    .hub-emblem{ width:64px; height:64px; }
+    .site-foot nav{ margin-left:0; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .btn-pin, .bell, .msg svg{ transition:none; }
+    .illus-cascade:hover .flow-arrow .dash{ animation:none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- reusable drawn symbols — one stroke style: stroke-width 2 (marks) / 1.8 (16px icons), round caps -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- 16px icon set -->
+    <g id="i-loc" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M8 14.2S3.2 9.8 3.2 6.6a4.8 4.8 0 0 1 9.6 0c0 3.2-4.8 7.6-4.8 7.6Z"/>
+      <circle cx="8" cy="6.6" r="1.6"/>
+    </g>
+    <g id="i-parcel" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2.6 5.6 8 3l5.4 2.6v6L8 14.2l-5.4-2.6Z"/>
+      <path d="M2.6 5.6 8 8.2l5.4-2.6M8 8.2v6"/>
+    </g>
+    <g id="i-noparcel" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2.6 5.6 8 3l5.4 2.6v6L8 14.2l-5.4-2.6Z"/>
+      <path d="M2.6 5.6 8 8.2l5.4-2.6M8 8.2v6"/>
+      <path d="M1.6 14.4 14.4 1.6"/>
+    </g>
+    <g id="i-swap" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3.4 5h9.2m0 0L10 2.4M12.6 5 10 7.6"/>
+      <path d="M12.6 11H3.4m0 0L6 8.4M3.4 11 6 13.6"/>
+    </g>
+    <g id="i-star" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m8 2.2 1.8 3.7 4 .6-2.9 2.9.7 4L8 11.5l-3.6 1.9.7-4L2.2 6.5l4-.6Z"/>
+    </g>
+    <g id="i-arrow" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2.6 8h10.8m0 0L9.6 4.2M13.4 8l-3.8 3.8"/>
+    </g>
+    <g id="i-bell" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M8 2a3.8 3.8 0 0 0-3.8 3.8v2.7l-1.3 2.4h10.2l-1.3-2.4V5.8A3.8 3.8 0 0 0 8 2Z"/>
+      <path d="M6.5 13.1a1.6 1.6 0 0 0 3 0"/>
+    </g>
+    <!-- 16px list icon (Trade Parties steps) -->
+    <g id="i-list" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="1.8" width="10" height="12.4" rx="1.5"/>
+      <path d="M5.6 5.4h4.8M5.6 8h4.8M5.6 10.6h3"/>
+    </g>
+    <!-- little meeple, filled -->
+    <path id="i-meeple" d="M12 3.2c1.9 0 3.4 1.5 3.4 3.4 0 1.2-.6 2.3-1.5 2.9 2.4.5 4.7 1.7 4.7 3.6 0 1-.8 1.7-1.8 1.7h-2.9l2.3 4.2c.5.9-.2 1.9-1.2 1.9h-6c-1 0-1.7-1-1.2-1.9l2.3-4.2H7.2c-1 0-1.8-.7-1.8-1.7 0-1.9 2.3-3.1 4.7-3.6-.9-.6-1.5-1.7-1.5-2.9 0-1.9 1.5-3.4 3.4-3.4Z"/>
+  </defs>
+</svg>
+
+<header class="wrap site-head">
+  <a class="logo" href="#" aria-label="Meeple Cart home">
+    <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true">
+      <use href="#i-meeple" fill="var(--ink)" transform="translate(0 -1)"/>
+    </svg>
+    <span class="logo-word">Meeple Cart</span>
+  </a>
+
+  <nav class="site-nav" aria-label="Main">
+    <a href="board.html">Board</a>
+    <a href="browse.html">Browse</a>
+    <a href="chat.html">Chat</a>
+    <a href="hubs.html" aria-current="page">Hubs</a>
+  </nav>
+
+  <div class="head-actions">
+    <a class="bell" href="#" aria-label="Notifications and messages — 2 unread">
+      <svg width="20" height="20" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-bell"/></svg>
+      <span class="nav-badge" aria-hidden="true">2</span>
+    </a>
+    <a class="btn-pin" href="pin.html">
+      <svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><g stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M8 3v10M3 8h10"/></g></svg>
+      Pin a listing
+    </a>
+    <a class="avatar-self" href="profile.html" aria-label="Your profile — CB">CB</a>
+  </div>
+</header>
+
+<section class="wrap intro">
+  <h1>Hubs</h1>
+  <p>Independent Meeple Cart hubs for special ways to trade and share games. They sit beside the board, not in it — run by members, free like everything else.</p>
+</section>
+
+<main class="wrap hubs" aria-label="Hubs">
+
+  <!-- ── Gift Cascades ─────────────────────────────────────────── -->
+  <section class="hub hub-cascade" aria-labelledby="h-cascades">
+    <p class="status">HUB · OPEN</p>
+    <div class="hub-cols">
+      <div class="hub-text">
+        <div class="hub-name-row">
+          <svg class="hub-emblem" width="84" height="84" viewBox="0 0 96 96" role="img" aria-label="Gift Cascades emblem: three gifts passed down a chain">
+            <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <!-- gift one -->
+              <rect x="8" y="14" width="24" height="18" rx="2"/>
+              <path d="M20 14v18"/>
+              <path d="M20 14c-2.5-4.5-8-3.5-5.5 0M20 14c2.5-4.5 8-3.5 5.5 0"/>
+              <!-- onward -->
+              <path d="M36 21c8 2 10.5 8.5 8.5 16"/>
+              <path d="M44.5 37l-4.3-1.3M44.5 37l1.5-4.2"/>
+              <!-- gift two -->
+              <rect x="34" y="42" width="24" height="18" rx="2"/>
+              <path d="M46 42v18"/>
+              <path d="M46 42c-2.5-4.5-8-3.5-5.5 0M46 42c2.5-4.5 8-3.5 5.5 0"/>
+              <!-- onward again -->
+              <path d="M62 49c8 2 10.5 8.5 8.5 16"/>
+              <path d="M70.5 65l-4.3-1.3M70.5 65l1.5-4.2"/>
+              <!-- the next gift, not yet given -->
+              <g stroke-dasharray="4 4">
+                <rect x="60" y="70" width="24" height="18" rx="2"/>
+                <path d="M72 70v18"/>
+              </g>
+            </g>
+          </svg>
+          <div>
+            <h2 id="h-cascades">Gift Cascades</h2>
+            <span class="hub-mark">PAY IT FORWARD</span>
+          </div>
+        </div>
+        <p>A cascade starts when one member gifts a game to another — no payment, no trade-back. The receiver keeps the chain alive by gifting a game of their own onward to the next person, and the hub records every link.</p>
+        <p>Chains have no fixed length; a cascade runs for as long as its members keep gifting.</p>
+        <a class="msg" href="#">See current cascades <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      </div>
+
+      <figure class="illus illus-cascade">
+        <figcaption>How a cascade flows <em>· illustration</em></figcaption>
+        <div class="flow">
+          <div class="flow-node">
+            <span class="flow-avatar" aria-hidden="true">RH</span>
+            <span class="flow-name">Rima H.</span>
+            <span class="flow-gift">gifts Patchwork</span>
+          </div>
+          <svg class="flow-arrow" width="34" height="16" viewBox="0 0 34 16" aria-hidden="true">
+            <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path class="dash" d="M2 8h24"/>
+              <path d="M31 8l-4.5-3.6M31 8l-4.5 3.6"/>
+            </g>
+          </svg>
+          <div class="flow-node">
+            <span class="flow-avatar" aria-hidden="true">JW</span>
+            <span class="flow-name">Josh W.</span>
+            <span class="flow-gift">gifts Carcassonne onward</span>
+          </div>
+          <svg class="flow-arrow" width="34" height="16" viewBox="0 0 34 16" aria-hidden="true">
+            <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path class="dash" d="M2 8h24"/>
+              <path d="M31 8l-4.5-3.6M31 8l-4.5 3.6"/>
+            </g>
+          </svg>
+          <div class="flow-node next">
+            <span class="flow-avatar" aria-hidden="true">AM</span>
+            <span class="flow-name">Ana M.</span>
+            <span class="flow-gift">her turn to gift next</span>
+          </div>
+        </div>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ── Trade Parties ─────────────────────────────────────────── -->
+  <section class="hub hub-parties" aria-labelledby="h-parties">
+    <p class="status">HUB · OPEN</p>
+    <div class="hub-band">
+      <div class="hub-text">
+        <div class="hub-name-row">
+          <svg class="hub-emblem" width="84" height="84" viewBox="0 0 96 96" role="img" aria-label="Trade Parties emblem: four traders around one table">
+            <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="48" cy="52" r="19"/>
+              <!-- trades crossing the table -->
+              <path d="M40 47h16m0 0-4-4m4 4-4 4"/>
+              <path d="M56 58H40m0 0 4-4m-4 4 4 4"/>
+              <!-- the traders -->
+              <circle cx="48" cy="14" r="5"/>
+              <path d="M39 29a9 9 0 0 1 18 0"/>
+              <circle cx="48" cy="80" r="5"/>
+              <path d="M40 93.5a8 8 0 0 1 16 0"/>
+              <circle cx="13" cy="46" r="5"/>
+              <path d="M5 60a8 8 0 0 1 16 0"/>
+              <circle cx="83" cy="46" r="5"/>
+              <path d="M75 60a8 8 0 0 1 16 0"/>
+            </g>
+          </svg>
+          <div>
+            <h2 id="h-parties">Trade Parties</h2>
+            <span class="hub-mark">ONE ROUND</span>
+          </div>
+        </div>
+        <p>An organised community event: many members each bring a list of games they're offering and games they're after, and every list goes into a single round of matching. The hub works out a set of trades across the whole group, so each game moves once and everyone trades at the same time.</p>
+      </div>
+
+      <ol class="steps">
+        <li>
+          <span class="step-head"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-list"/></svg>Bring a list</span>
+          <p>Before the party closes, you post the games you'd part with and the games you'd want in return.</p>
+        </li>
+        <li>
+          <span class="step-head"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-swap"/></svg>Lists are matched</span>
+          <p>All lists are matched together in one round — including longer loops your own two-way swaps would never find.</p>
+        </li>
+        <li>
+          <span class="step-head"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-parcel"/></svg>Everyone trades at once</span>
+          <p>Matches are announced, and each member posts or hands over one game and receives one back.</p>
+        </li>
+      </ol>
+
+      <a class="msg" href="#">See upcoming parties <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+    </div>
+  </section>
+
+  <!-- ── Group Buys ────────────────────────────────────────────── -->
+  <section class="hub hub-groupbuys" aria-labelledby="h-groupbuys">
+    <p class="status">HUB · OPEN</p>
+    <div class="hub-cols flip">
+      <div class="hub-text">
+        <div class="hub-name-row">
+          <svg class="hub-emblem" width="84" height="84" viewBox="0 0 96 96" role="img" aria-label="Group Buys emblem: a stack of taped parcels">
+            <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="16" y="56" width="64" height="26" rx="2"/>
+              <path d="M48 56v26"/>
+              <rect x="60" y="63" width="12" height="8"/>
+              <rect x="24" y="34" width="48" height="22" rx="2"/>
+              <path d="M48 34v22"/>
+              <rect x="32" y="14" width="32" height="20" rx="2"/>
+              <path d="M48 14v20"/>
+            </g>
+          </svg>
+          <div>
+            <h2 id="h-groupbuys">Group Buys</h2>
+            <span class="hub-mark">SPLIT THE FREIGHT</span>
+          </div>
+        </div>
+        <p>When a game only ships from overseas, members pool their orders into one carton and split the freight between them. One member hosts the buy and places the order; everyone pays their own share up front.</p>
+        <p>When the carton lands, the host posts each copy onward within New Zealand.</p>
+        <a class="msg" href="#">See open group buys <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      </div>
+
+      <figure class="illus illus-split">
+        <figcaption>How a group buy splits <em>· illustration</em></figcaption>
+        <div class="split">
+          <svg viewBox="-14 0 368 190" role="img" aria-label="Diagram: one shared import carton splitting into three parcels posted to three members">
+            <g fill="none" stroke="var(--ink-2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <!-- the shared carton -->
+              <rect x="14" y="58" width="76" height="58" rx="2"/>
+              <path d="M52 58v58M14 76h76"/>
+              <!-- fan-out to members -->
+              <g stroke="var(--ink-soft)">
+                <path d="M100 74C136 52 168 40 202 34" stroke-dasharray="6 5"/>
+                <path d="M202 34l-4.8 1.9M202 34l-2.9 4.3"/>
+                <path d="M100 87h100" stroke-dasharray="6 5"/>
+                <path d="M200 87l-4.5-3.6M200 87l-4.5 3.6"/>
+                <path d="M100 100c36 22 68 34 102 40" stroke-dasharray="6 5"/>
+                <path d="M202 140l-4.8-1.9M202 140l-2.9-4.3"/>
+              </g>
+              <!-- three parcels -->
+              <rect x="212" y="16" width="42" height="30" rx="2"/><path d="M233 16v30"/>
+              <rect x="212" y="72" width="42" height="30" rx="2"/><path d="M233 72v30"/>
+              <rect x="212" y="128" width="42" height="30" rx="2"/><path d="M233 128v30"/>
+            </g>
+            <g font-family="Inter, sans-serif" font-size="12" font-weight="600" fill="var(--ink-soft)">
+              <text x="52" y="136" text-anchor="middle">one shared carton</text>
+              <text x="52" y="152" text-anchor="middle">freight split three ways</text>
+              <text x="262" y="30">Mere K.</text>
+              <text x="262" y="44" font-weight="400">Whangārei</text>
+              <text x="262" y="86">Callum S.</text>
+              <text x="262" y="100" font-weight="400">Wellington</text>
+              <text x="262" y="142">Tia P.</text>
+              <text x="262" y="156" font-weight="400">Invercargill</text>
+            </g>
+          </svg>
+        </div>
+      </figure>
+    </div>
+  </section>
+
+</main>
+
+<footer class="wrap site-foot">
+  <p><strong>Meeple Cart</strong> is free, open source, and community-run. No fees, ever.</p>
+  <nav aria-label="Footer">
+    <a href="#">About</a>
+    <a href="#">Code of conduct</a>
+    <a href="#">Source code</a>
+  </nav>
+</footer>
+
+</body>
+</html>

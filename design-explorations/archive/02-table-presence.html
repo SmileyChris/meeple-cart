@@ -1,0 +1,1107 @@
+<!doctype html>
+<!--
+  DIRECTION CONTRACT — 02 · "Table Presence"
+
+  World statement:
+  The feed is the game table mid-session, at night. One deep matte surface — charcoal
+  with a warm umber undertone, like an oiled hardwood gaming table under a low lamp —
+  and everything on the page is a physical component sitting on it. Offers are cards
+  with punchboard weight; price is a clay chip; condition is a punched token with die
+  pips; region is a little drawn map-token of Aotearoa; trust is a wooden meeple that
+  gains carving detail as the trader earns it. Light comes from above-left, so every
+  piece throws a soft shadow down and to the right. Serious modern dark UI — evening
+  focus, not casino glitz.
+
+  Palette tokens:
+    --table        #201A13   the table surface (umber charcoal — committed, not navy)
+    --table-deep   #16110B   recesses: photo wells, filter slots, page edges
+    --card         #2A2118   card stock / punchboard face
+    --line         #3D3223   piece edges
+    --ink          #F0E6D4   primary text (warm off-white, lamp-lit)
+    --ink-soft     #B2A38B   secondary text, tinted from the table hue (≥4.5:1)
+    --wood         #B57C48   wooden-token material: community, trust, seller marks
+    --brass        #E7AC46   the one metal: actions, active states, focus, price rings
+
+  Type pairing:
+    Hepta Slab (600/700/800)        — display: sturdy slab, game-box titling weight
+    Atkinson Hyperlegible (400/700) — dense metadata, built for low-light legibility
+
+  System rules:
+  1. The table is the ground: one dark umber surface; depth only from pieces sitting
+     on it, lit from above-left (shadows offset +x +y with soft blur).
+  2. Component grammar: metadata is drawn SVG game components in one stroke system —
+     chip roundel (price), punchboard pip-token (condition), NZ map-token (region),
+     parcel and swap tokens. No emoji, no icon fonts.
+  3. Two materials only: wood (--wood) for people/trust, brass (--brass) for actions.
+     Trust tiers are meeple silhouettes: dashed outline → carved outline → solid wood
+     → wood with grain → wood with grain and a brass inlay ring.
+  4. Photos are cards in hand: messy community shots letterboxed into a recessed well
+     on the table, each at its own aspect and slight tilt — never cropped to uniform.
+  5. Quiet motion: exactly one authored moment — a card lifts toward the lamp on
+     hover/focus (translate up-left, shadow deepens and lengthens). Nothing else moves.
+-->
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Meeple Cart — Browse</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Hepta+Slab:wght@600;700;800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --table: #201a13;
+    --table-deep: #16110b;
+    --card: #2a2118;
+    --card-hi: rgba(240, 230, 212, 0.07);
+    --line: #3d3223;
+    --ink: #f0e6d4;
+    --ink-soft: #b2a38b;
+    --wood: #b57c48;
+    --wood-deep: #8a5b33;
+    --brass: #e7ac46;
+    --brass-soft: #f2c56e;
+    --r-card: 12px;
+    --r-token: 8px;
+    --shadow-rest: 3px 5px 10px rgba(7, 4, 1, 0.45), 9px 14px 30px rgba(7, 4, 1, 0.32);
+    --shadow-lift: 7px 12px 18px rgba(7, 4, 1, 0.5), 18px 30px 54px rgba(7, 4, 1, 0.42);
+    --display: 'Hepta Slab', 'Iowan Old Style', serif;
+    --body: 'Atkinson Hyperlegible', 'Verdana', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html {
+    scrollbar-color: var(--wood-deep) var(--table-deep);
+  }
+  ::-webkit-scrollbar { width: 13px; }
+  ::-webkit-scrollbar-track { background: var(--table-deep); }
+  ::-webkit-scrollbar-thumb {
+    background: var(--wood-deep);
+    border-radius: 7px;
+    border: 3px solid var(--table-deep);
+  }
+  ::-webkit-scrollbar-thumb:hover { background: var(--wood); }
+
+  ::selection { background: var(--brass); color: #241705; }
+
+  body {
+    background: var(--table);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  a { color: inherit; }
+
+  :focus { outline: none; }
+  :focus-visible {
+    outline: 2px solid var(--brass);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  .shell {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 32px 72px;
+  }
+
+  /* ---------- header ---------- */
+
+  .site-head {
+    display: flex;
+    align-items: center;
+    gap: 36px;
+    padding: 26px 0 22px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .wordmark {
+    display: inline-flex;
+    align-items: center;
+    gap: 11px;
+    text-decoration: none;
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 1.28rem;
+    letter-spacing: 0.01em;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .wordmark svg { width: 26px; height: 26px; display: block; }
+  .wordmark .m-body { fill: var(--wood); }
+
+  .site-nav {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+    overflow-x: auto;
+  }
+  .site-nav a {
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+    padding: 8px 13px;
+    border-radius: var(--r-token);
+    white-space: nowrap;
+  }
+  .site-nav a:hover { color: var(--ink); background: rgba(240, 230, 212, 0.05); }
+  .site-nav a[aria-current='page'] {
+    color: var(--brass);
+    background: rgba(231, 172, 70, 0.09);
+    box-shadow: inset 0 -2px 0 var(--brass);
+    border-radius: var(--r-token) var(--r-token) 2px 2px;
+  }
+  .msg-dot {
+    display: inline-block;
+    min-width: 19px;
+    padding: 0 4px;
+    margin-left: 6px;
+    border-radius: 999px;
+    background: var(--wood);
+    color: #221507;
+    font-size: 0.75rem;
+    line-height: 19px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .avatar {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    flex: none;
+    border-radius: 50%;
+    background: var(--wood);
+    color: #241705;
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-decoration: none;
+    letter-spacing: 0.04em;
+    box-shadow: 2px 3px 7px rgba(7, 4, 1, 0.5);
+    border: 1px solid var(--wood-deep);
+  }
+  .avatar:hover { background: var(--brass-soft); }
+
+  /* ---------- page head ---------- */
+
+  .page-head {
+    padding: 56px 0 0;
+    max-width: 640px;
+  }
+  h1 {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: clamp(2rem, 4.2vw, 2.9rem);
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+  }
+  .lede {
+    margin-top: 12px;
+    color: var(--ink-soft);
+    font-size: 1.05rem;
+    max-width: 46ch;
+  }
+  .lede strong { color: var(--ink); font-weight: 700; }
+
+  /* ---------- filters: recessed slots in the table ---------- */
+
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-top: 30px;
+    padding: 14px 16px;
+    background: var(--table-deep);
+    border-radius: 14px;
+    box-shadow:
+      inset 2px 3px 8px rgba(0, 0, 0, 0.55),
+      inset -1px -1px 0 rgba(240, 230, 212, 0.05);
+  }
+
+  .filter-btn,
+  .seg button {
+    font-family: var(--body);
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--r-token);
+    padding: 9px 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    box-shadow: 2px 3px 6px rgba(7, 4, 1, 0.4);
+  }
+  .filter-btn:hover,
+  .seg button:hover { color: var(--ink); border-color: #55462f; }
+
+  .filter-btn svg,
+  .seg svg,
+  .toggle svg { width: 16px; height: 16px; flex: none; }
+  .filter-btn .stroke,
+  .toggle .stroke {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .seg {
+    display: inline-flex;
+    border-radius: var(--r-token);
+    box-shadow: 2px 3px 6px rgba(7, 4, 1, 0.4);
+  }
+  .seg button { box-shadow: none; border-radius: 0; margin-left: -1px; }
+  .seg button:first-child { border-radius: var(--r-token) 0 0 var(--r-token); margin-left: 0; }
+  .seg button:last-child { border-radius: 0 var(--r-token) var(--r-token) 0; }
+  .seg button[aria-pressed='true'],
+  .toggle[aria-pressed='true'] {
+    color: var(--brass);
+    background: #322718;
+    border-color: #6b5225;
+    box-shadow: inset 1px 2px 4px rgba(0, 0, 0, 0.45);
+  }
+
+  .filters .spacer { flex: 1; }
+  .filter-note { color: var(--ink-soft); font-size: 0.88rem; padding-right: 4px; }
+
+  /* ---------- feed ---------- */
+
+  .feed {
+    margin-top: 40px;
+    columns: 3;
+    column-gap: 26px;
+  }
+
+  .offer {
+    break-inside: avoid;
+    margin: 0 0 26px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-top-color: #4a3d2a;
+    border-radius: var(--r-card);
+    box-shadow: var(--shadow-rest);
+    overflow: hidden;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+  }
+  /* the one authored motion: the card lifts toward the lamp */
+  .offer:hover,
+  .offer:has(:focus-visible) {
+    transform: translate(-3px, -5px);
+    box-shadow: var(--shadow-lift);
+  }
+
+  /* photo well: a recess in the table; the shot sits letterboxed inside it */
+  .photo {
+    background: var(--table-deep);
+    box-shadow: inset 2px 4px 10px rgba(0, 0, 0, 0.55);
+    display: grid;
+    place-items: center;
+    padding: 16px;
+  }
+  .photo svg {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+    transform: rotate(var(--tilt, 0deg));
+    box-shadow: 3px 5px 12px rgba(5, 3, 1, 0.55);
+  }
+
+  .offer-body { padding: 18px 20px 20px; }
+
+  .title {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 1.22rem;
+    line-height: 1.25;
+    letter-spacing: -0.005em;
+  }
+  .title a { text-decoration: none; }
+  .title a:hover { color: var(--brass-soft); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+
+  .seller {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 9px;
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+  }
+  .seller .name { color: var(--ink); font-weight: 700; }
+  .seller .sep { color: #6d5f49; }
+
+  /* trust marks: wooden meeples gaining detail per tier */
+  .trust {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--wood);
+    font-weight: 700;
+  }
+  .trust svg { width: 17px; height: 17px; display: block; }
+  .trust .m { fill: var(--wood); stroke: none; }
+  .trust .grain {
+    fill: none;
+    stroke: #5c3d1f;
+    stroke-width: 1.1;
+    stroke-linecap: round;
+  }
+  .trust .halo {
+    fill: none;
+    stroke: var(--brass);
+    stroke-width: 1.4;
+  }
+  .trust-new .m {
+    fill: none;
+    stroke: var(--wood);
+    stroke-width: 1.4;
+    stroke-dasharray: 2.4 2.2;
+    stroke-linejoin: round;
+  }
+  .trust-seedling .m {
+    fill: none;
+    stroke: var(--wood);
+    stroke-width: 1.6;
+    stroke-linejoin: round;
+  }
+
+  /* ---------- meta: components on the card ---------- */
+
+  .meta {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  .price-block {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    width: 66px;
+  }
+  .chip { width: 62px; height: 62px; filter: drop-shadow(2px 3px 5px rgba(5, 3, 1, 0.5)); }
+  .chip .face { fill: #33291b; }
+  .chip .edge {
+    fill: none;
+    stroke: var(--brass);
+    stroke-width: 4;
+    stroke-dasharray: 6.2 6.37; /* 13 chip edge spots, seamless */
+  }
+  .chip .ring { fill: none; stroke: #5b4a2c; stroke-width: 1.3; }
+  .chip text {
+    font-family: var(--body);
+    font-weight: 700;
+    font-size: 15px;
+    fill: var(--ink);
+    font-variant-numeric: tabular-nums;
+    text-anchor: middle;
+  }
+  .chip.swap-chip .edge { stroke: var(--wood); }
+  .chip .swap-mark {
+    fill: none;
+    stroke: var(--wood);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .chip.swap-chip text { font-size: 11px; fill: var(--wood); letter-spacing: 0.06em; }
+  .chip-sub {
+    font-size: 0.76rem;
+    color: var(--ink-soft);
+    text-align: center;
+    line-height: 1.25;
+  }
+
+  .tokens {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+    padding-top: 2px;
+    min-width: 0;
+  }
+  .tokens li { display: flex; align-items: center; gap: 9px; min-width: 0; }
+  .tokens .val { color: var(--ink); font-weight: 700; }
+  .tok {
+    width: 20px;
+    height: 20px;
+    flex: none;
+    display: block;
+  }
+  .tok .stroke {
+    fill: none;
+    stroke: var(--ink-soft);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .tok .pip { fill: var(--brass); }
+  .tok .punch { fill: var(--card); stroke: var(--ink-soft); stroke-width: 1.8; }
+  .tok .nub { fill: var(--ink-soft); }
+  .tok.map { height: 24px; width: 17px; }
+  .tok.map .isle {
+    fill: none;
+    stroke: var(--ink-soft);
+    stroke-width: 1.6;
+    stroke-linejoin: round;
+  }
+  .tok.map .here { fill: var(--brass); }
+
+  .note {
+    margin-top: 15px;
+    font-size: 0.94rem;
+    color: var(--ink-soft);
+    border-top: 1px solid var(--line);
+    padding-top: 13px;
+  }
+
+  /* bundle contents: punchboard inventory */
+  .bundle {
+    list-style: none;
+    margin-top: 15px;
+    border: 1px dashed #52432c;
+    border-radius: var(--r-token);
+    padding: 11px 13px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 0.9rem;
+  }
+  .bundle li { display: flex; align-items: center; gap: 9px; }
+  .bundle .b-name { color: var(--ink); font-weight: 700; }
+  .bundle .b-cond { color: var(--ink-soft); margin-left: auto; white-space: nowrap; }
+  .bundle .tok { width: 17px; height: 17px; }
+
+  .stamp {
+    margin-top: 14px;
+    font-size: 0.8rem;
+    color: #a09378;
+  }
+
+  /* ---------- footer ---------- */
+
+  .site-foot {
+    border-top: 1px solid var(--line);
+    margin-top: 26px;
+    padding-top: 26px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+    align-items: center;
+    color: var(--ink-soft);
+    font-size: 0.88rem;
+  }
+  .site-foot a { color: var(--wood); font-weight: 700; text-decoration: none; }
+  .site-foot a:hover { color: var(--brass); text-decoration: underline; }
+  .site-foot .foot-spacer { flex: 1; }
+
+  /* ---------- responsive ---------- */
+
+  @media (max-width: 1020px) {
+    .feed { columns: 2; }
+  }
+  @media (max-width: 680px) {
+    .shell { padding: 0 18px 56px; }
+    .site-head { gap: 14px; flex-wrap: wrap; padding-top: 18px; }
+    .site-nav { margin-left: 0; width: 100%; order: 3; }
+    .avatar { margin-left: auto; }
+    .page-head { padding-top: 40px; }
+    .feed { columns: 1; margin-top: 32px; }
+    .filters { padding: 12px; }
+    .filter-note { display: none; }
+  }
+  @media (max-width: 430px) {
+    .shell { padding: 0 12px 48px; }
+    .offer-body { padding: 15px 15px 17px; }
+    .photo { padding: 12px; }
+    .meta { gap: 13px; }
+    .site-nav a { padding: 8px 9px; font-size: 0.9rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .offer { transition: none; }
+    .offer:hover,
+    .offer:has(:focus-visible) { transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- shared component symbols: one drawn system -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- wooden meeple silhouette -->
+    <path id="meeple" d="M12 2.4c1.9 0 3.1 1.4 3.1 3 0 .9-.4 1.7-1 2.3 1 .5 2 1.4 3.4 1.9 1.6.6 3.4 1.5 3.4 2.9 0 1-.8 1.7-1.8 1.7-1.5 0-2.7-.8-4-.8-.6 0-.8.3-.8 1 0 2 1.4 3.9 1.4 5.3 0 1-.8 1.6-1.7 1.6H9c-.9 0-1.7-.6-1.7-1.6 0-1.4 1.4-3.3 1.4-5.3 0-.7-.2-1-.8-1-1.3 0-2.5.8-4 .8-1 0-1.8-.7-1.8-1.7 0-1.4 1.8-2.3 3.4-2.9 1.4-.5 2.4-1.4 3.4-1.9-.6-.6-1-1.4-1-2.3 0-1.6 1.2-3 3.1-3z" />
+    <!-- carved grain detail for higher tiers -->
+    <g id="grain">
+      <path d="M9.6 14.6c1.2.9 3.6.9 4.8 0" />
+      <path d="M10.6 17.6c.8.5 2 .5 2.8 0" />
+    </g>
+    <!-- Aotearoa map-token: two islands -->
+    <g id="nz">
+      <path class="isle" d="M12.6 1.6c1.2 1.2.7 2.7 1.6 4 .8 1.2-.3 2.3-1.2 3.6-1.2 1.7-2.5 3.1-3.8 3.6-.9.3-1.6-.4-1.4-1.5.2-1.4-.8-2.1-.3-3.5.6-1.6 2.1-2 3-3.3.7-1.1 1.1-2.3 2.1-2.9z" />
+      <path class="isle" d="M7.4 14.6c1 .5 1.2 1.8.5 3.1-.9 1.7-2.1 2.8-3.2 4.2-1.1 1.5-1.8 3.3-3.2 4-.9.5-1.3-.6-.8-1.7.9-1.9 1.8-3.5 3.1-5.4 1.1-1.6 2.1-3.2 3.6-4.2z" />
+    </g>
+    <!-- punchboard condition tokens: die pips, 5=mint … 1=poor -->
+    <g id="cond5">
+      <rect class="punch" x="3" y="3" width="20" height="20" rx="4.5" />
+      <rect class="nub" x="11.4" y="1.4" width="3.2" height="2.2" rx="1" />
+      <circle class="pip" cx="8.6" cy="8.6" r="1.8" /><circle class="pip" cx="17.4" cy="8.6" r="1.8" />
+      <circle class="pip" cx="13" cy="13" r="1.8" />
+      <circle class="pip" cx="8.6" cy="17.4" r="1.8" /><circle class="pip" cx="17.4" cy="17.4" r="1.8" />
+    </g>
+    <g id="cond4">
+      <rect class="punch" x="3" y="3" width="20" height="20" rx="4.5" />
+      <rect class="nub" x="11.4" y="1.4" width="3.2" height="2.2" rx="1" />
+      <circle class="pip" cx="8.6" cy="8.6" r="1.8" /><circle class="pip" cx="17.4" cy="8.6" r="1.8" />
+      <circle class="pip" cx="8.6" cy="17.4" r="1.8" /><circle class="pip" cx="17.4" cy="17.4" r="1.8" />
+    </g>
+    <g id="cond3">
+      <rect class="punch" x="3" y="3" width="20" height="20" rx="4.5" />
+      <rect class="nub" x="11.4" y="1.4" width="3.2" height="2.2" rx="1" />
+      <circle class="pip" cx="8.6" cy="8.6" r="1.8" /><circle class="pip" cx="13" cy="13" r="1.8" />
+      <circle class="pip" cx="17.4" cy="17.4" r="1.8" />
+    </g>
+    <g id="cond2">
+      <rect class="punch" x="3" y="3" width="20" height="20" rx="4.5" />
+      <rect class="nub" x="11.4" y="1.4" width="3.2" height="2.2" rx="1" />
+      <circle class="pip" cx="8.6" cy="8.6" r="1.8" /><circle class="pip" cx="17.4" cy="17.4" r="1.8" />
+    </g>
+    <g id="cond1">
+      <rect class="punch" x="3" y="3" width="20" height="20" rx="4.5" />
+      <rect class="nub" x="11.4" y="1.4" width="3.2" height="2.2" rx="1" />
+      <circle class="pip" cx="13" cy="13" r="1.8" />
+    </g>
+    <!-- parcel token: can post -->
+    <g id="parcel">
+      <path class="stroke" d="M4.5 8.5 6.8 5h10.4l2.3 3.5" />
+      <rect class="stroke" x="4.5" y="8.5" width="15" height="11" rx="1.5" />
+      <path class="stroke" d="M12 8.5v11" />
+    </g>
+    <!-- swap token: open to trade -->
+    <g id="swap">
+      <path class="stroke" d="M4.5 8.7h14.3M15.6 5.4l3.2 3.3-3.2 3.3" />
+      <path class="stroke" d="M19.5 15.3H5.2M8.4 12l-3.2 3.3 3.2 3.3" />
+    </g>
+    <!-- chevron for the select -->
+    <path id="chev" class="stroke" d="M5.5 7.5 10 12l4.5-4.5" />
+  </defs>
+</svg>
+
+<div class="shell">
+
+  <header class="site-head">
+    <a class="wordmark" href="#">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><use class="m-body" href="#meeple" /></svg>
+      Meeple Cart
+    </a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="#" aria-current="page">Browse</a>
+      <a href="#">Wanted</a>
+      <a href="#">Messages<span class="msg-dot">2</span></a>
+      <a href="#">Trades</a>
+    </nav>
+    <a class="avatar" href="#" aria-label="Your profile — Kiri T.">KT</a>
+  </header>
+
+  <section class="page-head">
+    <h1>Tonight&rsquo;s table</h1>
+    <p class="lede">Live offers from traders around Aotearoa — <strong>free, no fees, ever</strong>. Pull up a chair and find your next game.</p>
+  </section>
+
+  <div class="filters" role="toolbar" aria-label="Filter offers">
+    <button class="filter-btn" type="button">
+      All regions
+      <svg viewBox="0 0 20 20" aria-hidden="true"><use href="#chev" /></svg>
+    </button>
+    <div class="seg" role="group" aria-label="Offer type">
+      <button type="button" aria-pressed="true">All</button>
+      <button type="button" aria-pressed="false">Selling</button>
+      <button type="button" aria-pressed="false">Trading</button>
+    </div>
+    <button class="filter-btn toggle" type="button" aria-pressed="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#parcel" /></svg>
+      Can post
+    </button>
+    <span class="spacer"></span>
+    <span class="filter-note">10 offers on the table</span>
+  </div>
+
+  <main class="feed">
+
+    <!-- 1 · Brass: Birmingham -->
+    <article class="offer">
+      <div class="photo" style="--tilt:-0.8deg">
+        <svg viewBox="0 0 400 300" width="340" role="img" aria-label="Photo: Brass Birmingham box on a sage carpet">
+          <rect width="400" height="300" fill="#57604e" />
+          <g fill="#4b5443"><ellipse cx="60" cy="250" rx="40" ry="9" /><ellipse cx="330" cy="50" rx="52" ry="11" /><ellipse cx="210" cy="285" rx="70" ry="8" /></g>
+          <radialGradient id="fl1" cx="0.32" cy="0.25" r="0.9"><stop offset="0" stop-color="#fff3d8" stop-opacity="0.28" /><stop offset="1" stop-color="#fff3d8" stop-opacity="0" /></radialGradient>
+          <rect width="400" height="300" fill="url(#fl1)" />
+          <g transform="rotate(-7 200 150)">
+            <rect x="78" y="66" width="252" height="176" rx="7" fill="#232019" opacity="0.4" transform="translate(8 10)" />
+            <rect x="78" y="66" width="252" height="176" rx="7" fill="#2c2a33" />
+            <rect x="78" y="66" width="252" height="70" rx="7" fill="#3b3947" />
+            <circle cx="140" cy="170" r="30" fill="#8a6a3c" opacity="0.85" />
+            <rect x="190" y="150" width="110" height="12" rx="6" fill="#c9bfa4" opacity="0.8" />
+            <rect x="190" y="172" width="76" height="9" rx="4.5" fill="#c9bfa4" opacity="0.5" />
+          </g>
+        </svg>
+      </div>
+      <div class="offer-body">
+        <h2 class="title"><a href="#">Brass: Birmingham</a></h2>
+        <p class="seller">
+          <span class="trust"><svg viewBox="0 0 24 24" aria-hidden="true"><use class="m" href="#meeple" /><use class="grain" href="#grain" /></svg>Established</span>
+          <span class="sep">·</span><span class="name">Hamish W.</span>
+        </p>
+        <div class="meta">
+          <div class="price-block">
+            <svg class="chip" viewBox="0 0 60 60" role="img" aria-label="Asking price 95 New Zealand dollars">
+              <circle class="face" cx="30" cy="30" r="27" />
+              <circle class="edge" cx="30" cy="30" r="26" />
+              <circle class="ring" cx="30" cy="30" r="20.5" />
+              <text x="30" y="35.5">$95</text>
+            </svg>
+          </div>
+          <ul class="tokens">
+            <li><svg class="tok" viewBox="0 0 26 26" aria-hidden="true"><use href="#cond5" /></svg><span class="val">Mint</span>&nbsp;— punched once</li>
+            <li><svg class="tok map" viewBox="0 0 15 30" aria-hidden="true"><use href="#nz" /><circle class="here" cx="4.9" cy="19.5" r="2.2" /></svg>Christchurch</li>
+            <li><svg class="tok" viewBox="0 0 24 24" aria-hidden="true"><use href="#parcel" /></svg>Can post nationwide</li>
+            <li><svg class="tok" viewBox="0 0 24 24" aria-hidden="true"><use href="#swap" /></svg>Open to trade offers</li>
+          </ul>
+        </div>
+        <p class="note">Bought for a group that never formed. Played twice, components bagged, cards unsleeved and crisp. Would trade straight across for Ark Nova or Dune: Imperium in similar nick.</p>
+        <p class="stamp">Listed 2 days ago</p>
+      </div>
+    </article>
+
+    <!-- 2 · Everdell bundle -->
+    <article class="offer">
+      <div class="photo" style="--tilt:1.1deg">
+        <svg viewBox="0 0 340 340" width="260" role="img" aria-label="Photo: stack of Everdell boxes on wooden floorboards">
+          <rect width="340" height="340" fill="#6b5a44" />
+          <g stroke="#5d4d39" stroke-width="4"><path d="M0 60h340M0 150h340M0 240h340M0 320h340" /></g>
+          <radialGradient id="fl2" cx="0.7" cy="0.2" r="0.95"><stop offset="0" stop-color="#ffe9c0" stop-opacity="0.3" /><stop offset="1" stop-color="#ffe9c0" stop-opacity="0" /></radialGradient>
+          <rect width="340" height="340" fill="url(#fl2)" />
+          <g transform="rotate(4 170 190)">
+            <rect x="60" y="196" width="220" height="86" rx="6" fill="#221c14" opacity="0.4" transform="translate(7 9)" />
+            <rect x="60" y="196" width="220" height="86" rx="6" fill="#365241" />
+            <rect x="72" y="128" width="196" height="62" rx="6" fill="#4c6a4e" />
+            <rect x="86" y="66" width="168" height="56" rx="6" fill="#7a5c40" />
+            <circle cx="170" cy="240" r="22" fill="#d8c690" opacity="0.75" />
+            <rect x="104" y="86" width="132" height="11" rx="5.5" fill="#e4d7b0" opacity="0.8" />
+          </g>
+        </svg>
+      </div>
+      <div class="offer-body">
+        <h2 class="title"><a href="#">Everdell + Expansions Bundle</a></h2>
+        <p class="seller">
+          <span class="trust"><svg viewBox="0 0 24 24" aria-hidden="true"><circle class="halo" cx="12" cy="12.5" r="11.1" /><use class="m" href="#meeple" /><use class="grain" href="#grain" /></svg>Trusted</span>
+          <span class="sep">·</span><span class="name">Priya N.</span>
+        </p>
+        <div class="meta">
+          <div class="price-block">
+            <svg class="chip" viewBox="0 0 60 60" role="img" aria-label="Asking price 180 New Zealand dollars or near offer">
+              <circle class="face" cx="30" cy="30" r="27" />
+              <circle class="edge" cx="30" cy="30" r="26" />
+              <circle class="ring" cx="30" cy="30" r="20.5" />
+              <text x="30" y="35.5">$180</text>
+            </svg>
+            <span class="chip-sub">or near offer</span>
+          </div>
+          <ul class="tokens">
+            <li><svg class="tok map" viewBox="0 0 15 30" aria-hidden="true"><use href="#nz" /><circle class="here" cx="12" cy="5" r="2.2" /></svg>Auckland</li>
+            <li><svg class="tok" viewBox="0 0 24 24" aria-hidden="true"><use href="#parcel" /></svg>Can post — one big box</li>
+          </ul>
+        </div>
+        <ul class="bundle" aria-label="Bundle contents, three items">
+          <li><svg class="tok" viewBox="0 0 26 26" aria-hidden="true"><use href="#cond4" /></svg><span class="b-name">Everdell (base)</span><span class="b-cond">excellent</span></li>
+          <li><svg class="tok" viewBox="0 0 26 26" aria-hidden="true"><use href="#cond4" /></svg><span class="b-name">Pearlbrook</span><span class="b-cond">excellent</span></li>
+          <li><svg class="tok" viewBox="0 0 26 26" aria-hidden="true"><use href="#cond3" /></svg><span class="b-name">Spirecrest</span><span class="b-cond">good</span></li>
+        </ul>
+        <p class="note">Selling as one lot only — not splitting, sorry. Everything sorted into a folded-space insert that comes with it. The Ever Tree has a repaired branch you honestly cannot see unless you go looking. Downsizing the shelf before we move house.</p>
+        <p class="stamp">Bumped this morning</p>
+      </div>
+    </article>
+
+    <!-- 3 · Wingspan -->
+    <article class="offer">
+      <div class="photo" style="--tilt:-1.4deg">
+        <svg viewBox="0 0 400 225" width="340" role="img" aria-label="Photo: Wingspan box on a dusty blue duvet">
+          <rect width="400" height="225" fill="#4c5666" />
+          <g fill="#424b59"><ellipse cx="80" cy="40" rx="60" ry="14" /><ellipse cx="320" cy="200" rx="75" ry="14" /></g>
+          <radialGradient id="fl3" cx="0.3" cy="0.3" r="0.9"><stop offset="0" stop-color="#f4ecda" stop-opacity="0.25" /><stop offset="1" stop-color="#f4ecda" stop-opacity="0" /></radialGradient>
+          <rect width="400" height="225" fill="url(#fl3)" />
+          <g transform="rotate(5 200 112)">
+            <rect x="96" y="38" width="208" height="150" rx="6" fill="#1e2530" opacity="0.4" transform="translate(7 8)" />
+            <rect x="96" y="38" width="208" height="150" rx="6" fill="#b8c4c9" />
+            <path d="M150 132c22-38 52-56 88-58-14 26-40 48-88 58z" fill="#7d9aa8" />
+            <rect x="122" y="58" width="120" height="13" rx="6.5" fill="#3d4a52" opacity="0.85" />
+          </g>
+        </svg>
+      </div>
+      <div class="offer-body">
+        <h2 class="title"><a href="#">Wingspan</a></h2>
+        <p class="seller">
+          <span class="trust"><svg viewBox="0 0 24 24" aria-hidden="true"><use class="m" href="#meeple" /></svg>Growing</span>
+          <span class="sep">·</span><span class="name">Sarah K.</span>
+        </p>
+        <div class="meta">
+          <div class="price-block">
+            <svg class="chip" viewBox="0 0 60 60" role="img" aria-label="Asking price 65 New Zealand dollars">
+              <circle class="face" cx="30" cy="30" r="27" />
+              <circle class="edge" cx="30" cy="30" r="26" />
+              <circle class="ring" cx="30" cy="30" r="20.5" />
+              <text x="30" y="35.5">$65</text>
+            </svg>
+          </div>
+          <ul class="tokens">
+            <li><svg class="tok" viewBox="0 0 26 26" aria-hidden="true"><use href="#cond4" /></svg><span class="val">Excellent</span></li>
+            <li><svg class="tok map" viewBox="0 0 15 30" aria-hidden="true"><use href="#nz" /><circle class="here" cx="9.3" cy="13.3" r="2.2" /></svg>Wellington</li>
+            <li><svg class="tok" viewBox="0 0 24 24" aria-hidden="true"><use href="#parcel" /></svg>Can post</li>
+          </ul>
+        </div>
+        <p class="note">Played maybe ten times; cards sleeved from day one.</p>
+        <p class="stamp">Listed yesterday</p>
+      </div>
+    </article>
+
+    <!-- 4 · Gloomhaven -->
+    <article class="offer">
+      <div class="photo" style="--tilt:0.7deg">
+        <svg viewBox="0 0 400 300" width="340" role="img" aria-label="Photo: Gloomhaven box on grey-brown carpet, badly lit">
+          <rect width="400" height="300" fill="#575049" />
+          <g fill="#4c4640"><ellipse cx="340" cy="260" rx="60" ry="12" /><ellipse cx="70" cy="60" rx="46" ry="10" /><ellipse cx="200" cy="20" rx="80" ry="9" /></g>
+          <radialGradient id="fl4" cx="0.25" cy="0.18" r="1"><stop offset="0" stop-color="#ffedc4" stop-opacity="0.32" /><stop offset="1" stop-color="#0d0a07" stop-opacity="0.25" /></radialGradient>
+          <rect width="400" height="300" fill="url(#fl4)" />
+          <g transform="rotate(-3 200 150)">
+            <rect x="60" y="58" width="280" height="192" rx="7" fill="#191512" opacity="0.45" transform="translate(9 11)" />
+            <rect x="60" y="58" width="280" height="192" rx="7" fill="#2a241f" />
+            <path d="M120 210c30-60 74-96 128-104-20 44-62 84-128 104z" fill="#4d4136" />
+            <rect x="94" y="84" width="168" height="15" rx="7" fill="#9a8564" opacity="0.8" />
+            <rect x="94" y="108" width="96" height="10" rx="5" fill="#9a8564" opacity="0.45" />
+          </g>
+        </svg>
+      </div>
+      <div class="offer-body">
+        <h2 class="title"><a href="#">Gloomhaven</a></h2>
+        <p class="seller">
+          <span class="trust"><svg viewBox="0 0 24 24" aria-hidden="true"><use class="m" href="#meeple" /></svg>Seedling</span>
+          <span class="sep">·</span><span class="name">Marcus T.</span>
+        </p>
+        <div class="meta">
+          <div class="price-block">
+            <svg class="chip" viewBox="0 0 60 60" role="img" aria-label="Asking price 120 New Zealand dollars">
+              <circle class="face" cx="30" cy="30" r="27" />
+              <circle class="edge" cx="30" cy="30" r="26" />
+              <circle class="ring" cx="30" cy="30" r="20.5" />
+              <text x="30" y="35.5">$120</text>
+            </svg>
+          </div>
+          <ul class="tokens">
+            <li><svg class="tok" viewBox="0 0 26 26" aria-hidden="true"><use href="#cond3" /></svg><span class="val">Good</span>&nbsp;— played a full campaign</li>
+            <li><svg class="tok map" viewBox="0 0 15 30" aria-hidden="true"><use href="#nz" /><circle class="here" cx="2.6" cy="25.5" r="2.2" /></svg>Dunedin</li>
+          </ul>
+        </div>
+        <p class="note">Pickup only — this thing weighs as much as a toddler and I'm not fighting the courier over it. Used the removable sticker set so the map board is clean. All 17 classes present and sorted into a Broken Token insert. One standee (Living Bones) is a colour-matched proxy; everything else counted and complete as of last weekend.</p>
+        <p class="stamp">Listed 5 days ago</p>
+      </div>
+    </article>
+
+    <!-- 5 · Root (trade only) -->
+    <article class="offer">
+      <div class="photo" style="--tilt:-1deg">
+        <svg viewBox="0 0 260 340" width="220" role="img" aria-label="Photo: Root box propped upright on a teal armchair">
+          <rect width="260" height="340" fill="#3f5652" />
+          <g fill="#374b48"><ellipse cx="130" cy="320" rx="110" ry="16" /><ellipse cx="40" cy="60" rx="36" ry="24" /></g>
+          <radialGradient id="fl5" cx="0.35" cy="0.22" r="0.95"><stop offset="0" stop-color="#f6ecd2" stop-opacity="0.26" /><stop offset="1" stop-color="#f6ecd2" stop-opacity="0" /></radialGradient>
+          <rect width="260" height="340" fill="url(#fl5)" />
+          <g transform="rotate(-4 130 180)">
+            <rect x="44" y="72" width="172" height="204" rx="6" fill="#20302d" opacity="0.45" transform="translate(7 9)" />
+            <rect x="44" y="72" width="172" height="204" rx="6" fill="#c8b58a" />
+            <circle cx="130" cy="160" r="42" fill="#b0562f" opacity="0.85" />
+            <path d="M108 232h44l-22-34z" fill="#5c7550" />
+            <rect x="66" y="94" width="128" height="13" rx="6.5" fill="#4a3a28" opacity="0.8" />
+          </g>
+        </svg>
+      </div>
+      <div class="offer-body">
+        <h2 class="title"><a href="#">Root + Riverfolk Expansion</a></h2>
+        <p class="seller">
+          <span class="trust"><svg viewBox="0 0 24 24" aria-hidden="true"><use class="m" href="#meeple" /></svg>Growing</span>
+          <span class="sep">·</span><span class="name">Jess M.</span>
+        </p>
+        <div class="meta">
+          <div class="price-block">
+            <svg class="chip swap-chip" viewBox="0 0 60 60" role="img" aria-label="Trade only, no cash price">
+              <circle class="face" cx="30" cy="30" r="27" />
+              <circle class="edge" cx="30" cy="30" r="26" />
+              <g class="swap-mark"><path d="M18 24.5h21.5M34.5 19.5l5 5-5 5" /><path d="M42 35.5H20.5M25.5 30.5l-5 5 5 5" /></g>
+              <text x="30" y="52">TRADE</text>
+            </svg>
+            <span class="chip-sub">trade only</span>
+          </div>
+          <ul class="tokens">
+            <li><svg class="tok" viewBox="0 0 26 26" aria-hidden="true"><use href="#cond4" /></svg><span class="val">Excellent</span></li>
+            <li><svg class="tok map" viewBox="0 0 15 30" aria-hidden="true"><use href="#nz" /><circle class="here" cx="9.8" cy="7.4" r="2.2" /></svg>Hamilton</li>
+            <li><svg class="tok" viewBox="0 0 24 24" aria-hidden="true"><use href="#parcel" /></svg>Can post</li>
+          </ul>
+        </div>
+        <p class="note">After Oath or Arcs, ideally. Wooden warriors all present, walnut screen-printing still sharp.</p>
+        <p class="stamp">Listed 3 days ago</p>
+      </div>
+    </article>
+
+    <!-- 6 · Cascadia -->
+    <article class="offer">
+      <div class="photo" style="--tilt:1.3deg">
+        <svg viewBox="0 0 320 320" width="250" role="img" aria-label="Photo: Cascadia box on mossy green carpet">
+          <rect width="320" height="320" fill="#4e5a45" />
+          <g fill="#44503c"><ellipse cx="270" cy="60" rx="46" ry="12" /><ellipse cx="60" cy="280" rx="52" ry="12" /></g>
+          <radialGradient id="fl6" cx="0.3" cy="0.28" r="0.9"><stop offset="0" stop-color="#f2ecd6" stop-opacity="0.24" /><stop offset="1" stop-color="#f2ecd6" stop-opacity="0" /></radialGradient>
+          <rect width="320" height="320" fill="url(#fl6)" />
+          <g transform="rotate(6 160 160)">
+            <rect x="58" y="76" width="204" height="168" rx="6" fill="#1d2318" opacity="0.4" transform="translate(7 9)" />
+            <rect x="58" y="76" width="204" height="168" rx="6" fill="#7fa08b" />
+            <path d="M84 208l40-58 30 34 26-44 42 68z" fill="#3f5a48" />
+            <circle cx="226" cy="116" r="17" fill="#e8ddb5" opacity="0.85" />
+            <rect x="84" y="94" width="104" height="12" rx="6" fill="#233527" opacity="0.75" />
+          </g>
+        </svg>
+      </div>
+      <div class="offer-body">
+        <h2 class="title"><a href="#">Cascadia</a></h2>
+        <p class="seller">
+          <span class="trust trust-new"><svg viewBox="0 0 24 24" aria-hidden="true"><use class="m" href="#meeple" /></svg>New</span>
+          <span class="sep">·</span><span class="name">Tom R.</span>
+        </p>
+        <div class="meta">
+          <div class="price-block">
+            <svg class="chip" viewBox="0 0 60 60" role="img" aria-label="Asking price 40 New Zealand dollars">
+              <circle class="face" cx="30" cy="30" r="27" />
+              <circle class="edge" cx="30" cy="30" r="26" />
+              <circle class="ring" cx="30" cy="30" r="20.5" />
+              <text x="30" y="35.5">$40</text>
+            </svg>
+          </div>
+          <ul class="tokens">
+            <li><svg class="tok" viewBox="0 0 26 26" aria-hidden="true"><use href="#cond4" /></svg><span class="val">Excellent</span></li>
+            <li><svg class="tok map" viewBox="0 0 15 30" aria-hidden="true"><use href="#nz" /><circle class="here" cx="11.5" cy="8" r="2.2" /></svg>Tauranga</li>
+            <li><svg class="tok" viewBox="0 0 24 24" aria-hidden="true"><use href="#parcel" /></svg>Can post</li>
+          </ul>
+        </div>
+        <p class="note">Great intro game, just never hits our table anymore.</p>
+        <p class="stamp">Listed this morning</p>
+      </div>
+    </article>
+
+    <!-- 7 · Twilight Imperium -->
+    <article class="offer">
+      <div class="photo" style="--tilt:-0.6deg">
+        <svg viewBox="0 0 400 225" width="340" role="img" aria-label="Photo: Twilight Imperium box on dark carpet, camera flash hotspot">
+          <rect width="400" height="225" fill="#3c3833" />
+          <g fill="#332f2b"><ellipse cx="330" cy="190" rx="70" ry="13" /><ellipse cx="60" cy="30" rx="50" ry="10" /></g>
+          <radialGradient id="fl7" cx="0.55" cy="0.3" r="0.75"><stop offset="0" stop-color="#fff1c8" stop-opacity="0.42" /><stop offset="1" stop-color="#0b0908" stop-opacity="0.3" /></radialGradient>
+          <rect width="400" height="225" fill="url(#fl7)" />
+          <g transform="rotate(2 200 112)">
+            <rect x="70" y="40" width="260" height="150" rx="6" fill="#12100e" opacity="0.5" transform="translate(8 9)" />
+            <rect x="70" y="40" width="260" height="150" rx="6" fill="#1d2233" />
+            <circle cx="200" cy="115" r="38" fill="#c2472f" opacity="0.8" />
+            <circle cx="200" cy="115" r="52" fill="none" stroke="#7f8bb0" stroke-width="3" opacity="0.55" />
+            <rect x="120" y="58" width="160" height="13" rx="6.5" fill="#c8cde0" opacity="0.75" />
+          </g>
+        </svg>
+      </div>
+      <div class="offer-body">
+        <h2 class="title"><a href="#">Twilight Imperium, 4th Edition</a></h2>
+        <p class="seller">
+          <span class="trust"><svg viewBox="0 0 24 24" aria-hidden="true"><use class="m" href="#meeple" /><use class="grain" href="#grain" /></svg>Established</span>
+          <span class="sep">·</span><span class="name">Alan G.</span>
+        </p>
+        <div class="meta">
+          <div class="price-block">
+            <svg class="chip" viewBox="0 0 60 60" role="img" aria-label="Asking price 150 New Zealand dollars">
+              <circle class="face" cx="30" cy="30" r="27" />
+              <circle class="edge" cx="30" cy="30" r="26" />
+              <circle class="ring" cx="30" cy="30" r="20.5" />
+              <text x="30" y="35.5">$150</text>
+            </svg>
+          </div>
+          <ul class="tokens">
+            <li><svg class="tok" viewBox="0 0 26 26" aria-hidden="true"><use href="#cond3" /></svg><span class="val">Good</span>&nbsp;— box corners worn</li>
+            <li><svg class="tok map" viewBox="0 0 15 30" aria-hidden="true"><use href="#nz" /><circle class="here" cx="7.8" cy="15.8" r="2.2" /></svg>Nelson</li>
+          </ul>
+        </div>
+        <p class="note">Pickup strongly preferred; will meet halfway anywhere Tasman-ish. Every plastic ship counted twice — nothing missing. Cards sleeved for the faction decks only. The box has done four house moves and looks it, but the guts are in great shape. Six-player epics await someone with more free Saturdays than me.</p>
+        <p class="stamp">Bumped 2 days ago</p>
+      </div>
+    </article>
+
+    <!-- 8 · Spirit Island -->
+    <article class="offer">
+      <div class="photo" style="--tilt:0.9deg">
+        <svg viewBox="0 0 400 300" width="340" role="img" aria-label="Photo: Spirit Island box on a dusty rose blanket">
+          <rect width="400" height="300" fill="#6b5354" />
+          <g fill="#5e4849"><ellipse cx="90" cy="270" rx="66" ry="13" /><ellipse cx="330" cy="40" rx="56" ry="12" /></g>
+          <radialGradient id="fl8" cx="0.3" cy="0.24" r="0.9"><stop offset="0" stop-color="#f7ecd8" stop-opacity="0.26" /><stop offset="1" stop-color="#f7ecd8" stop-opacity="0" /></radialGradient>
+          <rect width="400" height="300" fill="url(#fl8)" />
+          <g transform="rotate(-5 200 150)">
+            <rect x="86" y="60" width="232" height="180" rx="7" fill="#241a1a" opacity="0.42" transform="translate(8 10)" />
+            <rect x="86" y="60" width="232" height="180" rx="7" fill="#2e4744" />
+            <path d="M130 208c14-52 48-84 96-96-8 46-40 80-96 96z" fill="#6fa08a" opacity="0.9" />
+            <circle cx="150" cy="110" r="18" fill="#d8b45c" opacity="0.8" />
+            <rect x="182" y="86" width="110" height="12" rx="6" fill="#cfe0d2" opacity="0.7" />
+          </g>
+        </svg>
+      </div>
+      <div class="offer-body">
+        <h2 class="title"><a href="#">Spirit Island</a></h2>
+        <p class="seller">
+          <span class="trust"><svg viewBox="0 0 24 24" aria-hidden="true"><circle class="halo" cx="12" cy="12.5" r="11.1" /><use class="m" href="#meeple" /><use class="grain" href="#grain" /></svg>Trusted</span>
+          <span class="sep">·</span><span class="name">Ngaire H.</span>
+        </p>
+        <div class="meta">
+          <div class="price-block">
+            <svg class="chip" viewBox="0 0 60 60" role="img" aria-label="Asking price 70 New Zealand dollars or near offer">
+              <circle class="face" cx="30" cy="30" r="27" />
+              <circle class="edge" cx="30" cy="30" r="26" />
+              <circle class="ring" cx="30" cy="30" r="20.5" />
+              <text x="30" y="35.5">$70</text>
+            </svg>
+            <span class="chip-sub">or near offer</span>
+          </div>
+          <ul class="tokens">
+            <li><svg class="tok" viewBox="0 0 26 26" aria-hidden="true"><use href="#cond4" /></svg><span class="val">Excellent</span></li>
+            <li><svg class="tok map" viewBox="0 0 15 30" aria-hidden="true"><use href="#nz" /><circle class="here" cx="9" cy="11.6" r="2.2" /></svg>Palmerston North</li>
+            <li><svg class="tok" viewBox="0 0 24 24" aria-hidden="true"><use href="#parcel" /></svg>Can post</li>
+          </ul>
+        </div>
+        <p class="note">Base game only, invader cards sleeved. Brilliant co-op, we just went all-in on the big box edition so this one needs a new island to defend.</p>
+        <p class="stamp">Listed 4 days ago</p>
+      </div>
+    </article>
+
+    <!-- 9 · Azul -->
+    <article class="offer">
+      <div class="photo" style="--tilt:-1.2deg">
+        <svg viewBox="0 0 260 330" width="215" role="img" aria-label="Photo: Azul box held over a hallway floor">
+          <rect width="260" height="330" fill="#565062" />
+          <g fill="#4b4656"><ellipse cx="200" cy="300" rx="66" ry="15" /><ellipse cx="50" cy="40" rx="40" ry="12" /></g>
+          <radialGradient id="fl9" cx="0.4" cy="0.2" r="0.9"><stop offset="0" stop-color="#f3ecda" stop-opacity="0.28" /><stop offset="1" stop-color="#f3ecda" stop-opacity="0" /></radialGradient>
+          <rect width="260" height="330" fill="url(#fl9)" />
+          <g transform="rotate(3 130 165)">
+            <rect x="42" y="70" width="176" height="176" rx="6" fill="#17151c" opacity="0.45" transform="translate(7 9)" />
+            <rect x="42" y="70" width="176" height="176" rx="6" fill="#26324f" />
+            <g>
+              <rect x="70" y="120" width="34" height="34" rx="5" fill="#c94f3d" />
+              <rect x="112" y="120" width="34" height="34" rx="5" fill="#3e7fa6" />
+              <rect x="154" y="120" width="34" height="34" rx="5" fill="#d8c05a" />
+              <rect x="91" y="162" width="34" height="34" rx="5" fill="#4d9179" />
+              <rect x="133" y="162" width="34" height="34" rx="5" fill="#cdd3dc" />
+            </g>
+            <rect x="70" y="92" width="86" height="13" rx="6.5" fill="#dfe4ee" opacity="0.8" />
+          </g>
+        </svg>
+      </div>
+      <div class="offer-body">
+        <h2 class="title"><a href="#">Azul</a></h2>
+        <p class="seller">
+          <span class="trust trust-seedling"><svg viewBox="0 0 24 24" aria-hidden="true"><use class="m" href="#meeple" /></svg>Seedling</span>
+          <span class="sep">·</span><span class="name">Ben C.</span>
+        </p>
+        <div class="meta">
+          <div class="price-block">
+            <svg class="chip" viewBox="0 0 60 60" role="img" aria-label="Asking price 35 New Zealand dollars">
+              <circle class="face" cx="30" cy="30" r="27" />
+              <circle class="edge" cx="30" cy="30" r="26" />
+              <circle class="ring" cx="30" cy="30" r="20.5" />
+              <text x="30" y="35.5">$35</text>
+            </svg>
+          </div>
+          <ul class="tokens">
+            <li><svg class="tok" viewBox="0 0 26 26" aria-hidden="true"><use href="#cond5" /></svg><span class="val">Mint</span>&nbsp;— shrink off, played once</li>
+            <li><svg class="tok map" viewBox="0 0 15 30" aria-hidden="true"><use href="#nz" /><circle class="here" cx="9.3" cy="13.3" r="2.2" /></svg>Wellington</li>
+            <li><svg class="tok" viewBox="0 0 24 24" aria-hidden="true"><use href="#parcel" /></svg>Can post</li>
+          </ul>
+        </div>
+        <p class="note">Duplicate Secret Santa gift. Someone take it before I open it again.</p>
+        <p class="stamp">Listed 6 hours ago</p>
+      </div>
+    </article>
+
+    <!-- 10 · Carcassonne -->
+    <article class="offer">
+      <div class="photo" style="--tilt:0.5deg">
+        <svg viewBox="0 0 400 300" width="340" role="img" aria-label="Photo: Carcassonne boxes fanned out on beige carpet">
+          <rect width="400" height="300" fill="#6e6250" />
+          <g fill="#615645"><ellipse cx="70" cy="50" rx="50" ry="11" /><ellipse cx="330" cy="270" rx="64" ry="12" /><ellipse cx="250" cy="30" rx="44" ry="9" /></g>
+          <radialGradient id="fl10" cx="0.35" cy="0.25" r="0.9"><stop offset="0" stop-color="#fbf0d8" stop-opacity="0.28" /><stop offset="1" stop-color="#fbf0d8" stop-opacity="0" /></radialGradient>
+          <rect width="400" height="300" fill="url(#fl10)" />
+          <g transform="rotate(-8 190 170)">
+            <rect x="140" y="90" width="170" height="130" rx="6" fill="#23180d" opacity="0.4" transform="translate(8 9)" />
+            <rect x="140" y="90" width="170" height="130" rx="6" fill="#8c9a5f" transform="rotate(9 225 155)" />
+            <rect x="118" y="102" width="170" height="130" rx="6" fill="#5c7a4a" transform="rotate(4 203 167)" />
+            <rect x="96" y="114" width="170" height="130" rx="6" fill="#a4b06a" />
+            <path d="M136 214v-52l24-18 24 18v52z" fill="#5b4a33" />
+            <rect x="118" y="130" width="98" height="12" rx="6" fill="#3a3320" opacity="0.7" />
+          </g>
+        </svg>
+      </div>
+      <div class="offer-body">
+        <h2 class="title"><a href="#">Carcassonne + 3 Expansions</a></h2>
+        <p class="seller">
+          <span class="trust"><svg viewBox="0 0 24 24" aria-hidden="true"><use class="m" href="#meeple" /></svg>Growing</span>
+          <span class="sep">·</span><span class="name">Moana R.</span>
+        </p>
+        <div class="meta">
+          <div class="price-block">
+            <svg class="chip" viewBox="0 0 60 60" role="img" aria-label="Asking price 60 New Zealand dollars">
+              <circle class="face" cx="30" cy="30" r="27" />
+              <circle class="edge" cx="30" cy="30" r="26" />
+              <circle class="ring" cx="30" cy="30" r="20.5" />
+              <text x="30" y="35.5">$60</text>
+            </svg>
+          </div>
+          <ul class="tokens">
+            <li><svg class="tok" viewBox="0 0 26 26" aria-hidden="true"><use href="#cond3" /></svg><span class="val">Good</span>&nbsp;— well loved</li>
+            <li><svg class="tok map" viewBox="0 0 15 30" aria-hidden="true"><use href="#nz" /><circle class="here" cx="9.8" cy="7.4" r="2.2" /></svg>Hamilton</li>
+            <li><svg class="tok" viewBox="0 0 24 24" aria-hidden="true"><use href="#parcel" /></svg>Can post</li>
+            <li><svg class="tok" viewBox="0 0 24 24" aria-hidden="true"><use href="#swap" /></svg>Open to trade offers</li>
+          </ul>
+        </div>
+        <p class="note">Base plus Inns &amp; Cathedrals, Traders &amp; Builders, and The River. Tiles have soft corners from years of family games — all present, meeples complete including the pigs. Would happily swap for Patchwork plus a bit of cash.</p>
+        <p class="stamp">Listed 1 week ago</p>
+      </div>
+    </article>
+
+  </main>
+
+  <footer class="site-foot">
+    <span>Meeple Cart is <strong>free, community-run, and open source</strong>.</span>
+    <span>Made for Aotearoa's tabletop whānau.</span>
+    <span class="foot-spacer"></span>
+    <a href="#">About</a>
+    <a href="#">Code of conduct</a>
+    <a href="#">Source</a>
+  </footer>
+
+</div>
+
+</body>
+</html>

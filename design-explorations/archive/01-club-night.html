@@ -1,0 +1,1150 @@
+<!--
+  DIRECTION CONTRACT — 01 "Club Night"
+
+  World statement:
+  Meeple Cart is free and community-run, and this direction makes that its whole
+  visual identity. The browse feed is the noticeboard in the community hall on
+  games night: every offer is a paper card a real person pinned up — slight tilt,
+  soft shadow, a drawn pushpin — executed with modern web precision, never as a
+  grunge/skeuomorph costume. Warm light, neighbourly tone, "someone near you has
+  this". Trust is a rubber stamp, not a star rating.
+
+  Palette tokens:
+    --board       #F1E7D3   warm paper-cream ground (the corkboard)
+    --paper       #FFFDF6   card paper
+    --kraft       #EFE4CC   secondary surface (status strips, chips)
+    --kraft-deep  #C9B48D   rules, borders, board frame tint
+    --frame       #C2A177   timber board frame
+    --ink         #2B241A   warm near-black ink
+    --ink-soft    #6F6350   secondary ink, tinted warm (never flat gray)
+    --accent      #2247C4   marker/stamp blue — THE one saturated hue
+    --accent-deep #18339B   pressed/hover state of the same ink
+
+  Type pairing:
+    Display  — Solway (warm slab; headings, offer titles, prices)
+    Body     — Cabin (humanist sans; everything else)
+    Script   — Caveat, in EXACTLY one place: the logo wordmark
+
+  System rules this world enforces:
+  1. Accent is earned, never ambient: blue appears only where the visitor acts
+     (buttons, message links, checked filters, focus rings) or where trust is
+     asserted (stamps). A "New" member's stamp prints in plain ink — the blue
+     stamp ink is literally earned through vouched trades.
+  2. Paper physics, restrained: cards tilt at most ±0.5deg, shadows are soft and
+     offset, one drawn pushpin motif in one SVG stroke weight (2). No torn
+     edges, no texture bitmaps.
+  3. Trust is a stamp: a drawn SVG roundel — double ring, tier name in caps,
+     1–5 filled pips for rank — same geometry for every tier.
+  4. Staged clarity: every card opens with a printed status line in fixed
+     vocabulary (OFFER · ACTIVE / OFFER · PENDING / BUNDLE · ACTIVE), same
+     position on every card. This is a functional state device, not decoration.
+  5. One handwritten moment (the logo). One authored motion moment: hovering a
+     card straightens it to 0° and lifts it off the board, as if you leaned in.
+-->
+<!doctype html>
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meeple Cart — the board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cabin:ital,wght@0,400..700;1,400..700&family=Caveat:wght@600;700&family=Solway:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --board:#F1E7D3;
+    --paper:#FFFDF6;
+    --kraft:#EFE4CC;
+    --kraft-deep:#C9B48D;
+    --frame:#C2A177;
+    --ink:#2B241A;
+    --ink-soft:#6F6350;
+    --accent:#2247C4;
+    --accent-deep:#18339B;
+    --shadow-card:1px 3px 4px rgba(74,56,28,.10), 2px 12px 28px -12px rgba(74,56,28,.22);
+    --shadow-lift:2px 8px 10px rgba(74,56,28,.12), 4px 26px 44px -16px rgba(74,56,28,.30);
+    --font-display:'Solway', 'Georgia', serif;
+    --font-body:'Cabin', 'Segoe UI', 'Helvetica Neue', sans-serif;
+    --font-script:'Caveat', cursive;
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; }
+
+  html{ scrollbar-color: var(--kraft-deep) var(--board); }
+  ::-webkit-scrollbar{ width:13px; }
+  ::-webkit-scrollbar-track{ background:var(--board); }
+  ::-webkit-scrollbar-thumb{ background:var(--kraft-deep); border:3px solid var(--board); border-radius:8px; }
+  ::selection{ background:var(--accent); color:var(--paper); }
+
+  body{
+    font-family:var(--font-body);
+    font-size:16px;
+    line-height:1.5;
+    color:var(--ink);
+    background-color:var(--board);
+    /* cork pinholes — pure CSS, barely there */
+    background-image:radial-gradient(rgba(122,96,54,.055) 1px, transparent 1.4px);
+    background-size:23px 23px;
+    border:10px solid var(--frame);
+    box-shadow:inset 0 0 0 1px rgba(74,56,28,.28);
+    min-height:100vh;
+  }
+
+  a{ color:inherit; }
+  :focus-visible{ outline:2px solid var(--accent); outline-offset:2px; border-radius:2px; }
+
+  .wrap{ max-width:1180px; margin:0 auto; padding:0 32px; }
+
+  /* ---------- Header ---------- */
+
+  .site-head{
+    display:flex; align-items:center; gap:28px; flex-wrap:wrap;
+    padding:22px 0 18px;
+    border-bottom:1px solid var(--kraft-deep);
+  }
+  .logo{
+    display:flex; align-items:center; gap:10px;
+    text-decoration:none;
+  }
+  .logo svg{ display:block; }
+  .logo-word{
+    font-family:var(--font-script);
+    font-weight:700;
+    font-size:34px;
+    line-height:1;
+    letter-spacing:.5px;
+    transform:rotate(-2deg);
+  }
+
+  .site-nav{ display:flex; align-items:center; gap:4px; flex-wrap:wrap; margin-inline:auto; }
+  .site-nav a{
+    position:relative;
+    display:inline-flex; align-items:center; gap:7px;
+    text-decoration:none;
+    font-weight:600;
+    font-size:16px;
+    padding:8px 14px;
+    border-radius:4px;
+    color:var(--ink-soft);
+  }
+  .site-nav a:hover{ color:var(--ink); background:rgba(201,180,141,.28); }
+  .site-nav a[aria-current="page"]{ color:var(--ink); }
+  .site-nav a[aria-current="page"]::after{
+    content:"";
+    position:absolute; left:12px; right:12px; bottom:2px;
+    height:3px; border-radius:2px;
+    background:var(--accent);
+  }
+  .nav-badge{
+    font-size:12px; font-weight:700;
+    min-width:20px; height:20px;
+    display:inline-grid; place-items:center;
+    padding:0 5px;
+    border-radius:10px;
+    background:var(--accent); color:var(--paper);
+  }
+
+  .head-actions{ display:flex; align-items:center; gap:16px; }
+  .btn-pin{
+    font-family:var(--font-body);
+    font-weight:700; font-size:15px;
+    color:var(--paper);
+    background:var(--accent);
+    border:none; cursor:pointer;
+    padding:10px 18px 11px;
+    border-radius:4px;
+    box-shadow:1px 3px 0 var(--accent-deep);
+    text-decoration:none;
+    display:inline-flex; align-items:center; gap:8px;
+    transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+  .btn-pin:hover{ background:var(--accent-deep); transform:translateY(1px); box-shadow:1px 2px 0 var(--accent-deep); }
+  .avatar-self{
+    width:40px; height:40px; border-radius:50%;
+    display:grid; place-items:center;
+    background:var(--kraft); border:2px solid var(--kraft-deep);
+    font-family:var(--font-display); font-weight:700; font-size:14px;
+    color:var(--ink); text-decoration:none;
+  }
+  .avatar-self:hover{ border-color:var(--ink-soft); }
+
+  /* ---------- Page intro ---------- */
+
+  .intro{ padding:44px 0 8px; }
+  .intro h1{
+    font-family:var(--font-display);
+    font-weight:800;
+    font-size:clamp(30px, 4vw, 42px);
+    line-height:1.12;
+    letter-spacing:-.01em;
+  }
+  .intro p{
+    margin-top:10px;
+    max-width:56ch;
+    font-size:17px;
+    color:var(--ink-soft);
+  }
+
+  /* ---------- Filters ---------- */
+
+  .filters{
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+    padding:22px 0 6px;
+  }
+  .filters .grow{ flex:1; }
+
+  .chip, .seg label span, .region-tag{
+    font-family:var(--font-body);
+    font-size:14.5px; font-weight:600;
+  }
+
+  .region-tag{
+    position:relative;
+    display:inline-flex; align-items:center; gap:8px;
+    background:var(--paper);
+    border:1.5px solid var(--kraft-deep);
+    border-radius:4px;
+    padding:8px 10px 8px 12px;
+    box-shadow:1px 2px 3px rgba(74,56,28,.10);
+  }
+  .region-tag select{
+    font:inherit; color:var(--ink);
+    border:none; background:transparent;
+    padding-right:2px;
+    cursor:pointer;
+  }
+  .region-tag svg{ flex:none; }
+
+  .seg{ display:flex; }
+  .seg label{ position:relative; }
+  .seg label input{
+    position:absolute; inset:0;
+    opacity:0; cursor:pointer;
+  }
+  .seg label span{
+    display:inline-block;
+    padding:8px 15px 9px;
+    background:var(--paper);
+    border:1.5px solid var(--kraft-deep);
+    border-left-width:0;
+    color:var(--ink-soft);
+    cursor:pointer;
+    user-select:none;
+  }
+  .seg label:first-child span{ border-left-width:1.5px; border-radius:4px 0 0 4px; }
+  .seg label:last-child span{ border-radius:0 4px 4px 0; }
+  .seg label:hover span{ color:var(--ink); }
+  .seg label:has(input:checked) span{
+    background:var(--accent); border-color:var(--accent);
+    color:var(--paper);
+  }
+  .seg label:has(input:focus-visible) span{
+    outline:2px solid var(--accent); outline-offset:2px;
+  }
+
+  .chip{
+    position:relative;
+    display:inline-flex; align-items:center; gap:9px;
+    padding:8px 15px 9px;
+    background:var(--paper);
+    border:1.5px solid var(--kraft-deep);
+    border-radius:4px;
+    color:var(--ink-soft);
+    cursor:pointer; user-select:none;
+    box-shadow:1px 2px 3px rgba(74,56,28,.10);
+  }
+  .chip input{ position:absolute; inset:0; opacity:0; cursor:pointer; }
+  .chip svg{ flex:none; }
+  .chip:hover{ color:var(--ink); }
+  .chip:has(input:checked){
+    border-color:var(--accent); color:var(--accent-deep);
+    box-shadow:inset 0 0 0 1px var(--accent), 1px 2px 3px rgba(74,56,28,.10);
+  }
+  .chip:has(input:focus-visible){ outline:2px solid var(--accent); outline-offset:2px; }
+
+  .board-count{
+    font-size:14.5px; color:var(--ink-soft);
+    font-weight:500;
+  }
+
+  /* ---------- The board (feed) ---------- */
+
+  .feed{
+    padding:30px 0 26px;
+    columns:3;
+    column-gap:30px;
+  }
+
+  .card{
+    position:relative;
+    display:inline-block;width:100%;
+    margin:16px 0 36px;
+    background:var(--paper);
+    border:1px solid #E8DCC3;
+    border-radius:3px;
+    box-shadow:var(--shadow-card);
+    transform:rotate(var(--tilt, 0deg));
+    transition:transform .35s cubic-bezier(0.22,0.9,0.3,1), box-shadow .35s ease;
+  }
+  .card:first-child{ margin-top:18px; }
+  /* ±0.5deg max — paper individuality, not chaos */
+  .card:nth-child(9n+1){ --tilt:-0.4deg; }
+  .card:nth-child(9n+2){ --tilt:0.35deg; }
+  .card:nth-child(9n+3){ --tilt:-0.2deg; }
+  .card:nth-child(9n+4){ --tilt:0.5deg; }
+  .card:nth-child(9n+5){ --tilt:-0.45deg; }
+  .card:nth-child(9n+6){ --tilt:0.25deg; }
+  .card:nth-child(9n+7){ --tilt:-0.3deg; }
+  .card:nth-child(9n+8){ --tilt:0.45deg; }
+  .card:nth-child(9n+9){ --tilt:-0.15deg; }
+
+  /* the authored motion moment: lean in, the card straightens and lifts */
+  .card:hover, .card:focus-within{
+    transform:rotate(0deg) translateY(-6px);
+    box-shadow:var(--shadow-lift);
+    z-index:2;
+  }
+
+  .pin{
+    position:absolute;
+    top:-15px; left:50%;
+    transform:translateX(-50%);
+    z-index:3;
+  }
+
+  .status{
+    font-size:11.5px;
+    font-weight:700;
+    letter-spacing:.14em;
+    color:var(--ink-soft);
+    background:var(--kraft);
+    border-bottom:1px solid #E3D6BA;
+    border-radius:3px 3px 0 0;
+    padding:9px 18px 8px;
+  }
+  .is-pending .status{ color:var(--ink); }
+
+  .photo{ position:relative; display:block; border-bottom:1px solid #EDE2CB; }
+  .photo svg{ display:block; width:100%; height:auto; }
+
+  .overlay-stamp{
+    position:absolute; inset:0;
+    display:grid; place-items:center;
+    pointer-events:none;
+  }
+  .overlay-stamp span{
+    font-family:var(--font-body);
+    font-weight:700; font-size:15px; letter-spacing:.22em;
+    color:var(--ink);
+    background:rgba(255,253,246,.82);
+    border:2px solid var(--ink);
+    border-radius:3px;
+    padding:7px 16px 7px 19px;
+    transform:rotate(-7deg);
+  }
+
+  .card-body{ padding:18px 18px 4px; }
+
+  .card h2{
+    font-family:var(--font-display);
+    font-weight:700;
+    font-size:21px;
+    line-height:1.25;
+    margin-top:2px;
+  }
+  .cond{
+    margin-top:5px;
+    font-size:14px;
+    color:var(--ink-soft);
+  }
+  .cond strong, .items li strong{ color:var(--ink); font-weight:600; }
+
+  .items{ list-style:none; margin-top:8px; display:grid; gap:5px; }
+  .items li{
+    font-size:14.5px; color:var(--ink-soft);
+    display:flex; justify-content:space-between; gap:12px;
+    border-bottom:1px dashed #E3D6BA;
+    padding-bottom:5px;
+  }
+  .items li:last-child{ border-bottom:none; padding-bottom:0; }
+
+  .price-row{
+    display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
+    margin-top:12px;
+  }
+  .price{
+    font-family:var(--font-display);
+    font-weight:800;
+    font-size:25px;
+    line-height:1;
+    font-variant-numeric:tabular-nums;
+  }
+  .terms{
+    font-size:14px; color:var(--ink-soft);
+    display:inline-flex; align-items:center; gap:6px;
+  }
+  .terms svg{ flex:none; }
+
+  .note{
+    margin-top:11px;
+    font-size:15px;
+    line-height:1.55;
+    color:var(--ink);
+  }
+
+  .meta{
+    list-style:none;
+    display:flex; flex-wrap:wrap; gap:6px 16px;
+    margin-top:13px;
+    padding-top:12px;
+    border-top:1px solid #EDE2CB;
+  }
+  .meta li{
+    display:inline-flex; align-items:center; gap:7px;
+    font-size:13.5px; font-weight:600;
+    letter-spacing:.02em;
+    color:var(--ink-soft);
+  }
+  .meta svg{ flex:none; }
+
+  .trader{
+    display:flex; align-items:center; gap:12px;
+    padding:14px 14px 12px 18px;
+    margin-top:14px;
+    background:var(--kraft);
+    border-top:1px solid #E3D6BA;
+  }
+  .trader .who{ display:flex; align-items:center; gap:11px; min-width:0; flex:1; }
+  .avatar{
+    flex:none;
+    width:38px; height:38px; border-radius:50%;
+    display:grid; place-items:center;
+    background:var(--paper);
+    border:1.5px solid var(--kraft-deep);
+    font-family:var(--font-display); font-weight:700; font-size:13px;
+  }
+  .who-name{ display:block; font-weight:700; font-size:15px; line-height:1.3; }
+  .who-sub{ display:block; font-size:12.5px; color:var(--ink-soft); }
+
+  .stamp{ flex:none; transform:rotate(-6deg); opacity:.92; }
+
+  .act{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:12px 18px 15px;
+  }
+  .msg{
+    display:inline-flex; align-items:center; gap:8px;
+    font-weight:700; font-size:15px;
+    color:var(--accent);
+    text-decoration:none;
+    border-bottom:2px solid transparent;
+    padding-bottom:1px;
+  }
+  .msg:hover{ color:var(--accent-deep); border-bottom-color:var(--accent-deep); }
+  .msg svg{ transition:transform .18s ease; }
+  .msg:hover svg{ transform:translateX(3px); }
+
+  .watch{
+    display:inline-flex; align-items:center; gap:7px;
+    font-family:var(--font-body);
+    font-weight:600; font-size:13.5px;
+    color:var(--ink-soft);
+    background:transparent;
+    border:1.5px solid var(--kraft-deep);
+    border-radius:4px;
+    padding:6px 12px 7px;
+    cursor:pointer;
+    transition:color .15s ease, border-color .15s ease;
+  }
+  .watch:hover{ color:var(--accent-deep); border-color:var(--accent); }
+
+  /* ---------- Footer ---------- */
+
+  .site-foot{
+    border-top:1px solid var(--kraft-deep);
+    padding:26px 0 34px;
+    display:flex; align-items:center; gap:10px 28px; flex-wrap:wrap;
+    color:var(--ink-soft);
+    font-size:14.5px;
+  }
+  .site-foot p strong{ color:var(--ink); font-weight:700; }
+  .site-foot nav{ display:flex; gap:20px; margin-left:auto; }
+  .site-foot a{ color:var(--ink-soft); text-decoration:underline; text-underline-offset:3px; }
+  .site-foot a:hover{ color:var(--accent-deep); }
+
+  /* ---------- Responsive ---------- */
+
+  @media (max-width:1080px){
+    .feed{ columns:2; }
+  }
+  @media (max-width:760px){
+    body{ border-width:6px; }
+    .wrap{ padding:0 18px; }
+    .site-head{ gap:14px; padding-top:16px; }
+    .site-nav{ order:3; width:100%; margin-inline:0; justify-content:flex-start; }
+    .head-actions{ margin-left:auto; }
+    .intro{ padding-top:30px; }
+    .feed{ columns:1; }
+    .filters{ gap:10px; }
+  }
+  @media (max-width:430px){
+    body{ border-width:4px; }
+    .wrap{ padding:0 12px; }
+    .logo-word{ font-size:28px; }
+    .btn-pin{ padding:9px 13px 10px; font-size:14px; }
+    .site-nav a{ padding:7px 9px; font-size:15px; }
+    .intro p{ font-size:16px; }
+    .seg label span{ padding:8px 11px 9px; }
+    .card-body{ padding:15px 14px 2px; }
+    .act{ padding:10px 14px 13px; }
+    .trader{ padding-left:14px; }
+    .site-foot nav{ margin-left:0; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .card, .btn-pin, .msg svg, .watch{ transition:none; }
+    .card:hover, .card:focus-within{ transform:rotate(var(--tilt, 0deg)); }
+  }
+</style>
+</head>
+<body>
+
+<!-- reusable drawn symbols — one stroke style: stroke-width 2 (marks) / 1.8 (16px icons), round caps -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- pushpin -->
+    <g id="i-pushpin">
+      <circle cx="12" cy="10" r="7" fill="var(--paper)" stroke="var(--ink)" stroke-width="2"/>
+      <path d="M8.6 8.2a4 4 0 0 1 2.4-2.4" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round"/>
+      <path d="M12 17v10" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round"/>
+    </g>
+    <!-- 16px icon set -->
+    <g id="i-loc" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M8 14.2S3.2 9.8 3.2 6.6a4.8 4.8 0 0 1 9.6 0c0 3.2-4.8 7.6-4.8 7.6Z"/>
+      <circle cx="8" cy="6.6" r="1.6"/>
+    </g>
+    <g id="i-parcel" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2.6 5.6 8 3l5.4 2.6v6L8 14.2l-5.4-2.6Z"/>
+      <path d="M2.6 5.6 8 8.2l5.4-2.6M8 8.2v6"/>
+    </g>
+    <g id="i-noparcel" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2.6 5.6 8 3l5.4 2.6v6L8 14.2l-5.4-2.6Z"/>
+      <path d="M2.6 5.6 8 8.2l5.4-2.6M8 8.2v6"/>
+      <path d="M1.6 14.4 14.4 1.6"/>
+    </g>
+    <g id="i-swap" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3.4 5h9.2m0 0L10 2.4M12.6 5 10 7.6"/>
+      <path d="M12.6 11H3.4m0 0L6 8.4M3.4 11 6 13.6"/>
+    </g>
+    <g id="i-star" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m8 2.2 1.8 3.7 4 .6-2.9 2.9.7 4L8 11.5l-3.6 1.9.7-4L2.2 6.5l4-.6Z"/>
+    </g>
+    <g id="i-arrow" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2.6 8h10.8m0 0L9.6 4.2M13.4 8l-3.8 3.8"/>
+    </g>
+    <!-- little meeple, filled -->
+    <path id="i-meeple" d="M12 3.2c1.9 0 3.4 1.5 3.4 3.4 0 1.2-.6 2.3-1.5 2.9 2.4.5 4.7 1.7 4.7 3.6 0 1-.8 1.7-1.8 1.7h-2.9l2.3 4.2c.5.9-.2 1.9-1.2 1.9h-6c-1 0-1.7-1-1.2-1.9l2.3-4.2H7.2c-1 0-1.8-.7-1.8-1.7 0-1.9 2.3-3.1 4.7-3.6-.9-.6-1.5-1.7-1.5-2.9 0-1.9 1.5-3.4 3.4-3.4Z"/>
+  </defs>
+</svg>
+
+<header class="wrap site-head">
+  <a class="logo" href="#" aria-label="Meeple Cart home">
+    <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true">
+      <use href="#i-meeple" fill="var(--ink)" transform="translate(0 -1)"/>
+    </svg>
+    <span class="logo-word">Meeple Cart</span>
+  </a>
+
+  <nav class="site-nav" aria-label="Main">
+    <a href="#" aria-current="page">Browse</a>
+    <a href="#">Wanted</a>
+    <a href="#">Messages <span class="nav-badge" aria-label="2 unread">2</span></a>
+    <a href="#">Trades</a>
+  </nav>
+
+  <div class="head-actions">
+    <a class="btn-pin" href="#">
+      <svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><g stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M8 3v10M3 8h10"/></g></svg>
+      Pin a listing
+    </a>
+    <a class="avatar-self" href="#" aria-label="Your profile — CB">CB</a>
+  </div>
+</header>
+
+<section class="wrap intro">
+  <h1>On the board tonight</h1>
+  <p>Offers pinned by members around Aotearoa. No fees, no ads, no cut — just shelves that got too full.</p>
+</section>
+
+<form class="wrap filters" aria-label="Filter offers">
+  <label class="region-tag">
+    <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-loc" style="color:var(--ink-soft)"/></svg>
+    <span class="sr-only" hidden>Region</span>
+    <select name="region" aria-label="Region">
+      <option selected>All regions</option>
+      <option>Northland</option>
+      <option>Auckland</option>
+      <option>Waikato</option>
+      <option>Bay of Plenty</option>
+      <option>Manawatū–Whanganui</option>
+      <option>Wellington</option>
+      <option>Nelson–Tasman</option>
+      <option>Canterbury</option>
+      <option>Otago</option>
+      <option>Southland</option>
+    </select>
+  </label>
+
+  <fieldset class="seg" style="border:none" aria-label="Offer type">
+    <label><input type="radio" name="type" value="sale"><span>For sale</span></label>
+    <label><input type="radio" name="type" value="trade"><span>For trade</span></label>
+    <label><input type="radio" name="type" value="both" checked><span>Both</span></label>
+  </fieldset>
+
+  <label class="chip">
+    <input type="checkbox" name="canpost">
+    <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-parcel"/></svg>
+    Can post
+  </label>
+
+  <span class="grow"></span>
+  <p class="board-count">9 offers on the board</p>
+</form>
+
+<main class="wrap feed" aria-label="Offers">
+
+  <!-- 1 · Wingspan -->
+  <article class="card">
+    <svg class="pin" width="24" height="30" viewBox="0 0 24 30" aria-hidden="true"><use href="#i-pushpin"/></svg>
+    <p class="status">OFFER · ACTIVE</p>
+    <figure class="photo">
+      <svg viewBox="0 0 400 296" role="img" aria-label="Phone photo: Wingspan box on lounge carpet">
+        <defs><linearGradient id="p1g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9AA28D"/><stop offset="1" stop-color="#7D8571"/></linearGradient></defs>
+        <rect width="400" height="296" fill="url(#p1g)"/>
+        <ellipse cx="212" cy="222" rx="152" ry="24" fill="#5F674F" opacity=".4"/>
+        <g transform="rotate(-4 200 150)">
+          <rect x="92" y="66" width="224" height="142" rx="4" fill="#CBD2C1"/>
+          <rect x="92" y="180" width="224" height="30" rx="3" fill="#A9B19C"/>
+          <rect x="114" y="88" width="128" height="17" rx="3" fill="#8D957E"/>
+          <circle cx="276" cy="128" r="27" fill="#B5BDA7"/>
+          <path d="M262 132c6-9 22-9 28 0" fill="none" stroke="#8D957E" stroke-width="3" stroke-linecap="round"/>
+        </g>
+      </svg>
+    </figure>
+    <div class="card-body">
+      <h2>Wingspan</h2>
+      <p class="cond">Condition: <strong>excellent</strong> · sleeved, complete</p>
+      <div class="price-row">
+        <p class="price">$65</p>
+        <p class="terms">or near offer</p>
+      </div>
+      <p class="note">Base game with the swift-start pack. Sleeved from day one — the eggs have never been near a toddler.</p>
+      <ul class="meta">
+        <li><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-loc"/></svg>Wellington</li>
+        <li><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-parcel"/></svg>Posts NZ-wide</li>
+      </ul>
+    </div>
+    <footer class="trader">
+      <div class="who">
+        <span class="avatar" aria-hidden="true">PM</span>
+        <span>
+          <span class="who-name">Priya M.</span>
+          <span class="who-sub">11 vouched trades · joined 2023</span>
+        </span>
+      </div>
+      <svg class="stamp" width="66" height="66" viewBox="0 0 72 72" role="img" aria-label="Trust tier: Established">
+        <g fill="none" stroke="var(--accent)" stroke-width="2">
+          <circle cx="36" cy="36" r="33"/><circle cx="36" cy="36" r="26"/>
+        </g>
+        <g fill="var(--accent)"><circle cx="36" cy="6.5" r="1.6"/><circle cx="36" cy="65.5" r="1.6"/><circle cx="6.5" cy="36" r="1.6"/><circle cx="65.5" cy="36" r="1.6"/></g>
+        <use href="#i-meeple" fill="var(--accent)" transform="translate(29.5 12.5) scale(.56)"/>
+        <text x="36" y="38.5" text-anchor="middle" font-family="Cabin, sans-serif" font-weight="700" font-size="6.8" letter-spacing="1" fill="var(--accent)">ESTABLISHED</text>
+        <g>
+          <circle cx="26" cy="47" r="2.1" fill="var(--accent)"/><circle cx="31" cy="47" r="2.1" fill="var(--accent)"/><circle cx="36" cy="47" r="2.1" fill="var(--accent)"/><circle cx="41" cy="47" r="2.1" fill="var(--accent)"/><circle cx="46" cy="47" r="2.1" fill="none" stroke="var(--accent)" stroke-width="1.4"/>
+        </g>
+      </svg>
+    </footer>
+    <div class="act">
+      <a class="msg" href="#">Message Priya <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      <button class="watch" type="button"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-star"/></svg>Watch</button>
+    </div>
+  </article>
+
+  <!-- 2 · Brass: Birmingham -->
+  <article class="card">
+    <svg class="pin" width="24" height="30" viewBox="0 0 24 30" aria-hidden="true"><use href="#i-pushpin"/></svg>
+    <p class="status">OFFER · ACTIVE</p>
+    <figure class="photo">
+      <svg viewBox="0 0 400 252" role="img" aria-label="Phone photo: Brass Birmingham box on a wooden table">
+        <defs><linearGradient id="p2g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#B2906C"/><stop offset="1" stop-color="#95744F"/></linearGradient></defs>
+        <rect width="400" height="252" fill="url(#p2g)"/>
+        <rect x="0" y="0" width="400" height="12" fill="#84654266" opacity=".5"/>
+        <ellipse cx="188" cy="196" rx="146" ry="20" fill="#6B4E30" opacity=".45"/>
+        <g transform="rotate(3 200 130)">
+          <rect x="68" y="52" width="230" height="136" rx="4" fill="#565F6D"/>
+          <rect x="68" y="162" width="230" height="26" rx="3" fill="#454D59"/>
+          <rect x="88" y="72" width="146" height="18" rx="3" fill="#6E7887"/>
+          <rect x="88" y="120" width="190" height="4" rx="2" fill="#6E7887" opacity=".7"/>
+          <circle cx="258" cy="98" r="17" fill="#6E7887" opacity=".8"/>
+        </g>
+      </svg>
+    </figure>
+    <div class="card-body">
+      <h2>Brass: Birmingham</h2>
+      <p class="cond">Condition: <strong>mint</strong> · played twice</p>
+      <div class="price-row">
+        <p class="price">$95</p>
+        <p class="terms">or near offer</p>
+      </div>
+      <p class="note">Retail edition. Deluxe iron clays not included.</p>
+      <ul class="meta">
+        <li><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-loc"/></svg>Christchurch</li>
+        <li><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-parcel"/></svg>Posts NZ-wide</li>
+      </ul>
+    </div>
+    <footer class="trader">
+      <div class="who">
+        <span class="avatar" aria-hidden="true">MT</span>
+        <span>
+          <span class="who-name">Marcus T.</span>
+          <span class="who-sub">27 vouched trades · joined 2023</span>
+        </span>
+      </div>
+      <svg class="stamp" width="66" height="66" viewBox="0 0 72 72" role="img" aria-label="Trust tier: Trusted">
+        <g fill="none" stroke="var(--accent)" stroke-width="2">
+          <circle cx="36" cy="36" r="33"/><circle cx="36" cy="36" r="26"/>
+        </g>
+        <g fill="var(--accent)"><circle cx="36" cy="6.5" r="1.6"/><circle cx="36" cy="65.5" r="1.6"/><circle cx="6.5" cy="36" r="1.6"/><circle cx="65.5" cy="36" r="1.6"/></g>
+        <use href="#i-meeple" fill="var(--accent)" transform="translate(29.5 12.5) scale(.56)"/>
+        <text x="36" y="38.5" text-anchor="middle" font-family="Cabin, sans-serif" font-weight="700" font-size="7.6" letter-spacing="1.4" fill="var(--accent)">TRUSTED</text>
+        <g fill="var(--accent)">
+          <circle cx="26" cy="47" r="2.1"/><circle cx="31" cy="47" r="2.1"/><circle cx="36" cy="47" r="2.1"/><circle cx="41" cy="47" r="2.1"/><circle cx="46" cy="47" r="2.1"/>
+        </g>
+      </svg>
+    </footer>
+    <div class="act">
+      <a class="msg" href="#">Message Marcus <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      <button class="watch" type="button"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-star"/></svg>Watch</button>
+    </div>
+  </article>
+
+  <!-- 3 · Everdell bundle -->
+  <article class="card">
+    <svg class="pin" width="24" height="30" viewBox="0 0 24 30" aria-hidden="true"><use href="#i-pushpin"/></svg>
+    <p class="status">BUNDLE · ACTIVE</p>
+    <figure class="photo">
+      <svg viewBox="0 0 400 400" role="img" aria-label="Phone photo: three Everdell boxes stacked on a grey duvet">
+        <defs><linearGradient id="p3g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#A2A3AF"/><stop offset="1" stop-color="#8A8B98"/></linearGradient></defs>
+        <rect width="400" height="400" fill="url(#p3g)"/>
+        <path d="M0 330q100-26 200-12t200-6v88H0Z" fill="#7B7C89" opacity=".6"/>
+        <ellipse cx="196" cy="330" rx="160" ry="24" fill="#63646F" opacity=".5"/>
+        <g transform="rotate(-2 200 220)">
+          <rect x="74" y="200" width="252" height="128" rx="4" fill="#7C8E71"/>
+          <rect x="96" y="224" width="150" height="18" rx="3" fill="#98A98C"/>
+          <rect x="92" y="138" width="216" height="64" rx="4" fill="#93A487"/>
+          <rect x="112" y="156" width="118" height="14" rx="3" fill="#ABBB9E"/>
+          <rect x="112" y="84" width="176" height="56" rx="4" fill="#A7B79A"/>
+          <rect x="130" y="100" width="96" height="13" rx="3" fill="#C0CDB2"/>
+        </g>
+      </svg>
+    </figure>
+    <div class="card-body">
+      <h2>Everdell + expansions bundle</h2>
+      <ul class="items">
+        <li><strong>Everdell (base)</strong><span>excellent</span></li>
+        <li><strong>Pearlbrook</strong><span>excellent</span></li>
+        <li><strong>Spirecrest</strong><span>good</span></li>
+      </ul>
+      <div class="price-row">
+        <p class="price">$180</p>
+        <p class="terms">bundle only — won't split</p>
+      </div>
+      <p class="note">Collection cull, and this one hurts. Everything sorted into the base box plus one expansion box, all cards sleeved. Pickup preferred so you can check it over, but happy to courier at cost.</p>
+      <ul class="meta">
+        <li><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-loc"/></svg>Auckland</li>
+        <li><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-parcel"/></svg>Posts NZ-wide</li>
+      </ul>
+    </div>
+    <footer class="trader">
+      <div class="who">
+        <span class="avatar" aria-hidden="true">HK</span>
+        <span>
+          <span class="who-name">Hannah K.</span>
+          <span class="who-sub">5 vouched trades · joined 2024</span>
+        </span>
+      </div>
+      <svg class="stamp" width="66" height="66" viewBox="0 0 72 72" role="img" aria-label="Trust tier: Growing">
+        <g fill="none" stroke="var(--accent)" stroke-width="2">
+          <circle cx="36" cy="36" r="33"/><circle cx="36" cy="36" r="26"/>
+        </g>
+        <g fill="var(--accent)"><circle cx="36" cy="6.5" r="1.6"/><circle cx="36" cy="65.5" r="1.6"/><circle cx="6.5" cy="36" r="1.6"/><circle cx="65.5" cy="36" r="1.6"/></g>
+        <use href="#i-meeple" fill="var(--accent)" transform="translate(29.5 12.5) scale(.56)"/>
+        <text x="36" y="38.5" text-anchor="middle" font-family="Cabin, sans-serif" font-weight="700" font-size="7.6" letter-spacing="1.4" fill="var(--accent)">GROWING</text>
+        <g>
+          <circle cx="26" cy="47" r="2.1" fill="var(--accent)"/><circle cx="31" cy="47" r="2.1" fill="var(--accent)"/><circle cx="36" cy="47" r="2.1" fill="var(--accent)"/><circle cx="41" cy="47" r="2.1" fill="none" stroke="var(--accent)" stroke-width="1.4"/><circle cx="46" cy="47" r="2.1" fill="none" stroke="var(--accent)" stroke-width="1.4"/>
+        </g>
+      </svg>
+    </footer>
+    <div class="act">
+      <a class="msg" href="#">Message Hannah <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      <button class="watch" type="button"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-star"/></svg>Watch</button>
+    </div>
+  </article>
+
+  <!-- 4 · Gloomhaven -->
+  <article class="card">
+    <svg class="pin" width="24" height="30" viewBox="0 0 24 30" aria-hidden="true"><use href="#i-pushpin"/></svg>
+    <p class="status">OFFER · ACTIVE</p>
+    <figure class="photo">
+      <svg viewBox="0 0 400 268" role="img" aria-label="Phone photo: large Gloomhaven box on brown carpet, slightly off-centre">
+        <defs><linearGradient id="p4g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8E7E6A"/><stop offset="1" stop-color="#786955"/></linearGradient></defs>
+        <rect width="400" height="268" fill="url(#p4g)"/>
+        <ellipse cx="232" cy="218" rx="170" ry="24" fill="#5C4F3E" opacity=".45"/>
+        <g transform="rotate(-3 220 140)">
+          <rect x="96" y="52" width="272" height="158" rx="4" fill="#57504A"/>
+          <rect x="96" y="180" width="272" height="30" rx="3" fill="#463F3A"/>
+          <rect x="120" y="76" width="180" height="20" rx="3" fill="#6E655C"/>
+          <path d="M310 130l22 40h-44Z" fill="#6E655C" opacity=".8"/>
+          <circle cx="168" cy="138" r="22" fill="#6E655C" opacity=".7"/>
+        </g>
+      </svg>
+    </figure>
+    <div class="card-body">
+      <h2>Gloomhaven</h2>
+      <p class="cond">Condition: <strong>good</strong> · punched, organised</p>
+      <div class="price-row">
+        <p class="price">$120</p>
+      </div>
+      <p class="note">Punched and sorted into a Folded Space insert. All stickers used were the removable kind and the map board is clean. It's ten kilograms of cardboard, hence pickup — happy to meet anywhere in Dunedin.</p>
+      <ul class="meta">
+        <li><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-loc"/></svg>Dunedin</li>
+        <li><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-noparcel"/></svg>Pickup only</li>
+      </ul>
+    </div>
+    <footer class="trader">
+      <div class="who">
+        <span class="avatar" aria-hidden="true">TR</span>
+        <span>
+          <span class="who-name">Tom R.</span>
+          <span class="who-sub">2 vouched trades · joined 2025</span>
+        </span>
+      </div>
+      <svg class="stamp" width="66" height="66" viewBox="0 0 72 72" role="img" aria-label="Trust tier: Seedling">
+        <g fill="none" stroke="var(--accent)" stroke-width="2">
+          <circle cx="36" cy="36" r="33"/><circle cx="36" cy="36" r="26"/>
+        </g>
+        <g fill="var(--accent)"><circle cx="36" cy="6.5" r="1.6"/><circle cx="36" cy="65.5" r="1.6"/><circle cx="6.5" cy="36" r="1.6"/><circle cx="65.5" cy="36" r="1.6"/></g>
+        <use href="#i-meeple" fill="var(--accent)" transform="translate(29.5 12.5) scale(.56)"/>
+        <text x="36" y="38.5" text-anchor="middle" font-family="Cabin, sans-serif" font-weight="700" font-size="7.6" letter-spacing="1.4" fill="var(--accent)">SEEDLING</text>
+        <g>
+          <circle cx="26" cy="47" r="2.1" fill="var(--accent)"/><circle cx="31" cy="47" r="2.1" fill="var(--accent)"/><circle cx="36" cy="47" r="2.1" fill="none" stroke="var(--accent)" stroke-width="1.4"/><circle cx="41" cy="47" r="2.1" fill="none" stroke="var(--accent)" stroke-width="1.4"/><circle cx="46" cy="47" r="2.1" fill="none" stroke="var(--accent)" stroke-width="1.4"/>
+        </g>
+      </svg>
+    </footer>
+    <div class="act">
+      <a class="msg" href="#">Message Tom <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      <button class="watch" type="button"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-star"/></svg>Watch</button>
+    </div>
+  </article>
+
+  <!-- 5 · Cascadia -->
+  <article class="card">
+    <svg class="pin" width="24" height="30" viewBox="0 0 24 30" aria-hidden="true"><use href="#i-pushpin"/></svg>
+    <p class="status">OFFER · ACTIVE</p>
+    <figure class="photo">
+      <svg viewBox="0 0 400 232" role="img" aria-label="Phone photo: Cascadia box on a beige tabletop">
+        <defs><linearGradient id="p5g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C2B49C"/><stop offset="1" stop-color="#AC9E86"/></linearGradient></defs>
+        <rect width="400" height="232" fill="url(#p5g)"/>
+        <ellipse cx="176" cy="186" rx="132" ry="18" fill="#8A7C64" opacity=".45"/>
+        <g transform="rotate(2 180 120)">
+          <rect x="66" y="58" width="212" height="122" rx="4" fill="#6F9087"/>
+          <rect x="66" y="156" width="212" height="24" rx="3" fill="#5B7A72"/>
+          <rect x="86" y="76" width="122" height="16" rx="3" fill="#8AA79E"/>
+          <path d="M196 140l26-34 22 34Z" fill="#8AA79E" opacity=".85"/>
+          <circle cx="252" cy="96" r="12" fill="#8AA79E" opacity=".8"/>
+        </g>
+      </svg>
+    </figure>
+    <div class="card-body">
+      <h2>Cascadia</h2>
+      <p class="cond">Condition: <strong>excellent</strong></p>
+      <div class="price-row">
+        <p class="price">$45</p>
+        <p class="terms"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-swap"/></svg>open to trade — wants Calico or Verdant</p>
+      </div>
+      <p class="note">Landmarks expansion not included.</p>
+      <ul class="meta">
+        <li><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-loc"/></svg>Hamilton</li>
+        <li><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-parcel"/></svg>Posts NZ-wide</li>
+      </ul>
+    </div>
+    <footer class="trader">
+      <div class="who">
+        <span class="avatar" aria-hidden="true">JA</span>
+        <span>
+          <span class="who-name">Jess A.</span>
+          <span class="who-sub">no vouched trades yet · joined June 2026</span>
+        </span>
+      </div>
+      <!-- New tier prints in plain ink — the blue stamp ink is earned -->
+      <svg class="stamp" width="66" height="66" viewBox="0 0 72 72" role="img" aria-label="Trust tier: New member">
+        <g fill="none" stroke="var(--ink-soft)" stroke-width="2">
+          <circle cx="36" cy="36" r="33"/><circle cx="36" cy="36" r="26"/>
+        </g>
+        <g fill="var(--ink-soft)"><circle cx="36" cy="6.5" r="1.6"/><circle cx="36" cy="65.5" r="1.6"/><circle cx="6.5" cy="36" r="1.6"/><circle cx="65.5" cy="36" r="1.6"/></g>
+        <use href="#i-meeple" fill="var(--ink-soft)" transform="translate(29.5 12.5) scale(.56)"/>
+        <text x="36" y="38.5" text-anchor="middle" font-family="Cabin, sans-serif" font-weight="700" font-size="7.6" letter-spacing="1.4" fill="var(--ink-soft)">NEW</text>
+        <g>
+          <circle cx="26" cy="47" r="2.1" fill="var(--ink-soft)"/><circle cx="31" cy="47" r="2.1" fill="none" stroke="var(--ink-soft)" stroke-width="1.4"/><circle cx="36" cy="47" r="2.1" fill="none" stroke="var(--ink-soft)" stroke-width="1.4"/><circle cx="41" cy="47" r="2.1" fill="none" stroke="var(--ink-soft)" stroke-width="1.4"/><circle cx="46" cy="47" r="2.1" fill="none" stroke="var(--ink-soft)" stroke-width="1.4"/>
+        </g>
+      </svg>
+    </footer>
+    <div class="act">
+      <a class="msg" href="#">Message Jess <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      <button class="watch" type="button"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-star"/></svg>Watch</button>
+    </div>
+  </article>
+
+  <!-- 6 · Spirit Island (pending) -->
+  <article class="card is-pending">
+    <svg class="pin" width="24" height="30" viewBox="0 0 24 30" aria-hidden="true"><use href="#i-pushpin"/></svg>
+    <p class="status">OFFER · PENDING</p>
+    <figure class="photo">
+      <svg viewBox="0 0 400 288" role="img" aria-label="Phone photo: Spirit Island box on blue-grey carpet">
+        <defs><linearGradient id="p6g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8F97A0"/><stop offset="1" stop-color="#7A828B"/></linearGradient></defs>
+        <rect width="400" height="288" fill="url(#p6g)"/>
+        <ellipse cx="196" cy="226" rx="148" ry="22" fill="#5D646D" opacity=".45"/>
+        <g transform="rotate(-5 200 150)">
+          <rect x="86" y="70" width="228" height="146" rx="4" fill="#79856F"/>
+          <rect x="86" y="188" width="228" height="28" rx="3" fill="#65715C"/>
+          <rect x="106" y="92" width="140" height="18" rx="3" fill="#93A088"/>
+          <circle cx="272" cy="140" r="24" fill="#93A088" opacity=".85"/>
+          <path d="M120 168c22-18 52-18 74 0" fill="none" stroke="#93A088" stroke-width="4" stroke-linecap="round"/>
+        </g>
+      </svg>
+      <div class="overlay-stamp" aria-hidden="true"><span>TRADE PENDING</span></div>
+    </figure>
+    <div class="card-body">
+      <h2>Spirit Island</h2>
+      <p class="cond">Condition: <strong>good</strong> · promo spirits included</p>
+      <div class="price-row">
+        <p class="price">$80</p>
+        <p class="terms"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-swap"/></svg>or trade for Ark Nova</p>
+      </div>
+      <p class="note">A trade is being finalised with another member. Worth a watch in case it falls through.</p>
+      <ul class="meta">
+        <li><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-loc"/></svg>Palmerston North</li>
+        <li><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-parcel"/></svg>Posts NZ-wide</li>
+      </ul>
+    </div>
+    <footer class="trader">
+      <div class="who">
+        <span class="avatar" aria-hidden="true">DP</span>
+        <span>
+          <span class="who-name">Dev P.</span>
+          <span class="who-sub">6 vouched trades · joined 2024</span>
+        </span>
+      </div>
+      <svg class="stamp" width="66" height="66" viewBox="0 0 72 72" role="img" aria-label="Trust tier: Growing">
+        <g fill="none" stroke="var(--accent)" stroke-width="2">
+          <circle cx="36" cy="36" r="33"/><circle cx="36" cy="36" r="26"/>
+        </g>
+        <g fill="var(--accent)"><circle cx="36" cy="6.5" r="1.6"/><circle cx="36" cy="65.5" r="1.6"/><circle cx="6.5" cy="36" r="1.6"/><circle cx="65.5" cy="36" r="1.6"/></g>
+        <use href="#i-meeple" fill="var(--accent)" transform="translate(29.5 12.5) scale(.56)"/>
+        <text x="36" y="38.5" text-anchor="middle" font-family="Cabin, sans-serif" font-weight="700" font-size="7.6" letter-spacing="1.4" fill="var(--accent)">GROWING</text>
+        <g>
+          <circle cx="26" cy="47" r="2.1" fill="var(--accent)"/><circle cx="31" cy="47" r="2.1" fill="var(--accent)"/><circle cx="36" cy="47" r="2.1" fill="var(--accent)"/><circle cx="41" cy="47" r="2.1" fill="none" stroke="var(--accent)" stroke-width="1.4"/><circle cx="46" cy="47" r="2.1" fill="none" stroke="var(--accent)" stroke-width="1.4"/>
+        </g>
+      </svg>
+    </footer>
+    <div class="act">
+      <a class="msg" href="#">Message Dev <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      <button class="watch" type="button"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-star"/></svg>Watch</button>
+    </div>
+  </article>
+
+  <!-- 7 · Azul -->
+  <article class="card">
+    <svg class="pin" width="24" height="30" viewBox="0 0 24 30" aria-hidden="true"><use href="#i-pushpin"/></svg>
+    <p class="status">OFFER · ACTIVE</p>
+    <figure class="photo">
+      <svg viewBox="0 0 400 356" role="img" aria-label="Phone photo: Azul box on wooden floorboards, shot from above">
+        <defs><linearGradient id="p7g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#AC8560"/><stop offset="1" stop-color="#946C4A"/></linearGradient></defs>
+        <rect width="400" height="356" fill="url(#p7g)"/>
+        <g stroke="#84603F" stroke-width="2" opacity=".5"><path d="M100 0v356M240 0v356M360 0v356"/></g>
+        <ellipse cx="204" cy="272" rx="120" ry="20" fill="#6B4A2C" opacity=".4"/>
+        <g transform="rotate(6 200 180)">
+          <rect x="98" y="86" width="204" height="182" rx="4" fill="#6B7CA1"/>
+          <rect x="118" y="108" width="112" height="18" rx="3" fill="#8B9ABB"/>
+          <g fill="#8B9ABB" opacity=".85">
+            <rect x="128" y="160" width="30" height="30" rx="4"/><rect x="168" y="160" width="30" height="30" rx="4"/><rect x="208" y="160" width="30" height="30" rx="4"/>
+            <rect x="148" y="200" width="30" height="30" rx="4"/><rect x="188" y="200" width="30" height="30" rx="4"/>
+          </g>
+        </g>
+      </svg>
+    </figure>
+    <div class="card-body">
+      <h2>Azul</h2>
+      <p class="cond">Condition: <strong>fair</strong> · well loved</p>
+      <div class="price-row">
+        <p class="price">$25</p>
+      </div>
+      <p class="note">Tiles are fine; box corners are taped. Priced accordingly.</p>
+      <ul class="meta">
+        <li><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-loc"/></svg>Nelson</li>
+        <li><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-parcel"/></svg>Posts NZ-wide</li>
+      </ul>
+    </div>
+    <footer class="trader">
+      <div class="who">
+        <span class="avatar" aria-hidden="true">MW</span>
+        <span>
+          <span class="who-name">Margaret W.</span>
+          <span class="who-sub">15 vouched trades · joined 2023</span>
+        </span>
+      </div>
+      <svg class="stamp" width="66" height="66" viewBox="0 0 72 72" role="img" aria-label="Trust tier: Established">
+        <g fill="none" stroke="var(--accent)" stroke-width="2">
+          <circle cx="36" cy="36" r="33"/><circle cx="36" cy="36" r="26"/>
+        </g>
+        <g fill="var(--accent)"><circle cx="36" cy="6.5" r="1.6"/><circle cx="36" cy="65.5" r="1.6"/><circle cx="6.5" cy="36" r="1.6"/><circle cx="65.5" cy="36" r="1.6"/></g>
+        <use href="#i-meeple" fill="var(--accent)" transform="translate(29.5 12.5) scale(.56)"/>
+        <text x="36" y="38.5" text-anchor="middle" font-family="Cabin, sans-serif" font-weight="700" font-size="6.8" letter-spacing="1" fill="var(--accent)">ESTABLISHED</text>
+        <g>
+          <circle cx="26" cy="47" r="2.1" fill="var(--accent)"/><circle cx="31" cy="47" r="2.1" fill="var(--accent)"/><circle cx="36" cy="47" r="2.1" fill="var(--accent)"/><circle cx="41" cy="47" r="2.1" fill="var(--accent)"/><circle cx="46" cy="47" r="2.1" fill="none" stroke="var(--accent)" stroke-width="1.4"/>
+        </g>
+      </svg>
+    </footer>
+    <div class="act">
+      <a class="msg" href="#">Message Margaret <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      <button class="watch" type="button"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-star"/></svg>Watch</button>
+    </div>
+  </article>
+
+  <!-- 8 · Twilight Imperium -->
+  <article class="card">
+    <svg class="pin" width="24" height="30" viewBox="0 0 24 30" aria-hidden="true"><use href="#i-pushpin"/></svg>
+    <p class="status">OFFER · ACTIVE</p>
+    <figure class="photo">
+      <svg viewBox="0 0 400 212" role="img" aria-label="Phone photo: huge Twilight Imperium box on a dark duvet, dim lighting">
+        <defs><linearGradient id="p8g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#716D78"/><stop offset="1" stop-color="#5D5964"/></linearGradient></defs>
+        <rect width="400" height="212" fill="url(#p8g)"/>
+        <path d="M0 150q120-22 240-8t160 0v70H0Z" fill="#524E59" opacity=".7"/>
+        <ellipse cx="200" cy="172" rx="172" ry="18" fill="#413E48" opacity=".5"/>
+        <g transform="rotate(-2 200 110)">
+          <rect x="50" y="42" width="300" height="130" rx="4" fill="#3E4650"/>
+          <rect x="50" y="146" width="300" height="26" rx="3" fill="#313841"/>
+          <rect x="76" y="64" width="196" height="18" rx="3" fill="#586470"/>
+          <circle cx="306" cy="96" r="20" fill="#586470" opacity=".9"/>
+          <g fill="#586470" opacity=".6"><circle cx="96" cy="118" r="3"/><circle cx="130" cy="102" r="2"/><circle cx="160" cy="124" r="2.5"/><circle cx="206" cy="108" r="2"/></g>
+        </g>
+      </svg>
+    </figure>
+    <div class="card-body">
+      <h2>Twilight Imperium, 4th ed.</h2>
+      <p class="cond">Condition: <strong>excellent</strong> · complete, verified</p>
+      <div class="price-row">
+        <p class="price">$210</p>
+      </div>
+      <p class="note">Played four glorious times, each one an entire Saturday. Every component bagged and counted before listing — happy to send photos of anything. The flatmates have staged an intervention about the shelf, so it goes to a good home. Box is genuinely enormous; bring a hatchback, not a handbag.</p>
+      <ul class="meta">
+        <li><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-loc"/></svg>Auckland</li>
+        <li><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-noparcel"/></svg>Pickup only</li>
+      </ul>
+    </div>
+    <footer class="trader">
+      <div class="who">
+        <span class="avatar" aria-hidden="true">SL</span>
+        <span>
+          <span class="who-name">Sam L.</span>
+          <span class="who-sub">31 vouched trades · joined 2023</span>
+        </span>
+      </div>
+      <svg class="stamp" width="66" height="66" viewBox="0 0 72 72" role="img" aria-label="Trust tier: Trusted">
+        <g fill="none" stroke="var(--accent)" stroke-width="2">
+          <circle cx="36" cy="36" r="33"/><circle cx="36" cy="36" r="26"/>
+        </g>
+        <g fill="var(--accent)"><circle cx="36" cy="6.5" r="1.6"/><circle cx="36" cy="65.5" r="1.6"/><circle cx="6.5" cy="36" r="1.6"/><circle cx="65.5" cy="36" r="1.6"/></g>
+        <use href="#i-meeple" fill="var(--accent)" transform="translate(29.5 12.5) scale(.56)"/>
+        <text x="36" y="38.5" text-anchor="middle" font-family="Cabin, sans-serif" font-weight="700" font-size="7.6" letter-spacing="1.4" fill="var(--accent)">TRUSTED</text>
+        <g fill="var(--accent)">
+          <circle cx="26" cy="47" r="2.1"/><circle cx="31" cy="47" r="2.1"/><circle cx="36" cy="47" r="2.1"/><circle cx="41" cy="47" r="2.1"/><circle cx="46" cy="47" r="2.1"/>
+        </g>
+      </svg>
+    </footer>
+    <div class="act">
+      <a class="msg" href="#">Message Sam <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      <button class="watch" type="button"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-star"/></svg>Watch</button>
+    </div>
+  </article>
+
+  <!-- 9 · Heat -->
+  <article class="card">
+    <svg class="pin" width="24" height="30" viewBox="0 0 24 30" aria-hidden="true"><use href="#i-pushpin"/></svg>
+    <p class="status">OFFER · ACTIVE</p>
+    <figure class="photo">
+      <svg viewBox="0 0 400 300" role="img" aria-label="Phone photo: Heat box on a garage floor">
+        <defs><linearGradient id="p9g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#A5A69D"/><stop offset="1" stop-color="#8F9088"/></linearGradient></defs>
+        <rect width="400" height="300" fill="url(#p9g)"/>
+        <path d="M0 96h400" stroke="#7C7D75" stroke-width="3" opacity=".6"/>
+        <ellipse cx="190" cy="234" rx="140" ry="20" fill="#6E6F67" opacity=".45"/>
+        <g transform="rotate(4 190 160)">
+          <rect x="72" y="96" width="236" height="132" rx="4" fill="#8F5B52"/>
+          <rect x="72" y="202" width="236" height="26" rx="3" fill="#774A42"/>
+          <rect x="94" y="116" width="96" height="17" rx="3" fill="#AB7A70"/>
+          <path d="M150 190q44-34 118-24" fill="none" stroke="#AB7A70" stroke-width="5" stroke-linecap="round"/>
+          <circle cx="268" cy="150" r="14" fill="#AB7A70" opacity=".9"/>
+        </g>
+      </svg>
+    </figure>
+    <div class="card-body">
+      <h2>Heat: Pedal to the Metal</h2>
+      <p class="cond">Condition: <strong>excellent</strong> · sleeved</p>
+      <div class="price-row">
+        <p class="price">$70</p>
+      </div>
+      <p class="note">Includes the Heavy Rain promo. Great with the family, we've just raced it out.</p>
+      <ul class="meta">
+        <li><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-loc"/></svg>Tauranga</li>
+        <li><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-parcel"/></svg>Posts NZ-wide</li>
+      </ul>
+    </div>
+    <footer class="trader">
+      <div class="who">
+        <span class="avatar" aria-hidden="true">AN</span>
+        <span>
+          <span class="who-name">Aroha N.</span>
+          <span class="who-sub">3 vouched trades · joined 2025</span>
+        </span>
+      </div>
+      <svg class="stamp" width="66" height="66" viewBox="0 0 72 72" role="img" aria-label="Trust tier: Seedling">
+        <g fill="none" stroke="var(--accent)" stroke-width="2">
+          <circle cx="36" cy="36" r="33"/><circle cx="36" cy="36" r="26"/>
+        </g>
+        <g fill="var(--accent)"><circle cx="36" cy="6.5" r="1.6"/><circle cx="36" cy="65.5" r="1.6"/><circle cx="6.5" cy="36" r="1.6"/><circle cx="65.5" cy="36" r="1.6"/></g>
+        <use href="#i-meeple" fill="var(--accent)" transform="translate(29.5 12.5) scale(.56)"/>
+        <text x="36" y="38.5" text-anchor="middle" font-family="Cabin, sans-serif" font-weight="700" font-size="7.6" letter-spacing="1.4" fill="var(--accent)">SEEDLING</text>
+        <g>
+          <circle cx="26" cy="47" r="2.1" fill="var(--accent)"/><circle cx="31" cy="47" r="2.1" fill="var(--accent)"/><circle cx="36" cy="47" r="2.1" fill="none" stroke="var(--accent)" stroke-width="1.4"/><circle cx="41" cy="47" r="2.1" fill="none" stroke="var(--accent)" stroke-width="1.4"/><circle cx="46" cy="47" r="2.1" fill="none" stroke="var(--accent)" stroke-width="1.4"/>
+        </g>
+      </svg>
+    </footer>
+    <div class="act">
+      <a class="msg" href="#">Message Aroha <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      <button class="watch" type="button"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><use href="#i-star"/></svg>Watch</button>
+    </div>
+  </article>
+
+</main>
+
+<footer class="wrap site-foot">
+  <p><strong>Meeple Cart</strong> is free, open source, and community-run. No fees, ever.</p>
+  <nav aria-label="Footer">
+    <a href="#">About</a>
+    <a href="#">Code of conduct</a>
+    <a href="#">Source code</a>
+  </nav>
+</footer>
+
+</body>
+</html>

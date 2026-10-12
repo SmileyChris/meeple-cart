@@ -1,0 +1,1532 @@
+<!--
+  DIRECTION CONTRACT — 03 "Shelf Spine"
+  =====================================
+  World statement:
+  Every trader's pride is the shelf. This page treats the browse feed as a
+  beautifully set catalogue of private collections — an art-book, not a store.
+  Photos are hung like plates in a gallery: a consistent mat-and-hairline frame
+  around wildly inconsistent amateur phone shots, each hung slightly askew the
+  way real prints hang. Metadata is set as museum labels: serif titles, small
+  letterspaced caps for condition/location/terms, tabular numerals on prices.
+  Trust renders as provenance — small drawn seals beside the trader's name,
+  growing in complexity as the record grows. The interface itself is printed
+  matter: warm gallery white, ink, hairline rules, one muted verdigris accent
+  reserved for actions and trust. Flat by contract; no shadows. Free and
+  community-run, so the register is curatorial, never salesy.
+
+  Palette tokens:
+    --paper        #FAF6EF   warm gallery white (ground)
+    --paper-bright #FFFDF8   plate highlight / button text
+    --mat          #F0E9DC   mount board behind photos
+    --ink          #211D18   text, structural rules
+    --ink-soft     #5B5347   secondary text (warm, tinted — never flat grey)
+    --line         #DCD3C2   hairlines
+    --line-strong  #B9AE99   emphasized hairlines
+    --accent       #33655B   verdigris — actions + trust seals ONLY
+    --accent-deep  #274F47   accent hover
+
+  Type pairing:
+    Newsreader (variable, optical sizes, real italics) — editorial serif for
+      titles, headings, notes. High-contrast at display sizes.
+    Archivo — neutral grotesk for the caps data lines, nav, prices, buttons.
+
+  System rules enforced:
+    1. Image-led hierarchy: photos take the largest share of every card, at
+       varied sizes/aspects in an editorial 12-col mosaic — never a uniform grid.
+    2. Museum-label metadata: serif title + letterspaced caps data line +
+       tabular-numeral price, in that order, on every offer.
+    3. Hairlines do all structural work; shadows are absent by contract.
+    4. Trust = provenance seals: five drawn marks (ring → sprout → leaves →
+       double ring → sealed star), one stroke weight, accent ink.
+    5. Editorial rhythm: large serif section headings and one full-width
+       featured spread break the scan into "pages". One authored motion
+       moment: askew plates level themselves under attention.
+-->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Browse — Meeple Cart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Archivo:wght@400;500;600;700&display=swap"
+  rel="stylesheet"
+/>
+<style>
+  :root {
+    --paper: #faf6ef;
+    --paper-bright: #fffdf8;
+    --mat: #f0e9dc;
+    --ink: #211d18;
+    --ink-soft: #5b5347;
+    --line: #dcd3c2;
+    --line-strong: #b9ae99;
+    --accent: #33655b;
+    --accent-deep: #274f47;
+    --serif: 'Newsreader', 'Iowan Old Style', Georgia, serif;
+    --grotesk: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    scrollbar-color: var(--line-strong) var(--paper);
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--paper);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--line-strong);
+    border: 2px solid var(--paper);
+    border-radius: 5px;
+  }
+
+  ::selection {
+    background: var(--accent);
+    color: var(--paper-bright);
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--serif);
+    font-optical-sizing: auto;
+    font-size: 17px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a {
+    color: inherit;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 1px;
+  }
+  input {
+    accent-color: var(--accent);
+  }
+
+  .shell {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 0 clamp(1rem, 4vw, 3rem);
+  }
+
+  /* ── Masthead ─────────────────────────────────────────── */
+  .masthead {
+    border-bottom: 1px solid var(--ink);
+    position: relative;
+  }
+  .masthead::before {
+    /* double rule, newspaper-flag style */
+    content: '';
+    display: block;
+    height: 3px;
+    background: var(--ink);
+  }
+  .masthead-row {
+    display: flex;
+    align-items: baseline;
+    gap: 2.5rem;
+    padding: 1.1rem 0 0.9rem;
+    flex-wrap: wrap;
+  }
+  .wordmark {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    text-decoration: none;
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 1.45rem;
+    letter-spacing: 0.01em;
+  }
+  .wordmark svg {
+    width: 21px;
+    height: 21px;
+    translate: 0 2px;
+  }
+  .site-nav {
+    display: flex;
+    gap: 1.8rem;
+    margin-left: auto;
+    align-items: baseline;
+    flex-wrap: wrap;
+  }
+  .site-nav a {
+    font-family: var(--grotesk);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--ink-soft);
+    padding: 0.2rem 0;
+  }
+  .site-nav a:hover {
+    color: var(--ink);
+  }
+  .site-nav a[aria-current='page'] {
+    color: var(--ink);
+    border-bottom: 2px solid var(--ink);
+  }
+  .site-nav .me {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: var(--ink);
+  }
+  .site-nav .me .pip {
+    width: 22px;
+    height: 22px;
+    border: 1px solid var(--ink);
+    border-radius: 50%;
+    display: inline-grid;
+    place-items: center;
+    font-size: 0.62rem;
+    letter-spacing: 0;
+    translate: 0 6px;
+  }
+
+  /* ── Page heading ─────────────────────────────────────── */
+  .pagehead {
+    padding: clamp(2.2rem, 5vw, 4rem) 0 1.6rem;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  .pagehead h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: clamp(2.4rem, 6vw, 4.2rem);
+    line-height: 1.02;
+    letter-spacing: -0.015em;
+  }
+  .pagehead h1 em {
+    font-style: italic;
+    font-weight: 400;
+  }
+  .pagehead .standfirst {
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--ink-soft);
+    font-size: 1.05rem;
+    max-width: 21em;
+    padding-bottom: 0.5rem;
+  }
+
+  /* ── Filter row ───────────────────────────────────────── */
+  .filters {
+    border-top: 1px solid var(--ink);
+    border-bottom: 1px solid var(--line);
+    padding: 0.8rem 0;
+    display: flex;
+    align-items: center;
+    gap: 1.6rem 2.2rem;
+    flex-wrap: wrap;
+    font-family: var(--grotesk);
+  }
+  .f-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+  }
+  .f-label {
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .filters select {
+    font-family: var(--grotesk);
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--ink);
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--line-strong);
+    padding: 0.25rem 1.3rem 0.25rem 0.1rem;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='6'%3E%3Cpath d='M1 1l3.5 3.5L8 1' fill='none' stroke='%23211D18' stroke-width='1.3'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.2rem center;
+    cursor: pointer;
+  }
+  .seg {
+    display: inline-flex;
+    border: 1px solid var(--line-strong);
+  }
+  .seg label {
+    position: relative;
+    cursor: pointer;
+  }
+  .seg label + label {
+    border-left: 1px solid var(--line-strong);
+  }
+  .seg input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .seg span {
+    display: inline-block;
+    padding: 0.38rem 0.85rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .seg label:hover span {
+    color: var(--ink);
+  }
+  .seg label:has(input:checked) span {
+    background: var(--ink);
+    color: var(--paper-bright);
+  }
+  .seg label:has(input:focus-visible) {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .f-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .f-check:hover {
+    color: var(--ink);
+  }
+  .f-check input {
+    width: 15px;
+    height: 15px;
+  }
+  .f-sort {
+    margin-left: auto;
+  }
+
+  /* ── Section headings ─────────────────────────────────── */
+  .section-head {
+    margin-top: clamp(2.8rem, 6vw, 4.5rem);
+    margin-bottom: 1.8rem;
+    border-top: 1px solid var(--line);
+    padding-top: 1.3rem;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .section-head h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: clamp(1.7rem, 3.4vw, 2.35rem);
+    letter-spacing: -0.01em;
+  }
+  .section-head .aside {
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--ink-soft);
+    font-size: 0.98rem;
+  }
+
+  /* ── Mosaic ───────────────────────────────────────────── */
+  .mosaic {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 3rem 2.2rem;
+    align-items: start;
+  }
+  .s3 {
+    grid-column: span 3;
+  }
+  .s4 {
+    grid-column: span 4;
+  }
+  .s5 {
+    grid-column: span 5;
+  }
+  .s6 {
+    grid-column: span 6;
+  }
+  .s7 {
+    grid-column: span 7;
+  }
+  .s12 {
+    grid-column: 1 / -1;
+  }
+
+  /* ── Plates (framed photos) ───────────────────────────── */
+  .plate {
+    display: block;
+    background: var(--mat);
+    border: 1px solid var(--line-strong);
+    padding: clamp(8px, 1.2vw, 14px);
+    text-decoration: none;
+    transition:
+      rotate 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 0.3s ease;
+  }
+  .plate svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid rgba(33, 29, 24, 0.28);
+  }
+  .tilt-a {
+    rotate: -0.9deg;
+  }
+  .tilt-b {
+    rotate: 0.7deg;
+  }
+  .tilt-c {
+    rotate: -0.5deg;
+  }
+  .tilt-d {
+    rotate: 1deg;
+  }
+  /* the authored motion moment: a crooked print levels itself under attention */
+  .offer:hover .plate,
+  .offer:focus-within .plate {
+    rotate: 0deg;
+    border-color: var(--ink);
+  }
+
+  /* ── Museum labels ────────────────────────────────────── */
+  .label {
+    padding-top: 1rem;
+  }
+  .title-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .title {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 1.32rem;
+    line-height: 1.18;
+    letter-spacing: -0.005em;
+  }
+  .title a {
+    text-decoration: none;
+  }
+  .title a:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+  .title .yr {
+    font-weight: 400;
+    font-style: italic;
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+    margin-left: 0.3rem;
+  }
+  .price {
+    font-family: var(--grotesk);
+    font-weight: 600;
+    font-size: 1.02rem;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .price .ono {
+    font-weight: 400;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    color: var(--ink-soft);
+  }
+  .price.trade-only {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+  }
+  .dataline {
+    margin-top: 0.45rem;
+    font-family: var(--grotesk);
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    line-height: 1.8;
+  }
+  .dataline .sep {
+    color: var(--line-strong);
+    margin: 0 0.35rem;
+  }
+  .note {
+    margin-top: 0.6rem;
+    font-family: var(--serif);
+    font-size: 0.98rem;
+    line-height: 1.55;
+    color: var(--ink);
+    max-width: 34em;
+  }
+  .note.long {
+    font-size: 0.95rem;
+  }
+
+  /* ── Provenance row ───────────────────────────────────── */
+  .prov {
+    margin-top: 0.85rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--grotesk);
+  }
+  .seal {
+    width: 17px;
+    height: 17px;
+    color: var(--accent);
+    flex: none;
+  }
+  .who {
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+  .tier {
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .view {
+    margin-left: auto;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--accent);
+    text-decoration: none;
+    white-space: nowrap;
+    background: linear-gradient(var(--accent), var(--accent)) no-repeat left
+      bottom / 0% 1px;
+    padding-bottom: 2px;
+    transition: background-size 0.35s ease;
+  }
+  .view:hover,
+  .view:focus-visible {
+    color: var(--accent-deep);
+    background-size: 100% 1px;
+  }
+
+  /* ── Featured spread ──────────────────────────────────── */
+  .spread {
+    border-top: 1px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+    margin-top: clamp(2.8rem, 6vw, 4.5rem);
+    padding: clamp(1.6rem, 3.5vw, 2.8rem) 0;
+    display: grid;
+    grid-template-columns: 7fr 5fr;
+    gap: clamp(1.6rem, 4vw, 3.2rem);
+    align-items: start;
+  }
+  .spread .plate {
+    rotate: -0.4deg;
+  }
+  .spread:hover .plate,
+  .spread:focus-within .plate {
+    rotate: 0deg;
+    border-color: var(--ink);
+  }
+  .spread-tag {
+    font-family: var(--grotesk);
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    border: 1px solid var(--line-strong);
+    display: inline-block;
+    padding: 0.3rem 0.7rem;
+    margin-bottom: 1.1rem;
+  }
+  .spread h3 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: clamp(1.8rem, 3.6vw, 2.6rem);
+    line-height: 1.08;
+    letter-spacing: -0.015em;
+  }
+  .spread h3 em {
+    font-style: italic;
+  }
+  .spread .note {
+    margin-top: 0.9rem;
+  }
+  .manifest {
+    margin: 1.2rem 0 0.4rem;
+    list-style: none;
+  }
+  .manifest li {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    padding: 0.42rem 0;
+    border-bottom: 1px dotted var(--line-strong);
+    font-size: 0.95rem;
+  }
+  .manifest .m-title {
+    font-family: var(--serif);
+  }
+  .manifest .leader {
+    flex: 1;
+  }
+  .manifest .m-cond {
+    font-family: var(--grotesk);
+    font-size: 0.64rem;
+    font-weight: 600;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .spread-price {
+    display: flex;
+    align-items: baseline;
+    gap: 0.8rem;
+    margin-top: 1.1rem;
+  }
+  .spread-price .price {
+    font-size: 1.7rem;
+    font-weight: 700;
+  }
+  .spread-price .terms {
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--ink-soft);
+    font-size: 0.98rem;
+  }
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 1.3rem;
+    margin-top: 1.3rem;
+    flex-wrap: wrap;
+  }
+  .btn {
+    font-family: var(--grotesk);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-decoration: none;
+    background: var(--accent);
+    color: var(--paper-bright);
+    padding: 0.72rem 1.4rem;
+    border: 1px solid var(--accent);
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+  }
+  .btn:hover {
+    background: var(--accent-deep);
+    border-color: var(--accent-deep);
+  }
+  .btn-quiet {
+    background: transparent;
+    color: var(--accent);
+  }
+  .btn-quiet:hover {
+    background: rgba(51, 101, 91, 0.08);
+    color: var(--accent-deep);
+  }
+  .spread .prov {
+    border-top: 1px solid var(--line);
+    margin-top: 1.5rem;
+  }
+
+  /* ── Colophon ─────────────────────────────────────────── */
+  .colophon {
+    margin-top: clamp(3.5rem, 8vw, 6rem);
+    border-top: 3px solid var(--ink);
+    position: relative;
+    padding: 1.4rem 0 3rem;
+  }
+  .colophon::before {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--ink);
+  }
+  .colophon-row {
+    display: flex;
+    align-items: baseline;
+    gap: 1.5rem 2.5rem;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+  .colophon p {
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+  }
+  .colophon nav {
+    display: flex;
+    gap: 1.6rem;
+  }
+  .colophon nav a {
+    font-family: var(--grotesk);
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--ink-soft);
+  }
+  .colophon nav a:hover {
+    color: var(--ink);
+  }
+
+  /* ── Responsive ───────────────────────────────────────── */
+  @media (max-width: 1080px) {
+    .s3,
+    .s4,
+    .s5 {
+      grid-column: span 6;
+    }
+    .s6,
+    .s7 {
+      grid-column: span 12;
+    }
+    .spread {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 680px) {
+    body {
+      font-size: 16px;
+    }
+    .mosaic {
+      gap: 2.4rem 0;
+    }
+    .s3,
+    .s4,
+    .s5,
+    .s6,
+    .s7 {
+      grid-column: span 12;
+    }
+    .masthead-row {
+      gap: 1rem;
+    }
+    .site-nav {
+      gap: 1.1rem;
+      margin-left: 0;
+    }
+    .f-sort {
+      margin-left: 0;
+    }
+    .pagehead {
+      padding-top: 1.8rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .plate,
+    .view,
+    .btn {
+      transition: none;
+    }
+    .tilt-a,
+    .tilt-b,
+    .tilt-c,
+    .tilt-d,
+    .spread .plate {
+      rotate: 0deg;
+    }
+  }
+</style>
+
+<!-- ── Drawn symbols: provenance seals + meeple mark ─────── -->
+<svg width="0" height="0" style="position: absolute" aria-hidden="true">
+  <defs>
+    <symbol id="seal-new" viewBox="0 0 20 20">
+      <circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.4" />
+    </symbol>
+    <symbol id="seal-seedling" viewBox="0 0 20 20">
+      <circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.4" />
+      <path d="M10 14V9.6" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+      <path d="M10 9.6C10 7.4 8.7 6.4 6.8 6.4c0 2.2 1.3 3.2 3.2 3.2Z" fill="currentColor" />
+    </symbol>
+    <symbol id="seal-growing" viewBox="0 0 20 20">
+      <circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.4" />
+      <path d="M10 14.4V8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+      <path d="M10 9.4C10 7.3 8.8 6.3 7 6.3c0 2.1 1.2 3.1 3 3.1Z" fill="currentColor" />
+      <path d="M10 11.6c0-2.1 1.2-3.1 3-3.1 0 2.1-1.2 3.1-3 3.1Z" fill="currentColor" />
+    </symbol>
+    <symbol id="seal-established" viewBox="0 0 20 20">
+      <circle cx="10" cy="10" r="7.4" fill="none" stroke="currentColor" stroke-width="1.3" />
+      <circle cx="10" cy="10" r="4.4" fill="none" stroke="currentColor" stroke-width="1.3" />
+      <circle cx="10" cy="10" r="1.2" fill="currentColor" />
+    </symbol>
+    <symbol id="seal-trusted" viewBox="0 0 20 20">
+      <circle cx="10" cy="10" r="7.6" fill="currentColor" />
+      <path
+        d="M10 5.9l1.1 2.3 2.5.35-1.8 1.75.45 2.5L10 11.6l-2.25 1.2.45-2.5-1.8-1.75 2.5-.35Z"
+        fill="var(--paper-bright)"
+      />
+    </symbol>
+    <symbol id="meeple" viewBox="0 0 24 24">
+      <path
+        d="M12 2.6c-2 0-3.5 1.5-3.5 3.4 0 1 .4 1.8 1 2.5-1.6.7-3.5 2-5 3.6-.7.8-.2 2 .9 2h2.7c-1 1.7-2.5 3.3-4.1 4.4-.9.6-.5 2 .6 2h5.6c.7 0 1.4-.4 1.8-1l1-1.4 1 1.4c.4.6 1.1 1 1.8 1h5.6c1.1 0 1.5-1.4.6-2-1.6-1.1-3.1-2.7-4.1-4.4h2.7c1.1 0 1.6-1.2.9-2-1.5-1.6-3.4-2.9-5-3.6.6-.7 1-1.5 1-2.5 0-1.9-1.5-3.4-3.5-3.4Z"
+        fill="currentColor"
+      />
+    </symbol>
+  </defs>
+</svg>
+
+<header class="masthead">
+  <div class="shell masthead-row">
+    <a class="wordmark" href="#">
+      <svg aria-hidden="true"><use href="#meeple" /></svg>
+      Meeple Cart
+    </a>
+    <nav class="site-nav" aria-label="Primary">
+      <a href="#" aria-current="page">Browse</a>
+      <a href="#">Wanted</a>
+      <a href="#">Messages</a>
+      <a href="#">Trades</a>
+      <a href="#" class="me"><span class="pip" aria-hidden="true">CH</span>Chris</a>
+    </nav>
+  </div>
+</header>
+
+<main class="shell">
+  <div class="pagehead">
+    <h1>On the shelves <em>this week</em></h1>
+    <p class="standfirst">
+      Live offers from traders across Aotearoa. Free to browse, free to trade
+      — no fees, ever.
+    </p>
+  </div>
+
+  <form class="filters" aria-label="Filter offers">
+    <div class="f-group">
+      <span class="f-label" id="fl-region">Region</span>
+      <select aria-labelledby="fl-region">
+        <option>All of NZ</option>
+        <option>Auckland</option>
+        <option>Wellington</option>
+        <option>Canterbury</option>
+        <option>Otago</option>
+        <option>Waikato</option>
+        <option>Bay of Plenty</option>
+        <option>Manawatū-Whanganui</option>
+        <option>Nelson–Tasman</option>
+      </select>
+    </div>
+    <fieldset class="f-group" style="border: none">
+      <legend class="f-label" style="float: left; margin-right: 0.7rem">
+        Terms
+      </legend>
+      <div class="seg" role="radiogroup" aria-label="Offer terms">
+        <label><input type="radio" name="terms" checked /><span>All</span></label>
+        <label><input type="radio" name="terms" /><span>For sale</span></label>
+        <label><input type="radio" name="terms" /><span>For trade</span></label>
+        <label><input type="radio" name="terms" /><span>Both</span></label>
+      </div>
+    </fieldset>
+    <label class="f-check">
+      <input type="checkbox" />
+      Can post
+    </label>
+    <div class="f-group f-sort">
+      <span class="f-label" id="fl-sort">Sort</span>
+      <select aria-labelledby="fl-sort">
+        <option>Newest first</option>
+        <option>Price, low to high</option>
+        <option>Price, high to low</option>
+        <option>Recently bumped</option>
+      </select>
+    </div>
+  </form>
+
+  <!-- ── Section one ─────────────────────────────────────── -->
+  <div class="section-head">
+    <h2>Fresh to the shelf</h2>
+    <span class="aside">listed in the last few days</span>
+  </div>
+
+  <section class="mosaic" aria-label="New offers">
+    <!-- 1 · Brass -->
+    <article class="offer s5">
+      <a class="plate tilt-a" href="#" aria-label="View offer: Brass Birmingham">
+        <svg viewBox="0 0 640 460" role="img" aria-label="Phone photo of Brass: Birmingham on a wooden table">
+          <rect width="640" height="460" fill="#b3946f" />
+          <g stroke="#a1815d" stroke-width="3" opacity="0.6">
+            <line x1="0" y1="88" x2="640" y2="82" />
+            <line x1="0" y1="196" x2="640" y2="190" />
+            <line x1="0" y1="308" x2="640" y2="302" />
+            <line x1="0" y1="416" x2="640" y2="410" />
+          </g>
+          <g transform="rotate(-4 320 235)">
+            <rect x="150" y="90" width="340" height="280" fill="#3a3129" />
+            <rect x="150" y="90" width="340" height="280" fill="none" stroke="#241d16" stroke-width="3" />
+            <rect x="178" y="128" width="284" height="64" fill="#c8a877" opacity="0.9" />
+            <rect x="178" y="220" width="200" height="14" fill="#8a765b" opacity="0.7" />
+            <rect x="178" y="248" width="150" height="14" fill="#8a765b" opacity="0.5" />
+            <circle cx="430" cy="300" r="34" fill="#8f5d33" opacity="0.8" />
+          </g>
+          <rect width="640" height="460" fill="#7a5c34" opacity="0.08" />
+        </svg>
+      </a>
+      <div class="label">
+        <div class="title-row">
+          <h3 class="title"><a href="#">Brass: Birmingham</a><span class="yr">2018</span></h3>
+          <span class="price">$110</span>
+        </div>
+        <p class="dataline">
+          Excellent<span class="sep">·</span>Wellington<span class="sep">·</span>Posts NZ-wide
+        </p>
+        <p class="note">Played twice, fully sleeved. Deluxe iron clays included.</p>
+        <div class="prov">
+          <svg class="seal" aria-hidden="true"><use href="#seal-trusted" /></svg>
+          <span class="who">Marcus T.</span>
+          <span class="tier">Trusted</span>
+          <a class="view" href="#">View offer</a>
+        </div>
+      </div>
+    </article>
+
+    <!-- 2 · Wingspan -->
+    <article class="offer s4">
+      <a class="plate tilt-b" href="#" aria-label="View offer: Wingspan with Oceania expansion">
+        <svg viewBox="0 0 560 560" role="img" aria-label="Phone photo of Wingspan and the Oceania expansion on carpet">
+          <rect width="560" height="560" fill="#a6a091" />
+          <g fill="#968f7e" opacity="0.55">
+            <circle cx="60" cy="80" r="5" /><circle cx="160" cy="40" r="4" />
+            <circle cx="480" cy="110" r="5" /><circle cx="380" cy="60" r="3" />
+            <circle cx="90" cy="480" r="4" /><circle cx="500" cy="500" r="5" />
+            <circle cx="280" cy="530" r="4" /><circle cx="40" cy="300" r="4" />
+            <circle cx="530" cy="330" r="4" />
+          </g>
+          <g transform="rotate(3 280 260)">
+            <rect x="105" y="105" width="350" height="240" fill="#8ba3b5" />
+            <rect x="105" y="105" width="350" height="240" fill="none" stroke="#5f7889" stroke-width="3" />
+            <rect x="135" y="140" width="180" height="46" fill="#e8e4d6" opacity="0.9" />
+            <path d="M370 180c22-30 58-32 66-8-26 4-46 16-66 8Z" fill="#5f7889" opacity="0.8" />
+          </g>
+          <g transform="rotate(-2 300 430)">
+            <rect x="150" y="370" width="270" height="120" fill="#c7b98f" />
+            <rect x="150" y="370" width="270" height="120" fill="none" stroke="#9a8c62" stroke-width="3" />
+            <rect x="175" y="398" width="130" height="30" fill="#efe9d8" opacity="0.9" />
+          </g>
+          <rect width="560" height="560" fill="#5c6a5a" opacity="0.06" />
+        </svg>
+      </a>
+      <div class="label">
+        <div class="title-row">
+          <h3 class="title"><a href="#">Wingspan + Oceania</a></h3>
+          <span class="price">$95</span>
+        </div>
+        <p class="dataline">
+          Good<span class="sep">·</span>Auckland<span class="sep">·</span>Posts NZ-wide<span class="sep">·</span>Open to trades
+        </p>
+        <p class="note">
+          Base game plus Oceania, eggs all present and counted. Box corners a
+          little worn from the shelf, cards mint. Would trade the pair for Ark
+          Nova or Cascadia + cash.
+        </p>
+        <div class="prov">
+          <svg class="seal" aria-hidden="true"><use href="#seal-growing" /></svg>
+          <span class="who">Priya N.</span>
+          <span class="tier">Growing</span>
+          <a class="view" href="#">View offer</a>
+        </div>
+      </div>
+    </article>
+
+    <!-- 3 · Patchwork -->
+    <article class="offer s3">
+      <a class="plate tilt-c" href="#" aria-label="View offer: Patchwork">
+        <svg viewBox="0 0 420 520" role="img" aria-label="Phone photo of Patchwork on a duvet">
+          <rect width="420" height="520" fill="#c3bab0" />
+          <path d="M0 120c90 30 180-40 300-6 60 17 90 6 120 0" fill="none" stroke="#b0a698" stroke-width="10" opacity="0.7" />
+          <path d="M0 400c110 26 210-30 320 2 40 12 70 6 100 0" fill="none" stroke="#b0a698" stroke-width="10" opacity="0.7" />
+          <g transform="rotate(-5 210 265)">
+            <rect x="95" y="150" width="230" height="230" fill="#6e7b57" />
+            <rect x="95" y="150" width="230" height="230" fill="none" stroke="#4c563b" stroke-width="3" />
+            <g opacity="0.85">
+              <rect x="125" y="185" width="52" height="52" fill="#c9c09a" />
+              <rect x="185" y="185" width="52" height="52" fill="#93a06f" />
+              <rect x="125" y="245" width="52" height="52" fill="#93a06f" />
+              <rect x="185" y="245" width="52" height="52" fill="#c9c09a" />
+            </g>
+          </g>
+          <rect width="420" height="520" fill="#6a6f5b" opacity="0.05" />
+        </svg>
+      </a>
+      <div class="label">
+        <div class="title-row">
+          <h3 class="title"><a href="#">Patchwork</a></h3>
+          <span class="price">$25</span>
+        </div>
+        <p class="dataline">
+          Excellent<span class="sep">·</span>Christchurch<span class="sep">·</span>Posts NZ-wide
+        </p>
+        <p class="note">Great two-player. Complete, barely played.</p>
+        <div class="prov">
+          <svg class="seal" aria-hidden="true"><use href="#seal-seedling" /></svg>
+          <span class="who">Ben K.</span>
+          <span class="tier">Seedling</span>
+          <a class="view" href="#">View offer</a>
+        </div>
+      </div>
+    </article>
+
+    <!-- 4 · Gloomhaven -->
+    <article class="offer s4">
+      <a class="plate tilt-d" href="#" aria-label="View offer: Gloomhaven">
+        <svg viewBox="0 0 560 420" role="img" aria-label="Phone photo of the large Gloomhaven box on carpet">
+          <rect width="560" height="420" fill="#9a9184" />
+          <g fill="#8a8174" opacity="0.5">
+            <circle cx="70" cy="60" r="4" /><circle cx="490" cy="70" r="5" />
+            <circle cx="120" cy="370" r="4" /><circle cx="450" cy="360" r="4" />
+            <circle cx="290" cy="40" r="3" /><circle cx="40" cy="220" r="4" />
+          </g>
+          <g transform="rotate(2 280 210)">
+            <rect x="70" y="60" width="420" height="300" fill="#3d3a3c" />
+            <rect x="70" y="60" width="420" height="300" fill="none" stroke="#262426" stroke-width="4" />
+            <rect x="110" y="105" width="250" height="52" fill="#77706a" opacity="0.85" />
+            <path d="M400 300c14-52 44-78 62-70-8 34-32 62-62 70Z" fill="#5a5254" opacity="0.9" />
+            <rect x="110" y="185" width="180" height="12" fill="#5c5658" opacity="0.8" />
+          </g>
+          <rect width="560" height="420" fill="#514c48" opacity="0.07" />
+        </svg>
+      </a>
+      <div class="label">
+        <div class="title-row">
+          <h3 class="title"><a href="#">Gloomhaven</a><span class="yr">2017</span></h3>
+          <span class="price">$80 <span class="ono">o.n.o.</span></span>
+        </div>
+        <p class="dataline">
+          Fair<span class="sep">·</span>Hamilton<span class="sep">·</span>Pickup only
+        </p>
+        <p class="note long">
+          Punched and organised into a Folded Space insert. One city event card
+          has a coffee ring and we lost a single Living Bones standee somewhere
+          around scenario 40 — everything else audited and complete. It's very
+          heavy, hence pickup.
+        </p>
+        <div class="prov">
+          <svg class="seal" aria-hidden="true"><use href="#seal-established" /></svg>
+          <span class="who">Aroha W.</span>
+          <span class="tier">Established</span>
+          <a class="view" href="#">View offer</a>
+        </div>
+      </div>
+    </article>
+
+    <!-- 5 · Cascadia -->
+    <article class="offer s3">
+      <a class="plate tilt-b" href="#" aria-label="View offer: Cascadia">
+        <svg viewBox="0 0 420 460" role="img" aria-label="Phone photo of Cascadia on a kitchen bench">
+          <rect width="420" height="460" fill="#b5ab99" />
+          <rect x="0" y="330" width="420" height="130" fill="#a3987f" opacity="0.7" />
+          <g transform="rotate(-3 210 220)">
+            <rect x="80" y="90" width="260" height="260" fill="#4e7a6a" />
+            <rect x="80" y="90" width="260" height="260" fill="none" stroke="#365648" stroke-width="3" />
+            <path d="M110 300l55-90 40 60 35-55 60 85Z" fill="#7ba18e" opacity="0.9" />
+            <rect x="110" y="120" width="150" height="36" fill="#e6e0cd" opacity="0.9" />
+            <circle cx="300" cy="140" r="20" fill="#d9cf9f" opacity="0.9" />
+          </g>
+          <rect width="420" height="460" fill="#71685a" opacity="0.06" />
+        </svg>
+      </a>
+      <div class="label">
+        <div class="title-row">
+          <h3 class="title"><a href="#">Cascadia</a></h3>
+          <span class="price">$45 <span class="ono">o.n.o.</span></span>
+        </div>
+        <p class="dataline">
+          Excellent<span class="sep">·</span>Nelson<span class="sep">·</span>Posts NZ-wide
+        </p>
+        <p class="note">Landmarks promo included. Lovely condition.</p>
+        <div class="prov">
+          <svg class="seal" aria-hidden="true"><use href="#seal-growing" /></svg>
+          <span class="who">Tom H.</span>
+          <span class="tier">Growing</span>
+          <a class="view" href="#">View offer</a>
+        </div>
+      </div>
+    </article>
+
+    <!-- 6 · Spirit Island (trade only) -->
+    <article class="offer s5">
+      <a class="plate tilt-a" href="#" aria-label="View offer: Spirit Island with Branch and Claw">
+        <svg viewBox="0 0 640 430" role="img" aria-label="Phone photo of Spirit Island and Branch and Claw on a dining table">
+          <rect width="640" height="430" fill="#93887c" />
+          <g stroke="#84796d" stroke-width="3" opacity="0.6">
+            <line x1="0" y1="110" x2="640" y2="116" />
+            <line x1="0" y1="240" x2="640" y2="246" />
+            <line x1="0" y1="366" x2="640" y2="372" />
+          </g>
+          <g transform="rotate(-2 250 210)">
+            <rect x="80" y="80" width="330" height="250" fill="#566073" />
+            <rect x="80" y="80" width="330" height="250" fill="none" stroke="#3b4353" stroke-width="3" />
+            <path d="M120 290c40-90 110-140 200-150-20 80-100 150-200 150Z" fill="#77836f" opacity="0.85" />
+            <rect x="120" y="112" width="200" height="42" fill="#d8d2c0" opacity="0.9" />
+          </g>
+          <g transform="rotate(4 500 260)">
+            <rect x="420" y="150" width="180" height="220" fill="#6b5a4d" />
+            <rect x="420" y="150" width="180" height="220" fill="none" stroke="#4b3e34" stroke-width="3" />
+            <rect x="442" y="180" width="120" height="28" fill="#cfc4ad" opacity="0.9" />
+          </g>
+          <rect width="640" height="430" fill="#4f4a42" opacity="0.07" />
+        </svg>
+      </a>
+      <div class="label">
+        <div class="title-row">
+          <h3 class="title"><a href="#">Spirit Island + Branch &amp; Claw</a></h3>
+          <span class="price trade-only">trade only</span>
+        </div>
+        <p class="dataline">
+          Good<span class="sep">·</span>Tauranga<span class="sep">·</span>Posts NZ-wide<span class="sep">·</span>Open to trades
+        </p>
+        <p class="note">
+          After Dune: Imperium, Heat, or Brass: Lancashire. Both boxes complete;
+          tokens bagged by type. Happy to post at my cost for the right swap.
+        </p>
+        <div class="prov">
+          <svg class="seal" aria-hidden="true"><use href="#seal-established" /></svg>
+          <span class="who">Sam R.</span>
+          <span class="tier">Established</span>
+          <a class="view" href="#">View offer</a>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <!-- ── Featured spread: the bundle ─────────────────────── -->
+  <section class="spread" aria-label="Featured bundle offer">
+    <a class="plate" href="#" aria-label="View offer: complete Everdell bundle">
+      <svg viewBox="0 0 760 540" role="img" aria-label="Phone photo of the Everdell base game stacked with three expansion boxes on a lounge floor">
+        <rect width="760" height="540" fill="#a89e8d" />
+        <g fill="#998f7e" opacity="0.55">
+          <circle cx="80" cy="70" r="5" /><circle cx="660" cy="90" r="5" />
+          <circle cx="140" cy="480" r="4" /><circle cx="600" cy="470" r="5" />
+          <circle cx="380" cy="50" r="4" /><circle cx="50" cy="300" r="4" />
+          <circle cx="710" cy="320" r="4" /><circle cx="330" cy="510" r="4" />
+        </g>
+        <g transform="rotate(-2 380 330)">
+          <rect x="150" y="220" width="460" height="250" fill="#42604a" />
+          <rect x="150" y="220" width="460" height="250" fill="none" stroke="#2c4232" stroke-width="4" />
+          <path d="M240 440c30-120 90-180 150-190-15 90-70 165-150 190Z" fill="#6d8a6a" opacity="0.9" />
+          <rect x="200" y="255" width="260" height="52" fill="#e2dcc4" opacity="0.9" />
+          <circle cx="540" cy="300" r="36" fill="#c8b06a" opacity="0.85" />
+        </g>
+        <g transform="rotate(1.5 400 190)">
+          <rect x="210" y="130" width="340" height="90" fill="#5d7189" />
+          <rect x="210" y="130" width="340" height="90" fill="none" stroke="#41526a" stroke-width="3" />
+          <rect x="240" y="158" width="170" height="30" fill="#dcd8c8" opacity="0.9" />
+        </g>
+        <g transform="rotate(-1 400 105)">
+          <rect x="250" y="62" width="260" height="70" fill="#8a5e50" />
+          <rect x="250" y="62" width="260" height="70" fill="none" stroke="#6b4438" stroke-width="3" />
+          <rect x="276" y="84" width="130" height="24" fill="#e0d6c4" opacity="0.9" />
+        </g>
+        <rect width="760" height="540" fill="#5c5a48" opacity="0.07" />
+      </svg>
+    </a>
+    <div>
+      <span class="spread-tag">Bundle · 4 items</span>
+      <h3>Everdell, <em>the whole valley</em></h3>
+      <p class="note">
+        Base game with Pearlbrook, Spirecrest and Bellfaire, plus the wooden
+        Ever Tree upgrade. Everything sleeved from first play and stored flat.
+        Selling as one lot only — it deserves to stay together.
+      </p>
+      <ul class="manifest">
+        <li><span class="m-title">Everdell (base, 2nd printing)</span><span class="leader"></span><span class="m-cond">Excellent</span></li>
+        <li><span class="m-title">Pearlbrook</span><span class="leader"></span><span class="m-cond">Excellent</span></li>
+        <li><span class="m-title">Spirecrest</span><span class="leader"></span><span class="m-cond">Mint</span></li>
+        <li><span class="m-title">Bellfaire</span><span class="leader"></span><span class="m-cond">Excellent</span></li>
+      </ul>
+      <div class="spread-price">
+        <span class="price">$250</span>
+        <span class="terms">or near offer · posts NZ-wide · Christchurch</span>
+      </div>
+      <div class="actions">
+        <a class="btn" href="#">Message Sophie</a>
+        <a class="btn btn-quiet" href="#">Add to watchlist</a>
+      </div>
+      <div class="prov">
+        <svg class="seal" aria-hidden="true"><use href="#seal-trusted" /></svg>
+        <span class="who">Sophie L.</span>
+        <span class="tier">Trusted</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Section two ─────────────────────────────────────── -->
+  <div class="section-head">
+    <h2>Across the country</h2>
+    <span class="aside">from Auckland to Dunedin</span>
+  </div>
+
+  <section class="mosaic" aria-label="More offers">
+    <!-- 7 · Ark Nova -->
+    <article class="offer s4">
+      <a class="plate tilt-c" href="#" aria-label="View offer: Ark Nova">
+        <svg viewBox="0 0 560 460" role="img" aria-label="Phone photo of Ark Nova on a coffee table">
+          <rect width="560" height="460" fill="#af9f87" />
+          <ellipse cx="280" cy="430" rx="320" ry="60" fill="#9c8c73" opacity="0.6" />
+          <g transform="rotate(-3 280 220)">
+            <rect x="110" y="80" width="340" height="280" fill="#5c6e5e" />
+            <rect x="110" y="80" width="340" height="280" fill="none" stroke="#41503f" stroke-width="3" />
+            <rect x="140" y="115" width="220" height="50" fill="#ddd6bd" opacity="0.9" />
+            <circle cx="390" cy="280" r="42" fill="#8ca083" opacity="0.85" />
+            <rect x="140" y="200" width="170" height="12" fill="#7e8f74" opacity="0.8" />
+            <rect x="140" y="226" width="120" height="12" fill="#7e8f74" opacity="0.6" />
+          </g>
+          <rect width="560" height="460" fill="#6b6046" opacity="0.06" />
+        </svg>
+      </a>
+      <div class="label">
+        <div class="title-row">
+          <h3 class="title"><a href="#">Ark Nova</a><span class="yr">2021</span></h3>
+          <span class="price">$115</span>
+        </div>
+        <p class="dataline">
+          Mint<span class="sep">·</span>Auckland<span class="sep">·</span>Posts NZ-wide
+        </p>
+        <p class="note">In shrink until last month, played once. Just not for us.</p>
+        <div class="prov">
+          <svg class="seal" aria-hidden="true"><use href="#seal-new" /></svg>
+          <span class="who">Daniel M.</span>
+          <span class="tier">New</span>
+          <a class="view" href="#">View offer</a>
+        </div>
+      </div>
+    </article>
+
+    <!-- 8 · Twilight Imperium -->
+    <article class="offer s5">
+      <a class="plate tilt-b" href="#" aria-label="View offer: Twilight Imperium Fourth Edition">
+        <svg viewBox="0 0 640 400" role="img" aria-label="Phone photo of the enormous Twilight Imperium box on carpet, feet visible at the edge">
+          <rect width="640" height="400" fill="#988d80" />
+          <g fill="#897e71" opacity="0.5">
+            <circle cx="60" cy="50" r="4" /><circle cx="580" cy="60" r="5" />
+            <circle cx="100" cy="350" r="4" /><circle cx="520" cy="340" r="4" />
+            <circle cx="320" cy="30" r="3" />
+          </g>
+          <g transform="rotate(1.5 320 210)">
+            <rect x="60" y="55" width="520" height="300" fill="#2e3138" />
+            <rect x="60" y="55" width="520" height="300" fill="none" stroke="#1c1e23" stroke-width="4" />
+            <circle cx="440" cy="200" r="70" fill="#4a5163" opacity="0.9" />
+            <circle cx="440" cy="200" r="40" fill="#657089" opacity="0.7" />
+            <rect x="100" y="100" width="240" height="46" fill="#b8aa8b" opacity="0.85" />
+            <rect x="100" y="170" width="160" height="12" fill="#565b68" opacity="0.9" />
+          </g>
+          <ellipse cx="70" cy="385" rx="46" ry="16" fill="#7d7266" opacity="0.8" />
+          <rect width="640" height="400" fill="#45403a" opacity="0.08" />
+        </svg>
+      </a>
+      <div class="label">
+        <div class="title-row">
+          <h3 class="title"><a href="#">Twilight Imperium, 4th ed.</a></h3>
+          <span class="price">$180</span>
+        </div>
+        <p class="dataline">
+          Excellent<span class="sep">·</span>Wellington<span class="sep">·</span>Pickup only
+        </p>
+        <p class="note">
+          Complete and sleeved, with painted plastic for two factions (photos in
+          the listing). It weighs as much as a toddler, so pickup from the CBD —
+          I'll help you carry it to the car.
+        </p>
+        <div class="prov">
+          <svg class="seal" aria-hidden="true"><use href="#seal-trusted" /></svg>
+          <span class="who">Marcus T.</span>
+          <span class="tier">Trusted</span>
+          <a class="view" href="#">View offer</a>
+        </div>
+      </div>
+    </article>
+
+    <!-- 9 · Azul -->
+    <article class="offer s3">
+      <a class="plate tilt-d" href="#" aria-label="View offer: Azul">
+        <svg viewBox="0 0 420 420" role="img" aria-label="Phone photo of Azul on a kitchen table">
+          <rect width="420" height="420" fill="#b7ac9c" />
+          <line x1="0" y1="330" x2="420" y2="322" stroke="#a3987f" stroke-width="6" opacity="0.7" />
+          <g transform="rotate(4 210 200)">
+            <rect x="75" y="75" width="270" height="250" fill="#4c5f80" />
+            <rect x="75" y="75" width="270" height="250" fill="none" stroke="#35435c" stroke-width="3" />
+            <g opacity="0.9">
+              <rect x="105" y="110" width="40" height="40" fill="#c85f4f" />
+              <rect x="153" y="110" width="40" height="40" fill="#d9cf9f" />
+              <rect x="105" y="158" width="40" height="40" fill="#6a93a8" />
+              <rect x="153" y="158" width="40" height="40" fill="#c85f4f" />
+            </g>
+            <rect x="105" y="240" width="150" height="34" fill="#dcd6c4" opacity="0.9" />
+          </g>
+          <rect width="420" height="420" fill="#6f6552" opacity="0.06" />
+        </svg>
+      </a>
+      <div class="label">
+        <div class="title-row">
+          <h3 class="title"><a href="#">Azul</a></h3>
+          <span class="price">$35</span>
+        </div>
+        <p class="dataline">
+          Good<span class="sep">·</span>Palmerston North<span class="sep">·</span>Posts NZ-wide
+        </p>
+        <p class="note">All tiles present. Family favourite, upgrading to Chroma.</p>
+        <div class="prov">
+          <svg class="seal" aria-hidden="true"><use href="#seal-seedling" /></svg>
+          <span class="who">Rachel O.</span>
+          <span class="tier">Seedling</span>
+          <a class="view" href="#">View offer</a>
+        </div>
+      </div>
+    </article>
+
+    <!-- 10 · Root -->
+    <article class="offer s3">
+      <a class="plate tilt-a" href="#" aria-label="View offer: Root">
+        <svg viewBox="0 0 420 500" role="img" aria-label="Phone photo of Root on a couch cushion">
+          <rect width="420" height="500" fill="#b0a08e" />
+          <path d="M0 90c110-30 220 34 420-8" fill="none" stroke="#9c8c78" stroke-width="12" opacity="0.6" />
+          <path d="M0 430c130 26 260-30 420 4" fill="none" stroke="#9c8c78" stroke-width="12" opacity="0.6" />
+          <g transform="rotate(-4 210 250)">
+            <rect x="80" y="130" width="260" height="240" fill="#b5713f" />
+            <rect x="80" y="130" width="260" height="240" fill="none" stroke="#8a5228" stroke-width="3" />
+            <circle cx="210" cy="255" r="52" fill="#d99e5c" opacity="0.85" />
+            <path d="M195 235c-6-16 4-28 15-28s21 12 15 28Z" fill="#8a5228" opacity="0.9" />
+            <rect x="110" y="160" width="120" height="34" fill="#ecdfc4" opacity="0.9" />
+          </g>
+          <rect width="420" height="500" fill="#6d5c46" opacity="0.07" />
+        </svg>
+      </a>
+      <div class="label">
+        <div class="title-row">
+          <h3 class="title"><a href="#">Root</a><span class="yr">2018</span></h3>
+          <span class="price">$70</span>
+        </div>
+        <p class="dataline">
+          Good<span class="sep">·</span>Dunedin<span class="sep">·</span>Posts NZ-wide<span class="sep">·</span>Open to trades
+        </p>
+        <p class="note">Base game, complete. Keen on Heat or Dune: Imperium.</p>
+        <div class="prov">
+          <svg class="seal" aria-hidden="true"><use href="#seal-growing" /></svg>
+          <span class="who">Callum F.</span>
+          <span class="tier">Growing</span>
+          <a class="view" href="#">View offer</a>
+        </div>
+      </div>
+    </article>
+
+    <!-- 11 · Heat -->
+    <article class="offer s6">
+      <a class="plate tilt-c" href="#" aria-label="View offer: Heat Pedal to the Metal">
+        <svg viewBox="0 0 720 400" role="img" aria-label="Phone photo of Heat: Pedal to the Metal on a garage workbench">
+          <rect width="720" height="400" fill="#a29a90" />
+          <g stroke="#928a80" stroke-width="4" opacity="0.6">
+            <line x1="0" y1="120" x2="720" y2="126" />
+            <line x1="0" y1="260" x2="720" y2="266" />
+          </g>
+          <rect x="600" y="40" width="90" height="140" fill="#8a8278" opacity="0.7" />
+          <g transform="rotate(-2 330 200)">
+            <rect x="90" y="70" width="480" height="260" fill="#9c4a40" />
+            <rect x="90" y="70" width="480" height="260" fill="none" stroke="#73342c" stroke-width="4" />
+            <path d="M140 280c80-14 180-70 260-64 60 5 100 30 130 52-130 24-280 30-390 12Z" fill="#c27b64" opacity="0.85" />
+            <rect x="140" y="105" width="260" height="48" fill="#e8ddc4" opacity="0.9" />
+            <circle cx="500" cy="140" r="26" fill="#e0b45c" opacity="0.9" />
+          </g>
+          <rect width="720" height="400" fill="#5c4f45" opacity="0.07" />
+        </svg>
+      </a>
+      <div class="label">
+        <div class="title-row">
+          <h3 class="title"><a href="#">Heat: Pedal to the Metal</a></h3>
+          <span class="price">$75</span>
+        </div>
+        <p class="dataline">
+          Mint<span class="sep">·</span>Auckland<span class="sep">·</span>Posts NZ-wide
+        </p>
+        <p class="note">
+          Opened to check contents, never made the table. Includes the Heavy
+          Rain promo mat.
+        </p>
+        <div class="prov">
+          <svg class="seal" aria-hidden="true"><use href="#seal-established" /></svg>
+          <span class="who">Jess P.</span>
+          <span class="tier">Established</span>
+          <a class="view" href="#">View offer</a>
+        </div>
+      </div>
+    </article>
+
+    <!-- 12 · Carcassonne bundle -->
+    <article class="offer s6">
+      <a class="plate tilt-b" href="#" aria-label="View offer: Carcassonne with three expansions">
+        <svg viewBox="0 0 720 420" role="img" aria-label="Phone photo of Carcassonne and three small expansion boxes laid out on carpet">
+          <rect width="720" height="420" fill="#a9a294" />
+          <g fill="#999282" opacity="0.55">
+            <circle cx="70" cy="60" r="4" /><circle cx="650" cy="80" r="5" />
+            <circle cx="120" cy="360" r="4" /><circle cx="600" cy="350" r="4" />
+            <circle cx="360" cy="40" r="4" /><circle cx="40" cy="210" r="4" />
+          </g>
+          <g transform="rotate(-2 220 210)">
+            <rect x="70" y="90" width="300" height="240" fill="#5b7d99" />
+            <rect x="70" y="90" width="300" height="240" fill="none" stroke="#3f5a72" stroke-width="3" />
+            <rect x="100" y="122" width="180" height="42" fill="#e4ddc8" opacity="0.9" />
+            <path d="M150 300v-70l40-30 40 30v70Z" fill="#8ba3b5" opacity="0.9" />
+          </g>
+          <g transform="rotate(3 520 160)">
+            <rect x="430" y="90" width="180" height="130" fill="#7d6a8c" />
+            <rect x="430" y="90" width="180" height="130" fill="none" stroke="#5b4b68" stroke-width="3" />
+          </g>
+          <g transform="rotate(-4 520 320)">
+            <rect x="420" y="260" width="170" height="120" fill="#87775a" />
+            <rect x="420" y="260" width="170" height="120" fill="none" stroke="#645741" stroke-width="3" />
+          </g>
+          <g transform="rotate(2 660 300)">
+            <rect x="610" y="240" width="90" height="130" fill="#6a8a70" />
+            <rect x="610" y="240" width="90" height="130" fill="none" stroke="#4d6852" stroke-width="3" />
+          </g>
+          <rect width="720" height="420" fill="#5f5a4c" opacity="0.06" />
+        </svg>
+      </a>
+      <div class="label">
+        <div class="title-row">
+          <h3 class="title"><a href="#">Carcassonne + 3 expansions</a></h3>
+          <span class="price">$85 <span class="ono">o.n.o.</span></span>
+        </div>
+        <p class="dataline">
+          Good<span class="sep">·</span>Christchurch<span class="sep">·</span>Posts NZ-wide<span class="sep">·</span>Open to trades
+        </p>
+        <p class="note">
+          Base plus Inns &amp; Cathedrals, Traders &amp; Builders, and The
+          River. Tiles show table wear but nothing missing — counted twice.
+          Selling together; would also swap for Everdell or Wingspan.
+        </p>
+        <div class="prov">
+          <svg class="seal" aria-hidden="true"><use href="#seal-new" /></svg>
+          <span class="who">Hana G.</span>
+          <span class="tier">New</span>
+          <a class="view" href="#">View offer</a>
+        </div>
+      </div>
+    </article>
+
+    <!-- 13 · Dune Imperium -->
+    <article class="offer s4">
+      <a class="plate tilt-a" href="#" aria-label="View offer: Dune Imperium">
+        <svg viewBox="0 0 560 440" role="img" aria-label="Phone photo of Dune: Imperium on a desk under warm lamplight">
+          <rect width="560" height="440" fill="#b0997c" />
+          <circle cx="460" cy="60" r="120" fill="#c9b48e" opacity="0.5" />
+          <g transform="rotate(2 280 220)">
+            <rect x="105" y="85" width="350" height="270" fill="#8c6a3f" />
+            <rect x="105" y="85" width="350" height="270" fill="none" stroke="#67491f" stroke-width="3" />
+            <path d="M130 320c60-30 120-90 170-90s90 50 130 70c-100 24-210 30-300 20Z" fill="#c2985c" opacity="0.85" />
+            <rect x="135" y="115" width="200" height="44" fill="#e8d9b8" opacity="0.9" />
+            <circle cx="400" cy="150" r="24" fill="#e0c284" opacity="0.9" />
+          </g>
+          <rect width="560" height="440" fill="#7a5c34" opacity="0.08" />
+        </svg>
+      </a>
+      <div class="label">
+        <div class="title-row">
+          <h3 class="title"><a href="#">Dune: Imperium</a><span class="yr">2020</span></h3>
+          <span class="price">$65</span>
+        </div>
+        <p class="dataline">
+          Excellent<span class="sep">·</span>Wellington<span class="sep">·</span>Posts NZ-wide
+        </p>
+        <p class="note">Sleeved, with the Rise of Ix dial promo.</p>
+        <div class="prov">
+          <svg class="seal" aria-hidden="true"><use href="#seal-growing" /></svg>
+          <span class="who">Nikau P.</span>
+          <span class="tier">Growing</span>
+          <a class="view" href="#">View offer</a>
+        </div>
+      </div>
+    </article>
+
+    <!-- 14 · Terraforming Mars -->
+    <article class="offer s4">
+      <a class="plate tilt-d" href="#" aria-label="View offer: Terraforming Mars">
+        <svg viewBox="0 0 560 480" role="img" aria-label="Phone photo of Terraforming Mars on floorboards">
+          <rect width="560" height="480" fill="#a08a72" />
+          <g stroke="#8f7961" stroke-width="3" opacity="0.6">
+            <line x1="90" y1="0" x2="84" y2="480" />
+            <line x1="240" y1="0" x2="234" y2="480" />
+            <line x1="400" y1="0" x2="394" y2="480" />
+            <line x1="540" y1="0" x2="534" y2="480" />
+          </g>
+          <g transform="rotate(-3 280 240)">
+            <rect x="105" y="100" width="350" height="280" fill="#7a4636" />
+            <rect x="105" y="100" width="350" height="280" fill="none" stroke="#57291c" stroke-width="3" />
+            <circle cx="360" cy="270" r="60" fill="#a8664c" opacity="0.9" />
+            <circle cx="340" cy="250" r="14" fill="#c98a68" opacity="0.9" />
+            <rect x="135" y="130" width="230" height="46" fill="#dfcdb2" opacity="0.9" />
+          </g>
+          <rect width="560" height="480" fill="#5c4335" opacity="0.08" />
+        </svg>
+      </a>
+      <div class="label">
+        <div class="title-row">
+          <h3 class="title"><a href="#">Terraforming Mars</a></h3>
+          <span class="price">$60</span>
+        </div>
+        <p class="dataline">
+          Fair<span class="sep">·</span>Dunedin<span class="sep">·</span>Pickup or meet
+        </p>
+        <p class="note">
+          Well loved — box lid split at one corner and taped, player mats
+          curling at the edges. All cards and tiles accounted for. Priced
+          honestly for a table copy, not a shelf copy.
+        </p>
+        <div class="prov">
+          <svg class="seal" aria-hidden="true"><use href="#seal-established" /></svg>
+          <span class="who">George A.</span>
+          <span class="tier">Established</span>
+          <a class="view" href="#">View offer</a>
+        </div>
+      </div>
+    </article>
+  </section>
+</main>
+
+<footer class="colophon">
+  <div class="shell colophon-row">
+    <p>
+      Meeple Cart is free, open-source and community-run — built by and for
+      Aotearoa's board gaming community. No fees, no ads, no cut of your trade.
+    </p>
+    <nav aria-label="Footer">
+      <a href="#">About</a>
+      <a href="#">Guidelines</a>
+      <a href="#">Source code</a>
+    </nav>
+  </div>
+</footer>
